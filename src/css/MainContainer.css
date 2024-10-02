@@ -1,0 +1,34 @@
+/* MainContainer.css */
+.main-container {
+    display: flex;
+    width: 100%;
+    height: calc(100vh - 56px); /* Adjust height to account for navbar */
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden; /* Prevents overflow */
+  }
+  
+  .card-container {
+    flex: auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  .form {
+    flex: 0 0 30%;
+    max-width: 30%;
+    margin-left: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%; /* Full height to match card container */
+    box-sizing: border-box;
+  }
+  

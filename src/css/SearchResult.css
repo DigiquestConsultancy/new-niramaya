@@ -1,0 +1,285 @@
+.container {
+    max-width: 1300px;
+}
+
+.date-buttons button {
+    margin-right: 10px;
+    
+}
+
+.date-buttons {
+    margin-bottom: 1rem !important;
+    display: inline-flex;
+}
+
+.date {
+    width: 180px;
+    height: 60px;
+    font-size: 18px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin: 48px;
+}
+
+.move{
+    width: 60px;
+}
+
+.btn-outline-primary {
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.btn-outline-primary:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+.card {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.card img {
+    max-height: 200px;
+    object-fit: cover;
+}
+
+.card-body {
+    /* display: flex; */
+    align-items: flex-start;
+    padding: initial;
+}
+
+.card-result {
+    display: -webkit-box;
+}
+
+.slot-button {
+    font-size: 1rem;
+    padding: 5px 10px;
+    margin-bottom: 5px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.slot-button:hover {
+    transform: none;
+}
+
+.search-results {
+    position: absolute;
+    right: 0;
+    margin-right: 150px;
+    width: 622px;
+    flex-direction: column;
+    max-height: 300px; /* Set max height */
+    overflow-y: auto;  /* Enable vertical scrolling */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+}
+
+/* Hide scrollbar for WebKit-based browsers */
+.search-results::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+}
+
+
+/* Show scrollbar for WebKit-based browsers on hover */
+.search-results:hover::-webkit-scrollbar {
+    display: block; /* Safari and Chrome */
+}
+
+.search-result {
+    display: flex; /* Use flexbox for layout */
+    width: 600px;
+    margin: 8px;;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    /* align-items: left;  */
+}
+
+.search-result:last-child {
+    border-bottom: none;
+}
+
+.search-result:hover {
+    background-color: #f0f0f0;
+}
+
+.profile-pic {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.doctor-details {
+    display: inline-block;
+    vertical-align: top;
+    flex-grow: 1; 
+    margin-left: 20px;
+}
+
+.doctor-name {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.specialization {
+    color: #4d4a4a;
+}
+
+.selected-doctor-card {
+    margin-top: 20px;
+}
+
+.selected-doctor-card .card-header {
+    display: flex;
+    align-items: center;
+}
+
+.selected-doctor-card .card-header img {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    margin-right: 20px;
+}
+
+.selected-doctor-card .card-body {
+    padding: 20px;
+    padding-left: 10px;
+}
+
+.selected-doctor-card .doctor-name {
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.selected-doctor-card .specializations {
+    color: #4d4a4a;
+}
+
+.selected-doctor-card .experience {
+    margin-top: 10px;
+}
+
+.selected-doctor-card .address {
+    margin-top: 10px;
+}
+
+.selected-doctor-card .qualification {
+    margin-top: 10px;
+}
+
+.selected-doctor-card .details {
+    margin-top: 20px;
+}
+
+.slots-section {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.timing-label {
+    width: 15%;
+    text-align: left;
+    padding-top: 10px;
+    display: flex;
+    font-size: 20px;
+    /* padding: 30px; */
+}
+
+h3{
+    margin-top: 48px;
+    font-size: 32px;
+}
+.slots {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: start;
+    padding: 60px 10px;
+}
+
+.col-md-2 {
+    flex: 0 0 auto;
+    width: 120px;
+    padding: 50px 10px;
+    line-height: 3;
+}
+
+.col-md-12 {
+    flex: 0 0 auto;
+    width: 100%;
+    padding: 12px;
+} 
+
+.slot-row {
+    display: flex;
+    align-items: center;
+}
+
+.slot-row button {
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.slots-container {
+    width: 85%;
+}
+
+
+.no-profile-pic {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+
+
+
+.specialization {
+    color: #555;
+}
+
+.slot-button {
+    text-align: center;
+    cursor: pointer;
+}
+
+/* Slot count styling */
+.slot-count {
+    display: block;
+    font-size: 0.8rem; /* Adjust the size as needed */
+    color: green; /* Set the color to green */
+    margin-top: 0.2rem; /* Add some space above the text */
+    text-align: center; /* Center align the text */
+}
+
+/* morning, afternoon, evening icons */
+
+
+.col{
+    flex: 1 0;
+    padding: 30px;
+    margin-top: 50px;
+}

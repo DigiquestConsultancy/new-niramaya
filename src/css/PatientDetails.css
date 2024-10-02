@@ -1,0 +1,26 @@
+.custom-profile-form {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.custom-profile-form h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+}
+
+.custom-profile-form .form-control,
+.custom-profile-form .form-select {
+    margin-bottom: 10px;
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.custom-profile-form .btn {
+    font-size: 16px;
+    padding: 10px 20px;
+    border-radius: 4px;
+}

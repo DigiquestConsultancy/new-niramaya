@@ -1,0 +1,25 @@
+.header {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-evenly;
+  }
+   
+  .heading{
+    padding-left: 300px;
+  }
+   
+  .logo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+  }
+   
+   
+  .doctor-container {
+    background: linear-gradient(to right, #f5f7ad, #f0f2f3);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin: 0;
+   
+  }

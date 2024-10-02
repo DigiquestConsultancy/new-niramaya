@@ -1,0 +1,115 @@
+.search-group {
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+  }
+   
+  .location-btn, .search-btn {
+    background-color: #055b6e;
+    color: white;
+    font-size: 18px;
+    border: none;
+    cursor: pointer;
+  }
+  .main-content {
+    display: flex;
+    justify-content: space-between;
+  }
+   
+  /* Patient cards container taking 70% width */
+  .patient-cards-section {
+    width: 70%;
+    padding-right: 20px; /* Optional: Add some space between the patient cards and appointment sections */
+  }
+   
+  /* Upcoming and completed appointments container taking 30% width */
+  .appointments-section {
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+   
+  /* Styling the row of patient cards to display 3 cards in a row */
+  .row-cards {
+    display: flex;
+    flex-wrap: wrap;
+  }
+   
+  .patient-card {
+    background-color: #055b6e;
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    color: white;
+    flex: 1 0 calc(33.333% - 20px); /* 3 cards in a row, adjusting for the gap */
+    margin-bottom: 20px;
+  }
+   
+  .patient-card-img {
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+   
+  .patient-card-title {
+    font-size: 18px;
+    font-weight: bold;
+  }
+   
+  .patient-card-text {
+    font-size: 14px;
+    color: #fcfcfc;
+    font-weight: bold;
+  }
+   
+  /* Styling the appointment sections to align correctly and not overlap */
+  .appointment-section {
+    margin-bottom: 30px;
+  }
+   
+  .arrow-button {
+    background-color: #055b6e;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 50%;
+  }
+   
+  .appointment-card {
+    background-color: #055b6e;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    color: white;
+    margin-bottom: 20px;
+    margin-top: 35px;
+   
+  }
+   
+  .appointment-time {
+    font-size: 16px;
+    font-weight: bold;
+  }
+   
+  .appointment-details {
+    font-size: 14px;
+    color: #fcfcfc;
+    font-weight: bold;
+  }
+   
+  /* Ensure the search result does not overlap with the appointments */
+  .search-results {
+    margin-top: 20px;
+    position: absolute; /* Adjust position to ensure no overlap */
+    z-index: 10; /* Higher z-index to ensure it's on top */
+    background-color: #ffffff; /* White background to separate it from other content */
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+   

@@ -1,0 +1,91 @@
+/* Global Styles */
+body {
+    font-family: Arial, sans-serif;
+  }
+ 
+  /* Responsive Styles */
+  @media (max-width: 768px) {
+    .table {
+      font-size: 0.9rem; /* Slightly smaller text for mobile */
+    }
+ 
+    .form-control {
+      font-size: 0.9rem; /* Smaller text for form inputs */
+    }
+ 
+    .card {
+      margin-bottom: 1rem; /* More space between cards on mobile */
+    }
+ 
+    .btn {
+      width: 100%; /* Full width buttons on mobile */
+      margin-bottom: 0.5rem; /* Space between buttons */
+    }
+ 
+    .file-input {
+      display: flex;
+      flex-direction: column; /* Stack file input elements */
+    }
+ 
+    .selected-file {
+      display: flex;
+      justify-content: space-between; /* Space between file name and delete button */
+    }
+ 
+    /* Adjust input fields for smaller screens */
+    .form-group {
+      margin-bottom: 1rem; /* More space for input fields */
+    }
+ 
+    /* Adjust dropdowns for smaller screens */
+    .dropdown {
+      width: 100%; /* Full width for dropdowns */
+    }
+ 
+    /* Card header styles */
+    .card-title {
+      font-size: 1.5rem; /* Responsive title size */
+    }
+  }
+ 
+  /* Adjustments for smaller devices */
+  @media (max-width: 576px) {
+    .card-title {
+      font-size: 1.2rem; /* Even smaller titles on very small screens */
+    }
+ 
+    .btn {
+      font-size: 0.8rem; /* Smaller button text */
+    }
+ 
+    .form-control {
+      font-size: 0.8rem; /* Smaller form input text */
+    }
+ 
+    /* Adjust table styles for mobile */
+    .table thead {
+      display: none; /* Hide table headers for mobile */
+    }
+ 
+    .table, .table tbody, .table tr, .table td {
+      display: block; /* Make table rows block for mobile */
+      width: 100%; /* Full width for each row */
+      margin-bottom: 1rem; /* Space between rows */
+    }
+ 
+    .table td {
+      text-align: left; /* Align text to right */
+      padding: 0.5rem; /* Padding for cells */
+      position: relative; /* For pseudo-elements */
+    }
+ 
+    .table td::before {
+      content: attr(data-label); /* Use data-label for headers */
+      position: absolute; /* Position label */
+      left: 0;
+      width: 50%;
+      padding: 0.5rem; /* Padding for labels */
+      font-weight: bold; /* Bold labels */
+      text-align: left; /* Align labels to left */
+    }
+  }

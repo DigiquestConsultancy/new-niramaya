@@ -1,0 +1,28 @@
+.reception-header {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+  }
+   
+  .left-logo {
+    width: 100px;
+    border-radius: 50%;
+    height: 100px;
+  }
+   
+  .right-logo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+  }
+   
+   
+  .reception-container {
+    /* background-image: url('../images/bg6.jpg'); */
+    background: linear-gradient(to right, #c4d5da, #b8dce4);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    /* height: 100vh; */
+    margin: 0;
+  }
