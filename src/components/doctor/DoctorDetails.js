@@ -132,7 +132,7 @@ const DoctorDetails = () => {
     start_day: '',
     end_day: '',
     doc_file: '',
-    opd_timings: [{ start_time: '', end_time: '' }], // Initial timing set
+    opd_timings: [{ start_time: '', end_time: '' }],
   });
  
   const [activeTab, setActiveTab] = useState('personal');
@@ -148,11 +148,14 @@ const DoctorDetails = () => {
   const [isPersonalComplete, setIsPersonalComplete] = useState(false);
   const [isAddressComplete, setIsAddressComplete] = useState(false);
   const [isOpdComplete, setIsOpdComplete] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false); // Track if updating or creating
+  const [isUpdating, setIsUpdating] = useState(false);
   const [showOpdTimings, setShowOpdTimings] = useState(false);
- 
+  const [documentUrl, setDocumentUrl] = useState(null);
+  const [numPages, setNumPages] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const [profilePicPreview, setProfilePicPreview] = useState('');
   const [clinicPicPreview, setClinicPicPreview] = useState('');
+  const [formErrors, setFormErrors] = useState({});
  
   const updateProgress = async () => {
     try {
@@ -168,7 +171,6 @@ const DoctorDetails = () => {
         setIsAddressComplete(doctorSummary.address);
         setIsOpdComplete(doctorSummary.opd_days);
  
-        // Calculate and update the progress bar
         let calculatedProgress = 0;
         if (doctorSummary.personal_details) calculatedProgress += 50;
         if (doctorSummary.address) calculatedProgress += 25;
@@ -180,7 +182,6 @@ const DoctorDetails = () => {
     }
   };
  
-  // Fetching other data
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -235,7 +236,6 @@ const DoctorDetails = () => {
           doc_file: '',
         });
  
-        // Update profile picture preview URL if it exists
         const profilePicUrl = doctorDetails.profile_pic
           ? `${BaseUrl.defaults.baseURL}${doctorDetails.profile_pic}`
           : '';
@@ -246,6 +246,31 @@ const DoctorDetails = () => {
       }
     } catch (error) {
       console.error('Error fetching doctor details:', error);
+    }
+  };
+ 
+  const handleViewDocument = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('No token found. Please login again.');
+        return;
+      }
+      const decodedToken = jwtDecode(token);
+      const doctorId = decodedToken.doctor_id;
+      if (!doctorId) {
+        alert('Doctor ID not found.');
+        return;
+      }
+      const response = await BaseUrl.get(`/doctor/viewdoc/?doctor_id=${doctorId}`, {
+        responseType: 'blob',
+      });
+      const fileUrl = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      window.open(fileUrl, '_blank');
+    } catch (error) {
+      console.error('Error fetching document:', error);
+      alert('Unable to fetch document.');
     }
   };
  
@@ -304,7 +329,7 @@ const DoctorDetails = () => {
     try {
       const token = localStorage.getItem('token');
       const decodedToken = jwtDecode(token);
-      const doctor_id = decodedToken.doctor_id; // Get doctor_id from the token
+      const doctor_id = decodedToken.doctor_id;
  
       const response = await BaseUrl.get(`/doctor/opddays/?doctor_id=${doctor_id}`);
       const opdDetails = response.data;
@@ -315,19 +340,18 @@ const DoctorDetails = () => {
           start_day: opdDetails[0].start_day,
           end_day: opdDetails[0].end_day,
           doc_file: opdDetails[0].doc_file,
-          opd_timings: [], // Initialize empty timings
+          opd_timings: [],
         });
  
         setClinicPicPreview(`${BaseUrl.defaults.baseURL}${opdDetails[0].doc_file}`);
  
         const opdIds = opdDetails.map((detail) => detail.id);
-        setOpdId(opdIds[0]); // Store only the first OPD ID
+        setOpdId(opdIds[0]);
         setIsOpdComplete(true);
         calculateProgress();
  
-        // Fetch and display OPD timings without saving again
         fetchOpdTimings(opdIds[0]);
-        setShowOpdTimings(true);  // Show OPD timings directly
+        setShowOpdTimings(true);
       }
     } catch (error) {
       console.error('Error fetching OPD details:', error);
@@ -335,30 +359,24 @@ const DoctorDetails = () => {
     }
   };
  
- 
- 
- 
   const fetchOpdTimings = async (opdId) => {
     try {
       const response = await BaseUrl.get(`/doctor/timeopd/?opd_id=${opdId}`);
       const timings = response.data.map((timing) => ({
         start_time: timing.start_time,
         end_time: timing.end_time,
-        time_id: timing.id, // Store the timing ID to update it later if needed
+        time_id: timing.id,
       }));
  
       setOpdData((prevOpdData) => ({
         ...prevOpdData,
-        opd_timings: timings, // Update timings directly
+        opd_timings: timings,
       }));
     } catch (error) {
       console.error('Error fetching OPD timings:', error);
       setErrorMessage('Failed to fetch OPD timings.');
     }
   };
- 
- 
- 
  
  
   const handleTabClick = (tab) => {
@@ -384,30 +402,27 @@ const DoctorDetails = () => {
     setProgress(currentProgress);
   };
  
- 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
  
     if (type === 'file') {
       const file = files[0];
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        [name]: file,
-      }));
- 
-      // Create a preview URL for the profile picture or clinic picture
       if (name === 'profile_pic' && file) {
         const reader = new FileReader();
         reader.onloadend = () => {
-          setProfilePicPreview(reader.result);
+          setFormData((prevFormData) => ({
+            ...prevFormData,
+            profile_pic: file,
+          }));
         };
         reader.readAsDataURL(file);
-      } else if (name === 'doc_file' && file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setClinicPicPreview(reader.result);
-        };
-        reader.readAsDataURL(file);
+      } else if (name === 'doc_file' && file.type === 'application/pdf') {
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          doc_file: file,
+        }));
+      } else {
+        alert('Please upload a valid PDF document.');
       }
     } else {
       setFormData((prevFormData) => ({
@@ -434,19 +449,17 @@ const DoctorDetails = () => {
  
   const handleOpdChange = (field, event) => {
     if (field === 'doc_file') {
-      const file = event.target.files[0]; // Get the file from the input
+      const file = event.target.files[0];
       if (file) {
         setOpdData((prevOpdData) => ({
           ...prevOpdData,
-          doc_file: file,  // Update the doc_file in state
+          doc_file: file,
         }));
- 
-        // Create a preview URL for the clinic picture
         const reader = new FileReader();
         reader.onloadend = () => {
           setClinicPicPreview(reader.result);
         };
-        reader.readAsDataURL(file);  // Create a preview for the UI
+        reader.readAsDataURL(file);
       }
     } else {
       setOpdData((prevOpdData) => ({
@@ -456,10 +469,26 @@ const DoctorDetails = () => {
     }
   };
  
- 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
+ 
+ 
+ 
+    const errors = {};
+    if (!formData.name) errors.name = ['This field may not be blank.'];
+    if (!formData.specialization) errors.specialization = ['This field may not be blank.'];
+    if (!formData.registration_no) errors.registration_no = ['This field may not be blank.'];
+    if (!formData.gender) errors.gender = ['"Select a valid gender."'];
+    if (!Number.isInteger(parseInt(formData.experience))) errors.experience = ['A valid integer is required.'];
+ 
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+    } else {
+      console.log('Form submitted successfully', formData);
+    }
+ 
+ 
  
     if (!token) {
       setErrorMessage('No token found, please login again.');
@@ -553,6 +582,17 @@ const DoctorDetails = () => {
       const doctor_id = decodedToken.doctor_id;
  
       let response;
+      const errors = {};
+      if (!addressData.country) errors.country = ['Country is required.'];
+      if (!addressData.state) errors.state = ['State is required.'];
+      if (!addressData.city) errors.city = ['City is required.'];
+      if (!addressData.street_address) errors.street_address = ['Street Address is required.'];
+      if (!addressData.pin_code) errors.pin_code = ['Pin Code is required.'];
+ 
+      if (Object.keys(errors).length > 0) {
+        setFormErrors(errors);
+        return;
+      }
  
       if (addressId) {
         response = await BaseUrl.put(`/doctor/doctoraddres/?doctor_id=${doctor_id}&address_id=${addressId}`, {
@@ -577,9 +617,8 @@ const DoctorDetails = () => {
     }
   };
  
- 
   const handleOpdSubmit = async (e) => {
-    e.preventDefault(); // Prevent the form from reloading or submitting twice
+    e.preventDefault();
  
     try {
       const token = localStorage.getItem('token');
@@ -596,30 +635,28 @@ const DoctorDetails = () => {
         formDataToSubmit.append('doc_file', opdData.doc_file);
       }
  
+      const errors = {};
+      if (!opdData.clinic_name) errors.clinic_name = ['Clinic Name is required.'];
+      if (!opdData.start_day) errors.start_day = ['Start Day is required.'];
+      if (!opdData.end_day) errors.end_day = ['Last Day is required.'];
+ 
+      if (Object.keys(errors).length > 0) {
+        setFormErrors(errors);
+        return;
+      }
       let response;
       if (opdId) {
-        // PUT request to update existing OPD details
-        response = await BaseUrl.put(`/doctor/opddays/?opd_id=${opdId}`, formDataToSubmit, {
-          
-        });
+        response = await BaseUrl.put(`/doctor/opddays/?opd_id=${opdId}`, formDataToSubmit);
       } else {
-        // POST request to create new OPD details
-        response = await BaseUrl.post(`/doctor/opddays/`, formDataToSubmit, {
-         
-        });
+        response = await BaseUrl.post(`/doctor/opddays/`, formDataToSubmit);
       }
  
       if (response.status === 200 || response.status === 201) {
         setSuccessMessage('OPD details saved successfully.');
-        setIsOpdComplete(true);
- 
         if (!opdId) {
           setOpdId(response.data.id);
         }
- 
-        // Fetch updated OPD details after saving
-        fetchOpdDetails();
-        setShowOpdTimings(true); // Show OPD timings after saving details
+        setShowOpdTimings(true);
       } else {
         throw new Error('Failed to save OPD details.');
       }
@@ -628,8 +665,6 @@ const DoctorDetails = () => {
       setErrorMessage('Failed to save OPD details.');
     }
   };
- 
- 
  
   const handleSaveTimings = async () => {
     try {
@@ -641,7 +676,6 @@ const DoctorDetails = () => {
         setErrorMessage('Doctor ID or OPD ID is missing.');
         return;
       }
- 
       const promises = opdData.opd_timings.map(async (timing, index) => {
         const formData = new FormData();
         formData.append('opd_id', opdId);
@@ -649,19 +683,14 @@ const DoctorDetails = () => {
         formData.append('end_time', timing.end_time);
  
         if (timing.time_id) {
-          // Update the existing timing (PUT request)
           formData.append('time_id', timing.time_id);
           return BaseUrl.put(`/doctor/timeopd/?opd_id=${opdId}`, formData, {
-            
           });
         } else {
-          // Create a new timing (POST request)
           return BaseUrl.post(`/doctor/timeopd/`, formData, {
-           
           });
         }
       });
- 
       setSuccessMessage('Timings saved successfully.');
       fetchOpdTimings();
     } catch (error) {
@@ -669,6 +698,8 @@ const DoctorDetails = () => {
       setErrorMessage('Failed to save timings.');
     }
   };
+ 
+ 
  
   const handleOpdTimingChange = (index, field, value) => {
     const updatedTimings = opdData.opd_timings.map((timing, i) =>
@@ -691,10 +722,8 @@ const DoctorDetails = () => {
     try {
       const response = await BaseUrl.delete(`/doctor/timeopd/?time_id=${timeId}`);
  
-      if (response.status === 204) { // Assuming 204 is returned for successful deletion
+      if (response.status === 204) {
         setSuccessMessage('Timing deleted successfully.');
- 
-        // Remove the timing from the state after successful deletion
         setOpdData((prevOpdData) => ({
           ...prevOpdData,
           opd_timings: prevOpdData.opd_timings.filter((timing) => timing.time_id !== timeId),
@@ -707,7 +736,6 @@ const DoctorDetails = () => {
       setErrorMessage('Failed to delete timing.');
     }
   };
- 
  
   const renderForm = () => {
     switch (activeTab) {
@@ -749,14 +777,29 @@ const DoctorDetails = () => {
  
         <div className="col-md-6">
           <label>Name</label><span className="text-danger">*</span>
-          <input type="text" className="form-control" name="name" value={formData.name} onChange={handleChange} />
+          {formErrors.name && <p className="text-danger">{formErrors.name[0]}</p>}
+          <input
+            type="text"
+            className="form-control"
+            name="name"
+            value={formData.name}
+            required
+            onChange={handleChange}
+          />
         </div>
       </div>
- 
       <div className="row mb-3">
         <div className="col-md-4">
           <label>Specialization</label><span className="text-danger">*</span>
-          <input type="text" className="form-control" name="specialization" value={formData.specialization} onChange={handleChange} />
+          {formErrors.specialization && <p className="text-danger">{formErrors.specialization[0]}</p>}
+          <input
+            type="text"
+            className="form-control"
+            name="specialization"
+            value={formData.specialization}
+            required
+            onChange={handleChange}
+          />
         </div>
         <div className="col-md-4">
           <label>Qualification</label><span className="text-danger">*</span>
@@ -772,18 +815,40 @@ const DoctorDetails = () => {
         </div>
         <div className="col-md-4">
           <label>Experience</label><span className="text-danger">*</span>
-          <input type="text" className="form-control" name="experience" value={formData.experience} onChange={handleChange} />
+          {formErrors.experience && <p className="text-danger">{formErrors.experience[0]}</p>}
+          <input
+            type="number"
+            className="form-control"
+            name="experience"
+            value={formData.experience}
+            required
+            onChange={handleChange}
+          />
         </div>
       </div>
- 
       <div className="row mb-3">
         <div className="col-md-4">
           <label>Registration No</label><span className="text-danger">*</span>
-          <input type="text" className="form-control" name="registration_no" value={formData.registration_no} onChange={handleChange} />
+          {formErrors.registration_no && <p className="text-danger">{formErrors.registration_no[0]}</p>}
+          <input
+            type="text"
+            className="form-control"
+            name="registration_no"
+            value={formData.registration_no}
+            required
+            onChange={handleChange}
+          />
         </div>
         <div className="col-md-4">
-          <label>Gender</label>
-          <select className="form-control" name="gender" value={formData.gender} onChange={handleChange}>
+          <label>Gender</label><span className="text-danger">*</span>
+          {formErrors.gender && <p className="text-danger">{formErrors.gender[0]}</p>}
+          <select
+            className="form-control"
+            name="gender"
+            value={formData.gender}
+            onChange={handleChange}
+            required
+          >
             <option value="">Select Gender</option>
             <option value="male">Male</option>
             <option value="female">Female</option>
@@ -792,25 +857,67 @@ const DoctorDetails = () => {
         </div>
         <div className="col-md-4">
           <label>Date of Birth</label>
-          <input type="date" className="form-control" name="date_of_birth" value={formData.date_of_birth} max={today} onChange={handleChange} />
+          <input
+            type="date"
+            className="form-control"
+            name="date_of_birth"
+            value={formData.date_of_birth}
+            max={today}
+            onChange={handleChange}
+          />
         </div>
       </div>
- 
       <div className="row mb-3">
         <div className="col-md-4">
           <label>Languages Spoken</label>
-          <input type="text" className="form-control" name="languages_spoken" value={formData.languages_spoken} onChange={handleChange} />
+          <input
+            type="text"
+            className="form-control"
+            name="languages_spoken"
+            value={formData.languages_spoken}
+            onChange={handleChange}
+          />
         </div>
         <div className="col-md-4">
           <label>Mobile No</label><span className="text-danger">*</span>
-          <input type="number" className="form-control" name="mobile_number" value={formData.mobile_number} disabled />
+          <input
+            type="number"
+            className="form-control"
+            name="mobile_number"
+            value={formData.mobile_number}
+            disabled
+          />
         </div>
         <div className="col-md-4">
-          <label>Email</label>
-          <input type="email" className="form-control" name="email" value={formData.email} onChange={handleChange} />
+          <label>Email</label><span className="text-danger">*</span>
+          {formErrors.email && <p className="text-danger">{formErrors.email[0]}</p>}
+          <input
+            type="email"
+            className="form-control"
+            name="email"
+            value={formData.email}
+            required
+            onChange={handleChange}
+          />
         </div>
       </div>
-      <button type="submit" className="btn btn-primary" onClick={handleSubmit}>Save Personal Details</button>
+      <div className="row mb-3">
+        <div className="col-md-4">
+          <label>Upload Document <small style={{ color: 'red', fontSize: '12px' }}>(PDF only)</small></label>
+          <input
+            id="documentUpload"
+            type="file"
+            className="form-control"
+            name="doc_file"
+            accept=".pdf"
+            onChange={handleChange}
+          />
+        </div>
+        <div className="col-md-4 pt-4">
+          <button type="button" className="btn btn-secondary" onClick={handleViewDocument}>View Uploaded Document</button>
+        </div>
+      </div>
+      <button className="btn btn-primary" onClick={handleSubmit} >Save Personal Details</button>
     </form>
   );
  
@@ -818,37 +925,84 @@ const DoctorDetails = () => {
     <form
       className="address-details-form p-4 rounded shadow mt-5"
       style={{ backgroundColor: '#f8f9fa', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}
+      onSubmit={handleAddressSubmit}
     >
       <h2>Address Details</h2>
       <div className="row mb-3">
         <div className="col-md-4">
           <label>Country</label><span className="text-danger">*</span>
-          <input type="text" className="form-control" name="country" value={addressData.country} onChange={handleAddressChange} />
+          {formErrors.country && <p className="text-danger">{formErrors.country[0]}</p>}
+          <input
+            type="text"
+            className="form-control"
+            name="country"
+            value={addressData.country}
+            onChange={handleAddressChange}
+            required
+          />
         </div>
         <div className="col-md-4">
           <label>State</label><span className="text-danger">*</span>
-          <input type="text" className="form-control" name="state" value={addressData.state} onChange={handleAddressChange} />
+          {formErrors.state && <p className="text-danger">{formErrors.state[0]}</p>}
+          <input
+            type="text"
+            className="form-control"
+            name="state"
+            value={addressData.state}
+            onChange={handleAddressChange}
+            required
+          />
         </div>
         <div className="col-md-4">
           <label>City</label><span className="text-danger">*</span>
-          <input type="text" className="form-control" name="city" value={addressData.city} onChange={handleAddressChange} />
+          {formErrors.city && <p className="text-danger">{formErrors.city[0]}</p>}
+          <input
+            type="text"
+            className="form-control"
+            name="city"
+            value={addressData.city}
+            onChange={handleAddressChange}
+            required
+          />
         </div>
       </div>
       <div className="row mb-3">
         <div className="col-md-4">
           <label>Street Address</label><span className="text-danger">*</span>
-          <input type="text" className="form-control" name="street_address" value={addressData.street_address} onChange={handleAddressChange} />
+          {formErrors.street_address && <p className="text-danger">{formErrors.street_address[0]}</p>}
+          <input
+            type="text"
+            className="form-control"
+            name="street_address"
+            value={addressData.street_address}
+            onChange={handleAddressChange}
+            required
+          />
         </div>
         <div className="col-md-4">
           <label>Pin Code</label><span className="text-danger">*</span>
-          <input type="text" className="form-control" name="pin_code" value={addressData.pin_code} onChange={handleAddressChange} />
+          {formErrors.pin_code && <p className="text-danger">{formErrors.pin_code[0]}</p>}
+          <input
+            type="text"
+            className="form-control"
+            name="pin_code"
+            value={addressData.pin_code}
+            onChange={handleAddressChange}
+            required
+          />
         </div>
         <div className="col-md-4">
           <label>Landmark</label>
-          <input type="text" className="form-control" name="landmark" value={addressData.landmark} onChange={handleAddressChange} />
+          <input
+            type="text"
+            className="form-control"
+            name="landmark"
+            value={addressData.landmark}
+            onChange={handleAddressChange}
+          />
         </div>
       </div>
-      <button type="submit" className="btn btn-primary" onClick={handleAddressSubmit}>
+      <button type="submit" className="btn btn-primary">
         Save Address
       </button>
     </form>
@@ -879,41 +1033,45 @@ const DoctorDetails = () => {
         </div>
         <div className="col-md-6">
           <label>Clinic Name</label><span className="text-danger">*</span>
+          {formErrors.clinic_name && <p className="text-danger">{formErrors.clinic_name[0]}</p>}
           <input
             type="text"
             className="form-control"
             name="clinic_name"
             value={opdData.clinic_name}
-            onChange={(e) => setOpdData({ ...opdData, clinic_name: e.target.value })}
+            onChange={(e) => handleOpdChange('clinic_name', e)}
+            required
           />
         </div>
       </div>
- 
       <div className="row mb-3">
         <div className="col-md-6">
           <label>Start Day</label><span className="text-danger">*</span>
+          {formErrors.start_day && <p className="text-danger">{formErrors.start_day[0]}</p>}
           <input
             type="text"
             className="form-control"
             name="start_day"
             value={opdData.start_day}
-            onChange={(e) => setOpdData({ ...opdData, start_day: e.target.value })}
+            onChange={(e) => handleOpdChange('start_day', e)}
             placeholder="e.g., Monday"
+            required
           />
         </div>
         <div className="col-md-6">
-          <label>End Day</label><span className="text-danger">*</span>
+          <label>Last Day</label><span className="text-danger">*</span>
+          {formErrors.end_day && <p className="text-danger">{formErrors.end_day[0]}</p>}
           <input
             type="text"
             className="form-control"
             name="end_day"
             value={opdData.end_day}
-            onChange={(e) => setOpdData({ ...opdData, end_day: e.target.value })}
+            onChange={(e) => handleOpdChange('end_day', e)}
             placeholder="e.g., Friday"
+            required
           />
         </div>
       </div>
- 
       <button type="submit" className="btn btn-primary mt-3" onClick={handleOpdSubmit}>
         Save OPD Details
       </button>
@@ -947,7 +1105,7 @@ const DoctorDetails = () => {
               <div className="col-md-2 d-flex align-items-center justify-content-center">
                 <FaTrash
                   className="text-danger"
-                  style={{ cursor: 'pointer'}}
+                  style={{ cursor: 'pointer' }}
                   onClick={() => handleDeleteTiming(timing.time_id)}
                 />
               </div>
@@ -1009,5 +1167,6 @@ const DoctorDetails = () => {
 };
  
 export default DoctorDetails;
+ 
  
  

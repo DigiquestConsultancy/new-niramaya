@@ -1,31 +1,6 @@
-/* 
-.login-form, .otp-form {
-  width: 100%;
-  max-width: 500px;
-  padding: 20px;
-  background: hsla(0, 6%, 87%, 0.769);
-  border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
 
-.otp-container {
-  display: flex;
-  justify-content: space-between;
-}
-
-.otp-input {
-  width: 40px;
-  text-align: center;
-}
-
-.verify-button, .resend-button {
-  width: 100%;
-} */
-
-
-/* Background and form container styles */
 .bg-container {
-  /* background-image: url('C:\MyData\React Course\final project\final-project\src\images\logindoctor.png'); */
+  background-image: url('C:\MyData\React Course\final project\final-project\src\images\logindoctor.png');
   background-size: cover;
   background-position: center;
   min-height: 68vh;
@@ -41,177 +16,164 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.2); /* Slight white overlay */
-  backdrop-filter: blur(0px); /* Blur effect */
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(0px);
   z-index: 1;
 }
 .form-wrapper {
-  background: #fff; /* White background for the form */
+  background: #fff;
   padding: 30px;
-  border-radius: 10px; /* Rounded corners */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-  max-width: 500px; /* Restrict max width to prevent overflow */
-  width: 100%; /* Full width for small screens */
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  width: 100%;
 }
  
  
 .form-container {
   position: relative;
-  z-index: 2; /* Keeps the form above the blurred background */
+  z-index: 2;
 }
  
-/* Common styles for all forms */
 .form-container form {
   width: 100%;
-  max-width: 600px; /* Set a maximum width for all forms */
-  padding: 40px; /* Uniform padding for all forms */
-  background-color: rgba(238, 238, 238, 0.9); /* Light background with transparency */
-  border-radius: 15px; /* Rounded corners */
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); /* Larger shadow for depth */
-  min-height: 500px; /* Set equal minimum height for all forms */
+  max-width: 600px;
+  padding: 40px;
+  background-color: rgba(238, 238, 238, 0.9);
+  border-radius: 15px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  min-height: 500px;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Vertically center the content */
+  justify-content: center;
 }
  
-/* Responsive adjustments for smaller screens */
 @media (max-width: 768px) {
   .form-container form {
     max-width: 100%;
-    margin: 0 20px; /* Reduce horizontal margins for smaller screens */
-    padding: 30px; /* Adjust padding for smaller screens */
-    min-height: 400px; /* Adjust minimum height */
+    margin: 0 20px;
+    padding: 30px;
+    min-height: 400px;
   }
 }
  
-/* Large screen (laptop, desktop) media query */
 @media (min-width: 1200px) {
   .form-container form {
-    height: 50vh; /* Set a specific height for larger screens */
-    max-width: 40%; /* Reduce max-width slightly for larger screens */
+    height: 50vh;
+    max-width: 40%;
   }
 }
  
-/* Button styles */
 buttons {
-  font-size: 1.3rem; /* Uniform button text size */
-  padding: 12px; /* Uniform button padding */
-  width: 28%; /* Full width buttons */
+  font-size: 1.3rem;
+  padding: 12px;
+  width: 28%;
 }
  
-/* Specific container adjustments for each form type */
 .login-form, .otp-form, .forgot-password-form, .reset-password-form {
-  max-width: 600px; /* Ensure consistent maximum width */
+  max-width: 600px;
 }
  
-/* OTP Input Container Styles */
+ 
+ 
 .otp-container {
   display: flex;
-  justify-content: space-between; /* Space between the OTP input boxes */
-  flex-wrap: nowrap; /* Ensure that inputs do not wrap to the next line */
-  gap: 10px; /* Add some space between each input box */
-  margin: 20px 0; /* Margin around the OTP input container */
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 10px;
+  margin: 20px 0;
 }
  
-/* Styles for each OTP input box */
 .otp-input {
-  width: 50px; /* Set a fixed width for the input boxes */
-  height: 50px; /* Set a fixed height for the input boxes */
-  text-align: center; /* Center the text (OTP digit) inside the box */
-  font-size: 1.5rem; /* Increase the font size for better readability */
-  border: 2px solid #4384c9; /* Border color to match the design */
-  border-radius: 10px; /* Rounded corners */
-  background-color: #f8f9fa; /* Light background for the inputs */
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
-  transition: all 0.3s ease; /* Smooth transition for hover effect */
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  font-size: 1.5rem;
+  border: 2px solid #4384c9;
+  border-radius: 10px;
+  background-color: #f8f9fa;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
  
-/* Focused state of OTP input */
 .otp-input:focus {
-  border-color: #007bff; /* Change border color when focused */
-  outline: none; /* Remove the default outline */
-  box-shadow: 0px 4px 6px rgba(0, 123, 255, 0.25); /* Stronger shadow on focus */
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0px 4px 6px rgba(0, 123, 255, 0.25);
 }
  
-/* Responsive adjustments for smaller screens */
 @media (max-width: 768px) {
   .otp-container {
-    justify-content: space-between; /* Ensure the inputs stay on one row */
-    gap: 5px; /* Reduce the gap between boxes */
+    justify-content: space-between;
+    gap: 5px;
   }
  
   .otp-input {
-    width: 45px; /* Slightly reduce the width for mobile screens */
-    height: 45px; /* Slightly reduce the height for mobile screens */
-    font-size: 1.4rem; /* Adjust the font size for better readability on smaller screens */
+    width: 45px;
+    height: 45px;
+    font-size: 1.4rem;
   }
 }
  
 @media (max-width: 576px) {
   .otp-container {
-    justify-content: space-between; /* Ensure the inputs stay on one row even on very small screens */
-    gap: 4px; /* Further reduce the gap between boxes */
+    justify-content: space-between;
+    gap: 4px;
   }
  
   .otp-input {
-    width: 40px; /* Further reduce the width for very small screens */
-    height: 40px; /* Further reduce the height for very small screens */
-    font-size: 1.2rem; /* Adjust the font size for smaller screens */
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
   }
 }
  
  
- 
-/* Forgot password form styling */
 .forgot-password-container {
   display: flex;
-  justify-content: flex-end; /* Align to the right */
+  justify-content: flex-end;
 }
  
 .forgot-password-form {
-  background-color: rgba(238, 238, 238, 0.9); /* White background for the card */
-  padding: 40px; /* Padding inside the form */
-  border-radius: 15px; /* Rounded corners */
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); /* Box shadow for depth */
+  background-color: rgba(238, 238, 238, 0.9);
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
   width: 100%;
-  max-width: 600px; /* Limit the max-width */
-  margin-right: 20px; /* Margin on the right side */
-  z-index: 2; /* Ensure it's on top */
+  max-width: 600px;
+  margin-right: 20px;
+  z-index: 2;
 }
  
-/* Reset password form container */
 .reset-password-container {
   display: flex;
-  justify-content: flex-end; /* Align to the right */
+  justify-content: flex-end;
 }
  
-/* Reset password form styles */
 .reset-password-form {
-  background-color: rgba(238, 238, 238, 0.9); /* White background for card effect */
-  padding: 40px; /* Padding inside the form */
-  border-radius: 15px; /* Rounded corners for the card */
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); /* Box shadow for depth */
+  background-color: rgba(238, 238, 238, 0.9);
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
   width: 100%;
-  max-width: 600px; /* Limit the max-width */
-  margin-right: 20px; /* Add right margin for better visibility */
-  z-index: 2; /* Ensure it's on top */
+  max-width: 600px;
+  margin-right: 20px;
+  z-index: 2;
 }
  
-/* Adjust margins for smaller screens */
 @media (max-width: 768px) {
   .forgot-password-form,
   .reset-password-form {
-    margin-right: 10px; /* Reduce right margin on smaller screens */
+    margin-right: 10px;
   }
 }
- 
  
  
 .auth-toggle {
   display: flex;
   justify-content: center;
-  position: fixed;
-  top: 70px;
+  position: absolute;
+  top: -60px;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
@@ -240,24 +202,38 @@ buttons {
   font-size: 1.8rem;
 }
  
- 
- 
- 
-.form-container {
-  position: relative;
-}
- 
- 
 .doctor-login-link {
-  position: absolute;
-  top: 20px;
-  right: 45px;
-  font-size: 1.2rem;
+    position: relative;
+    padding-bottom: 50px;
 }
+ 
+.text-link {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+ 
  
 .doctor-login-link a {
   color: #0063cc;
   text-decoration: none;
-  font-weight:bold;
+  font-weight: bold;
   text-decoration: underline;
+}
+ 
+ 
+.login-box {
+  padding-top: 40px;
+}
+ 
+.reg-box {
+  padding-top: 64px;
+}
+ 
+.plogin-box {
+  padding-top: 64px;
+}
+ 
+.preg-box {
+  padding-top: 64px;
 }

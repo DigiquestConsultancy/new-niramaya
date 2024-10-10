@@ -5,7 +5,7 @@
     height: calc(100vh - 56px); /* Adjust height to account for navbar */
     padding: 20px;
     box-sizing: border-box;
-    overflow: hidden; /* Prevents overflow */
+    /* overflow: hidden;  */
   }
   
   .card-container {

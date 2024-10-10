@@ -61,15 +61,13 @@
 // export default Navbar;
 
 
-
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 import Container from 'react-bootstrap/Container';
 import Company from '../../images/logo.jpeg';
-import '../../css/Navbar.css'; // Import custom styles
+import '../../css/Navbar.css';
  
 const CustomNavbar = () => {
     const location = useLocation();
@@ -80,7 +78,7 @@ const CustomNavbar = () => {
         } else if (location.pathname === '/doctor/login') {
             return '/doctor/register';
         }
-        return '/patient/login'; // Default redirect if none of the above conditions are met
+        return '/patient/login';
     };
  
     return (
@@ -89,18 +87,17 @@ const CustomNavbar = () => {
                 <Navbar.Brand as={Link} to="/">
                     <img src={Company} alt="Company Logo" height="40" />
                 </Navbar.Brand>
-                <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                <Navbar.Collapse id="basic-navbar-nav">
-                    <Nav className="ms-auto">
-                        <Nav.Link
-                            as={Link}
-                            to={handleLoginSignUpRedirect()}
-                            className="btn btn-outline-dark custom-link"
-                        >
-                            Login/SignUp
-                        </Nav.Link>
-                    </Nav>
-                </Navbar.Collapse>
+                <Nav className="ms-auto">
+                    <Nav.Link
+                        as={Link}
+                        to={handleLoginSignUpRedirect()}
+                        className="btn custom-link"
+                        style={{ paddingRight: '30px' }}
+                    >
+                        Login/SignUp
+                    </Nav.Link>
+                </Nav>
+ 
             </Container>
         </Navbar>
     );

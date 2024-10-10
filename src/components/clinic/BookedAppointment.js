@@ -1,12 +1,11 @@
-
 // import React, { useState, useEffect } from "react";
+// import '../../css/ClinicBookedAppointment.css'; // Import your CSS file
 // import {Modal,Button,Form,Row,Col,Table,Dropdown,DropdownButton,Container,Card,Toast,ToastContainer,} from "react-bootstrap";
 // import { FaEdit, FaTrash, FaChevronDown, FaChevronUp } from "react-icons/fa";
 // import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 // import {faFileAlt,faReceipt,faEllipsisV,faTimes as faTimesSolid,} from "@fortawesome/free-solid-svg-icons";
 // import BaseUrl from "../../api/BaseUrl";
 // import { jwtDecode } from "jwt-decode";
- 
 // const ClinicBookedAppointment = () => {
 //   const [appointments, setAppointments] = useState([]);
 //   const [clinicId, setClinicId] = useState("");
@@ -21,7 +20,13 @@
 //   const [showPrescriptionForm, setShowPrescriptionForm] = useState(false);
 //   const [showVitalForm, setShowVitalForm] = useState(false);
 //   const [prescriptionDocuments, setPrescriptionDocuments] = useState([]);
-//   const [prescriptions, setPrescriptions] = useState([{ medicine_name: "", time: "", comment: "", description: "" },]);
+//   // const [prescriptions, setPrescriptions] = useState([
+//   //   { medicine_name: "", time: "", comment: "", description: "" },
+//   // ]);
+//   const [prescriptions, setPrescriptions] = useState([
+//     { medicine_name: "", time: [], comment: "", description: "" },
+//   ]);
+ 
 //   const [showRecordForm, setShowRecordForm] = useState(false);
 //   const [recordDetails, setRecordDetails] = useState({mobile_number: "",blood_pressure: "",weight: "",height: "",sugar_level: "",oxygen_level: "",symptoms: "",symptoms_comment: "",body_temperature: "",appointment_id: "",});
 //   const [showFormModal, setShowFormModal] = useState(false);
@@ -30,13 +35,8 @@
 //   const [previewFileType, setPreviewFileType] = useState("");
 //   const [selectedFiles, setSelectedFiles] = useState([]);
 //   const [selectedFile, setSelectedFile] = useState(null);
-//   const [formData, setFormData] = useState({
-//     document_name: "",
-//     patient_name: "",
-//     document_date: "",
-//     document_type: "",
-//     document_file: "",
-//   });
+//   const [formData, setFormData] = useState({document_name: "",patient_name: "",document_date: "",document_type: "",document_file: "",});
+//   const [timeSlots, setTimeSlots] = useState([]); // Define timeSlots here
 //   const [medicalRecords, setMedicalRecords] = useState([]);
 //   const [showMedicalRecords, setShowMedicalRecords] = useState(false);
 //   const [editingRecordId, setEditingRecordId] = useState(null);
@@ -122,12 +122,11 @@
 //       link.download = `${record.document_name}.${
 //         response.data.type.split("/")[1]
 //       }`;
+//       setSuccessMessage("Document file downloaded successfully");
 //       link.click();
 //     } catch (error) {
 //       console.error("Error downloading file:", error);
-//       setShowToast(true);
-//       setToastMessage("Failed to download file.");
-//       setToastVariant("danger");
+//       setErrorMessage("Failed to download Document file");
 //     }
 //   };
  
@@ -209,20 +208,14 @@
 //             setUploadedPrescription(selectedFiles[0]);
 //             await fetchMedicalRecords(expandedAppointmentId);
 //             await fetchAppointments(clinicId);
-//             setShowToast(true);
-//             setToastMessage("Document uploaded successfully!");
-//             setToastVariant("success");
+//             setSuccessMessage("Document file uploaded successfully");
 //           } else {
 //             console.error("Failed to upload document");
-//             setShowToast(true);
-//             setToastMessage("Failed to upload document.");
-//             setToastVariant("danger");
+//             setErrorMessage("Failed to upload document file");
 //           }
 //         } catch (postError) {
 //           console.error("Error uploading document:", postError);
-//           setShowToast(true);
-//           setToastMessage("Error uploading document.");
-//           setToastVariant("danger");
+//           setErrorMessage("Error uploading document file");
 //         }
 //       }
  
@@ -277,9 +270,7 @@
 //         );
 //         setShowFormModal(false);
 //         await fetchMedicalRecords(expandedAppointmentId);
-//         setShowToast(true);
-//         setToastMessage("Record updated successfully!");
-//         setToastVariant("success");
+//         setSuccessMessage("Document file updated successfully");
 //       } else {
 //         await BaseUrl.post(
 //           `/patient/patientdocumentusingappointmentid/`,
@@ -287,15 +278,11 @@
 //         );
 //         setShowFormModal(false);
 //         await fetchMedicalRecords(expandedAppointmentId);
-//         setShowToast(true);
-//         setToastMessage("Record saved successfully!");
-//         setToastVariant("success");
+//         setSuccessMessage("Document record saved successfully");
 //       }
 //     } catch (error) {
 //       console.error("Error saving document:", error);
-//       setShowToast(true);
-//       setToastMessage("Failed to save record.");
-//       setToastVariant("danger");
+//       setErrorMessage("Failed to save document record");
 //     }
 //   };
  
@@ -332,14 +319,10 @@
 //       });
 //       await fetchMedicalRecords(expandedAppointmentId);
 //       await fetchAppointments(clinicId);
-//       setShowToast(true);
-//       setToastMessage("Record deleted successfully!");
-//       setToastVariant("success");
+//       setSuccessMessage("File record deleted successfully");
 //     } catch (error) {
 //       console.error("Error deleting record:", error);
-//       setShowToast(true);
-//       setToastMessage("Failed to delete record.");
-//       setToastVariant("danger");
+//       setErrorMessage("Failed to delete record file");
 //     }
 //   };
  
@@ -455,20 +438,14 @@
 //         setShowPrescriptionDocsForm(false);
 //         await fetchMedicalRecords(appointment_id); // Fetch updated medical records
 //         await fetchAppointments(clinicId); // Fetch updated appointments
-//         setShowToast(true);
-//         setToastMessage("Prescription document uploaded successfully!");
-//         setToastVariant("success");
+//         setSuccessMessage("Prescription document uploaded successfully");
 //       } else {
 //         console.error("Failed to upload prescription document");
-//         setShowToast(true);
-//         setToastMessage("Failed to upload prescription document.");
-//         setToastVariant("danger");
+//         setErrorMessage("Failed to upload prescription document");
 //       }
 //     } catch (error) {
 //       console.error("Error uploading prescription document:", error);
-//       setShowToast(true);
-//       setToastMessage("Error uploading prescription document.");
-//       setToastVariant("danger");
+//       setErrorMessage("Error uploading prescription document");
 //     }
 //   };
  
@@ -572,76 +549,85 @@
 //       setShowMedicalRecords(true);
  
 //       try {
-//         // Ensure that only the latest request for the selected patient is processed
+//         // Fetch data for the patient, without waiting for each API to complete before proceeding to the next
 //         const fetchDataForPatient = async () => {
-//           // Fetch patient details
-//           const patientResponse = await BaseUrl.get(
+//           const patientPromise = BaseUrl.get(
 //             `/patient/patient/?patient_id=${details.patient_id}&appointment_id=${appointment_id}`
 //           );
-//           if (patientResponse.status === 200) {
-//             const patientDetails = patientResponse.data;
+ 
+//           const checkupPromise = BaseUrl.get(`/patient/patientcheckup/`, {
+//             params: { appointment_id: appointment_id },
+//           });
+ 
+//           const prescriptionPromise = BaseUrl.get(
+//             `/patient/patientpriscription/?patient_id=${details.patient_id}&appointment_id=${appointment_id}`
+//           );
+ 
+//           const prescriptionDocPromise = BaseUrl.get(`/patient/patientprescriptonfile/`, {
+//             params: { appointment_id: appointment_id },
+//           });
+ 
+//           const symptomsPromise = BaseUrl.get(`/doctor/symptomsdetail/?appointment_id=${appointment_id}`);
+ 
+//           // You can also await these individually if you want to handle them sequentially
+ 
+//           // Use Promise.allSettled to ensure all promises are hit, regardless of whether any fail
+//           const results = await Promise.allSettled([
+//             patientPromise,
+//             checkupPromise,
+//             prescriptionPromise,
+//             prescriptionDocPromise,
+//             symptomsPromise,
+//             fetchDocumentIds(appointment_id), // fetch document ids
+//             fetchMedicalRecords(appointment_id), // fetch medical records
+//           ]);
+ 
+//           // Handle patient details response
+//           const patientResponse = results[0];
+//           if (patientResponse.status === "fulfilled" && patientResponse.value.status === 200) {
+//             const patientDetails = patientResponse.value.data;
 //             setFormDetails((prevDetails) => ({
 //               ...prevDetails,
 //               ...patientDetails,
 //             }));
+//           } else {
+//             console.error("Failed to fetch patient details:", patientResponse.reason);
 //           }
  
-//           // Fetch vitals or checkup details
-//           const checkupResponse = await BaseUrl.get(`/patient/patientcheckup/`, {
-//             params: { appointment_id: appointment_id },
-//           });
-//           if (checkupResponse.status === 200 && checkupResponse.data.length > 0) {
-//             const checkupDetails = checkupResponse.data[0];
+//           // Handle checkup details response
+//           const checkupResponse = results[1];
+//           if (checkupResponse.status === "fulfilled" && checkupResponse.value.status === 200) {
+//             const checkupDetails = checkupResponse.value.data[0];
 //             setRecordDetails((prevDetails) => ({
 //               ...prevDetails,
 //               ...checkupDetails,
 //             }));
+//           } else {
+//             console.error("Failed to fetch checkup details:", checkupResponse.reason);
 //           }
  
-//           // Fetch prescriptions
-//           const prescriptionResponse = await BaseUrl.get(
-//             `/patient/patientpriscription/?patient_id=${details.patient_id}&appointment_id=${appointment_id}`
-//           );
-//           if (prescriptionResponse.status === 200) {
-//             setPrescriptions(prescriptionResponse.data);
+//           // Handle prescriptions response
+//           const prescriptionResponse = results[2];
+//           if (prescriptionResponse.status === "fulfilled" && prescriptionResponse.value.status === 200) {
+//             setPrescriptions(prescriptionResponse.value.data);
+//           } else {
+//             console.error("Failed to fetch prescriptions:", prescriptionResponse.reason);
 //           }
  
-//           // Fetch prescription documents
-//           const prescriptionDocResponse = await BaseUrl.get(`/patient/patientprescriptonfile/`, {
-//             params: { appointment_id: appointment_id },
-//           });
-//           if (prescriptionDocResponse.status === 200) {
-//             setPrescriptionDocuments(prescriptionDocResponse.data);
+//           // Handle prescription documents response
+//           const prescriptionDocResponse = results[3];
+//           if (prescriptionDocResponse.status === "fulfilled" && prescriptionDocResponse.value.status === 200) {
+//             setPrescriptionDocuments(prescriptionDocResponse.value.data);
+//           } else {
+//             console.error("Failed to fetch prescription documents:", prescriptionDocResponse.reason);
 //           }
  
-//           // Fetch document IDs by calling the fetchDocumentIds function
-//           await fetchDocumentIds(appointment_id);
- 
-//           // Fetch medical records
-//           await fetchMedicalRecords(appointment_id);
- 
-//           // Fetch symptoms
-//           const symptomsResponse = await BaseUrl.get(
-//             `/doctor/symptomsdetail/?appointment_id=${appointment_id}`
-//           );
-//           if (symptomsResponse.status === 200) {
-//             setSelectedSymptoms(symptomsResponse.data);
-//           }
- 
-//           // Fetch prescription times (new API call)
-//           const prescriptionTimeResponse = await BaseUrl.get(`/patient/time/`, {
-//             params: { appointment_id: appointment_id },
-//           });
-//           if (prescriptionTimeResponse.status === 200) {
-//             // Assuming you'll update the state with prescription times
-//             const prescriptionTimes = prescriptionTimeResponse.data;
-//             console.log(prescriptionTimes);
-//             setPrescriptions((prevPrescriptions) =>
-//               prevPrescriptions.map((prescription, index) => ({
-//                 ...prescription,
-//                 time: prescriptionTimes[index]?.times || [],
-//               }))
-//             );
+//           // Handle symptoms response
+//           const symptomsResponse = results[4];
+//           if (symptomsResponse.status === "fulfilled" && symptomsResponse.value.status === 200) {
+//             setSelectedSymptoms(symptomsResponse.value.data);
+//           } else {
+//             console.error("Failed to fetch symptoms:", symptomsResponse.reason);
 //           }
 //         };
  
@@ -650,6 +636,419 @@
 //       } catch (error) {
 //         console.error("Error fetching patient data:", error);
 //       }
+//     }
+//   };
+ 
+//   const getPrescriptions = async (appointmentId) => {
+//     try {
+//       // Call the GET API to fetch prescriptions for a specific appointment
+//       const response = await BaseUrl.get(`/patient/patientpriscription/`, {
+//         params: { appointment_id: appointmentId },
+//       });
+ 
+//       if (response.status === 200) {
+//         const fetchedPrescriptions = response.data; // Assuming the response contains the prescription data
+//         setPrescriptions(fetchedPrescriptions); // Update the state with the fetched prescriptions
+//         console.log("Prescriptions fetched successfully", fetchedPrescriptions);
+//       } else {
+//         console.error("Failed to fetch prescriptions");
+//         setErrorMessage("Failed to fetch prescriptions");
+//       }
+//     } catch (error) {
+//       console.error("Error fetching prescriptions:", error);
+//       setErrorMessage("Error fetching prescriptions");
+//     }
+//   };
+ 
+ 
+ 
+ 
+ 
+ 
+//   const handleVitalChange = (e) => {
+//     const { name, value } = e.target;
+//     setRecordDetails((prevDetails) => ({
+//       ...prevDetails,
+//       [name]: value,
+//     }));
+//   };
+// // Function to fetch prescription documents for a specific appointment
+// const fetchPrescriptionDocuments = async (appointment_id) => {
+//   try {
+//     // Make the GET request to fetch prescription documents
+//     const response = await BaseUrl.get(`/patient/patientprescriptonfile/`, {
+//       params: { appointment_id: appointment_id }, // Pass the appointment ID in the request params
+//     });
+ 
+//     // Check if the response is successful
+//     if (response.status === 200) {
+//       const prescriptionDocuments = response.data; // Assuming the response contains the document data
+//       console.log("Prescription documents fetched successfully", prescriptionDocuments);
+//       return prescriptionDocuments; // Return the fetched documents
+//     } else {
+//       console.error("Failed to fetch prescription documents");
+//       throw new Error("Failed to fetch prescription documents");
+//     }
+//   } catch (error) {
+//     console.error("Error fetching prescription documents:", error);
+//     throw error; // Rethrow the error for further handling if needed
+//   }
+// };
+ 
+// const handleDeletePrescriptionDoc = async (docId, appointment_id) => {
+//   try {
+//     const response = await BaseUrl.delete(`/patient/patientprescriptonfile/`, {
+//       data: {
+//         document_id: docId,
+//       },
+//     });
+ 
+//     if (response.status === 204) {
+//       setSuccessMessage("Prescription document deleted successfully");
+ 
+//       // Refresh the prescription document list after deletion only if response status is 204
+//       // await fetchPrescriptionDocuments(expandedAppointmentId); // Call the fetchPrescriptionDocuments function
+//     } else {
+//       // If the response is not 204, handle it as an error
+//       throw new Error("Failed to delete prescription document");
+//     }
+//   } catch (error) {
+//     console.error("Error deleting prescription document:", error);
+//     setErrorMessage({ type: 'error', text: error.response?.data?.error || "An error occurred. Please try again."});
+//   }
+// };
+ 
+//   const handleDownloadPrescriptionDoc = async (doc) => {
+//     try {
+//       const response = await BaseUrl.get(`/patient/patientprescriptonfileView/`, {
+//         params: {
+//           patient_id: doc.patient,
+//           document_id: doc.id,
+//         },
+//         responseType: "blob", // Ensure it's downloading as a blob
+//       });
+//       setSuccessMessage("Prescription document downloaded successfully");
+ 
+//       const url = URL.createObjectURL(response.data);
+//       const link = document.createElement("a");
+//       link.href = url;
+//       link.download = `${doc.document_name}.${response.data.type.split("/")[1]}`;
+//       link.click();
+//     } catch (error) {
+//       console.error("Error downloading prescription document:", error);
+//       setErrorMessage("Failed to download preset document");
+//     }
+//   };
+ 
+//   const handleUpdate = async () => {
+//     try {
+//       const selectedAppointment = appointments.find(
+//         (appointment) => appointment.appointment_id === expandedAppointmentId
+//       );
+ 
+//       if (!selectedAppointment) {
+//         throw new Error("Selected appointment not found");
+//       }
+ 
+//       const payload = {
+//         appointment_id: selectedAppointment.appointment_id,
+//         patient_id: selectedAppointment.patient_id,
+//         ...formDetails,
+//       };
+ 
+//       const response = await BaseUrl.put(`/patient/patient/`, payload);
+ 
+//       if (response.status === 200) {
+//         await fetchAppointments(clinicId);
+//         setSuccessMessage("Appointment slot and patient details have been updated successfully");
+//       } else {
+//         console.error("Failed to update appointment details");
+//         setErrorMessage("Appointment slot not found");
+//       }
+//     } catch (error) {
+//       console.error("Error updating appointment details:", error);
+//       setErrorMessage("Booked by patient not found");
+//     }
+//   };
+ 
+//   const handleDelete = async (appointment_id) => {
+//     try {
+//       // Make the DELETE request to remove the appointment
+//       const response = await BaseUrl.delete(`/doctorappointment/getslot/`, {
+//         data: { appointment_id }, // Pass the appointment ID for deletion
+//       });
+ 
+//       if (response.status === 204) {
+//         // Fetch the updated appointments after successfully deleting the appointment
+//         await fetchAppointments(clinicId); // Fetch updated appointments using clinicId
+//         setSuccessMessage("Appointment slot has been deleted successfully");
+ 
+//         // Optional: You can also perform a redirect here if needed
+//         // For example, redirect to the main appointments page or any other page
+//         // window.location.href = '/clinic/booked-appointments'; // Uncomment if you want to redirect
+//       } else {
+//         // If the response status is not 200, handle it as an error
+//         throw new Error("Failed to delete appointment");
+//       }
+//     } catch (error) {
+//       // Log any errors encountered during the process and show an error message to the user
+//       console.error("Error deleting appointment:", error);
+//       setErrorMessage("Appointment slot not found");
+//     }
+//   };
+ 
+ 
+ 
+//   const handleCancelAppointment = async (appointment_id) => {
+//     try {
+//       const response = await BaseUrl.patch(`/doctorappointment/getslot/`, {
+//         appointment_id,
+//       });
+ 
+//       if (response.status === 200) {
+//         await fetchAppointments(clinicId);
+//         setSuccessMessage("Appointment slot has been freed up successfully");
+//       } else {
+//         console.error("Failed to cancel appointment");
+//         setErrorMessage("Appointment slot not found");
+//       }
+//     } catch (error) {
+//       console.error("Error canceling appointment:", error);
+//       setErrorMessage("Appointment slot not found");
+//     }
+//   };
+ 
+//   const handlePrescriptionChange = (index, e) => {
+//     const { name, value } = e.target;
+//     const updatedPrescriptions = prescriptions.map((prescription, i) =>
+//       i === index ? { ...prescription, [name]: value } : prescription
+//     );
+//     setPrescriptions(updatedPrescriptions);
+//   };
+ 
+ 
+ 
+//   const addPrescriptionRow = () => {
+//     setPrescriptions([{ medicine_name: "", time: "", comment: "", description: "" }, ...prescriptions]);
+//   };
+ 
+ 
+ 
+ 
+//   const removePrescriptionRow = async (index) => {
+//     try {
+//       const prescriptionToDelete = prescriptions[index];
+//       const prescription_id = prescriptionToDelete.id;
+ 
+//       if (!prescription_id) {
+//         console.error("No prescription ID found");
+//         return;
+//       }
+ 
+//       // Call the DELETE API to remove the prescription
+//       const response = await BaseUrl.delete(`/patient/patientpriscription/`, {
+//         params: { prescription_id },
+//       });
+ 
+//       if (response.status === 200 || response.status === 204) {
+//         // Remove the prescription from the UI
+//         const updatedPrescriptions = prescriptions.filter(
+//           (_, i) => i !== index
+//         );
+//         setPrescriptions(updatedPrescriptions);
+ 
+//         // Call the getPrescriptions function to refresh the list of prescriptions
+//         await getPrescriptions(expandedAppointmentId);
+//          // Fetch updated prescriptions
+       
+ 
+//         setSuccessMessage("Prescription removed successfully");
+//       } else {
+//         console.error("Failed to remove prescription");
+//         setErrorMessage("Error removing prescription");
+//       }
+//     } catch (error) {
+//       console.error("Error removing prescription:", error);
+//       setErrorMessage("Error removing prescription");
+//     }
+//   };
+ 
+//   const fetchPrescriptions = async (appointment_id, patient_id) => {
+//     try {
+//       // Make the GET API call to fetch prescriptions for the given appointment and patient
+//       const response = await BaseUrl.get('/patient/patientpriscription/', {
+//         params: {
+//           appointment_id: appointment_id, // Pass the appointment ID
+//           patient_id: patient_id,         // Pass the patient ID
+//         },
+//       });
+ 
+//       if (response.status === 200) {
+//         const fetchedPrescriptions = response.data; // Assuming the API returns an array of prescriptions
+ 
+//         // Update the state with the fetched prescriptions
+//         setPrescriptions(fetchedPrescriptions); // Set the fetched prescriptions to state
+ 
+       
+//       } else {
+//         console.error('Failed to fetch prescriptions');
+//       }
+//     } catch (error) {
+//       console.error('Error fetching prescriptions:', error);
+//     }
+//   };
+ 
+ 
+ 
+ 
+//   const handlePrescriptionSubmit = async (index) => {
+//     try {
+//       const selectedAppointment = appointments.find(
+//         (appointment) => appointment.appointment_id === expandedAppointmentId
+//       );
+ 
+//       if (!selectedAppointment) {
+//         console.error("No selected appointment found");
+//         return;
+//       }
+ 
+//       const patient_id = selectedAppointment.patient_id;
+//       const appointment_id = selectedAppointment.appointment_id;
+ 
+//       // Get the specific prescription for the current index
+//       const prescription = prescriptions[index];
+ 
+//       if (!prescription.medicine_name || !prescription.time || !prescription.comment) {
+//         setErrorMessage("Please fill out all required fields before submitting.");
+//         return;
+//       }
+ 
+//       // Prepare the payload for the individual prescription
+//       const payload = {
+//         ...prescription,
+//         patient_id: patient_id,
+//         appointment_id: appointment_id,
+//       };
+ 
+//       // Make the POST API call to submit the individual prescription
+//       const response = await BaseUrl.post('/patient/patientpriscription/', [payload]);
+ 
+//       if (response.status === 201) {
+//         setSuccessMessage("Prescription submitted successfully");
+ 
+//         // Optionally clear this specific prescription row
+//         const updatedPrescriptions = prescriptions.map((prescription, i) =>
+//           i === index ? { medicine_name: '', time: '', comment: '', description: '' } : prescription
+//         );
+//         setPrescriptions(updatedPrescriptions);
+ 
+//         // Fetch the latest prescriptions after successful submission
+//         await fetchPrescriptions(appointment_id, patient_id); // Fetch updated prescriptions
+//         await fetchDocumentIds(appointment_id);
+//       } else {
+//         console.error('Failed to submit prescription');
+//         setErrorMessage("Failed to submit prescription");
+//       }
+//     } catch (error) {
+//       console.error('Error submitting prescription:', error);
+//       setErrorMessage("Failed to submit prescription");
+//     }
+//   };
+ 
+ 
+ 
+ 
+     
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+//   const handleUpdatePrescription = async (index) => {
+//     try {
+//       const selectedAppointment = appointments.find(
+//         (appointment) => appointment.appointment_id === expandedAppointmentId
+//       );
+ 
+//       if (!selectedAppointment) {
+//         console.error("No selected appointment found");
+//         return;
+//       }
+ 
+//       const patient_id = selectedAppointment.patient_id;
+//       const appointment_id = selectedAppointment.appointment_id;
+ 
+//       // Get the specific prescription for the current index
+//       const prescription = prescriptions[index];
+ 
+//       // Ensure the prescription has a valid prescription_id for updating
+//       // if (!prescription.prescription_id) {
+//       //   setErrorMessage("Prescription ID is required for updating.");
+//       //   return;
+//       // }
+ 
+//       // Prepare the payload for updating the prescription
+//       const payload = {
+//         prescription_id: prescription.id, // Required for update
+//         patient_id: patient_id,                        // Required for update
+//         appointment_id: appointment_id,                // Optional based on backend requirements
+//         medicine_name: prescription.medicine_name,     // Fields to be updated
+//         time: prescription.time,
+//         comment: prescription.comment,
+//         description: prescription.description,
+//       };
+ 
+//       // Make the PUT API call to update the prescription
+//       const response = await BaseUrl.put('/patient/patientpriscription/', payload); // No prescription_id in URL
+ 
+//       if (response.status === 200) {
+//         console.log("Prescription updated successfully");
+//         setSuccessMessage("Prescription updated successfully");
+ 
+//         // Fetch the updated prescriptions after updating
+//         await fetchPrescriptions(appointment_id, patient_id);
+//       } else {
+//         console.error("Failed to update prescription");
+//         setErrorMessage("Failed to update prescription");
+//       }
+//     } catch (error) {
+//       console.error("Error updating prescription:", error);
+//       setErrorMessage("Error updating prescription");
+//     }
+//   };
+ 
+ 
+ 
+ 
+ 
+     
+ 
+ 
+//   const fetchDocumentIds = async (appointmentId) => {
+//     try {
+//       const response = await BaseUrl.get(
+//         `/patient/patientdocumentusingappointmentid/`,
+//         {
+//           params: {
+//             appointment: appointmentId,
+//           },
+//         }
+//       );
+ 
+//       if (response.status === 200) {
+//         const ids = response.data.map((doc) => doc.id);
+//         setDocumentIds(ids);
+//       } else {
+//         console.error("Failed to fetch document IDs");
+//       }
+//     } catch (error) {
+//       console.error("Error fetching document IDs:", error);
 //     }
 //   };
  
@@ -718,293 +1117,9 @@
 //     }
 //   };
  
-//   const handleVitalChange = (e) => {
-//     const { name, value } = e.target;
-//     setRecordDetails((prevDetails) => ({
-//       ...prevDetails,
-//       [name]: value,
-//     }));
-//   };
- 
-//   const handleDeletePrescriptionDoc = async (docId) => {
-//     try {
-//       await BaseUrl.delete(`/patient/patientprescriptonfile/`, {
-//         data: {
-//           document_id: docId,
-//         },
-//       });
-//       // Refresh the document list after deletion
-//       await fetchMedicalRecords(expandedAppointmentId);
-//     } catch (error) {
-//       console.error("Error deleting prescription document:", error);
-//     }
-//   };
- 
-//   const handleDownloadPrescriptionDoc = async (doc) => {
-//     try {
-//       const response = await BaseUrl.get(`/patient/patientprescriptonfileView/`, {
-//         params: {
-//           patient_id: doc.patient,
-//           document_id: doc.id,
-//         },
-//         responseType: "blob", // Ensure it's downloading as a blob
-//       });
- 
-//       const url = URL.createObjectURL(response.data);
-//       const link = document.createElement("a");
-//       link.href = url;
-//       link.download = `${doc.document_name}.${response.data.type.split("/")[1]}`;
-//       link.click();
-//     } catch (error) {
-//       console.error("Error downloading prescription document:", error);
-//     }
-//   };
- 
-//   const handleUpdate = async () => {
-//     try {
-//       const selectedAppointment = appointments.find(
-//         (appointment) => appointment.appointment_id === expandedAppointmentId
-//       );
- 
-//       if (!selectedAppointment) {
-//         throw new Error("Selected appointment not found");
-//       }
- 
-//       const payload = {
-//         appointment_id: selectedAppointment.appointment_id,
-//         patient_id: selectedAppointment.patient_id,
-//         ...formDetails,
-//       };
- 
-//       const response = await BaseUrl.put(`/patient/patient/`, payload);
- 
-//       if (response.status === 200) {
-//         await fetchAppointments(clinicId);
-//         setErrorMessage("");
-//         setShowToast(true);
-//         setToastMessage("Appointment details updated successfully!");
-//         setToastVariant("success");
-//       } else {
-//         console.error("Failed to update appointment details");
-//         setShowToast(true);
-//         setToastMessage("Failed to update appointment details.");
-//         setToastVariant("danger");
-//       }
-//     } catch (error) {
-//       console.error("Error updating appointment details:", error);
-//       setShowToast(true);
-//       setToastMessage("Error updating appointment details.");
-//       setToastVariant("danger");
-//     }
-//   };
- 
-//   const handleDelete = async (appointment_id) => {
-//     try {
-//       const response = await BaseUrl.delete(`/doctorappointment/getslot/`, {
-//         data: { appointment_id },
-//       });
- 
-//       if (response.status === 200) {
-//         await fetchAppointments(clinicId);
-//         setErrorMessage("");
-//         setShowToast(true);
-//         setToastMessage("Appointment deleted successfully!");
-//         setToastVariant("success");
-//       } else {
-//         throw new Error("Failed to cancel appointment");
-//       }
-//     } catch (error) {
-//       console.error("Error deleting appointment:", error);
-//       setShowToast(true);
-//       setToastMessage("Failed to delete appointment.");
-//       setToastVariant("danger");
-//     }
-//   };
- 
-//   const handleCancelAppointment = async (appointment_id) => {
-//     try {
-//       const response = await BaseUrl.patch(`/doctorappointment/getslot/`, {
-//         appointment_id,
-//       });
- 
-//       if (response.status === 200) {
-//         await fetchAppointments(clinicId);
-//         setShowToast(true);
-//         setToastMessage("Appointment cancelled successfully!");
-//         setToastVariant("success");
-//       } else {
-//         console.error("Failed to cancel appointment");
-//         setShowToast(true);
-//         setToastMessage("Failed to cancel appointment.");
-//         setToastVariant("danger");
-//       }
-//     } catch (error) {
-//       console.error("Error canceling appointment:", error);
-//       setShowToast(true);
-//       setToastMessage("Error canceling appointment.");
-//       setToastVariant("danger");
-//     }
-//   };
- 
-//   const handlePrescriptionChange = (index, e) => {
-//     const { name, value } = e.target;
-//     const updatedPrescriptions = prescriptions.map((prescription, i) =>
-//       i === index ? { ...prescription, [name]: value } : prescription
-//     );
-//     setPrescriptions(updatedPrescriptions);
-//   };
- 
-//   const addPrescriptionRow = () => {
-//     setPrescriptions([
-//       ...prescriptions,
-//       { medicine_name: "", time: "", comment: "", description: "" },
-//     ]);
-//   };
- 
-//   const removePrescriptionRow = async (index) => {
-//     try {
-//       const prescriptionToDelete = prescriptions[index];
-//       const prescription_id = prescriptionToDelete.id;
- 
-//       if (!prescription_id) {
-//         console.error("No prescription ID found");
-//         return;
-//       }
-//       const response = await BaseUrl.delete(`/patient/patientpriscription/`, {
-//         params: { prescription_id },
-//       });
- 
-//       if (response.status === 200 || response.status === 204) {
-//         const updatedPrescriptions = prescriptions.filter(
-//           (_, i) => i !== index
-//         );
-//         setPrescriptions(updatedPrescriptions);
-//         setShowToast(true);
-//         setToastMessage("Prescription removed successfully!");
-//         setToastVariant("success");
-//       } else {
-//         console.error("Failed to remove prescription");
-//         setShowToast(true);
-//         setToastMessage("Failed to remove prescription.");
-//         setToastVariant("danger");
-//       }
-//     } catch (error) {
-//       console.error("Error removing prescription:", error);
-//       setShowToast(true);
-//       setToastMessage("Error removing prescription.");
-//       setToastVariant("danger");
-//     }
-//   };
- 
-//   const handlePrescriptionSubmit = async () => {
-//     try {
-//       const selectedAppointment = appointments.find(
-//         (appointment) => appointment.appointment_id === expandedAppointmentId
-//       );
- 
-//       if (!selectedAppointment) {
-//         console.error("No selected appointment found");
-//         return;
-//       }
- 
-//       const patient_id = selectedAppointment.patient_id;
-//       const appointment_id = selectedAppointment.appointment_id;
- 
-//       // Assuming you want to send the most recently added prescription (last one in the array)
-//       const prescription = prescriptions[prescriptions.length - 1]; // Select the last added prescription
- 
-//       // Prepare the payload for a single prescription but in an array (list)
-//       const payload = [
-//         {
-//           ...prescription,
-//           patient_id: patient_id,
-//           appointment_id: appointment_id,
-//         },
-//       ];
- 
-//       // Make the POST API call to submit a single prescription as part of an array
-//       const response = await BaseUrl.post('/patient/patientpriscription/', payload);
- 
-//       if (response.status === 201) {
-//         // Reset the form after successful submission
-//         setShowPrescriptionForm(true);
-//         setPrescriptions([{ medicine_name: '', time: [], comment: '', description: '' }]);
-//         console.log('Prescription submitted successfully');
-//       } else {
-//         console.error('Failed to submit prescription');
-//       }
-//     } catch (error) {
-//       console.error('Error submitting prescription:', error);
-//     }
-//   };
- 
-//   const handleUpdatePrescription = async () => {
-//     try {
-//       const selectedAppointment = appointments.find(
-//         (appointment) => appointment.appointment_id === expandedAppointmentId
-//       );
- 
-//       if (!selectedAppointment) {
-//         console.error("No selected appointment found");
-//         return;
-//       }
- 
-//       const patient_id = selectedAppointment.patient_id;
- 
-//       // Assuming we are updating the last added prescription
-//       const prescription = prescriptions[prescriptions.length - 1]; // Select the last added prescription
- 
-//       // Prepare the payload for a single prescription but in an array (list)
-//       const payload = [
-//         {
-//           prescription_id: prescription.prescription_id || null, // Ensure prescription_id is included
-//           patient_id: patient_id,
-//           appointment_id: expandedAppointmentId,
-//           medicine_name: prescription.medicine_name,
-//           // time: prescription.time, // Include this if needed
-//           comment: prescription.comment,
-//           description: prescription.description,
-//         },
-//       ];
- 
-//       // Make the PUT API call to update a single prescription (inside an array)
-//       const response = await BaseUrl.put('/patient/patientpriscription/', payload);
- 
-//       if (response.status === 200) {
-//         console.log("Prescription updated successfully");
-//       } else {
-//         console.error("Failed to update prescription");
-//       }
-//     } catch (error) {
-//       console.error("Error updating prescription:", error);
-//     }
-//   };
- 
- 
-//   const fetchDocumentIds = async (appointmentId) => {
-//     try {
-//       const response = await BaseUrl.get(
-//         `/patient/patientdocumentusingappointmentid/`,
-//         {
-//           params: {
-//             appointment: appointmentId,
-//           },
-//         }
-//       );
- 
-//       if (response.status === 200) {
-//         const ids = response.data.map((doc) => doc.id);
-//         setDocumentIds(ids);
-//       } else {
-//         console.error("Failed to fetch document IDs");
-//       }
-//     } catch (error) {
-//       console.error("Error fetching document IDs:", error);
-//     }
-//   };
- 
 //   const handleVitalSubmit = async () => {
 //     try {
+//       // Find the selected appointment based on the expanded appointment ID
 //       const selectedAppointment = appointments.find(
 //         (appointment) => appointment.appointment_id === expandedAppointmentId
 //       );
@@ -1017,106 +1132,96 @@
 //       const patient_id = selectedAppointment.patient_id;
 //       const appointment_date = selectedAppointment.appointment_date;
  
-//       try {
-//         const postResponse = await BaseUrl.post("/patient/patientcheckup/", {
-//           patient_id: patient_id,
-//           appointment_id: expandedAppointmentId,
-//           record_date: appointment_date,
-//           blood_pressure: recordDetails.blood_pressure,
-//           oxygen_level: recordDetails.oxygen_level,
-//           sugar_level: recordDetails.sugar_level,
-//           weight: recordDetails.weight,
-//           pulse_rate: recordDetails.pulse_rate,
-//           heart_rate: recordDetails.heart_rate,
-//           body_temperature: recordDetails.body_temperature,
+//       // Make the POST API call to submit vitals
+//       const postResponse = await BaseUrl.post("/patient/patientcheckup/", {
+//         patient_id: patient_id,
+//         appointment_id: expandedAppointmentId,
+//         record_date: appointment_date,
+//         blood_pressure: recordDetails.blood_pressure,
+//         oxygen_level: recordDetails.oxygen_level,
+//         sugar_level: recordDetails.sugar_level,
+//         weight: recordDetails.weight,
+//         pulse_rate: recordDetails.pulse_rate,
+//         heart_rate: recordDetails.heart_rate,
+//         body_temperature: recordDetails.body_temperature,
+//       });
+ 
+//       if (postResponse.status === 201) {
+//         setErrorMessage("");
+//         await fetchAppointments(clinicId); // Fetch updated appointments
+//         await fetchMedicalRecords(expandedAppointmentId); // Fetch updated medical records
+//         setRecordDetails({
+//           patient_id: "",
+//           blood_pressure: "",
+//           oxygen_level: "",
+//           sugar_level: "",
+//           weight: "",
+//           pulse_rate: "",
+//           heart_rate: "",
+//           body_temperature: "",
+//           appointment_id: "",
+//           appointment_date: "",
 //         });
- 
-//         if (postResponse.status === 200) {
-//           setErrorMessage("");
-//           await fetchAppointments(clinicId); // Fetch updated appointments
-//           await fetchMedicalRecords(expandedAppointmentId); // Fetch updated medical records
-//           setRecordDetails({
-//             patient_id: "",
-//             blood_pressure: "",
-//             oxygen_level: "",
-//             sugar_level: "",
-//             weight: "",
-//             pulse_rate: "",
-//             heart_rate: "",
-//             body_temperature: "",
-//             appointment_id: "",
-//             appointment_date: "",
-//           });
-//           setShowToast(true);
-//           setToastMessage("Vitals submitted successfully!");
-//           setToastVariant("success");
-//         } else {
-//           console.error("Failed to submit vitals");
-//           setShowToast(true);
-//           setToastMessage("Failed to submit vitals.");
-//           setToastVariant("danger");
-//         }
-//       } catch (postError) {
-//         if (postError.response?.status === 400) {
-//           try {
-//             const putResponse = await BaseUrl.put("/patient/patientcheckup/", {
-//               patient_id: patient_id,
-//               appointment_id: expandedAppointmentId,
-//               appointment_date: appointment_date,
-//               blood_pressure: recordDetails.blood_pressure,
-//               oxygen_level: recordDetails.oxygen_level,
-//               sugar_level: recordDetails.sugar_level,
-//               weight: recordDetails.weight,
-//               pulse_rate: recordDetails.pulse_rate,
-//               heart_rate: recordDetails.heart_rate,
-//               body_temperature: recordDetails.body_temperature,
-//             });
- 
-//             if (putResponse.status === 200) {
-//               setErrorMessage("");
-//               await fetchAppointments(clinicId); // Fetch updated appointments
-//               await fetchMedicalRecords(expandedAppointmentId); // Fetch updated medical records
-//               setRecordDetails({
-//                 patient_id: "",
-//                 blood_pressure: "",
-//                 oxygen_level: "",
-//                 sugar_level: "",
-//                 weight: "",
-//                 pulse_rate: "",
-//                 heart_rate: "",
-//                 body_temperature: "",
-//                 appointment_id: "",
-//                 appointment_date: "",
-//               });
-//               setShowToast(true);
-//               setToastMessage("Vitals updated successfully!");
-//               setToastVariant("success");
-//             } else {
-//               console.error("Failed to update vitals");
-//               setShowToast(true);
-//               setToastMessage("Failed to update vitals.");
-//               setToastVariant("danger");
-//             }
-//           } catch (putError) {
-//             console.error("Error updating vitals:", putError);
-//             setShowToast(true);
-//             setToastMessage("Error updating vitals.");
-//             setToastVariant("danger");
-//           }
-//         } else {
-//           console.error("Error submitting vitals:", postError);
-//           setShowToast(true);
-//           setToastMessage("Error submitting vitals.");
-//           setToastVariant("danger");
-//         }
+//         setSuccessMessage("Vitals submitted successfully");
+// setRecordDetails(recordDetails);
+//       } else {
+//         setErrorMessage("Failed to submit vitals");
 //       }
-//     } catch (error) {
-//       console.error("Error submitting vitals:", error);
+//     } catch (postError) {
+//       console.error("Error submitting vitals:", postError);
+//       setErrorMessage("Error submitting vitals");
 //       setShowToast(true);
 //       setToastMessage("Error submitting vitals.");
 //       setToastVariant("danger");
 //     }
 //   };
+ 
+ 
+//   const handleVitalUpdate = async () => {
+//     try {
+//       // Find the selected appointment based on the expanded appointment ID
+//       const selectedAppointment = appointments.find(
+//         (appointment) => appointment.appointment_id === expandedAppointmentId
+//       );
+ 
+//       if (!selectedAppointment) {
+//         console.error("No selected appointment found");
+//         return;
+//       }
+ 
+//       const patient_id = selectedAppointment.patient_id;
+//       const appointment_id = selectedAppointment.appointment_id;
+ 
+//       // Prepare the payload for updating the vitals, including appointment_id in the payload
+//       const payload = {
+//         blood_pressure: recordDetails.blood_pressure,
+//         oxygen_level: recordDetails.oxygen_level,
+//         body_temperature: recordDetails.body_temperature,
+//         heart_rate: recordDetails.heart_rate,
+//         pulse_rate: recordDetails.pulse_rate,
+//         sugar_level: recordDetails.sugar_level,
+//         weight: recordDetails.weight,
+//         patient_id: patient_id,
+//         appointment_id: appointment_id, // Send appointment_id in payload
+//       };
+ 
+//       // Make the PUT API call to update the vitals (no appointment_id in the URL)
+//       const response = await BaseUrl.put(`/patient/patientcheckup/`, payload);
+ 
+//       if (response.status === 200) {
+//         console.log("Vitals updated successfully");
+//         setSuccessMessage("Vitals updated successfully");
+//       } else {
+//         console.error("Failed to update vitals");
+//         setErrorMessage("Failed to update vitals");
+//       }
+//     } catch (error) {
+//       console.error("Error updating vitals:", error);
+//       setErrorMessage("Error updating vitals");
+//     }
+//   };
+ 
+ 
  
 //   const handleSearchChange = (e) => {
 //     const { name, value } = e.target;
@@ -1149,9 +1254,7 @@
 //       setAppointments(fetchedAppointments);
 //     } catch (error) {
 //       console.error("Error searching appointments:", error);
-//       setShowToast(true);
-//       setToastMessage("Failed to search appointments.");
-//       setToastVariant("danger");
+//       setErrorMessage("No appointments found");
 //     }
 //   };
  
@@ -1281,8 +1384,10 @@
 //         setSelectedSymptoms((prevSymptoms) =>
 //           prevSymptoms.filter((s) => s.id !== symptom.id)
 //         );
+//         setSuccessMessage("Symptoms Detail deleted successfully");
 //       } else {
 //         console.error("Failed to delete symptom");
+//         setErrorMessage("Symptoms Detail not found");
 //       }
 //     } catch (error) {
 //       console.error("Error deleting symptom:", error);
@@ -1302,6 +1407,8 @@
  
 //       const appointment_id = expandedAppointmentId;
 //       const appointment_date = selectedAppointment.appointment_date;
+ 
+//       let successCount = 0; // Counter to track the number of successful API calls
  
 //       for (const symptom of selectedSymptoms) {
 //         const symptomPayload = {
@@ -1324,14 +1431,22 @@
 //             }
 //           );
  
-//           if (response.status === 201 || response.status === 200) {
-//             console.log("Symptom saved successfully");
+//           // Check if the response status is 200 or 201
+//           if (response.status === 200 || response.status === 201) {
+//             successCount++; // Increment the success counter for successful responses
 //           } else {
-//             console.error("Failed to save symptom");
+//             console.error("Failed to save symptom:", symptom);
 //           }
 //         } catch (error) {
 //           console.error("Error saving symptom:", error);
 //         }
+//       }
+ 
+//       // If any of the symptoms were saved successfully, print the success message
+//       if (successCount > 0) {
+//         setSuccessMessage(`${successCount} symptom(s) details saved successfully`);
+//       } else {
+//         setErrorMessage("No symptoms details were saved");
 //       }
  
 //       await fetchAppointments(clinicId); // Fetch updated appointments
@@ -1340,6 +1455,7 @@
 //       console.error("Error saving symptoms:", error);
 //     }
 //   };
+ 
  
 //   const handleUpdateSymptom = async () => {
 //     try {
@@ -1354,6 +1470,8 @@
  
 //       const appointment_id = expandedAppointmentId;
 //       const appointment_date = selectedAppointment.appointment_date;
+ 
+//       let successCount = 0; // Counter to track the number of successful updates
  
 //       for (const symptom of selectedSymptoms) {
 //         const symptomPayload = {
@@ -1376,14 +1494,22 @@
 //             }
 //           );
  
-//           if (response.status === 201 || response.status === 200) {
-//             console.log("Symptom updated successfully");
+//           // Check if the response status is 200 or 201
+//           if (response.status === 200 || response.status === 201) {
+//             successCount++; // Increment success counter
 //           } else {
-//             console.error("Failed to update symptom");
+//             console.error("Failed to update symptom:", symptom);
 //           }
 //         } catch (error) {
 //           console.error("Error updating symptom:", error);
 //         }
+//       }
+ 
+//       // If any symptoms were updated successfully, print the success message
+//       if (successCount > 0) {
+//         setSuccessMessage(`${successCount} symptom(s) updated successfully`);
+//       } else {
+//         setErrorMessage("No symptoms were updated");
 //       }
  
 //       await fetchAppointments(clinicId); // Fetch updated appointments
@@ -1401,6 +1527,22 @@
 //       ...prevDetails,
 //       [name]: value,
 //     }));
+//   };
+ 
+//   const handleTimeSelection = (e, index, timeSlot) => {
+//     const updatedPrescriptions = prescriptions.map((prescription, i) => {
+//       if (i === index) {
+//         let updatedTime;
+//         if (e.target.checked) {
+//           updatedTime = [...prescription.time, timeSlot]; // Add the selected time slot
+//         } else {
+//           updatedTime = prescription.time.filter((time) => time !== timeSlot); // Remove the deselected time slot
+//         }
+//         return { ...prescription, time: updatedTime };
+//       }
+//       return prescription;
+//     });
+//     setPrescriptions(updatedPrescriptions);
 //   };
  
 //   return (
@@ -1455,6 +1597,28 @@
 //           background: "linear-gradient(145deg, #e8f5e9, #c8e6c9)",
 //         }}
 //       >
+//          {/* Success/Error Modal */}
+//       <Modal
+//         show={!!errorMessage || !!successMessage}
+//         onHide={handleCloseMessageModal}
+//       >
+//         <Modal.Header closeButton>
+//           <Modal.Title>
+//             {errorMessage ? "Error" : "Success"}
+//           </Modal.Title>
+//         </Modal.Header>
+//         <Modal.Body>
+//           <p>{errorMessage || successMessage}</p>
+//         </Modal.Body>
+//         <Modal.Footer>
+//           <Button
+//             variant="primary"
+//             onClick={handleCloseMessageModal}
+//           >
+//             Close
+//           </Button>
+//         </Modal.Footer>
+//       </Modal>
 //         <Card.Body>
 //           <h5 className="card-title mb-4" style={{ color: "#28a745" }}>
 //             Booked Appointments
@@ -1745,123 +1909,125 @@
 //     </tr>
 //   )}
  
-//                   {showVitalForm &&
-//                     expandedAppointmentId === appointment.appointment_id && (
-//                       <tr>
-//                         <td colSpan="6">
-//                           <Card
-//                             className="shadow-sm mt-3"
-//                             style={{
-//                               borderRadius: "15px",
-//                               border: "2px solid #17a2b8",
-//                               background:
-//                                 "linear-gradient(145deg, #e3f5f9, #d0ebf5)",
-//                             }}
-//                           >
-//                             <Card.Body>
-//                               <h5>Vitals</h5>
-//                               <Form>
-//                                 <Row className="mb-3">
-//                                   <Col>
-//                                     <Form.Group controlId="formBloodPressure">
-//                                       <Form.Label>Blood Pressure</Form.Label>
-//                                       <Form.Control
-//                                         type="text"
-//                                         name="blood_pressure"
-//                                         value={recordDetails.blood_pressure}
-//                                         onChange={handleVitalChange}
-//                                       />
-//                                     </Form.Group>
-//                                   </Col>
-//                                   <Col>
-//                                     <Form.Group controlId="formOxygenLevel">
-//                                       <Form.Label>Oxygen Level</Form.Label>
-//                                       <Form.Control
-//                                         type="text"
-//                                         name="oxygen_level"
-//                                         value={recordDetails.oxygen_level}
-//                                         onChange={handleVitalChange}
-//                                       />
-//                                     </Form.Group>
-//                                   </Col>
-//                                   <Col>
-//                                     <Form.Group controlId="formTemperature">
-//                                       <Form.Label>Body Temperature</Form.Label>
-//                                       <Form.Control
-//                                         type="text"
-//                                         name="body_temperature"
-//                                         value={
-//                                           recordDetails.body_temperature
-//                                         }
-//                                         onChange={handleVitalChange}
-//                                       />
-//                                     </Form.Group>
-//                                   </Col>
-//                                   <Col>
-//                                     <Form.Group controlId="formHeartRate">
-//                                       <Form.Label>Heart Rate</Form.Label>
-//                                       <Form.Control
-//                                         type="text"
-//                                         name="heart_rate"
-//                                         value={recordDetails.heart_rate}
-//                                         onChange={handleVitalChange}
-//                                       />
-//                                     </Form.Group>
-//                                   </Col>
-//                                   <Col>
-//                                     <Form.Group controlId="formPulseRate">
-//                                       <Form.Label>Pulse Rate</Form.Label>
-//                                       <Form.Control
-//                                         type="text"
-//                                         name="pulse_rate"
-//                                         value={recordDetails.pulse_rate}
-//                                         onChange={handleVitalChange}
-//                                       />
-//                                     </Form.Group>
-//                                   </Col>
-//                                   <Col>
-//                               <Form.Group controlId="formSugarLevel">
-//                                 <Form.Label>sugar level</Form.Label>
-//                                 <Form.Control
-//                                   type="text"
-//                                   name="sugar_level"
-//                                   value={recordDetails.sugar_level}
-//                                   onChange={handleVitalChange}
-//                                 />
-//                               </Form.Group>
-//                             </Col>
-                       
-//                             <Col>
-//                               <Form.Group controlId="formWeight">
-//                                 <Form.Label>Weight</Form.Label>
-//                                 <Form.Control
-//                                   type="text"
-//                                   name="weight"
-//                                   value={recordDetails.weight}
-//                                   onChange={handleVitalChange}
-//                                 />
-//                               </Form.Group>
-//                             </Col>
-//                                 </Row>
-//                                 <Button
-//                                   variant="primary"
-//                                   onClick={handleVitalSubmit}
-//                                 >
-//                                   Submit
-//                                 </Button>
-//                                 <Button
-//                                   variant="secondary"
-//                                   className="ms-2"
-//                                   onClick={() => setShowVitalForm(false)}
-//                                 >
-//                                   Cancel
-//                                 </Button>
-//                               </Form>
-//                             </Card.Body>
-//                           </Card>
-//                         </td>
-//                       </tr>
-//                     )}
+// {showVitalForm &&
+//   expandedAppointmentId === appointment.appointment_id && (
+//     <tr>
+//       <td colSpan="6">
+//         <Card
+//           className="shadow-sm mt-3"
+//           style={{
+//             borderRadius: "15px",
+//             border: "2px solid #17a2b8",
+//             background: "linear-gradient(145deg, #e3f5f9, #d0ebf5)",
+//           }}
+//         >
+//           <Card.Body>
+//             <h5>Vitals</h5>
+//             <Form>
+//               <Row className="mb-3">
+//                 <Col>
+//                   <Form.Group controlId="formBloodPressure">
+//                     <Form.Label>Blood Pressure</Form.Label>
+//                     <Form.Control
+//                       type="text"
+//                       name="blood_pressure"
+//                       value={recordDetails.blood_pressure}
+//                       onChange={handleVitalChange}
+//                     />
+//                   </Form.Group>
+//                 </Col>
+//                 <Col>
+//                   <Form.Group controlId="formOxygenLevel">
+//                     <Form.Label>Oxygen Level</Form.Label>
+//                     <Form.Control
+//                       type="text"
+//                       name="oxygen_level"
+//                       value={recordDetails.oxygen_level}
+//                       onChange={handleVitalChange}
+//                     />
+//                   </Form.Group>
+//                 </Col>
+//                 <Col>
+//                   <Form.Group controlId="formTemperature">
+//                     <Form.Label>Body Temperature</Form.Label>
+//                     <Form.Control
+//                       type="text"
+//                       name="body_temperature"
+//                       value={recordDetails.body_temperature}
+//                       onChange={handleVitalChange}
+//                     />
+//                   </Form.Group>
+//                 </Col>
+//                 <Col>
+//                   <Form.Group controlId="formHeartRate">
+//                     <Form.Label>Heart Rate</Form.Label>
+//                     <Form.Control
+//                       type="text"
+//                       name="heart_rate"
+//                       value={recordDetails.heart_rate}
+//                       onChange={handleVitalChange}
+//                     />
+//                   </Form.Group>
+//                 </Col>
+//                 <Col>
+//                   <Form.Group controlId="formPulseRate">
+//                     <Form.Label>Pulse Rate</Form.Label>
+//                     <Form.Control
+//                       type="text"
+//                       name="pulse_rate"
+//                       value={recordDetails.pulse_rate}
+//                       onChange={handleVitalChange}
+//                     />
+//                   </Form.Group>
+//                 </Col>
+//                 <Col>
+//                   <Form.Group controlId="formSugarLevel">
+//                     <Form.Label>Sugar Level</Form.Label>
+//                     <Form.Control
+//                       type="text"
+//                       name="sugar_level"
+//                       value={recordDetails.sugar_level}
+//                       onChange={handleVitalChange}
+//                     />
+//                   </Form.Group>
+//                 </Col>
+//                 <Col>
+//                   <Form.Group controlId="formWeight">
+//                     <Form.Label>Weight</Form.Label>
+//                     <Form.Control
+//                       type="text"
+//                       name="weight"
+//                       value={recordDetails.weight}
+//                       onChange={handleVitalChange}
+//                     />
+//                   </Form.Group>
+//                 </Col>
+//               </Row>
+//               <Button variant="primary" onClick={handleVitalSubmit}>
+//                 Submit
+//               </Button>
+//               <Button
+//                 variant="secondary"
+//                 className="ms-2"
+//                 onClick={() => setShowVitalForm(false)}
+//               >
+//                 Cancel
+//               </Button>
+//               {/* Add the new "Update" button */}
+//               <Button
+//                 variant="warning"
+//                 className="ms-2"
+//                 onClick={handleVitalUpdate} // Define this function for update functionality
+//               >
+//                 Update
+//               </Button>
+//             </Form>
+//           </Card.Body>
+//         </Card>
+//       </td>
+//     </tr>
+//   )}
+ 
  
 // {showPrescriptionForm &&
 //   expandedAppointmentId === appointment.appointment_id && (
@@ -1923,6 +2089,29 @@
 //                       />
 //                     </Form.Group>
 //                   </Col>
+ 
+//                   {/* Time Slot Dropdown */}
+//                   <Col>
+//                     <Form.Group controlId={`formTimeSlot${index}`}>
+//                       <Form.Label>Time</Form.Label>
+//                       <Form.Control
+//                         as="select"
+//                         name="time"
+//                         value={prescription.time}
+//                         onChange={(e) => handlePrescriptionChange(index, e)}
+//                       >
+//                         <option value="">Select Time</option>
+//                         <option value="morning">Morning</option>
+//                         <option value="morning-afternoon">Morning-Afternoon</option>
+//                         <option value="morning-afternoon-evening">Morning-Afternoon-Evening</option>
+//                         <option value="morning-afternoon-evening-night">Morning-Afternoon-Evening-Night</option>
+//                         <option value="afternoon">Afternoon</option>
+//                         <option value="evening">Evening</option>
+//                         <option value="night">Night</option>
+//                       </Form.Control>
+//                     </Form.Group>
+//                   </Col>
+ 
 //                   <Col className="d-flex align-items-center">
 //                     <Button
 //                       variant="danger"
@@ -1931,15 +2120,13 @@
 //                     >
 //                       Remove
 //                     </Button>
-//                     {/* Submit All Prescriptions */}
 //                     <Button
 //                       variant="primary"
-//                       onClick={handlePrescriptionSubmit} // Adjusted for submitting all prescriptions
+//                       onClick={() => handlePrescriptionSubmit(index)}
 //                       className="me-2"
 //                     >
 //                       Submit
 //                     </Button>
-//                     {/* Update Prescription */}
 //                     <Button
 //                       variant="warning"
 //                       onClick={() => handleUpdatePrescription(index)}
@@ -2044,6 +2231,13 @@
 //       </td>
 //     </tr>
 //   )}
+ 
+ 
+ 
+ 
+ 
+ 
+ 
  
 // {showRecordForm &&
 //                     expandedAppointmentId === appointment.appointment_id && (
@@ -2312,7 +2506,11 @@
 //                         </td>
 //                       </tr>
 //                     )}
-
+ 
+ 
+ 
+ 
+ 
 //                 </React.Fragment>
 //               ))}
 //             </tbody>
@@ -2349,6 +2547,7 @@
 //         </Modal.Footer>
 //       </Modal>
  
+//       {/* Preview Modal */}
 //       <Modal
 //         show={showPreviewModal}
 //         onHide={handleClosePreviewModal}
@@ -2357,15 +2556,27 @@
 //         <Modal.Header closeButton>
 //           <Modal.Title>Preview Document</Modal.Title>
 //         </Modal.Header>
-//         <Modal.Body>
+//         <Modal.Body style={{ maxHeight: '600px', overflowY: 'auto' }}>
 //           {previewFileType.includes("image") ? (
-//             <img src={previewFileUrl} alt="Document Preview" />
+//             <img
+//               src={previewFileUrl}
+//               alt="Document Preview"
+//               style={{
+//                 maxWidth: "100%", // Fit image within the modal width
+//                 maxHeight: "500px", // Ensure the image doesn't exceed the modal height
+//                 display: "block",
+//                 margin: "0 auto", // Center the image
+//               }}
+//             />
 //           ) : previewFileType.includes("pdf") ? (
 //             <iframe
 //               src={previewFileUrl}
 //               title="Document Preview"
-//               width="100%"
-//               height="600px"
+//               style={{
+//                 width: "100%",
+//                 height: "500px", // Set a fixed height for PDF preview
+//                 border: "none",
+//               }}
 //             ></iframe>
 //           ) : (
 //             <p>No preview available for this file type.</p>
@@ -2377,6 +2588,7 @@
 //           </Button>
 //         </Modal.Footer>
 //       </Modal>
+     
  
 //       <ToastContainer position="top-end" className="p-3">
 //         <Toast
@@ -2395,8 +2607,11 @@
  
 // export default ClinicBookedAppointment;
  
+ 
+
+
 import React, { useState, useEffect } from "react";
-import '../../css/ClinicBookedAppointment.css'; // Import your CSS file
+import "../../css/ClinicBookedAppointment.css"; // Import your CSS file
 import {Modal,Button,Form,Row,Col,Table,Dropdown,DropdownButton,Container,Card,Toast,ToastContainer,} from "react-bootstrap";
 import { FaEdit, FaTrash, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -2408,6 +2623,7 @@ const ClinicBookedAppointment = () => {
   const [clinicId, setClinicId] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [appointmentIdToDelete, setAppointmentIdToDelete] = useState(null);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [expandedAppointmentId, setExpandedAppointmentId] = useState(null);
   const [expandedPrescriptionId, setExpandedPrescriptionId] = useState(null);
@@ -2423,9 +2639,8 @@ const ClinicBookedAppointment = () => {
   const [prescriptions, setPrescriptions] = useState([
     { medicine_name: "", time: [], comment: "", description: "" },
   ]);
- 
   const [showRecordForm, setShowRecordForm] = useState(false);
-  const [recordDetails, setRecordDetails] = useState({mobile_number: "",blood_pressure: "",weight: "",height: "",sugar_level: "",oxygen_level: "",symptoms: "",symptoms_comment: "",body_temperature: "",appointment_id: "",});
+  const [recordDetails, setRecordDetails] = useState({mobile_number: "",blood_pressure: "",weight: "",height: "",bmi: "",sugar_level: "",oxygen_level: "",symptoms: "",symptoms_comment: "",body_temperature: "",appointment_id: "",});
   const [showFormModal, setShowFormModal] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewFileUrl, setPreviewFileUrl] = useState("");
@@ -2440,13 +2655,13 @@ const ClinicBookedAppointment = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
   const [showSymptomsForm, setShowSymptomsForm] = useState(false);
+  const [appointmentData, setAppointmentData] = useState(null); // Store the API response data
   const [searchSymptom, setSearchSymptom] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
   const [uploadedPrescription, setUploadedPrescription] = useState(null);
   const [isPrescriptionDocs, setIsPrescriptionDocs] = useState(false);
-  const [showPrescriptionDocsForm, setShowPrescriptionDocsForm] =
-    useState(false);
+  const [showPrescriptionDocsForm, setShowPrescriptionDocsForm] = useState(false);
   const [documentIds, setDocumentIds] = useState([]);
  
   const [showToast, setShowToast] = useState(false);
@@ -2801,7 +3016,7 @@ const ClinicBookedAppointment = () => {
     }
   };
  
-  const handlePrescriptionDocs = async (appointment_id) => {
+ const handlePrescriptionDocs = async (appointment_id) => {
     if (!selectedFile) {
       return;
     }
@@ -2905,6 +3120,11 @@ const ClinicBookedAppointment = () => {
       blood_pressure: "",
       weight: "",
       height: "",
+      bmi: "",
+      sugar_level: "",
+      oxygen_level: "",
+      symptoms: "",
+      symptoms_comment: "",
       sugar_level: "",
       oxygen_level: "",
       symptoms: "",
@@ -2912,7 +3132,9 @@ const ClinicBookedAppointment = () => {
       body_temperature: "",
       appointment_id: "",
     });
-    setPrescriptions([{ medicine_name: "", time: [], comment: "", description: "" }]);
+    setPrescriptions([
+      { medicine_name: "", time: [], comment: "", description: "" },
+    ]);
     setSelectedSymptoms([]);
     setPrescriptionDocuments([]);
     setMedicalRecords([]); // Clear medical records
@@ -2960,11 +3182,16 @@ const ClinicBookedAppointment = () => {
             `/patient/patientpriscription/?patient_id=${details.patient_id}&appointment_id=${appointment_id}`
           );
  
-          const prescriptionDocPromise = BaseUrl.get(`/patient/patientprescriptonfile/`, {
-            params: { appointment_id: appointment_id },
-          });
+          const prescriptionDocPromise = BaseUrl.get(
+            `/patient/patientprescriptonfile/`,
+            {
+              params: { appointment_id: appointment_id },
+            }
+          );
  
-          const symptomsPromise = BaseUrl.get(`/doctor/symptomsdetail/?appointment_id=${appointment_id}`);
+          const symptomsPromise = BaseUrl.get(
+            `/doctor/symptomsdetail/?appointment_id=${appointment_id}`
+          );
  
           // You can also await these individually if you want to handle them sequentially
  
@@ -2981,47 +3208,74 @@ const ClinicBookedAppointment = () => {
  
           // Handle patient details response
           const patientResponse = results[0];
-          if (patientResponse.status === "fulfilled" && patientResponse.value.status === 200) {
+          if (
+            patientResponse.status === "fulfilled" &&
+            patientResponse.value.status === 200
+          ) {
             const patientDetails = patientResponse.value.data;
             setFormDetails((prevDetails) => ({
               ...prevDetails,
               ...patientDetails,
             }));
           } else {
-            console.error("Failed to fetch patient details:", patientResponse.reason);
+            console.error(
+              "Failed to fetch patient details:",
+              patientResponse.reason
+            );
           }
  
           // Handle checkup details response
           const checkupResponse = results[1];
-          if (checkupResponse.status === "fulfilled" && checkupResponse.value.status === 200) {
+          if (
+            checkupResponse.status === "fulfilled" &&
+            checkupResponse.value.status === 200
+          ) {
             const checkupDetails = checkupResponse.value.data[0];
             setRecordDetails((prevDetails) => ({
               ...prevDetails,
               ...checkupDetails,
             }));
           } else {
-            console.error("Failed to fetch checkup details:", checkupResponse.reason);
+            console.error(
+              "Failed to fetch checkup details:",
+              checkupResponse.reason
+            );
           }
  
           // Handle prescriptions response
           const prescriptionResponse = results[2];
-          if (prescriptionResponse.status === "fulfilled" && prescriptionResponse.value.status === 200) {
+          if (
+            prescriptionResponse.status === "fulfilled" &&
+            prescriptionResponse.value.status === 200
+          ) {
             setPrescriptions(prescriptionResponse.value.data);
           } else {
-            console.error("Failed to fetch prescriptions:", prescriptionResponse.reason);
+            console.error(
+              "Failed to fetch prescriptions:",
+              prescriptionResponse.reason
+            );
           }
  
           // Handle prescription documents response
           const prescriptionDocResponse = results[3];
-          if (prescriptionDocResponse.status === "fulfilled" && prescriptionDocResponse.value.status === 200) {
+          if (
+            prescriptionDocResponse.status === "fulfilled" &&
+            prescriptionDocResponse.value.status === 200
+          ) {
             setPrescriptionDocuments(prescriptionDocResponse.value.data);
           } else {
-            console.error("Failed to fetch prescription documents:", prescriptionDocResponse.reason);
+            console.error(
+              "Failed to fetch prescription documents:",
+              prescriptionDocResponse.reason
+            );
           }
  
           // Handle symptoms response
           const symptomsResponse = results[4];
-          if (symptomsResponse.status === "fulfilled" && symptomsResponse.value.status === 200) {
+          if (
+            symptomsResponse.status === "fulfilled" &&
+            symptomsResponse.value.status === 200
+          ) {
             setSelectedSymptoms(symptomsResponse.value.data);
           } else {
             console.error("Failed to fetch symptoms:", symptomsResponse.reason);
@@ -3057,83 +3311,165 @@ const ClinicBookedAppointment = () => {
     }
   };
  
- 
- 
- 
- 
- 
   const handleVitalChange = (e) => {
     const { name, value } = e.target;
-    setRecordDetails((prevDetails) => ({
-      ...prevDetails,
-      [name]: value,
-    }));
+    setRecordDetails((prevDetails) => {
+      const updatedDetails = { ...prevDetails, [name]: value };
+ 
+      // Check if height and weight are present and calculate BMI
+      const heightInMeters = parseFloat(updatedDetails.height) / 100; // Convert cm to meters
+      const weight = parseFloat(updatedDetails.weight);
+ 
+      if (heightInMeters && weight) {
+        updatedDetails.bmi = (
+          weight /
+          (heightInMeters * heightInMeters)
+        ).toFixed(2); // Calculate BMI
+      } else {
+        updatedDetails.bmi = ""; // Reset BMI if height or weight is missing
+      }
+ 
+      return updatedDetails;
+    });
   };
-// Function to fetch prescription documents for a specific appointment
-const fetchPrescriptionDocuments = async (appointment_id) => {
-  try {
-    // Make the GET request to fetch prescription documents
-    const response = await BaseUrl.get(`/patient/patientprescriptonfile/`, {
-      params: { appointment_id: appointment_id }, // Pass the appointment ID in the request params
-    });
  
-    // Check if the response is successful
-    if (response.status === 200) {
-      const prescriptionDocuments = response.data; // Assuming the response contains the document data
-      console.log("Prescription documents fetched successfully", prescriptionDocuments);
-      return prescriptionDocuments; // Return the fetched documents
-    } else {
-      console.error("Failed to fetch prescription documents");
-      throw new Error("Failed to fetch prescription documents");
+  // Function to fetch prescription documents for a specific appointment
+  const fetchPrescriptionDocuments = async (appointment_id) => {
+    try {
+      // Make the GET request to fetch prescription documents
+      const response = await BaseUrl.get(`/patient/patientprescriptonfile/`, {
+        params: { appointment_id: appointment_id }, // Pass the appointment ID in the request params
+      });
+ 
+      // Check if the response is successful
+      if (response.status === 200) {
+        const prescriptionDocuments = response.data; // Assuming the response contains the document data
+        console.log(
+          "Prescription documents fetched successfully",
+          prescriptionDocuments
+        );
+        return prescriptionDocuments; // Return the fetched documents
+      } else {
+        console.error("Failed to fetch prescription documents");
+        throw new Error("Failed to fetch prescription documents");
+      }
+    } catch (error) {
+      console.error("Error fetching prescription documents:", error);
+      throw error; // Rethrow the error for further handling if needed
     }
-  } catch (error) {
-    console.error("Error fetching prescription documents:", error);
-    throw error; // Rethrow the error for further handling if needed
-  }
-};
+  };
  
-const handleDeletePrescriptionDoc = async (docId, appointment_id) => {
-  try {
-    const response = await BaseUrl.delete(`/patient/patientprescriptonfile/`, {
-      data: {
-        document_id: docId,
-      },
-    });
+  const handleDeletePrescriptionDoc = async (docId, appointment_id) => {
+    try {
+      const response = await BaseUrl.delete(
+        `/patient/patientprescriptonfile/`,
+        {
+          data: {
+            document_id: docId,
+          },
+        }
+      );
  
-    if (response.status === 204) {
-      setSuccessMessage("Prescription document deleted successfully");
+      if (response.status === 204) {
+        setSuccessMessage("Prescription document deleted successfully");
  
-      // Refresh the prescription document list after deletion only if response status is 204
-      // await fetchPrescriptionDocuments(expandedAppointmentId); // Call the fetchPrescriptionDocuments function
-    } else {
-      // If the response is not 204, handle it as an error
-      throw new Error("Failed to delete prescription document");
+        // Refresh the prescription document list after deletion only if response status is 204
+        // await fetchPrescriptionDocuments(expandedAppointmentId); // Call the fetchPrescriptionDocuments function
+      } else {
+        // If the response is not 204, handle it as an error
+        throw new Error("Failed to delete prescription document");
+      }
+    } catch (error) {
+      console.error("Error deleting prescription document:", error);
+      setErrorMessage({
+        type: "error",
+        text:
+          error.response?.data?.error || "An error occurred. Please try again.",
+      });
     }
-  } catch (error) {
-    console.error("Error deleting prescription document:", error);
-    setErrorMessage({ type: 'error', text: error.response?.data?.error || "An error occurred. Please try again."});
-  }
-};
+  };
  
   const handleDownloadPrescriptionDoc = async (doc) => {
     try {
-      const response = await BaseUrl.get(`/patient/patientprescriptonfileView/`, {
-        params: {
-          patient_id: doc.patient,
-          document_id: doc.id,
-        },
-        responseType: "blob", // Ensure it's downloading as a blob
-      });
+      const response = await BaseUrl.get(
+        `/patient/patientprescriptonfileView/`,
+        {
+          params: {
+            patient_id: doc.patient,
+            document_id: doc.id,
+          },
+          responseType: "blob", // Ensure it's downloading as a blob
+        }
+      );
       setSuccessMessage("Prescription document downloaded successfully");
  
       const url = URL.createObjectURL(response.data);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${doc.document_name}.${response.data.type.split("/")[1]}`;
+      link.download = `${doc.document_name}.${
+        response.data.type.split("/")[1]
+      }`;
       link.click();
     } catch (error) {
       console.error("Error downloading prescription document:", error);
       setErrorMessage("Failed to download preset document");
+    }
+  };
+ 
+  const handlePrint = async (appointment_id) => {
+    try {
+      if (!appointment_id) {
+        console.error("No appointment ID selected");
+        setErrorMessage("No appointment ID selected");
+        return;
+      }
+ 
+      // Make the GET request to fetch appointment data
+      const response = await BaseUrl.get(`/patient/printrepport/`, {
+        params: {
+          appointment_id: expandedAppointmentId, // Use the dynamically passed appointment_id
+        },
+        responseType: "blob", // Assuming the response might be in PDF/blob format
+      });
+ 
+      // Create a blob from the response data
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+ 
+      // Open the PDF in a new browser tab
+      const newWindow = window.open(url);
+      if (newWindow) {
+        newWindow.focus(); // Focus on the new window (tab)
+      }
+ 
+      setSuccessMessage("Appointment details opened successfully");
+    } catch (error) {
+      console.error("Error fetching appointment details:", error);
+      setErrorMessage("Failed to fetch appointment details");
+    }
+  };
+ 
+  // Function to download the appointment data (can modify according to your API)
+  const handleDownload = async (appointment_id) => {
+    try {
+      const response = await BaseUrl.get(`/patient/printrepport/`, {
+        params: {
+          appointment_id: expandedAppointmentId, // Dynamically pass the appointment_id
+        },
+        responseType: "blob", // Assuming the response is a PDF or blob
+      });
+ 
+      // Create a blob from the response and download it
+      const blob = new Blob([response.data], { type: "application/pdf" }); // Adjust type if needed
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "AppointmentRecord.pdf"); // Set file name
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error("Error downloading the file:", error);
     }
   };
  
@@ -3157,7 +3493,9 @@ const handleDeletePrescriptionDoc = async (docId, appointment_id) => {
  
       if (response.status === 200) {
         await fetchAppointments(clinicId);
-        setSuccessMessage("Appointment slot and patient details have been updated successfully");
+        setSuccessMessage(
+          "Appointment slot and patient details have been updated successfully"
+        );
       } else {
         console.error("Failed to update appointment details");
         setErrorMessage("Appointment slot not found");
@@ -3175,7 +3513,7 @@ const handleDeletePrescriptionDoc = async (docId, appointment_id) => {
         data: { appointment_id }, // Pass the appointment ID for deletion
       });
  
-      if (response.status === 204) {
+      if (response.status === 200) {
         // Fetch the updated appointments after successfully deleting the appointment
         await fetchAppointments(clinicId); // Fetch updated appointments using clinicId
         setSuccessMessage("Appointment slot has been deleted successfully");
@@ -3193,8 +3531,6 @@ const handleDeletePrescriptionDoc = async (docId, appointment_id) => {
       setErrorMessage("Appointment slot not found");
     }
   };
- 
- 
  
   const handleCancelAppointment = async (appointment_id) => {
     try {
@@ -3223,14 +3559,12 @@ const handleDeletePrescriptionDoc = async (docId, appointment_id) => {
     setPrescriptions(updatedPrescriptions);
   };
  
- 
- 
   const addPrescriptionRow = () => {
-    setPrescriptions([{ medicine_name: "", time: "", comment: "", description: "" }, ...prescriptions]);
+    setPrescriptions([
+      { medicine_name: "", time: "", comment: "", description: "" },
+      ...prescriptions,
+    ]);
   };
- 
- 
- 
  
   const removePrescriptionRow = async (index) => {
     try {
@@ -3256,8 +3590,7 @@ const handleDeletePrescriptionDoc = async (docId, appointment_id) => {
  
         // Call the getPrescriptions function to refresh the list of prescriptions
         await getPrescriptions(expandedAppointmentId);
-         // Fetch updated prescriptions
-       
+        // Fetch updated prescriptions
  
         setSuccessMessage("Prescription removed successfully");
       } else {
@@ -3273,10 +3606,10 @@ const handleDeletePrescriptionDoc = async (docId, appointment_id) => {
   const fetchPrescriptions = async (appointment_id, patient_id) => {
     try {
       // Make the GET API call to fetch prescriptions for the given appointment and patient
-      const response = await BaseUrl.get('/patient/patientpriscription/', {
+      const response = await BaseUrl.get("/patient/patientpriscription/", {
         params: {
           appointment_id: appointment_id, // Pass the appointment ID
-          patient_id: patient_id,         // Pass the patient ID
+          patient_id: patient_id, // Pass the patient ID
         },
       });
  
@@ -3285,18 +3618,13 @@ const handleDeletePrescriptionDoc = async (docId, appointment_id) => {
  
         // Update the state with the fetched prescriptions
         setPrescriptions(fetchedPrescriptions); // Set the fetched prescriptions to state
- 
-       
       } else {
-        console.error('Failed to fetch prescriptions');
+        console.error("Failed to fetch prescriptions");
       }
     } catch (error) {
-      console.error('Error fetching prescriptions:', error);
+      console.error("Error fetching prescriptions:", error);
     }
   };
- 
- 
- 
  
   const handlePrescriptionSubmit = async (index) => {
     try {
@@ -3315,8 +3643,14 @@ const handleDeletePrescriptionDoc = async (docId, appointment_id) => {
       // Get the specific prescription for the current index
       const prescription = prescriptions[index];
  
-      if (!prescription.medicine_name || !prescription.time || !prescription.comment) {
-        setErrorMessage("Please fill out all required fields before submitting.");
+      if (
+        !prescription.medicine_name ||
+        !prescription.time ||
+        !prescription.comment
+      ) {
+        setErrorMessage(
+          "Please fill out all required fields before submitting."
+        );
         return;
       }
  
@@ -3328,14 +3662,18 @@ const handleDeletePrescriptionDoc = async (docId, appointment_id) => {
       };
  
       // Make the POST API call to submit the individual prescription
-      const response = await BaseUrl.post('/patient/patientpriscription/', [payload]);
+      const response = await BaseUrl.post("/patient/patientpriscription/", [
+        payload,
+      ]);
  
       if (response.status === 201) {
         setSuccessMessage("Prescription submitted successfully");
  
         // Optionally clear this specific prescription row
         const updatedPrescriptions = prescriptions.map((prescription, i) =>
-          i === index ? { medicine_name: '', time: '', comment: '', description: '' } : prescription
+          i === index
+            ? { medicine_name: "", time: "", comment: "", description: "" }
+            : prescription
         );
         setPrescriptions(updatedPrescriptions);
  
@@ -3343,29 +3681,14 @@ const handleDeletePrescriptionDoc = async (docId, appointment_id) => {
         await fetchPrescriptions(appointment_id, patient_id); // Fetch updated prescriptions
         await fetchDocumentIds(appointment_id);
       } else {
-        console.error('Failed to submit prescription');
+        console.error("Failed to submit prescription");
         setErrorMessage("Failed to submit prescription");
       }
     } catch (error) {
-      console.error('Error submitting prescription:', error);
+      console.error("Error submitting prescription:", error);
       setErrorMessage("Failed to submit prescription");
     }
   };
- 
- 
- 
- 
-     
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
  
   const handleUpdatePrescription = async (index) => {
     try {
@@ -3393,16 +3716,19 @@ const handleDeletePrescriptionDoc = async (docId, appointment_id) => {
       // Prepare the payload for updating the prescription
       const payload = {
         prescription_id: prescription.id, // Required for update
-        patient_id: patient_id,                        // Required for update
-        appointment_id: appointment_id,                // Optional based on backend requirements
-        medicine_name: prescription.medicine_name,     // Fields to be updated
+        patient_id: patient_id, // Required for update
+        appointment_id: appointment_id, // Optional based on backend requirements
+        medicine_name: prescription.medicine_name, // Fields to be updated
         time: prescription.time,
         comment: prescription.comment,
         description: prescription.description,
       };
  
       // Make the PUT API call to update the prescription
-      const response = await BaseUrl.put('/patient/patientpriscription/', payload); // No prescription_id in URL
+      const response = await BaseUrl.put(
+        "/patient/patientpriscription/",
+        payload
+      ); // No prescription_id in URL
  
       if (response.status === 200) {
         console.log("Prescription updated successfully");
@@ -3419,13 +3745,6 @@ const handleDeletePrescriptionDoc = async (docId, appointment_id) => {
       setErrorMessage("Error updating prescription");
     }
   };
- 
- 
- 
- 
- 
-     
- 
  
   const fetchDocumentIds = async (appointmentId) => {
     try {
@@ -3487,7 +3806,7 @@ const handleDeletePrescriptionDoc = async (docId, appointment_id) => {
               heart_rate: fetchedData.heart_rate || "",
               pulse_rate: fetchedData.pulse_rate || "",
               sugar_level: fetchedData.sugar_level || "",
-              weight: fetchedData.weight ,
+              weight: fetchedData.weight,
               appointment_date: appointment_date,
             });
           } else {
@@ -3506,6 +3825,8 @@ const handleDeletePrescriptionDoc = async (docId, appointment_id) => {
         oxygen_level: "",
         sugar_level: "",
         weight: "",
+        height: "",
+        bmi: "",
         pulse_rate: "",
         heart_rate: "",
         body_temperature: "",
@@ -3538,6 +3859,8 @@ const handleDeletePrescriptionDoc = async (docId, appointment_id) => {
         oxygen_level: recordDetails.oxygen_level,
         sugar_level: recordDetails.sugar_level,
         weight: recordDetails.weight,
+        height: recordDetails.height,
+        bmi: recordDetails.bmi,
         pulse_rate: recordDetails.pulse_rate,
         heart_rate: recordDetails.heart_rate,
         body_temperature: recordDetails.body_temperature,
@@ -3552,15 +3875,17 @@ const handleDeletePrescriptionDoc = async (docId, appointment_id) => {
           blood_pressure: "",
           oxygen_level: "",
           sugar_level: "",
+          height: "",
           weight: "",
           pulse_rate: "",
+          bmi: "",
           heart_rate: "",
           body_temperature: "",
           appointment_id: "",
           appointment_date: "",
         });
         setSuccessMessage("Vitals submitted successfully");
-setRecordDetails(recordDetails);
+        setRecordDetails(recordDetails);
       } else {
         setErrorMessage("Failed to submit vitals");
       }
@@ -3572,7 +3897,6 @@ setRecordDetails(recordDetails);
       setToastVariant("danger");
     }
   };
- 
  
   const handleVitalUpdate = async () => {
     try {
@@ -3598,6 +3922,8 @@ setRecordDetails(recordDetails);
         pulse_rate: recordDetails.pulse_rate,
         sugar_level: recordDetails.sugar_level,
         weight: recordDetails.weight,
+        bmi: recordDetails.bmi,
+        height: recordDetails.height,
         patient_id: patient_id,
         appointment_id: appointment_id, // Send appointment_id in payload
       };
@@ -3617,8 +3943,6 @@ setRecordDetails(recordDetails);
       setErrorMessage("Error updating vitals");
     }
   };
- 
- 
  
   const handleSearchChange = (e) => {
     const { name, value } = e.target;
@@ -3767,7 +4091,6 @@ setRecordDetails(recordDetails);
     setSearchResults([]);
   };
  
- 
   const handleRemoveSymptom = async (symptom) => {
     try {
       const response = await BaseUrl.delete(`/doctor/symptomsdetail/`, {
@@ -3841,7 +4164,9 @@ setRecordDetails(recordDetails);
  
       // If any of the symptoms were saved successfully, print the success message
       if (successCount > 0) {
-        setSuccessMessage(`${successCount} symptom(s) details saved successfully`);
+        setSuccessMessage(
+          `${successCount} symptom(s) details saved successfully`
+        );
       } else {
         setErrorMessage("No symptoms details were saved");
       }
@@ -3852,7 +4177,6 @@ setRecordDetails(recordDetails);
       console.error("Error saving symptoms:", error);
     }
   };
- 
  
   const handleUpdateSymptom = async () => {
     try {
@@ -3916,7 +4240,6 @@ setRecordDetails(recordDetails);
     }
   };
  
- 
   // Add this function to handle input changes in forms
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -3942,6 +4265,7 @@ setRecordDetails(recordDetails);
     setPrescriptions(updatedPrescriptions);
   };
  
+ 
   return (
     <Container fluid>
       {errorMessage && (
@@ -3955,19 +4279,41 @@ setRecordDetails(recordDetails);
           className="shadow-sm mb-3"
           style={{
             borderRadius: "15px",
-            border: "2px solid #007bff",
-            background: "linear-gradient(145deg, #f0f9ff, #cfe3f8)",
+            border: " #0091A5",
+            background: "#0091A5",
           }}
         >
           <Card.Body>
-            <h5 className="card-title mb-4" style={{ color: "#007bff" }}>
+            <h5
+              className="card-title mb-4"
+              style={{
+                color: "#003366", // Text color
+                fontFamily: "Sans-Serif", // Font family
+              }}
+            >
               Search Appointments
             </h5>
+ 
             <Form>
-              <Form.Group>
-                <label htmlFor="booked_by" className="form-label">
-                  Search by Booked By:
-                </label>
+              <Form.Group
+                className="form-group-responsive"
+                style={{
+                  maxWidth: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  margin: "0 auto",
+                  padding: "0 20px",
+                }}
+              >
+                <label
+                  htmlFor="booked_by"
+                  style={{
+                    marginBottom: "0",
+                    marginRight: "10px",
+                    flexShrink: 0,
+                    whiteSpace: "nowrap",
+                  }}
+                ></label>
                 <input
                   type="text"
                   className="form-control"
@@ -3976,12 +4322,61 @@ setRecordDetails(recordDetails);
                   value={searchParams.booked_by}
                   onChange={handleSearchChange}
                   placeholder="Date/Time Slot/Doctor/Booked By/Mobile Number"
+                  style={{
+                    border: "2px solid #007bff",
+                    borderTopLeftRadius: "5px",
+                    borderBottomLeftRadius: "5px",
+                    height: "38px",
+                    flex: 1,
+                    marginRight: "-1px",
+                  }}
                 />
+                <Button
+                  onClick={handleSearch}
+                  className="search-button"
+                  style={{
+                    borderTopRightRadius: "5px",
+                    borderBottomRightRadius: "5px",
+                    height: "40px",
+                    weight: "80px",
+                    backgroundColor: "#0166CB",
+                    color: "white",
+                    border: "2px solid #007bff",
+                    paddingLeft: "12px",
+                    paddingRight: "12px",
+                  }}
+                >
+                  Search
+                </Button>
               </Form.Group>
-              <Button className="btn btn-primary mt-3" onClick={handleSearch}>
-                Search
-              </Button>
             </Form>
+ 
+            {/* <Form>
+              <Row>
+                <Col xs={12} md={9}>
+                  <Form.Group>
+                    <Form.Control
+                      type="text"
+                      value={searchParams.booked_by}
+                      onChange={handleSearchChange}
+                      placeholder="Date/Time Slot/Doctor/Booked By/Mobile Number"
+                      className="mb-2 mb-md-0"
+                    />
+                  </Form.Group>
+                </Col>
+                <Col xs={12} md={3}>
+                  <Button variant="primary" block onClick={handleSearch}>
+                    Search
+                  </Button>
+                </Col>
+              </Row>
+            </Form> */}
+            {/* <Button
+  className="btn mt-3"
+  style={{ backgroundColor: '#0166CB', color: 'white' }}
+  onClick={handleSearch}>
+  Search
+</Button> */}
           </Card.Body>
         </Card>
       </div>
@@ -3990,47 +4385,92 @@ setRecordDetails(recordDetails);
         className="shadow-sm"
         style={{
           borderRadius: "15px",
-          border: "2px solid #28a745",
-          background: "linear-gradient(145deg, #e8f5e9, #c8e6c9)",
+          border: " #0091A5",
+          background: "#0091A5",
         }}
       >
-         {/* Success/Error Modal */}
-      <Modal
-        show={!!errorMessage || !!successMessage}
-        onHide={handleCloseMessageModal}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {errorMessage ? "Error" : "Success"}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>{errorMessage || successMessage}</p>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="primary"
-            onClick={handleCloseMessageModal}
-          >
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
+        {/* Success/Error Modal */}
+        <Modal
+          show={!!errorMessage || !!successMessage}
+          onHide={handleCloseMessageModal}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>{errorMessage ? "Error" : "Success"}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>{errorMessage || successMessage}</p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="primary" onClick={handleCloseMessageModal}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
         <Card.Body>
-          <h5 className="card-title mb-4" style={{ color: "#28a745" }}>
+          <h5
+            className="card-title mb-4"
+            style={{
+              color: "#ffffff", // Text color
+              fontFamily: "Sans-Serif", // Font family
+            }}
+          >
             Booked Appointments
           </h5>
+ 
           <Table className="table table-hover">
             <thead className="table-light">
               <tr>
-                <th>Date</th>
-                <th>Time Slot</th>
-                <th>Doctor</th>
-                <th>Booked By</th>
-                <th>Mobile Number</th>
-                <th>Actions</th>
+                <th
+                  style={{
+                    background: "#D7EAF0", // Background color
+                    color: "#003366", // Text color
+                  }}
+                >
+                  Date
+                </th>
+                <th
+                  style={{
+                    background: "#D7EAF0",
+                    color: "#003366", // Text color
+                  }}
+                >
+                  Time Slot
+                </th>
+                <th
+                  style={{
+                    background: "#D7EAF0",
+                    color: "#003366", // Text color
+                  }}
+                >
+                  Doctor
+                </th>
+                <th
+                  style={{
+                    background: "#D7EAF0",
+                    color: "#003366", // Text color
+                  }}
+                >
+                  Booked By
+                </th>
+                <th
+                  style={{
+                    background: "#D7EAF0",
+                    color: "#003366", // Text color
+                  }}
+                >
+                  Mobile Number
+                </th>
+                <th
+                  style={{
+                    background: "#D7EAF0",
+                    color: "#003366", // Text color
+                  }}
+                >
+                  Actions
+                </th>
               </tr>
             </thead>
+ 
             <tbody>
               {appointments.map((appointment) => (
                 <React.Fragment key={appointment.appointment_id}>
@@ -4041,25 +4481,23 @@ setRecordDetails(recordDetails);
                     <td>{appointment.booked_by}</td>
                     <td>{appointment.mobile_number}</td>
                     <td>
-                      <FaEdit
+                      {/* <FaEdit
                         className="me-2 text-primary"
                         onClick={() =>
                           toggleForm(appointment.appointment_id, appointment)
                         }
                         style={{ cursor: "pointer" }}
-                      />
+                      /> */}
                       <FaTrash
-                        className="me-2 text-danger"
+                        className="me-2"
                         onClick={() => {
                           setShowConfirmation(true);
-                          setAppointmentIdToDelete(
-                            appointment.appointment_id
-                          );
+                          setAppointmentIdToDelete(appointment.appointment_id);
                         }}
-                        style={{ cursor: "pointer" }}
+                        style={{ cursor: "pointer", color: "black" }} // Set color to black
                       />
-                      {expandedAppointmentId ===
-                      appointment.appointment_id ? (
+ 
+                      {expandedAppointmentId === appointment.appointment_id ? (
                         <FaChevronUp
                           onClick={() => setExpandedAppointmentId(null)}
                           style={{ cursor: "pointer" }}
@@ -4075,102 +4513,284 @@ setRecordDetails(recordDetails);
                     </td>
                   </tr>
  
-                  {expandedAppointmentId === appointment.appointment_id && (
+ 
+                 {expandedAppointmentId === appointment.appointment_id && (
                     <tr>
                       <td colSpan="6">
                         <Card
                           className="shadow-sm mt-3"
                           style={{
                             borderRadius: "15px",
-                            border: "2px solid #ffc107",
-                            background: "linear-gradient(145deg, #fff3cd, #ffeeba)",
+                            border: " #0091A5",
+                            background: "#0091A5",
                           }}
                         >
-                          <Card.Body>
-                            <h5>Patient Details</h5>
+                          <Card.Body
+                            style={{
+                              position: "relative", // Allows absolute positioning within the Card
+                            }}
+                          >
+                            {/* Container for Heading and Print Button */}
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "flex-start", // Aligns items to the left
+                                padding: "10px 20px", // Adds padding around the content
+                              }}
+                            >
+                              <h5
+                                style={{
+                                  fontWeight: "600",
+                                  fontSize: "40px",
+                                  color: "#ffffff",
+                                  fontFamily: "Sans-Serif",
+                                  lineHeight: "46.88px",
+                                  margin: "0px", // Removes margin to keep elements close
+                                  textAlign: "left",
+                                }}
+                              >
+                                Patient Details
+                              </h5>
+                              <Button
+                                style={{
+                                  marginLeft: "20px", // Space from heading
+                                  backgroundColor: "#0166CB", // Button color
+                                  color: "#ffffff", // Text color
+                                  border: "none", // No border
+                                  borderRadius: "5px", // Rounded corners
+                                  padding: "10px 20px", // Padding
+                                  cursor: "pointer", // Pointer cursor on hover
+                                }}
+                                onClick={handlePrint}
+                              >
+                                Print
+                              </Button>
+                            </div>
+ 
+                            {/* Update Button in Top Right Corner */}
+                            <Button
+                              style={{
+                                position: "absolute", // Absolute positioning within the card
+                                top: "10px", // Distance from the top of the Card
+                                right: "10px", // Distance from the right of the Card
+                                backgroundColor: "#0166CB", // Bootstrap primary color
+                                color: "#ffffff", // Text color
+                                border: "none", // No border
+                                borderRadius: "5px", // Rounded corners
+                                padding: "10px 20px", // Padding
+                                cursor: "pointer", // Pointer cursor on hover
+                              }}
+                              onClick={handleUpdate}
+                            >
+                              Update
+                            </Button>
+ 
                             <Form>
                               <Row className="mb-3">
-                                <Col>
-                                  <Form.Group controlId="formName">
-                                    <Form.Label>Name</Form.Label>
+                                {/* Adjust column sizes for better spacing */}
+                                <Col sm={6} md={4}>
+                                  <Form.Group
+                                    controlId="formName"
+                                    className="mb-3"
+                                  >
+                                    <Form.Label
+                                      style={{
+                                        color: "#003366", // Text color
+                                        fontFamily: "Sans-Serif", // Font family
+                                        fontSize: "25px", // Font size
+                                        fontWeight: 600, // Font weight
+                                        lineHeight: "29.3px", // Line height
+                                        textAlign: "left", // Left align the label
+                                        width: "100%", // Make sure label takes full width
+                                      }}
+                                    >
+                                      Name
+                                    </Form.Label>
+ 
                                     <Form.Control
                                       type="text"
                                       name="name"
                                       value={formDetails.name || ""}
                                       onChange={handleInputChange}
+                                      style={{
+                                        textAlign: "left", // Ensure the input text is left-aligned
+                                      }}
                                     />
                                   </Form.Group>
                                 </Col>
-                                <Col>
-                                  <Form.Group controlId="formMobileNumber">
-                                    <Form.Label>Mobile Number</Form.Label>
+                                <Col sm={6} md={4}>
+                                  <Form.Group
+                                    controlId="formMobileNumber"
+                                    className="mb-3"
+                                  >
+                                    <Form.Label
+                                      style={{
+                                        color: "#003366", // Text color (adjust to the desired color)
+                                        fontFamily: "Sans-Serif", // Font family
+                                        fontSize: "25px", // Font size
+                                        fontWeight: 600, // Font weight
+                                        lineHeight: "29.3px", // Line height
+                                        textAlign: "left", // Left align the label
+                                        width: "100%", // Ensure label takes full width
+                                      }}
+                                    >
+                                      Mobile Number
+                                    </Form.Label>
+ 
                                     <Form.Control
                                       type="text"
                                       name="mobile_number"
                                       value={formDetails.mobile_number || ""}
                                       onChange={handleInputChange}
+                                      style={{
+                                        textAlign: "left", // Ensure input text is left-aligned
+                                      }}
                                     />
                                   </Form.Group>
                                 </Col>
-                                <Col>
-                                  <Form.Group controlId="formAge">
-                                    <Form.Label>Age</Form.Label>
+                                <Col sm={6} md={4}>
+                                  <Form.Group
+                                    controlId="formAge"
+                                    className="mb-3"
+                                  >
+                                    <Form.Label
+                                      style={{
+                                        color: "#003366", // Text color (adjusted to match the previous examples)
+                                        fontFamily: "Sans-Serif", // Font family
+                                        fontSize: "25px", // Font size
+                                        fontWeight: 600, // Font weight for boldness
+                                        lineHeight: "29.3px", // Line height for proper spacing
+                                        textAlign: "left", // Align text to the left
+                                        width: "100%", // Ensure the label takes full width
+                                      }}
+                                    >
+                                      Age
+                                    </Form.Label>
+ 
                                     <Form.Control
                                       type="text"
                                       name="age"
                                       value={formDetails.age || ""}
                                       onChange={handleInputChange}
+                                      style={{
+                                        textAlign: "left", // Ensure the input text is left-aligned
+                                      }}
                                     />
                                   </Form.Group>
                                 </Col>
-                                <Col>
-                                  <Form.Group controlId="formGender">
-                                    <Form.Label>Gender</Form.Label>
+                                <Col sm={6} md={4}>
+                                  <Form.Group
+                                    controlId="formGender"
+                                    className="mb-3"
+                                  >
+                                    <Form.Label
+                                      style={{
+                                        color: "#003366", // Text color (adjusted to match other fields)
+                                        fontFamily: "Sans-Serif", // Font family
+                                        fontSize: "25px", // Font size
+                                        fontWeight: 600, // Bold font weight
+                                        lineHeight: "29.3px", // Line height for proper spacing
+                                        textAlign: "left", // Align text to the left
+                                        width: "100%", // Ensure the label takes full width
+                                      }}
+                                    >
+                                      Gender
+                                    </Form.Label>
+ 
                                     <Form.Control
                                       type="text"
                                       name="gender"
                                       value={formDetails.gender || ""}
                                       onChange={handleInputChange}
+                                      style={{
+                                        textAlign: "left", // Ensure the input text is left-aligned
+                                      }}
                                     />
                                   </Form.Group>
                                 </Col>
-                                <Col>
-                                  <Form.Group controlId="formAddress">
-                                    <Form.Label>Address</Form.Label>
+                                <Col sm={6} md={4}>
+                                  <Form.Group
+                                    controlId="formAddress"
+                                    className="mb-3"
+                                  >
+                                    <Form.Label
+                                      style={{
+                                        color: "#003366", // Text color (adjusted to match other fields)
+                                        fontFamily: "Sans-Serif", // Font family
+                                        fontSize: "25px", // Font size
+                                        fontWeight: 600, // Bold font weight
+                                        lineHeight: "29.3px", // Line height for proper spacing
+                                        textAlign: "left", // Align text to the left
+                                        width: "100%", // Ensure the label takes full width
+                                      }}
+                                    >
+                                      Address
+                                    </Form.Label>
+ 
                                     <Form.Control
                                       type="text"
                                       name="address"
                                       value={formDetails.address || ""}
                                       onChange={handleInputChange}
+                                      style={{
+                                        textAlign: "left", // Ensure the input text is left-aligned
+                                      }}
                                     />
                                   </Form.Group>
                                 </Col>
                               </Row>
-                              <Button variant="primary" onClick={handleUpdate}>
-                                Update
-                              </Button>
-                              <Button
-                                variant="danger"
-                                className="ms-2"
-                                onClick={() =>
-                                  handleDelete(appointment.appointment_id)
-                                }
-                              >
-                                Delete
-                              </Button>
-                              <Button
-                                variant="warning"
-                                className="ms-2"
-                                onClick={() =>
-                                  handleCancelAppointment(
-                                    appointment.appointment_id
-                                  )
-                                }
-                              >
-                                Cancel Appointment
-                              </Button>
+                              {/* Center buttons */}
+                              <div className="d-flex justify-content-center gap-2">
+                                {/* <Button
+                                  variant="primary"
+                                  onClick={handleUpdate}
+                                >
+                                  Update
+                                </Button> */}
+                                <Button
+                                  style={{
+                                    backgroundColor: "#0166CB", // Setting the background color to the same blue
+                                    color: "#FFFFFF", // White text for readability
+                                    border: "none", // Removing default border
+                                    borderRadius: "5px", // Rounded corners for a smooth look
+                                    padding: "10px 20px", // Adequate padding for content spacing
+                                    cursor: "pointer", // Cursor changes to pointer on hover to indicate clickable area
+                                  }}
+                                  onClick={() =>
+                                    handleDelete(appointment.appointment_id)
+                                  }
+                                >
+                                  Delete
+                                </Button>
  
-                             
+                                <Button
+                                  style={{
+                                    backgroundColor: "#0166CB", // Setting the background color
+                                    color: "#FFFFFF", // Ensuring text color is white for readability
+                                    border: "none", // No border for a cleaner look
+                                    borderRadius: "5px", // Rounded corners for aesthetics
+                                    padding: "10px 20px", // Padding for better text spacing
+                                    cursor: "pointer", // Cursor change on hover to indicate it's clickable
+                                  }}
+                                  onClick={() =>
+                                    handleCancelAppointment(
+                                      appointment.appointment_id
+                                    )
+                                  }
+                                >
+                                  Cancel Appointment
+                                </Button>
+                              </div>
+                              <div className="d-flex justify-content-end mt-4">
+                                {/* <Button
+                                  variant="outline-secondary"
+                                  className="me-2"
+                                  onClick={handlePrint}
+                                >
+                                  Print
+                                </Button> */}
+                              </div>
                             </Form>
                           </Card.Body>
                         </Card>
@@ -4178,422 +4798,823 @@ setRecordDetails(recordDetails);
                     </tr>
                   )}
  
-{showSymptomsForm &&
-  expandedAppointmentId === appointment.appointment_id && (
-    <tr>
-      <td colSpan="6">
-        <Card
-          className="shadow-sm mt-3"
-          style={{
-            borderRadius: "15px",
-            border: "2px solid #fd7e14",
-            background: "linear-gradient(145deg, #fde2cd, #fbd5b4)",
-          }}
-        >
-          <Card.Body>
-            <h5>Symptoms</h5>
-            <Form>
-              <Row className="mb-3">
-                <Col xs={12}>
-                  <Form.Group controlId="symptomSearch">
-                    <Form.Label>Search Symptoms</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Search symptoms"
-                      value={searchSymptom}
-                      onChange={handleSymptomSearch}
-                    />
-                     {searchResults.length > 0 && (
-                                  <ul className="list-group mt-2">
-                                    {searchResults.map((symptom, index) => (
-                                      <li
-                                        key={index}
-                                        className="list-group-item"
-                                        onClick={() =>
-                                          handleAddSymptom({
-                                            id: symptom.id,
-                                            symptoms_name:
-                                              symptom.symptoms_name,
-                                            severity: "",
-                                          })
-                                        }
-                                        style={{ cursor: "pointer" }}
+ 
+                  {showSymptomsForm &&
+                    expandedAppointmentId === appointment.appointment_id && (
+                      <tr>
+                        <td colSpan="6">
+                          <Card
+                            className="shadow-sm mt-3"
+                            style={{
+                              borderRadius: "15px",
+                              border: "#0091A5",
+                              background: "#0091A5",
+                            }}
+                          >
+                            <Card.Body style={{ position: "relative" }}>
+                              {/* Container for Heading, Search Bar, and Update Button */}
+                              <div
+                                className="symptoms-header"
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "flex-start",
+                                  padding: "10px 20px",
+                                }}
+                              >
+                                <h5
+                                  style={{
+                                    fontWeight: "600",
+                                    fontSize: "40px",
+                                    color: "#ffffff",
+                                    fontFamily: "Sans-Serif",
+                                    lineHeight: "46.88px",
+                                    margin: "0px 20px 0px 0px",
+                                    textAlign: "left",
+                                  }}
+                                >
+                                  Symptoms
+                                </h5>
+                                <Form.Control
+                                  type="text"
+                                  placeholder="Search symptoms"
+                                  value={searchSymptom}
+                                  onChange={handleSymptomSearch}
+                                  style={{
+                                    width: "300px",
+                                    margin: "0px",
+                                  }}
+                                />
+                                <Button
+                                  style={{
+                                    marginLeft: "auto",
+                                    backgroundColor: "#0166CB",
+                                    color: "#ffffff",
+                                    border: "none",
+                                    borderRadius: "5px",
+                                    padding: "10px 20px",
+                                    cursor: "pointer",
+                                  }}
+                                  onClick={handleUpdateSymptom}
+                                >
+                                  Update Symptoms
+                                </Button>
+                              </div>
+ 
+                              <Form>
+                                <Row className="mb-3">
+                                  <Col xs={12}>
+                                    {searchResults.length > 0 && (
+                                      <ul className="list-group mt-2">
+                                        {searchResults.map((symptom, index) => (
+                                          <li
+                                            key={index}
+                                            className="list-group-item"
+                                            onClick={() =>
+                                              handleAddSymptom({
+                                                id: symptom.id,
+                                                symptoms_name:
+                                                  symptom.symptoms_name,
+                                                severity: "",
+                                              })
+                                            }
+                                            style={{ cursor: "pointer" }}
+                                          >
+                                            {symptom.symptoms_name}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    )}
+                                  </Col>
+                                </Row>
+ 
+                                <Table striped bordered hover>
+                                  <thead className="table-light">
+                                    <tr>
+                                      <th
+                                        style={{
+                                          backgroundColor: "#D7EAF0",
+                                          color: "#003366",
+                                        }}
                                       >
-                                        {symptom.symptoms_name}
-                                      </li>
+                                        Symptom
+                                      </th>
+                                      <th
+                                        style={{
+                                          backgroundColor: "#D7EAF0",
+                                          color: "#003366",
+                                        }}
+                                      >
+                                        Severity
+                                      </th>
+                                      <th
+                                        style={{
+                                          backgroundColor: "#D7EAF0",
+                                          color: "#003366",
+                                        }}
+                                      >
+                                        Since
+                                      </th>
+                                      <th
+                                        style={{
+                                          backgroundColor: "#D7EAF0",
+                                          color: "#003366",
+                                        }}
+                                      >
+                                        More Options
+                                      </th>
+                                      <th
+                                        style={{
+                                          backgroundColor: "#D7EAF0",
+                                          color: "#003366",
+                                        }}
+                                      >
+                                        Actions
+                                      </th>
+                                    </tr>
+                                  </thead>
+ 
+                                  <tbody>
+                                    {selectedSymptoms.map((symptom, index) => (
+                                      <tr key={index}>
+                                        <td>{symptom.symptoms_name}</td>
+                                        <td>
+                                          <Form.Select
+                                            name={`severity-${index}`}
+                                            value={symptom.severity}
+                                            onChange={(e) =>
+                                              handleSeverityChange(index, e)
+                                            }
+                                          >
+                                            <option value="">
+                                              Select Severity
+                                            </option>
+                                            <option value="mild">Mild</option>
+                                            <option value="moderate">
+                                              Moderate
+                                            </option>
+                                            <option value="severe">
+                                              Severe
+                                            </option>
+                                          </Form.Select>
+                                        </td>
+                                        <td>
+                                          <Form.Control
+                                            type="text"
+                                            name={`since-${index}`}
+                                            value={symptom.since}
+                                            onChange={(e) =>
+                                              handleSinceChange(index, e)
+                                            }
+                                          />
+                                        </td>
+                                        <td>
+                                          <Form.Control
+                                            type="text"
+                                            name={`more_options-${index}`}
+                                            value={symptom.more_options}
+                                            onChange={(e) =>
+                                              handleMoreOptionsChange(index, e)
+                                            }
+                                          />
+                                        </td>
+                                        <td>
+                                          <Button
+                                            style={{
+                                              backgroundColor: "#0166CB",
+                                              color: "#FFFFFF",
+                                              border: "none",
+                                              borderRadius: "5px",
+                                              padding: "10px 20px",
+                                              cursor: "pointer",
+                                            }}
+                                            onClick={() =>
+                                              handleRemoveSymptom(symptom)
+                                            }
+                                          >
+                                            Remove
+                                          </Button>
+                                        </td>
+                                      </tr>
                                     ))}
-                                  </ul>
-                                )}
-                  </Form.Group>
-                </Col>
-              </Row>
+                                  </tbody>
+                                </Table>
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  <Button
+                                    variant="primary"
+                                    onClick={handleSaveSymptoms}
+                                    style={{
+                                      background: "#0166CB",
+                                      border: "none",
+                                      width: "74.05px",
+                                      height: "36px",
+                                    }}
+                                  >
+                                    Save
+                                  </Button>
+                                </div>
+                              </Form>
+                            </Card.Body>
+                          </Card>
+                        </td>
+                      </tr>
+                    )}
  
-              <Table striped bordered hover>
-                <thead className="table-light">
-                  <tr>
-                    <th>Symptom</th>
-                    <th>Severity</th>
-                    <th>Since</th>
-                    <th>More Options</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedSymptoms.map((symptom, index) => (
-                    <tr key={index}>
-                      <td>{symptom.symptoms_name}</td>
-                      <td>
-                        <Form.Select
-                          name={`severity-${index}`}
-                          value={symptom.severity}
-                          onChange={(e) => handleSeverityChange(index, e)}
-                        >
-                          <option value="">Select Severity</option>
-                          <option value="mild">Mild</option>
-                          <option value="moderate">Moderate</option>
-                          <option value="severe">Severe</option>
-                        </Form.Select>
-                      </td>
-                      <td>
-                        <Form.Control
-                          type="text"
-                          name={`since-${index}`}
-                          value={symptom.since}
-                          onChange={(e) => handleSinceChange(index, e)}
-                        />
-                      </td>
-                      <td>
-                        <Form.Control
-                          type="text"
-                          name={`more_options-${index}`}
-                          value={symptom.more_options}
-                          onChange={(e) => handleMoreOptionsChange(index, e)}
-                        />
-                      </td>
-                      <td>
-                        <Button
-                          variant="danger"
-                          onClick={() => handleRemoveSymptom(symptom)}
-                        >
-                          Remove
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-              <Button variant="primary" onClick={handleSaveSymptoms}>
-                Save
-              </Button>
-              <Button
-                variant="warning"
-                className="ms-2"
-                onClick={handleUpdateSymptom}
-              >
-                Update Symptoms
-              </Button>
-              <Button
-                variant="secondary"
-                className="ms-2"
-                onClick={() => setShowSymptomsForm(false)}
-              >
-                Cancel
-              </Button>
-            </Form>
-          </Card.Body>
-        </Card>
-      </td>
-    </tr>
-  )}
+                  {showVitalForm &&
+                    expandedAppointmentId === appointment.appointment_id && (
+                      <tr>
+                        <td colSpan="6">
+                          <Card
+                            className="shadow-sm mt-3"
+                            style={{
+                              borderRadius: "15px",
+                              border: " #0091A5",
+                              background: "#0091A5",
+                            }}
+                          >
+                            <Card.Body
+                              style={{
+                                position: "relative", // Allows absolute positioning within the Card
+                              }}
+                            >
+                              {/* Flexbox container for heading and alignment */}
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "flex-start", // Align items to the left
+                                  padding: "10px 20px", // Adds padding around the content
+                                }}
+                              >
+                                <h5
+                                  style={{
+                                    fontWeight: "600",
+                                    fontSize: "40px", // Matches font size of "Symptoms" heading
+                                    color: "#ffffff",
+                                    fontFamily: "Sans-Serif", // Matches font family
+                                    lineHeight: "46.88px", // Matches line height
+                                    margin: "0px", // Removes margin to keep elements close
+                                    textAlign: "left", // Align heading to the left
+                                  }}
+                                >
+                                  Patient Vitals
+                                </h5>
+                              </div>
  
-{showVitalForm &&
-  expandedAppointmentId === appointment.appointment_id && (
+                              {/* Update button in top right corner */}
+                              <Button
+                                style={{
+                                  position: "absolute", // Absolute positioning within the card
+                                  top: "10px", // Distance from the top of the Card
+                                  right: "10px", // Distance from the right of the Card
+                                  backgroundColor: "#0166CB", // Bootstrap primary color
+                                  color: "#ffffff", // Text color
+                                  border: "none", // No border
+                                  borderRadius: "5px", // Rounded corners
+                                  padding: "10px 20px", // Padding
+                                  cursor: "pointer", // Pointer cursor on hover
+                                }}
+                                onClick={handleVitalUpdate}
+                              >
+                                Update Vitals
+                              </Button>
+ 
+                              {/* Table for Vitals */}
+                              <Table
+                                bordered
+                                hover
+                                responsive
+                                className="table-sm"
+                                style={{ fontSize: "0.9rem" }}
+                              >
+                                <thead>
+                                  <tr>
+                                    <th
+                                      style={{
+                                        backgroundColor: "#D7EAF0", // Applying background color
+                                        color: "#003366", // Applying text color
+                                      }}
+                                    >
+                                      Blood Pressure
+                                    </th>
+                                    <th
+                                      style={{
+                                        backgroundColor: "#D7EAF0", // Applying background color
+                                        color: "#003366", // Applying text color
+                                      }}
+                                    >
+                                      Oxygen Level
+                                    </th>
+                                    <th
+                                      style={{
+                                        backgroundColor: "#D7EAF0", // Applying background color
+                                        color: "#003366", // Applying text color
+                                      }}
+                                    >
+                                      Body Temp.
+                                    </th>
+                                    <th
+                                      style={{
+                                        backgroundColor: "#D7EAF0", // Applying background color
+                                        color: "#003366", // Applying text color
+                                      }}
+                                    >
+                                      Heart Rate
+                                    </th>
+                                    <th
+                                      style={{
+                                        backgroundColor: "#D7EAF0", // Applying background color
+                                        color: "#003366", // Applying text color
+                                      }}
+                                    >
+                                      Pulse Rate
+                                    </th>
+                                    <th
+                                      style={{
+                                        backgroundColor: "#D7EAF0", // Applying background color
+                                        color: "#003366", // Applying text color
+                                      }}
+                                    >
+                                      Sugar Level
+                                    </th>
+                                    <th
+                                      style={{
+                                        backgroundColor: "#D7EAF0", // Applying background color
+                                        color: "#003366", // Applying text color
+                                      }}
+                                    >
+                                      Height (cm)
+                                    </th>
+                                    <th
+                                      style={{
+                                        backgroundColor: "#D7EAF0", // Applying background color
+                                        color: "#003366", // Applying text color
+                                      }}
+                                    >
+                                      Weight (kg)
+                                    </th>
+                                    <th
+                                      style={{
+                                        backgroundColor: "#D7EAF0", // Applying background color
+                                        color: "#003366", // Applying text color
+                                      }}
+                                    >
+                                      BMI
+                                    </th>
+                                  </tr>
+                                </thead>
+ 
+                                <tbody>
+                                  <tr>
+                                    <td>
+                                      <Form.Control
+                                        type="text"
+                                        name="blood_pressure"
+                                        value={recordDetails.blood_pressure}
+                                        onChange={handleVitalChange}
+                                        style={{ padding: "5px" }}
+                                      />
+                                    </td>
+                                    <td>
+                                      <Form.Control
+                                        type="text"
+                                        name="oxygen_level"
+                                        value={recordDetails.oxygen_level}
+                                        onChange={handleVitalChange}
+                                        style={{ padding: "5px" }}
+                                      />
+                                    </td>
+                                    <td>
+                                      <Form.Control
+                                        type="text"
+                                        name="body_temperature"
+                                        value={recordDetails.body_temperature}
+                                        onChange={handleVitalChange}
+                                        style={{ padding: "5px" }}
+                                      />
+                                    </td>
+                                    <td>
+                                      <Form.Control
+                                        type="text"
+                                        name="heart_rate"
+                                        value={recordDetails.heart_rate}
+                                        onChange={handleVitalChange}
+                                        style={{ padding: "5px" }}
+                                      />
+                                    </td>
+                                    <td>
+                                      <Form.Control
+                                        type="text"
+                                        name="pulse_rate"
+                                        value={recordDetails.pulse_rate}
+                                        onChange={handleVitalChange}
+                                        style={{ padding: "5px" }}
+                                      />
+                                    </td>
+                                    <td>
+                                      <Form.Control
+                                        type="text"
+                                        name="sugar_level"
+                                        value={recordDetails.sugar_level}
+                                        onChange={handleVitalChange}
+                                        style={{ padding: "5px" }}
+                                      />
+                                    </td>
+                                    <td>
+                                      <Form.Control
+                                        type="text"
+                                        name="height"
+                                        value={recordDetails.height || ""}
+                                        onChange={handleVitalChange}
+                                        style={{ padding: "5px" }}
+                                      />
+                                    </td>
+                                    <td>
+                                      <Form.Control
+                                        type="text"
+                                        name="weight"
+                                        value={recordDetails.weight || ""}
+                                        onChange={handleVitalChange}
+                                        style={{ padding: "5px" }}
+                                      />
+                                    </td>
+                                    <td>
+                                      <Form.Control
+                                        type="text"
+                                        name="bmi"
+                                        value={recordDetails.bmi || ""}
+                                        readOnly // BMI is calculated automatically
+                                        style={{ padding: "5px" }}
+                                      />
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </Table>
+ 
+                              {/* Action buttons */}
+                              <div
+                                style={{
+                                  display: "flex", // Flexbox layout
+                                  justifyContent: "center", // Center horizontally
+                                  alignItems: "center", // Center vertically (optional)
+                                }}
+                              >
+                                <Button
+                                  variant="primary"
+                                  onClick={handleVitalSubmit}
+                                  className="me-2"
+                                  style={{
+                                    background: "#0166CB", // Set the background color to #0166CB
+                                    border: "none", // Optional: Remove any border if needed
+                                  }}
+                                >
+                                  Submit
+                                </Button>
+                              </div>
+                            </Card.Body>
+                          </Card>
+                        </td>
+                      </tr>
+                    )}
+ 
+ 
+                 {showPrescriptionForm &&
+                    expandedAppointmentId === appointment.appointment_id && (
+                      <tr>
+                        <td colSpan="6">
+                          <Card
+                            className="shadow-sm mt-3"
+                            style={{
+                              borderRadius: "15px",
+                              border: " #0091A5",
+                              background: "#0091A5",
+                            }}
+                          >
+                            <Card.Body style={{ position: "relative" }}>
+                              {/* Container for Heading, Add Prescription, and Upload Prescription Buttons */}
+                              <div
+                                className="prescription-header"
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "flex-start",
+                                  padding: "10px 20px",
+                                }}
+                              >
+                                <h5
+                                  style={{
+                                    fontWeight: "600",
+                                    fontSize: "40px",
+                                    color: "#ffffff",
+                                    fontFamily: "Sans-Serif",
+                                    lineHeight: "46.88px",
+                                    margin: "0px",
+                                    textAlign: "left",
+                                  }}
+                                >
+                                  Prescription
+                                </h5>
+                                <Button
+                                  variant="success"
+                                  className="ms-3"
+                                  onClick={addPrescriptionRow}
+                                  style={{
+                                    backgroundColor: "#00DAF7",
+                                    color: "#003366",
+                                    border: "none",
+                                    borderRadius: "5px",
+                                    padding: "10px 20px",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  Add Prescription
+                                </Button>
+                                <div className="upload-prescription-wrapper">
+                                  <Button
+                                    variant="outline-primary"
+                                    style={{
+                                      position: "absolute", // Position the button absolutely
+                                      top: "10px", // Distance from the top of the Card
+                                      right: "10px", // Distance from the right side of the Card
+                                      background: "#0166CB",
+                                      color: "#ffffff",
+                                      border: "none",
+                                      borderRadius: "5px",
+                                      padding: "10px 20px",
+                                      cursor: "pointer", // Pointer cursor for interactivity
+                                    }}
+                                    onClick={() => {
+                                      setIsPrescriptionDocs(true);
+                                      setShowPrescriptionDocsForm(true);
+                                    }}
+                                  >
+                                    Upload Prescription
+                                  </Button>
+                                </div>
+                              </div>
+ 
+                              {/* Prescription Form */}
+                              <Form>
+                                {prescriptions.map((prescription, index) => (
+                                  <Row className="mb-3" key={index}>
+                                    <Col>
+                                      <Form.Group
+                                        controlId={`formMedicineName${index}`}
+                                      >
+                                        <Form.Label
+                                          style={{
+                                            color: "#003366",
+                                            fontFamily: "Sans-Serif",
+                                            fontSize: "25px",
+                                            fontWeight: 600,
+                                            lineHeight: "29.3px",
+                                            textAlign: "left",
+                                            width: "186px",
+                                            height: "40px",
+                                            opacity: 1,
+                                          }}
+                                        >
+                                          Medicine Name
+                                        </Form.Label>
+                                        <Form.Control
+                                          type="text"
+                                          name="medicine_name"
+                                          value={prescription.medicine_name}
+                                          onChange={(e) =>
+                                            handlePrescriptionChange(index, e)
+                                          }
+                                        />
+                                      </Form.Group>
+                                    </Col>
+                                    <Col>
+                                      <Form.Group
+                                        controlId={`formComment${index}`}
+                                      >
+                                        <Form.Label
+                                          style={{
+                                            color: "#003366",
+                                            fontFamily: "Sans-Serif",
+                                            fontSize: "25px",
+                                            fontWeight: 600,
+                                            lineHeight: "29.3px",
+                                            textAlign: "left",
+                                            width: "186px",
+                                            height: "40px",
+                                            opacity: 1,
+                                          }}
+                                        >
+                                          Precautions
+                                        </Form.Label>
+                                        <Form.Control
+                                          type="text"
+                                          name="comment"
+                                          value={prescription.comment}
+                                          onChange={(e) =>
+                                            handlePrescriptionChange(index, e)
+                                          }
+                                        />
+                                      </Form.Group>
+                                    </Col>
+                                    <Col>
+                                      <Form.Group
+                                        controlId={`formDescription${index}`}
+                                      >
+                                        <Form.Label
+                                          style={{
+                                            color: "#003366",
+                                            fontFamily: "Sans-Serif",
+                                            fontSize: "25px",
+                                            fontWeight: 600,
+                                            lineHeight: "29.3px",
+                                            textAlign: "left",
+                                            width: "186px",
+                                            height: "40px",
+                                            opacity: 1,
+                                          }}
+                                        >
+                                          Description
+                                        </Form.Label>
+                                        <Form.Control
+                                          type="text"
+                                          name="description"
+                                          value={prescription.description}
+                                          onChange={(e) =>
+                                            handlePrescriptionChange(index, e)
+                                          }
+                                        />
+                                      </Form.Group>
+                                    </Col>
+                                    <Col>
+                                      <Form.Group
+                                        controlId={`formTimeSlot${index}`}
+                                      >
+                                        <Form.Label
+                                          style={{
+                                            color: "#003366",
+                                            fontFamily: "Sans-Serif",
+                                            fontSize: "25px",
+                                            fontWeight: 600,
+                                            lineHeight: "29.3px",
+                                            textAlign: "left",
+                                            width: "186px",
+                                            height: "40px",
+                                            opacity: 1,
+                                          }}
+                                        >
+                                          Time
+                                        </Form.Label>
+                                        <Form.Control
+                                          as="select"
+                                          name="time"
+                                          value={prescription.time}
+                                          onChange={(e) =>
+                                            handlePrescriptionChange(index, e)
+                                          }
+                                        >
+                                          <option value="">Select Time</option>
+                                          <option value="morning">
+                                            Morning
+                                          </option>
+                                          <option value="morning-afternoon">
+                                            Morning-Afternoon
+                                          </option>
+                                          <option value="morning-afternoon-evening">
+                                            Morning-Afternoon-Evening
+                                          </option>
+                                          <option value="morning-afternoon-evening-night">
+                                            Morning-Afternoon-Evening-Night
+                                          </option>
+                                          <option value="afternoon">
+                                            Afternoon
+                                          </option>
+                                          <option value="evening">
+                                            Evening
+                                          </option>
+                                          <option value="night">Night</option>
+                                        </Form.Control>
+                                      </Form.Group>
+                                    </Col>
+                                    <Col className="d-flex align-items-center">
+                                      <Button
+                                        variant="primary"
+                                        onClick={() =>
+                                          handlePrescriptionSubmit(index)
+                                        }
+                                        className="me-2"
+                                        style={{
+                                          background: "#0166CB",
+                                          border: "none",
+                                          padding: "6px 12px",
+                                          fontSize: "0.9rem",
+                                          borderRadius: "5px",
+                                          height: "40px",
+                                          width: "80px",
+                                          marginTop: "44px",
+                                        }}
+                                      >
+                                        Submit
+                                      </Button>
+                                      <Button
+                                        variant="danger"
+                                        onClick={() =>
+                                          handleUpdatePrescription(index)
+                                        }
+                                        className="me-2"
+                                        style={{
+                                          background: "#0166CB",
+                                          border: "none",
+                                          padding: "6px 12px",
+                                          fontSize: "0.9rem",
+                                          borderRadius: "5px",
+                                          height: "40px",
+                                          width: "80px",
+                                          marginTop: "44px",
+                                        }}
+                                      >
+                                        Update
+                                      </Button>
+                                      <Button
+                                        variant="danger"
+                                        onClick={() =>
+                                          removePrescriptionRow(index)
+                                        }
+                                        className="me-2"
+                                        style={{
+                                          background: "#0166CB",
+                                          border: "none",
+                                          padding: "6px 12px",
+                                          fontSize: "0.9rem",
+                                          borderRadius: "5px",
+                                          height: "40px",
+                                          width: "80px",
+                                          marginTop: "44px",
+                                        }}
+                                      >
+                                        Delete
+                                      </Button>
+                                    </Col>
+                                  </Row>
+                                ))}
+                              </Form>
+ 
+                              {/* Prescription Documents Section and Modal */}
+                              {/* Add your Table and Modal code here */}
+                            </Card.Body>
+                          </Card>
+                          <Table striped bordered hover>
+  <thead className="table-light">
     <tr>
-      <td colSpan="6">
-        <Card
-          className="shadow-sm mt-3"
-          style={{
-            borderRadius: "15px",
-            border: "2px solid #17a2b8",
-            background: "linear-gradient(145deg, #e3f5f9, #d0ebf5)",
-          }}
-        >
-          <Card.Body>
-            <h5>Vitals</h5>
-            <Form>
-              <Row className="mb-3">
-                <Col>
-                  <Form.Group controlId="formBloodPressure">
-                    <Form.Label>Blood Pressure</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="blood_pressure"
-                      value={recordDetails.blood_pressure}
-                      onChange={handleVitalChange}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col>
-                  <Form.Group controlId="formOxygenLevel">
-                    <Form.Label>Oxygen Level</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="oxygen_level"
-                      value={recordDetails.oxygen_level}
-                      onChange={handleVitalChange}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col>
-                  <Form.Group controlId="formTemperature">
-                    <Form.Label>Body Temperature</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="body_temperature"
-                      value={recordDetails.body_temperature}
-                      onChange={handleVitalChange}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col>
-                  <Form.Group controlId="formHeartRate">
-                    <Form.Label>Heart Rate</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="heart_rate"
-                      value={recordDetails.heart_rate}
-                      onChange={handleVitalChange}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col>
-                  <Form.Group controlId="formPulseRate">
-                    <Form.Label>Pulse Rate</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="pulse_rate"
-                      value={recordDetails.pulse_rate}
-                      onChange={handleVitalChange}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col>
-                  <Form.Group controlId="formSugarLevel">
-                    <Form.Label>Sugar Level</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="sugar_level"
-                      value={recordDetails.sugar_level}
-                      onChange={handleVitalChange}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col>
-                  <Form.Group controlId="formWeight">
-                    <Form.Label>Weight</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="weight"
-                      value={recordDetails.weight}
-                      onChange={handleVitalChange}
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-              <Button variant="primary" onClick={handleVitalSubmit}>
-                Submit
-              </Button>
-              <Button
-                variant="secondary"
-                className="ms-2"
-                onClick={() => setShowVitalForm(false)}
-              >
-                Cancel
-              </Button>
-              {/* Add the new "Update" button */}
-              <Button
-                variant="warning"
-                className="ms-2"
-                onClick={handleVitalUpdate} // Define this function for update functionality
-              >
-                Update
-              </Button>
-            </Form>
-          </Card.Body>
-        </Card>
-      </td>
+      <th>SNo.</th>
+      <th>Document Date</th>
+      <th className="text-center">Actions</th>
     </tr>
-  )}
- 
- 
-{showPrescriptionForm &&
-  expandedAppointmentId === appointment.appointment_id && (
-    <tr>
-      <td colSpan="6">
-        <Card
-          className="shadow-sm mt-3"
-          style={{
-            borderRadius: "15px",
-            border: "2px solid #dc3545",
-            background: "linear-gradient(145deg, #f8d7da, #f1aeb6)",
-          }}
-        >
-          <Card.Body>
-            <div className="d-flex justify-content-center align-items-center mb-3">
-              <h5 className="text-center d-inline-block mb-0">Prescription</h5>
+  </thead>
+  <tbody>
+    {prescriptionDocuments.map((doc, index) => (
+      <React.Fragment key={doc.id}>
+        <tr>
+          <td>{index + 1}</td>
+          <td>{doc.document_date}</td>
+          <td className="text-center">
+            <div className="d-flex justify-content-center align-items-center">
               <Button
-                variant="success"
-                className="ms-3 d-inline-block"
-                onClick={addPrescriptionRow}
+                variant="primary"
+                className="me-2"
+                onClick={() => handlePreview(doc.id)}
               >
-                Add Prescription
+                Preview
               </Button>
+              <DropdownButton
+                id="dropdown-basic-button"
+                title={<FontAwesomeIcon icon={faEllipsisV} />}
+                variant="secondary"
+              >
+                <Dropdown.Item
+                  onClick={() => handleDownloadPrescriptionDoc(doc)}
+                >
+                  Download
+                </Dropdown.Item>
+                <Dropdown.Item
+                  onClick={() => handleDeletePrescriptionDoc(doc.id)}
+                >
+                  Delete
+                </Dropdown.Item>
+              </DropdownButton>
             </div>
+          </td>
+        </tr>
+      </React.Fragment>
+    ))}
+  </tbody>
+</Table>
  
-            <Form>
-              {prescriptions.map((prescription, index) => (
-                <Row className="mb-3" key={index}>
-                  <Col>
-                    <Form.Group controlId={`formMedicineName${index}`}>
-                      <Form.Label>Medicine Name</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="medicine_name"
-                        value={prescription.medicine_name}
-                        onChange={(e) => handlePrescriptionChange(index, e)}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col>
-                    <Form.Group controlId={`formComment${index}`}>
-                      <Form.Label>Precautions</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="comment"
-                        value={prescription.comment}
-                        onChange={(e) => handlePrescriptionChange(index, e)}
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col>
-                    <Form.Group controlId={`formDescription${index}`}>
-                      <Form.Label>Description</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="description"
-                        value={prescription.description}
-                        onChange={(e) => handlePrescriptionChange(index, e)}
-                      />
-                    </Form.Group>
-                  </Col>
- 
-                  {/* Time Slot Dropdown */}
-                  <Col>
-                    <Form.Group controlId={`formTimeSlot${index}`}>
-                      <Form.Label>Time</Form.Label>
-                      <Form.Control
-                        as="select"
-                        name="time"
-                        value={prescription.time}
-                        onChange={(e) => handlePrescriptionChange(index, e)}
-                      >
-                        <option value="">Select Time</option>
-                        <option value="morning">Morning</option>
-                        <option value="morning-afternoon">Morning-Afternoon</option>
-                        <option value="morning-afternoon-evening">Morning-Afternoon-Evening</option>
-                        <option value="morning-afternoon-evening-night">Morning-Afternoon-Evening-Night</option>
-                        <option value="afternoon">Afternoon</option>
-                        <option value="evening">Evening</option>
-                        <option value="night">Night</option>
-                      </Form.Control>
-                    </Form.Group>
-                  </Col>
- 
-                  <Col className="d-flex align-items-center">
-                    <Button
-                      variant="danger"
-                      onClick={() => removePrescriptionRow(index)}
-                      className="me-2"
-                    >
-                      Remove
-                    </Button>
-                    <Button
-                      variant="primary"
-                      onClick={() => handlePrescriptionSubmit(index)}
-                      className="me-2"
-                    >
-                      Submit
-                    </Button>
-                    <Button
-                      variant="warning"
-                      onClick={() => handleUpdatePrescription(index)}
-                    >
-                      Update
-                    </Button>
-                  </Col>
-                </Row>
-              ))}
-            </Form>
- 
-            <Button
-              variant="outline-primary"
-              className="float-end mb-5"
-              onClick={() => {
-                setIsPrescriptionDocs(true);
-                setShowPrescriptionDocsForm(true);
-              }}
-            >
-              Upload Prescription
-            </Button>
-          </Card.Body>
-        </Card>
- 
-        {/* Prescription Documents Section */}
-        <Table striped bordered hover>
-          <thead className="table-light">
-            <tr>
-              <th>SNo.</th>
-              <th>Document Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {prescriptionDocuments.map((doc, index) => (
-              <React.Fragment key={doc.id}>
-                <tr>
-                  <td>{index + 1}</td>
-                  <td>{doc.document_date}</td>
-                  <td>
-                    <div className="d-flex align-items-center">
-                      <Button
-                        variant="primary"
-                        className="me-2"
-                        onClick={() => handlePreview(doc.id)}
-                      >
-                        Preview
-                      </Button>
-                      <DropdownButton
-                        id="dropdown-basic-button"
-                        title={<FontAwesomeIcon icon={faEllipsisV} />}
-                        variant="secondary"
-                      >
-                        <Dropdown.Item onClick={() => handleDownloadPrescriptionDoc(doc)}>
-                          Download
-                        </Dropdown.Item>
-                        <Dropdown.Item onClick={() => handleDeletePrescriptionDoc(doc.id)}>
-                          Delete
-                        </Dropdown.Item>
-                      </DropdownButton>
-                    </div>
-                  </td>
-                </tr>
-              </React.Fragment>
-            ))}
-          </tbody>
-        </Table>
- 
-        {/* Modal for uploading prescription files */}
-        <Modal
+                          <Modal
           show={showPrescriptionDocsForm}
           onHide={() => setShowPrescriptionDocsForm(false)}
         >
@@ -4612,31 +5633,25 @@ setRecordDetails(recordDetails);
             </Form>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowPrescriptionDocsForm(false)}>
+            <Button
+              variant="secondary"
+              onClick={() => setShowPrescriptionDocsForm(false)}
+            >
               Cancel
             </Button>
             <Button
               variant="primary"
-              onClick={() =>
-                handlePrescriptionDocs(appointment.appointment_id)
-              }
+              onClick={() => handlePrescriptionDocs(appointment.appointment_id)}
             >
               Upload
             </Button>
           </Modal.Footer>
         </Modal>
-      </td>
-    </tr>
-  )}
+                        </td>
+                      </tr>
+                    )}
  
- 
- 
- 
- 
- 
- 
- 
-{showRecordForm &&
+                  {showRecordForm &&
                     expandedAppointmentId === appointment.appointment_id && (
                       <tr>
                         <td colSpan="6">
@@ -4644,16 +5659,42 @@ setRecordDetails(recordDetails);
                             className="shadow-sm mt-3"
                             style={{
                               borderRadius: "15px",
-                              border: "2px solid #6f42c1",
-                              background:
-                                "linear-gradient(145deg, #e5e5f7, #d8d8f1)",
+                              border: " #0091A5",
+                              background: "#0091A5",
                             }}
                           >
                             <Card.Body>
-                              <h5>Document</h5>
+                              {/* Bold and larger font for heading */}
+                              <h5
+                                style={{
+                                  fontFamily: "Sans-Serif", // Set the font family
+                                  fontSize: "40px", // Set the font size
+                                  fontWeight: 600, // Set the font weight
+                                  lineHeight: "46.88px", // Set the line height
+                                  textAlign: "left", // Align text to the left
+                                  width: "225px", // Set the width
+                                  height: "46px", // Set the height
+                                  gap: "0px", // Gap property
+                                  opacity: 1, // Ensure full visibility
+                                  // background: '#FFFFFF',     // Set background color to white
+                                  color: "#ffffff", // Set the text color for contrast
+                                }}
+                              >
+                                Document
+                              </h5>
+ 
                               <Button
                                 variant="outline-primary"
-                                className="float-end mb-5"
+                                style={{
+                                  position: "absolute", // Absolute positioning inside the card
+                                  top: "10px", // Distance from the top of the card
+                                  right: "10px", // Distance from the right of the card
+                                  background: "#0166CB", // Background color
+                                  color: "#ffffff", // Text color
+                                  border: "none", // Remove the border
+                                  borderRadius: "5px", // Rounded corners
+                                  padding: "10px 20px", // Padding for size
+                                }}
                                 onClick={() => {
                                   setIsPrescriptionDocs(true);
                                   toggleFormModal();
@@ -4661,19 +5702,57 @@ setRecordDetails(recordDetails);
                               >
                                 Upload Document
                               </Button>
+ 
                               <Row className="mb-5">
                                 <Col xs={12} md={12}>
                                   <Table striped bordered hover>
                                     <thead className="table-light">
                                       <tr>
-                                        <th>Document Name</th>
-                                        <th>Patient Name</th>
-                                        <th>Document Date</th>
-                                        <th>Document Type</th>
-                                        <th>Document File</th>
-                                        <th>Actions</th>
+                                        <th
+                                          style={{
+                                            background: "#D7EAF0", // Background color for "Document Name"
+                                          }}
+                                        >
+                                          Document Name
+                                        </th>
+                                        <th
+                                          style={{
+                                            background: "#D7EAF0", // Background color for "Patient Name"
+                                          }}
+                                        >
+                                          Patient Name
+                                        </th>
+                                        <th
+                                          style={{
+                                            background: "#D7EAF0", // Background color for "Document Date"
+                                          }}
+                                        >
+                                          Document Date
+                                        </th>
+                                        <th
+                                          style={{
+                                            background: "#D7EAF0", // Background color for "Document Type"
+                                          }}
+                                        >
+                                          Document Type
+                                        </th>
+                                        <th
+                                          style={{
+                                            background: "#D7EAF0", // Background color for "Document File"
+                                          }}
+                                        >
+                                          Document File
+                                        </th>
+                                        <th
+                                          style={{
+                                            background: "#D7EAF0", // Background color for "Actions"
+                                          }}
+                                        >
+                                          Actions
+                                        </th>
                                       </tr>
                                     </thead>
+ 
                                     <tbody>
                                       {medicalRecords.map((record) => (
                                         <tr key={record.id}>
@@ -4903,11 +5982,6 @@ setRecordDetails(recordDetails);
                         </td>
                       </tr>
                     )}
- 
- 
- 
- 
- 
                 </React.Fragment>
               ))}
             </tbody>
@@ -4915,10 +5989,7 @@ setRecordDetails(recordDetails);
         </Card.Body>
       </Card>
  
-      <Modal
-        show={showConfirmation}
-        onHide={() => setShowConfirmation(false)}
-      >
+      <Modal show={showConfirmation} onHide={() => setShowConfirmation(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Confirm Deletion</Modal.Title>
         </Modal.Header>
@@ -4945,15 +6016,11 @@ setRecordDetails(recordDetails);
       </Modal>
  
       {/* Preview Modal */}
-      <Modal
-        show={showPreviewModal}
-        onHide={handleClosePreviewModal}
-        size="lg"
-      >
+      <Modal show={showPreviewModal} onHide={handleClosePreviewModal} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Preview Document</Modal.Title>
         </Modal.Header>
-        <Modal.Body style={{ maxHeight: '600px', overflowY: 'auto' }}>
+        <Modal.Body style={{ maxHeight: "600px", overflowY: "auto" }}>
           {previewFileType.includes("image") ? (
             <img
               src={previewFileUrl}
@@ -4985,7 +6052,6 @@ setRecordDetails(recordDetails);
           </Button>
         </Modal.Footer>
       </Modal>
-     
  
       <ToastContainer position="top-end" className="p-3">
         <Toast
