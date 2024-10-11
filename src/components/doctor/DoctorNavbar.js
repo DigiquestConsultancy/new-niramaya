@@ -436,14 +436,12 @@
 // export default DoctorNavbar;
 
 
-
-
+ 
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Company from "../../images/logo.jpeg";
-// import "../../css/Navbar.css";
 import ProfileIcon from "../profile/ProfileIcon";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
  
 const DoctorNavbar = () => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -507,7 +505,6 @@ const DoctorNavbar = () => {
                 </button>
  
                 <div className={`collapse navbar-collapse ${navbarOpen ? "show" : ""}`} id="navbarNav">
-                    {/* Main Navbar Items - Visible only on larger screens */}
                     <ul className="navbar-nav mr-auto d-none d-lg-flex">
                         {userType === "doctor" && (
                             <>
@@ -535,7 +532,7 @@ const DoctorNavbar = () => {
                                     className={`nav-item dropdown ${hospitalDropdownOpen ? "show" : ""}`}
                                     onMouseEnter={() => setHospitalDropdownOpen(true)}
                                     onMouseLeave={() => setHospitalDropdownOpen(false)}
-                                   
+ 
                                 >
                                     <button
                                         className={`btn nav-link dropdown-toggle ${!areAllFieldsEnabled ? "disabled" : ""}`}
@@ -550,7 +547,7 @@ const DoctorNavbar = () => {
                                     <div
                                         className={`dropdown-menu ${hospitalDropdownOpen ? "show" : ""}`}
                                         aria-labelledby="hospitalDropdown"
-                                        style={{backgroundColor: '#fff'}}
+                                        style={{ backgroundColor: '#fff' }}
                                     >
                                         <Link
                                             className={`dropdown-item ${!areAllFieldsEnabled ? "disabled" : ""}`}
@@ -592,7 +589,7 @@ const DoctorNavbar = () => {
                                     <div
                                         className={`dropdown-menu ${appointmentsDropdownOpen ? "show" : ""}`}
                                         aria-labelledby="appointmentsDropdown"
-                                        style={{backgroundColor: '#fff'}}
+                                        style={{ backgroundColor: '#fff' }}
                                     >
                                         <Link
                                             className={`dropdown-item ${!areAllFieldsEnabled ? "disabled" : ""}`}
@@ -630,6 +627,83 @@ const DoctorNavbar = () => {
                         )}
                     </ul>
  
+                    <ul className="navbar-nav mr-auto d-none d-lg-flex">
+                        {userType === 'clinic' && (
+                            <>
+ 
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/clinic/home" style={{ color: '#f18dc' }}>
+                                        <strong>Home</strong>
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/clinic/createslot" style={{ color: '#f18dc' }}>
+                                        <strong>Appointment Slots</strong>
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/clinic/details" style={{ color: '#f18dc' }}>
+                                        <strong>Clinic Details</strong>
+                                    </Link>
+                                </li>
+                                <li className={`nav-item dropdown ${appointmentsDropdownOpen ? 'show' : ''}`}
+                                    onMouseEnter={() => setAppointmentsDropdownOpen(true)}
+                                    onMouseLeave={() => setAppointmentsDropdownOpen(false)}>
+                                    <button
+                                        className="btn nav-link dropdown-toggle"
+                                        id="appointmentsDropdown"
+                                        onClick={toggleAppointmentsDropdown}
+                                        aria-expanded={appointmentsDropdownOpen}
+                                    >
+                                        <strong>Appointments</strong>
+                                    </button>
+                                    <div className={`dropdown-menu ${appointmentsDropdownOpen ? 'show' : ''}`} aria-labelledby="appointmentsDropdown">
+                                        <Link className="dropdown-item" to="/clinic/appointmentbook" onClick={() => setAppointmentsDropdownOpen(false)}>Book Appointment</Link>
+                                        <Link className="dropdown-item" to="/clinic/bookedappointment" onClick={() => setAppointmentsDropdownOpen(false)}>Booked Appointment</Link>
+                                    </div>
+                                </li>
+ 
+                            </>
+                        )}
+                    </ul>
+                    <ul className="navbar-nav mr-auto d-none d-lg-flex">
+                        {userType === 'reception' && (
+                            <>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/reception/home" style={{ color: '#f18dc' }}>
+                                        <strong>Home</strong>
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/reception/createslot" style={{ color: '#f18dc' }}>
+                                        <strong>Appointment Slots</strong>
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/reception/details" style={{ color: '#f18dc' }}>
+                                        <strong>Reception Details</strong>
+                                    </Link>
+                                </li>
+                                <li className={`nav-item dropdown ${appointmentsDropdownOpen ? 'show' : ''}`}
+                                    onMouseEnter={() => setAppointmentsDropdownOpen(true)}
+                                    onMouseLeave={() => setAppointmentsDropdownOpen(false)}>
+                                    <button
+                                        className="btn nav-link dropdown-toggle"
+                                        id="appointmentsDropdown"
+                                        onClick={toggleAppointmentsDropdown}
+                                        aria-expanded={appointmentsDropdownOpen}
+                                    >
+                                        <strong>Appointments</strong>
+                                    </button>
+                                    <div className={`dropdown-menu ${appointmentsDropdownOpen ? 'show' : ''}`} aria-labelledby="appointmentsDropdown">
+                                        <Link className="dropdown-item" to="/reception/appointmentbook" onClick={() => setAppointmentsDropdownOpen(false)}>Book Appointment</Link>
+                                        <Link className="dropdown-item" to="/reception/bookedappointment" onClick={() => setAppointmentsDropdownOpen(false)}>Booked Appointment</Link>
+                                    </div>
+                                </li>
+                            </>
+                        )}
+                    </ul>
+ 
                     <ul className="navbar-nav ml-auto d-none d-lg-flex">
                         <li className="nav-item">
                             <button className="btn nav-link" onClick={toggleProfileDropdown}>
@@ -638,7 +712,7 @@ const DoctorNavbar = () => {
                             <div
                                 className={`dropdown-menu dropdown-menu-right ${dropdownOpen ? "show" : ""}`}
                                 aria-labelledby="profileDropdown"
-                                style={{backgroundColor: '#fff'}}
+                                style={{ backgroundColor: '#fff' }}
                             >
                                 {userType === "doctor" && (
                                     <>
@@ -701,11 +775,80 @@ const DoctorNavbar = () => {
                                         </Link>
                                     </>
                                 )}
+ 
+ 
+                                {userType === "clinic" && (
+                                    <>
+                                        <Link
+                                            className="dropdown-item"
+                                            to="/clinic/details"
+                                            onClick={toggleProfileDropdown}
+                                        >
+                                            Clinic Details
+                                        </Link>
+                                        <Link
+                                            className={`dropdown-item`}
+                                            to="/clinic/createslot"
+                                            onClick={toggleProfileDropdown}
+                                        >
+                                            Create Slot
+                                        </Link>
+                                        <Link
+                                            className={`dropdown-item`}
+                                            to="/clinic/appointmentbook"
+                                            onClick={toggleProfileDropdown}
+                                        >
+                                            Book Appointment
+                                        </Link>
+                                        <Link
+                                            className={`dropdown-item`}
+                                            to="/clinic/bookedappointment"
+                                            onClick={toggleProfileDropdown}
+                                        >
+                                            Booked Appointment
+                                        </Link>
+                                    </>
+                                )}
+ 
+ 
+                                {userType === "reception" && (
+                                    <>
+                                        <Link
+                                            className="dropdown-item"
+                                            to="/reception/details"
+                                            onClick={toggleProfileDropdown}
+                                        >
+                                            Reception Details
+                                        </Link>
+                                        <Link
+                                            className={`dropdown-item`}
+                                            to="/reception/createslot"
+                                            onClick={toggleProfileDropdown}
+                                        >
+                                            Create Slot
+                                        </Link>
+                                        <Link
+                                            className={`dropdown-item`}
+                                            to="/reception/appointmentbook"
+                                            onClick={toggleProfileDropdown}
+                                        >
+                                            Book Appointment
+                                        </Link>
+                                        <Link
+                                            className={`dropdown-item`}
+                                            to="/reception/bookedappointment"
+                                            onClick={toggleProfileDropdown}
+                                        >
+                                            Booked Appointment
+                                        </Link>
+                                    </>
+                                )}
+ 
+ 
                             </div>
                         </li>
                     </ul>
  
-                    {/* Profile items for small screens - Hamburger Menu */}
                     <ul className="navbar-nav d-lg-none">
                         {userType === "doctor" && (
                             <>
@@ -746,7 +889,58 @@ const DoctorNavbar = () => {
                                 </li>
                             </>
                         )}
+ 
+                        {userType === "clinic" && (
+                            <>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/clinic/details" onClick={closeNavbar}>
+                                        Clinic Details
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/clinic/createslot" onClick={closeNavbar}>
+                                        Create Slot
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/clinic/appointmentbook" onClick={closeNavbar}>
+                                        Book Appointment
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/clinic/bookedappointment" onClick={closeNavbar}>
+                                        Booked Appointment
+                                    </Link>
+                                </li>
+                            </>
+                        )}
+ 
+                        {userType === "reception" && (
+                            <>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/reception/details" onClick={closeNavbar}>
+                                        Reception Details
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/reception/createslot" onClick={closeNavbar}>
+                                        Create Slot
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/reception/appointmentbook" onClick={closeNavbar}>
+                                        Book Appointment
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/reception/bookedappointment" onClick={closeNavbar}>
+                                        Booked Appointment
+                                    </Link>
+                                </li>
+                            </>
+                        )}
                     </ul>
+ 
                 </div>
             </div>
         </nav>
