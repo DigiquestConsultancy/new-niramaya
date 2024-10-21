@@ -1,25 +1,56 @@
-.header {
-    display: inline-flex;
-    align-items: center;
-    justify-content: space-evenly;
+@media (max-width: 768px) {
+  .header .logo {
+    max-width: 100px;
+    margin-bottom: 10px;
   }
-   
-  .heading{
-    padding-left: 300px;
+ 
+  .header .heading {
+    font-size: 24px;
+    padding-left: 0;
+    padding: 10px 20px;
   }
-   
-  .logo {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
+ 
+  .doctor-container h3 {
+    font-size: 16px;
+    padding-left: 0;
+    text-align: center;
+    padding: 10px 20px;
   }
-   
-   
-  .doctor-container {
-    background: linear-gradient(to right, #f5f7ad, #f0f2f3);
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    margin: 0;
-   
+ 
+ 
+}
+ 
+@media (max-width: 576px) {
+  .appointments-col h5,
+  .content-col h5.clickable {
+    font-size: 1rem;
+    padding: 8px;
   }
+ 
+  .appointments-col {
+    padding: 10px;
+    max-height: 300px;
+  }
+ 
+  .content-col h5.clickable {
+    border-radius: 4px;
+  }
+}
+ 
+@media (max-width: 768px) {
+  .appointments-col h5,
+  .content-col h5.clickable {
+    font-size: 1.1rem;
+    padding: 9px;
+  }
+ 
+  .content-col h5.clickable {
+    border-radius: 5px;
+  }
+}
+ 
+ 
+ 
+body {
+  overflow-x: hidden;
+}

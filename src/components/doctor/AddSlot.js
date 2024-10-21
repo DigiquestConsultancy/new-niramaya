@@ -44,16 +44,23 @@ const AddSlot = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await BaseUrl.post('/doctorappointment/slot/', formData);
-      if (response.status === 201) {
-        setSuccessMessage(response.data.success); // Display success message from the backend
-        setErrorMessage('');
-      }
+        const response = await BaseUrl.post('/doctorappointment/slot/', formData);
+        
+        if (response.status === 201 ) {
+            setSuccessMessage(response.data.success); // Display success message from the backend
+            setErrorMessage(''); // Clear any previous error message
+        }
     } catch (error) {
-      setErrorMessage('Error adding slot.');
-      setSuccessMessage('');
+        // Check if it's a 400 Bad Request error
+        if (error.response && error.response.status === 400) {
+            setErrorMessage(error.response.data.error); // Show backend error message for 400
+        } else {
+            setErrorMessage('An unexpected error occurred.');
+        }
+        setSuccessMessage(''); // Clear success message if any
     }
-  };
+};
+
 
   const generateIntervalMinutesOptions = () => {
     const options = [];

@@ -23,22 +23,22 @@ const PatientNavbar = ({ isLoggedIn }) => {
                 <div className="collapse navbar-collapse" id="navbarNav">
                     <ul className="navbar-nav mr-auto">
 
-                        <li className="nav-item">
+                        <li className="nav-item mr-3">
                             <Link className="nav-link" to="/patient/home" style={{ border: 'none', background: 'none', padding: 0, color: '#f18dc' }}>
                                 <b>Home</b>
                             </Link>
                         </li>
-                        <li className="nav-item">
+                        <li className="nav-item mr-3">
                             <Link className="nav-link" to="/patient/details" style={{ border: 'none', background: 'none', padding: 0, color: '#f18dc' }}>
                                 <b>My Details</b>
                             </Link>
                         </li>
-                        <li className="nav-item">
+                        <li className="nav-item mr-3">
                             <Link className="nav-link" to="/patient/slots" style={{ border: 'none', background: 'none', padding: 0, color: '#f18dc' }}>
                                 <b>My Appointments</b>
                             </Link>
                         </li>
-                        <li className="nav-item">
+                        <li className="nav-item mr-3">
                             <Link className="nav-link" to="/patient/bookappointment" style={{ border: 'none', background: 'none', padding: 0, color: '#f18dc' }}>
                                 <b>Book Appointments</b>
                             </Link>

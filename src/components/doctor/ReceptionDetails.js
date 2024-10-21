@@ -90,7 +90,7 @@ const ReceptionDetails = () => {
             <input type="number" className="form-control" name="mobile_number" value={formData.mobile_number} disabled onChange={handleChange} />
           </div>
           <div className="col-md-4">
-            <label>Name</label><span className="text-danger">*</span> {/* Mandatory indicator */}
+            <label>Name</label><span className="text-danger"></span> {/* Mandatory indicator */}
             <input type="text" className="form-control" name="name" value={formData.name} onChange={handleChange} />
           </div>
           <div className="col-md-4">

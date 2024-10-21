@@ -1,6 +1,8 @@
 
+
+
 .bg-container {
-  /* background-image: url('C:\MyData\React Course\final project\final-project\src\images\logindoctor.png'); */
+  /* background-image: url('C:\Users\DELL\Desktop\final project\final-project\src\images\logindoctor.png'); */
   background-size: cover;
   background-position: center;
   min-height: 68vh;
@@ -60,7 +62,7 @@
 @media (min-width: 1200px) {
   .form-container form {
     height: 50vh;
-    max-width: 40%;
+    max-width: 75%;
   }
 }
  
