@@ -1,32 +1,30 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import BaseUrl from "../../api/BaseUrl";
-import { Row, Col,Card,Button,Form,Modal,FormGroup,} from "react-bootstrap";
+import { Row, Col, Card, Button, ButtonGroup, Form, Modal, FormGroup, Dropdown, DropdownButton } from "react-bootstrap";
 import { jwtDecode } from "jwt-decode";
 import "../../css/DoctorHome.css";
 import { format, subDays, addDays } from "date-fns";
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 import { FaTimes } from "react-icons/fa";
-import { Dropdown, DropdownButton } from "react-bootstrap";
-import {faFileAlt,faReceipt,faTimes as faTimesSolid,} from "@fortawesome/free-solid-svg-icons";
+import { faFileAlt, faReceipt, faTimes as faTimesSolid } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
- 
 const DoctorHome = () => {
   const [totalAppointments, setTotalAppointments] = useState();
   const [bookedAppointmentCount, setBookedAppointmentCount] = useState();
-  const [completedAppointmentsCount, setCompletedAppointmentsCount] =useState();
+  const [completedAppointmentsCount, setCompletedAppointmentsCount] = useState();
   const [canceledAppointmentsCount, setCanceledAppointmentsCount] = useState();
   const [walkInCount, setWalkInCount] = useState();
   const [onlineCount, setOnlineCount] = useState();
   const [followUpCount, setFollowUpCount] = useState();
- 
+
   const [clinicPhoto, setClinicPhoto] = useState(null);
   const [clinicName, setClinicName] = useState();
-  const [mobileNumber, setMobileNumber] = useState(null);
+  const mobileNumber = useState(null);
   const [loading, setLoading] = useState(false);
-  const [isPrescriptionDocs, setIsPrescriptionDocs] = useState(false);
-  const [editingRecordId, setEditingRecordId] = useState(null);
- 
+  const isPrescriptionDocs = useState(false);
+  const editingRecordId = useState(null);
+
   const fetchClinicDetails = async () => {
     try {
       const response = await BaseUrl.get(`/doctor/opddays/`, {
@@ -35,49 +33,48 @@ const DoctorHome = () => {
           mobile_number: mobileNumber,
         },
       });
- 
       if (response.status === 200 && response.data.length > 0) {
         const data = response.data[0];
         setClinicName(data.clinic_name);
- 
+
         if (data.doc_file) {
           const fullImageUrl = `${BaseUrl.defaults.baseURL}${data.doc_file}`;
           setClinicPhoto(fullImageUrl);
         } else {
-          setClinicPhoto("No photo available");
+          setClinicPhoto("");
         }
+      } else {
+        setClinicName("");
+        setClinicPhoto("");
       }
-    } catch (error) {}
+    } catch (error) {
+      setClinicName("");
+      setClinicPhoto("");
+    }
   };
- 
-  const [appointments, setAppointments] = useState({
-    morning: [],
-    afternoon: [],
-    evening: [],
-  });
- 
+
   const [doctorId, setDoctorId] = useState(null);
- 
   const [todayAppointments, setTodayAppointments] = useState([]);
   const [completedAppointments, setCompletedAppointments] = useState([]);
   const [canceledAppointments, setCanceledAppointments] = useState([]);
- 
+
   const [showModal, setShowModal] = useState(false);
   const [showCompletedModal, setShowCompletedModal] = useState(false);
   const [showCanceledModal, setShowCanceledModal] = useState(false);
- 
-  const [isCanceled, setIsCanceled] = useState(false);
-  const [isEnded, setIsEnded] = useState(false);
- 
+
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentIndex, setCurrentIndex] = useState(0);
   const [completedIndex, setCompletedIndex] = useState(0);
   const [canceledIndex, setCanceledIndex] = useState(0);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
- 
-  const formattedDate = format(currentDate, "dd/MM/yyyy");
+
   const formattedISODate = format(currentDate, "yyyy-MM-dd");
- 
+  const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
+
+  const [morningSlots, setMorningSlots] = useState([]);
+  const [afternoonSlots, setAfternoonSlots] = useState([]);
+  const [eveningSlots, setEveningSlots] = useState([]);
+
   const [appointmentDetails, setAppointmentDetails] = useState([]);
   const [prescriptionData, setPrescriptionData] = useState(null);
   const [patientDetails, setPatientDetails] = useState(null);
@@ -92,21 +89,26 @@ const DoctorHome = () => {
   const [isVisitEnded, setIsVisitEnded] = useState(false);
   const [error, setError] = useState(null);
   const [editingDocumentId, setEditingDocumentId] = useState(null);
- 
+
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
- 
-  const [selectedTodayAppointment, setSelectedTodayAppointment] =
-    useState(null);
-  const [selectedCompletedAppointment, setSelectedCompletedAppointment] =
-    useState(null);
-  const [selectedCanceledAppointment, setSelectedCanceledAppointment] =
-    useState(null);
- 
+
+  const [selectedTodayAppointment, setSelectedTodayAppointment] = useState(null);
+  const [selectedCompletedAppointment, setSelectedCompletedAppointment] = useState(null);
+  const [selectedCanceledAppointment, setSelectedCanceledAppointment] = useState(null);
+
+  const handleClose = () => setShowModal(false);
+  const [modalContent, setModalContent] = useState("");
+
+  const handleShow = (message) => {
+    setModalContent(message);
+    setShowModal(true);
+  };
+
   const handlePrevious = () => {
     setCurrentIndex((prevIndex) => Math.max(prevIndex - 1, 0));
   };
- 
+
   const handleNext = () => {
     if (todayAppointments && todayAppointments.length > 0) {
       setCurrentIndex((prevIndex) =>
@@ -114,33 +116,30 @@ const DoctorHome = () => {
       );
     }
   };
- 
+
   const handleCompletedPrevious = () => {
     setCompletedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
   };
- 
+
   const handleCompletedNext = () => {
     setCompletedIndex((prevIndex) =>
       Math.min(prevIndex + 1, completedAppointments.length - 4)
     );
   };
+
   const fetchAppointmentCounts = async () => {
     try {
-      if (!doctorId) return;
- 
       const response = await BaseUrl.get(`/reception/walkincount/`, {
         params: {
           doctor_id: doctorId,
           appointment_date: formattedISODate,
         },
       });
- 
       if (response.status === 200) {
         const data = response.data.reduce(
           (acc, curr) => ({ ...acc, ...curr }),
           {}
         );
- 
         setTotalAppointments(data["Total Appointments"]);
         setBookedAppointmentCount(data["Booked Appointments"]);
         setCanceledAppointmentsCount(data["Canceled Appointments"]);
@@ -149,57 +148,65 @@ const DoctorHome = () => {
         setOnlineCount(data["Online"]);
         setFollowUpCount(data["Follow-Up"]);
       }
-    } catch (error) {}
+    } catch (error) { }
   };
- 
-  const fetchAppointments = useCallback(async () => {
-    try {
-      const responseSlots = await BaseUrl.get(
-        `/doctorappointment/todayslot/?doctor_id=${doctorId}`,
-        {
+
+  const fetchSlots = useCallback(
+    async (date = currentDate) => {
+      try {
+        const formattedDate = format(date, "yyyy-MM-dd");
+        const responseSlots = await BaseUrl.get(`/doctorappointment/slot/`, {
           params: {
             doctor_id: doctorId,
-            appointment_date: formattedISODate,
+            slot_date: formattedDate,
           },
+        });
+
+        const morningSlots = [];
+        const afternoonSlots = [];
+        const eveningSlots = [];
+
+        if (responseSlots.data && responseSlots.data.length > 0) {
+          responseSlots.data.forEach((slot) => {
+            const appointmentTime = slot.appointment_slot;
+            const hour = new Date(`2000-01-01T${appointmentTime}`).getHours();
+            if (hour < 12) {
+              morningSlots.push(slot);
+            } else if (hour < 17) {
+              afternoonSlots.push(slot);
+            } else {
+              eveningSlots.push(slot);
+            }
+          });
         }
-      );
- 
-      const categorizedSlots = { morning: [], afternoon: [], evening: [] };
-      responseSlots.data.forEach((slot) => {
-        const appointmentTime = slot.appointment_slot;
-        const hour = new Date(`2000-01-01T${appointmentTime}`).getHours();
-        if (hour < 12) {
-          categorizedSlots.morning.push(slot);
-        } else if (hour < 17) {
-          categorizedSlots.afternoon.push(slot);
-        } else {
-          categorizedSlots.evening.push(slot);
-        }
-      });
- 
-      setAppointments(categorizedSlots);
- 
+        setMorningSlots(morningSlots);
+        setAfternoonSlots(afternoonSlots);
+        setEveningSlots(eveningSlots);
+      } catch (error) {
+        setMorningSlots([]);
+        setAfternoonSlots([]);
+        setEveningSlots([]);
+      }
+    },
+    [doctorId, currentDate]
+  );
+
+  const fetchAllAppointments = useCallback(async () => {
+    try {
       const response = await BaseUrl.get(`/reception/allappointments/`, {
         params: { doctor_id: doctorId },
       });
- 
       const appointments = response.data;
-      const todayAppointments = appointments.filter(
-        (app) => !app.is_complete && !app.is_canceled
-      );
-      const completedAppointments = appointments.filter(
-        (app) => app.is_complete
-      );
-      const canceledAppointments = appointments.filter(
-        (app) => app.is_canceled
-      );
- 
+      const todayAppointments = appointments.filter((app) => !app.is_complete && !app.is_canceled);
+      const completedAppointments = appointments.filter((app) => app.is_complete);
+      const canceledAppointments = appointments.filter((app) => app.is_canceled);
       setTodayAppointments(todayAppointments);
       setCompletedAppointments(completedAppointments);
       setCanceledAppointments(canceledAppointments);
-    } catch (error) {}
-  }, [doctorId, formattedISODate]);
- 
+    } catch (error) {
+    }
+  }, [doctorId]);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -207,38 +214,37 @@ const DoctorHome = () => {
       setDoctorId(decoded.doctor_id);
     }
   }, []);
- 
+
   useEffect(() => {
-    fetchAppointments();
-    fetchAppointmentCounts();
+    fetchSlots();
+    fetchAllAppointments();
     fetchClinicDetails();
-  }, [doctorId, currentDate, fetchAppointments]);
- 
+    fetchAppointmentCounts();
+  }, [doctorId, currentDate]);
+
   const handlePreviousDate = () => {
-    setCurrentDate((prevDate) => subDays(prevDate, 1));
+    const newDate = subDays(currentDate, 1);
+    setCurrentDate(newDate);
   };
- 
+
   const handleNextDate = () => {
-    setCurrentDate((prevDate) => addDays(prevDate, 1));
+    const newDate = addDays(currentDate, 1);
+    setCurrentDate(newDate);
   };
- 
+
   const [uploadedPrescription, setUploadedPrescription] = useState(null);
+
   const fetchUploadedPrescriptionDocument = async (appointmentId) => {
-    setFetchError("");
-    setSuccessMessage("");
-    setErrorMessage("");
- 
     try {
-      const formattedDate = new Date(selectedAppointmentDate)
-        .toISOString()
-        .split("T")[0];
+      const formattedDate = selectedAppointmentDate
+        ? new Date(selectedAppointmentDate).toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0];
       const response = await BaseUrl.get(`/patient/patientprescriptonfile/`, {
         params: {
           appointment_id: appointmentId,
           prescription_date: formattedDate,
         },
       });
- 
       if (response.status === 200) {
         setUploadedPrescription(response.data);
       } else {
@@ -246,10 +252,10 @@ const DoctorHome = () => {
       }
     } catch (error) {
       setUploadedPrescription(null);
-      setError(error.response?.data?.error || error.message || "");
+      setError(error.response?.data?.error || error.message || "An unexpected error occurred.");
     }
   };
- 
+
   const handlePrescriptionClick = () => {
     setSelectedHeading("prescription");
     if (selectedAppointmentId && selectedAppointment.patient_id) {
@@ -260,7 +266,6 @@ const DoctorHome = () => {
         time: "",
         description: "",
       });
- 
       Promise.all([
         fetchPrescriptionData(
           selectedAppointment.patient_id,
@@ -276,14 +281,11 @@ const DoctorHome = () => {
         });
     }
   };
- 
+
   const fetchPrescriptionData = async (patientId, appointmentId) => {
-    setFetchError(""); // Clear existing errors
+    setFetchError("");
     try {
-      const response = await BaseUrl.get(
-        `/patient/patientpriscription/?patient_id=${patientId}&appointment_id=${appointmentId}`
-      );
- 
+      const response = await BaseUrl.get(`/patient/patientpriscription/?appointment_id=${appointmentId}`);
       if (response.data.length > 0) {
         const prescriptions = response.data.map((prescription) => ({
           ...prescription,
@@ -302,29 +304,26 @@ const DoctorHome = () => {
       );
     }
   };
- 
+
   const [formPrescription, setFormPrescription] = useState({
     medicine_name: "",
     comment: "",
     time: "",
     description: "",
   });
- 
+
   const handleViewPrescription = async (documentId) => {
     setFetchError("");
     try {
       if (!documentId) {
         throw new Error("Document ID is required");
       }
- 
-      const response = await BaseUrl.get(
-        `/patient/patientprescriptonfileView/`,
+      const response = await BaseUrl.get(`/patient/patientprescriptonfileView/`,
         {
           params: { document_id: documentId },
           responseType: "blob",
         }
       );
- 
       if (response.status === 200) {
         const fileType = response.headers["content-type"];
         const fileURL = window.URL.createObjectURL(
@@ -335,27 +334,13 @@ const DoctorHome = () => {
         setShowPreviewModal(true);
         setError(null);
       } else {
-        setError(
-          error.response?.data?.error ||
-            error.message ||
-            "An unexpected error occurred."
-        );
+        setError(error.response?.data?.error || error.message || "An unexpected error occurred.");
       }
     } catch (error) {
-      setError(
-        error.response?.data?.error ||
-          error.message ||
-          "An unexpected error occurred."
-      );
+      setError(error.response?.data?.error || error.message || "An unexpected error occurred.");
     }
   };
- 
-  const [activeActionIndex, setActiveActionIndex] = useState(null);
- 
-  const toggleActions = (index) => {
-    setActiveActionIndex((prevIndex) => (prevIndex === index ? null : index));
-  };
- 
+
   const renderPrescriptionData = () => {
     const hasPrescriptions = prescriptionData && prescriptionData.length > 0;
     return (
@@ -375,7 +360,6 @@ const DoctorHome = () => {
             {fetchError}
           </div>
         )}
- 
         {hasPrescriptions ? (
           prescriptionData.map((result, index) => (
             <div key={result.id} className="mb-3 position-relative">
@@ -391,6 +375,7 @@ const DoctorHome = () => {
                       onChange={(e) =>
                         handlePrescriptionFieldChange(e, index, "medicine_name")
                       }
+                      required
                     />
                   </FormGroup>
                 </Col>
@@ -419,6 +404,7 @@ const DoctorHome = () => {
                       onChange={(e) =>
                         handlePrescriptionFieldChange(e, index, "time")
                       }
+                      required
                     >
                       <option value="morning">Morning</option>
                       <option value="morning-afternoon">
@@ -549,7 +535,7 @@ const DoctorHome = () => {
             </Col>
           </Row>
         )}
- 
+
         <Col md={6} className="mb-5 mt-4">
           <Form.Group>
             <div style={{ display: "flex", gap: "10px" }}>
@@ -568,27 +554,44 @@ const DoctorHome = () => {
             </div>
           </Form.Group>
         </Col>
- 
+
         <input
           type="file"
           id="fileUpload"
           style={{ display: "none" }}
           onChange={handleFileUpload}
         />
- 
+
         {uploadedPrescription && uploadedPrescription.length > 0 && (
           <div className="mt-4">
             <h5>Uploaded Prescription Documents:</h5>
             <Row>
               {uploadedPrescription.map((result, index) => (
                 <Col key={index} md={3} className="mb-3">
-                  <Button
-                    variant="outline-primary"
-                    onClick={() => handleViewPrescription(result.id)}
-                    style={{ width: "100%", textAlign: "center" }}
-                  >
-                    View Document {index + 1}
-                  </Button>
+                  <ButtonGroup>
+                    <Button
+                      variant="outline-primary"
+                      onClick={() => handleViewPrescription(result.id)}
+                      style={{ width: "100%", textAlign: "center" }}
+                    >
+                      View Document {index + 1}
+                    </Button>
+                    <Dropdown as={ButtonGroup}>
+                      <Dropdown.Toggle
+                        split
+                        variant="outline-primary"
+                        id="dropdown-split-basic"
+                      />
+                      <Dropdown.Menu>
+                        <Dropdown.Item
+                          onClick={() => handleDeleteDocumentFile(result.id)}
+                          className="text-danger"
+                        >
+                          Remove
+                        </Dropdown.Item>
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  </ButtonGroup>
                 </Col>
               ))}
             </Row>
@@ -597,139 +600,69 @@ const DoctorHome = () => {
       </div>
     );
   };
- 
- 
+
   const handleAddPrescription = () => {
     setPrescriptionData([
       ...prescriptionData,
       { medicine_name: "", comment: "", time: "", description: "" },
     ]);
   };
- 
+
   const handlePrescriptionFieldChange = (e, index, field) => {
     const { value } = e.target;
     const updatedPrescriptions = [...prescriptionData];
     updatedPrescriptions[index][field] = value;
     setPrescriptionData(updatedPrescriptions);
   };
- 
+
   const handlePrescriptionChange = (e) => {
     const { name, value } = e.target;
     setFormPrescription((prev) => ({ ...prev, [name]: value }));
   };
- 
+
   const handlePrescriptionSubmit = async () => {
     try {
       const hasExistingPrescriptions = prescriptionData.length > 0;
-      const latestPrescription = hasExistingPrescriptions
-        ? prescriptionData[prescriptionData.length - 1]
-        : formPrescription;
- 
-      const isNewPrescription =
-        !hasExistingPrescriptions || !latestPrescription.id;
- 
-      const formData = new FormData();
-      formData.append("appointment_id", selectedAppointmentId);
-      formData.append("patient_id", selectedAppointment.patient_id);
-      formData.append("medicine_name", latestPrescription.medicine_name || "");
-      formData.append("comment", latestPrescription.comment || "");
-      formData.append("time", latestPrescription.time || "");
-      formData.append("description", latestPrescription.description || "");
- 
+      const latestPrescription = hasExistingPrescriptions ? prescriptionData[prescriptionData.length - 1] : formPrescription;
+      const isNewPrescription = !hasExistingPrescriptions || !latestPrescription.id;
+      const prescriptions = [
+        {
+          medicine_name: latestPrescription.medicine_name || "",
+          time: latestPrescription.time || "",
+          comment: latestPrescription.comment || "",
+          description: latestPrescription.description || "",
+          appointment_id: selectedAppointmentId,
+        }
+      ];
       const endpoint = "/patient/patientpriscription/";
       const response = isNewPrescription
-        ? await BaseUrl.post(endpoint, formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-          })
-        : await BaseUrl.put(endpoint, formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-          });
- 
-      if (response.status === 200) {
-        setSuccessMessage(response.data.success || ""); // Use backend success message
-        setErrorMessage(null);
- 
-        await fetchPrescriptionData(
+        ? await BaseUrl.post(endpoint, prescriptions, {
+          headers: { "Content-Type": "application/json" },
+        })
+        : await BaseUrl.put(endpoint, prescriptions, {
+          headers: { "Content-Type": "application/json" },
+        });
+
+      if (response.status === 201 && response.data.success) {
+        const successMessage =
+          response.data.success || "Details have been successfully updated.";
+        setSuccessMessage(successMessage);
+        handleShow(successMessage);
+        fetchPrescriptionData(
           selectedAppointment.patient_id,
           selectedAppointmentId
         );
       } else {
-        setErrorMessage(response.data.error || "");
+        setErrorMessage();
+        handleShow("Failed to save Prescription data.");
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.error || "");
+      const errorMessage = error.response?.data?.error;
+      setErrorMessage(errorMessage);
+      handleShow(errorMessage);
     }
   };
- 
-  const deletePrescription = async (prescriptionId) => {
-    try {
-      if (!prescriptionId) {
-        setErrorMessage("Prescription ID is missing.");
-        return;
-      }
- 
-      const response = await BaseUrl.delete(`/patient/patientpriscription/`, {
-        params: { prescription_id: prescriptionId },
-      });
- 
-      if (response.status === 200) {
-        setSuccessMessage(response.data.success || ""); // Use backend success message if available
-        setErrorMessage(null);
- 
-        await fetchPrescriptionData(
-          selectedAppointment.patient_id,
-          selectedAppointmentId
-        );
-      } else {
-        setErrorMessage(response.data.error || "");
-      }
-    } catch (error) {
-      setErrorMessage(error.response?.data?.error || "");
-    }
-  };
- 
-  const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) {
-      setErrorMessage("");
-      return;
-    }
- 
-    const formattedDate = new Date(selectedAppointmentDate)
-      .toISOString()
-      .split("T")[0];
-    const matchingAppointment = appointmentDetails.find(
-      (appointment) => appointment.appointment_date === selectedAppointmentDate
-    );
- 
-    if (!matchingAppointment) {
-      setErrorMessage("");
-      return;
-    }
- 
-    const appointmentId = matchingAppointment.id;
-    const formData = new FormData();
-    formData.append("document_file", file);
-    formData.append("appointment", appointmentId);
-    formData.append("document_date", formattedDate);
- 
-    try {
-      const response = await BaseUrl.post(
-        "/patient/patientprescriptonfile/",
-        formData
-      );
- 
-      if (response.status === 200) {
-        setSuccessMessage(response.data.success || "");
-        setErrorMessage(null);
-      } else {
-        setErrorMessage(response.data.error || "");
-      }
-    } catch (error) {
-      setErrorMessage(error.response?.data?.error || "");
-    }
-  };
- 
+
   const handleUpdatePrescription = async (prescriptionId, index) => {
     try {
       const prescriptionDataItem = prescriptionData[index];
@@ -737,47 +670,125 @@ const DoctorHome = () => {
         setErrorMessage("");
         return;
       }
- 
       const updateData = new FormData();
       updateData.append("prescription_id", prescriptionId);
-      updateData.append("patient_id", prescriptionDataItem.patient);
       updateData.append("medicine_name", prescriptionDataItem.medicine_name);
       updateData.append("time", prescriptionDataItem.time);
       updateData.append("comment", prescriptionDataItem.comment);
       updateData.append("description", prescriptionDataItem.description);
- 
-      const response = await BaseUrl.put(
-        `/patient/patientpriscription/`,
-        updateData,
+
+      const response = await BaseUrl.put(`/patient/patientpriscription/`, updateData,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
- 
-      if (response.status === 200) {
-        setSuccessMessage(response.data.success || "");
-        setErrorMessage(null);
- 
+      if (response.status === 201) {
+        const successMessage =
+          response.data.success || "Details have been successfully updated.";
+        setSuccessMessage(successMessage);
+        handleShow(successMessage);
         await fetchPrescriptionData(
           selectedAppointment.patient_id,
           selectedAppointmentId
         );
       } else {
-        setErrorMessage(response.data.error || "");
+        setErrorMessage("Failed to update prescription.");
+        handleShow("Failed to update patient Prescription.");
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.error || "");
+      const errorMessage = error.response?.data?.error;
+      setErrorMessage(errorMessage);
+      handleShow(errorMessage);
     }
   };
- 
+
+  const deletePrescription = async (prescriptionId) => {
+    try {
+      const response = await BaseUrl.delete(`/patient/patientpriscription/`, {
+        params: { prescription_id: prescriptionId },
+      });
+      if (response.status === 200) {
+        const successMessage = response.data.success || "Details have been successfully updated.";
+        setSuccessMessage(successMessage);
+        handleShow(successMessage);
+        await fetchPrescriptionData(
+          selectedAppointment.patient_id,
+          selectedAppointmentId
+        );
+      } else {
+        setErrorMessage("Failed to delete prescription.");
+        handleShow("Failed to remove Prescription.");
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.error;
+      setErrorMessage(errorMessage);
+      handleShow(errorMessage);
+    }
+  };
+
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    const formattedDate = selectedAppointmentDate ? new Date(selectedAppointmentDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0];
+    const matchingAppointment = appointmentDetails.find((appointment) => appointment.appointment_date === formattedDate);
+    const appointmentId = matchingAppointment.id;
+    const formData = new FormData();
+    formData.append("document_file", file);
+    formData.append("appointment", appointmentId);
+    formData.append("document_date", formattedDate);
+
+    try {
+      const response = await BaseUrl.post("/patient/patientprescriptonfile/", formData);
+      if (response.status === 201) {
+        const successMessage =
+          response.data.success || "Details have been successfully updated.";
+        setSuccessMessage(successMessage);
+        handleShow(successMessage);
+        await fetchUploadedPrescriptionDocument(appointmentId);
+      } else {
+        setErrorMessage("Failed to upload file.");
+        handleShow("Failed to upload Prescription files.");
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || "An error occurred during file upload.";
+      setErrorMessage(errorMessage);
+      handleShow(errorMessage);
+    }
+  };
+
+  const handleDeleteDocumentFile = async (documentId) => {
+    const formattedDate = selectedAppointmentDate ? new Date(selectedAppointmentDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0];
+    const matchingAppointment = appointmentDetails.find((appointment) => appointment.appointment_date === formattedDate);
+    const appointmentId = matchingAppointment.id;
+    try {
+      const response = await BaseUrl.delete(`/patient/patientprescriptonfile/`,
+        {
+          data: { document_id: documentId },
+        }
+      );
+      if (response.status === 200) {
+        const successMessage =
+          response.data.success || "Document has been successfully deleted.";
+        setSuccessMessage(successMessage);
+        handleShow(successMessage);
+        await fetchUploadedPrescriptionDocument(appointmentId);
+      } else {
+        setErrorMessage("Failed to delete document.");
+        handleShow("Failed to delete document.");
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error || "An error occurred during document deletion.";
+      setErrorMessage(errorMessage);
+      handleShow(errorMessage);
+    }
+  };
+
   const fetchPatientDetails = async (patientId, appointmentId) => {
     setFetchError("");
     setSuccessMessage("");
     setErrorMessage("");
     try {
-      const response = await BaseUrl.get(
-        `/patient/patient/?patient_id=${patientId}&appointment_id=${appointmentId}`
-      );
+      const response = await BaseUrl.get(`/patient/patient/?patient_id=${patientId}&appointment_id=${appointmentId}`);
       if (response.status === 200) {
         setPatientDetails(response.data);
       } else {
@@ -789,7 +800,7 @@ const DoctorHome = () => {
       setFetchError(error.response?.data?.error || error.message || "");
     }
   };
- 
+
   const handlePatientDetailsClick = () => {
     setSelectedHeading("patientDetails");
     if (selectedAppointment) {
@@ -803,7 +814,7 @@ const DoctorHome = () => {
         });
     }
   };
- 
+
   const renderPatientDetails = () => {
     return (
       <div>
@@ -822,7 +833,7 @@ const DoctorHome = () => {
             {fetchError}
           </div>
         )}
- 
+
         <Row className="mt-3">
           <Col md={3}>
             <Form.Group>
@@ -832,9 +843,11 @@ const DoctorHome = () => {
               <Form.Control
                 type="text"
                 value={patientDetails.name}
-                onChange={(e) =>
-                  setPatientDetails({ ...patientDetails, name: e.target.value })
-                }
+                onChange={(e) => {
+                  const inputValue = e.target.value;
+                  const validInput = inputValue.replace(/[^a-zA-Z\s]/g, '');
+                  setPatientDetails({ ...patientDetails, name: validInput });
+                }}
               />
             </Form.Group>
           </Col>
@@ -846,9 +859,11 @@ const DoctorHome = () => {
               <Form.Control
                 type="text"
                 value={patientDetails.age}
-                onChange={(e) =>
-                  setPatientDetails({ ...patientDetails, age: e.target.value })
-                }
+                onChange={(e) => {
+                  const inputValue = e.target.value;
+                  const validInput = inputValue.replace(/[^0-9]/g, '');
+                  setPatientDetails({ ...patientDetails, age: validInput });
+                }}
               />
             </Form.Group>
           </Col>
@@ -877,12 +892,11 @@ const DoctorHome = () => {
               <Form.Control
                 type="text"
                 value={patientDetails.mobile_number}
-                onChange={(e) =>
-                  setPatientDetails({
-                    ...patientDetails,
-                    mobile_number: e.target.value,
-                  })
-                }
+                onChange={(e) => {
+                  const inputValue = e.target.value;
+                  const validInput = inputValue.replace(/[^0-9]/g, '');
+                  setPatientDetails({ ...patientDetails, mobile_number: validInput });
+                }}
               />
             </Form.Group>
           </Col>
@@ -909,7 +923,7 @@ const DoctorHome = () => {
                 <strong>Date Of Birth:</strong>
               </Form.Label>
               <Form.Control
-                type="text"
+                type="date"
                 value={patientDetails.date_of_birth}
                 onChange={(e) =>
                   setPatientDetails({
@@ -943,7 +957,7 @@ const DoctorHome = () => {
                 <strong>Email:</strong>
               </Form.Label>
               <Form.Control
-                type="text"
+                type="email"
                 value={patientDetails.email}
                 onChange={(e) =>
                   setPatientDetails({
@@ -955,7 +969,7 @@ const DoctorHome = () => {
             </Form.Group>
           </Col>
         </Row>
- 
+
         <Button
           variant="primary"
           onClick={handleUpdatePatientDetails}
@@ -966,7 +980,7 @@ const DoctorHome = () => {
       </div>
     );
   };
- 
+
   const handleUpdatePatientDetails = async () => {
     try {
       const updateData = {
@@ -974,28 +988,29 @@ const DoctorHome = () => {
         patient_id: selectedAppointment.patient_id,
         appointment_id: selectedAppointment.appointment_id,
       };
- 
+
       const response = await BaseUrl.put(`/patient/patient/`, updateData);
- 
-      if (response.status === 200) {
-        setSuccessMessage(response.data.success || "");
-        setErrorMessage("");
+
+      if (response.status === 200 || response.status === 201) {
+        const successMessage = response.data.success || "Details have been successfully updated.";
+        setSuccessMessage(successMessage);
+        handleShow(successMessage);
       } else {
-        setErrorMessage(response.data.error || "");
-        setSuccessMessage("");
+        const errorMessage = "Failed to update patient details.";
+        setErrorMessage(errorMessage);
+        handleShow(errorMessage);
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.error || error.message || "");
-      setSuccessMessage("");
+      const errorMessage = error.response?.data?.error;
+      setErrorMessage(errorMessage);
+      handleShow(errorMessage);
     }
   };
- 
- 
- 
+
   const [isNewVitals, setIsNewVitals] = useState(true);
   const [vitalsSuccessMessage, setVitalsSuccessMessage] = useState("");
   const [vitalsErrorMessage, setVitalsErrorMessage] = useState("");
- 
+
   const fetchVitalsData = async (appointmentId) => {
     setFetchError("");
     setVitalsSuccessMessage("");
@@ -1004,11 +1019,10 @@ const DoctorHome = () => {
       const response = await BaseUrl.get(`/patient/vital/`, {
         params: { appointment_id: appointmentId },
       });
- 
+
       if (response.status === 200 && response.data.length > 0) {
         setVitalsData(response.data);
-        setIsNewVitals(false); // Data exists, so it's an update
- 
+        setIsNewVitals(false);
         setFormVitals({
           height: response.data[0]?.height || "",
           weight: response.data[0]?.weight || "",
@@ -1021,7 +1035,6 @@ const DoctorHome = () => {
           bmi: response.data[0]?.bmi || "",
         });
       } else {
-        // No data found, reset the form and mark as new entry
         setVitalsData([]);
         setIsNewVitals(true);
         setFormVitals({
@@ -1052,7 +1065,7 @@ const DoctorHome = () => {
       setIsNewVitals(true);
     }
   };
- 
+
   const handleVitalsClick = () => {
     setSelectedHeading("vitals");
     if (selectedAppointmentId) {
@@ -1061,7 +1074,7 @@ const DoctorHome = () => {
       );
     }
   };
- 
+
   const [formVitals, setFormVitals] = useState({
     height: vitalsData?.[0]?.height || "",
     weight: vitalsData?.[0]?.weight || "",
@@ -1073,7 +1086,7 @@ const DoctorHome = () => {
     sugar_level: vitalsData?.[0]?.sugar_level || "",
     bmi: vitalsData?.[0]?.bmi || "",
   });
- 
+
   const renderVitalsData = () => {
     return (
       <div style={{ padding: "20px" }}>
@@ -1087,12 +1100,6 @@ const DoctorHome = () => {
             {vitalsErrorMessage}
           </div>
         )}
-        {/* {setFetchError && (
-          <div className="alert alert-danger text-center" role="alert">
-            {vitalsErrorMessage}
-          </div>
-        )} */}
- 
         <Row>
           <Col md={3}>
             <Form.Group controlId="formBasicTemperature">
@@ -1174,7 +1181,7 @@ const DoctorHome = () => {
                 name="sugar_level"
                 placeholder="Enter sugar level"
                 value={formVitals.sugar_level}
-                onChange={handleInputChange} // Update state on change
+                onChange={handleInputChange}
               />
             </Form.Group>
           </Col>
@@ -1187,8 +1194,8 @@ const DoctorHome = () => {
                 type="number"
                 name="height"
                 placeholder="Enter height (in cm)"
-                value={formVitals.height} // Bind to formVitals state
-                onChange={handleInputChange} // Automatically calculate BMI
+                value={formVitals.height}
+                onChange={handleInputChange}
               />
             </Form.Group>
           </Col>
@@ -1201,8 +1208,8 @@ const DoctorHome = () => {
                 type="number"
                 name="weight"
                 placeholder="Enter weight (in kg)"
-                value={formVitals.weight} // Bind to formVitals state
-                onChange={handleInputChange} // Automatically calculate BMI
+                value={formVitals.weight}
+                onChange={handleInputChange}
               />
             </Form.Group>
           </Col>
@@ -1215,8 +1222,8 @@ const DoctorHome = () => {
                 type="number"
                 name="bmi"
                 placeholder="Enter BMI"
-                value={formVitals.bmi} // Bind to formVitals state
-                readOnly // BMI is automatically calculated
+                value={formVitals.bmi}
+                readOnly
               />
             </Form.Group>
           </Col>
@@ -1227,39 +1234,28 @@ const DoctorHome = () => {
       </div>
     );
   };
- 
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormVitals((prev) => {
       const updatedVitals = { ...prev, [name]: value };
- 
       const { weight, height } = updatedVitals;
- 
       if (name === "weight" || name === "height") {
         const heightInMeters = height / 100;
- 
         if (heightInMeters > 0 && weight > 0) {
           const calculatedBMI = (
             weight /
             (heightInMeters * heightInMeters)
           ).toFixed(2);
- 
-          updatedVitals.bmi = calculatedBMI; // Set the calculated BMI
+
+          updatedVitals.bmi = calculatedBMI;
         }
       }
- 
       return updatedVitals;
     });
   };
- 
+
   const handleVitalsSubmit = async () => {
-    const isEmpty = Object.values(formVitals).every((value) => value === "");
- 
-    if (isEmpty) {
-      setVitalsErrorMessage(""); // Do not show any frontend error message
-      return;
-    }
- 
     try {
       const vitalRequestData = {
         appointment_id: selectedAppointmentId,
@@ -1274,47 +1270,49 @@ const DoctorHome = () => {
         height: Number(formVitals.height),
         bmi: Number(formVitals.bmi),
       };
- 
       const response = isNewVitals
         ? await BaseUrl.post(`/patient/vital/`, vitalRequestData)
         : await BaseUrl.put(`/patient/vital/`, vitalRequestData);
- 
-      if (response.status === 200) {
-        setVitalsSuccessMessage(response.data.success || ""); // Use backend success message if available
-        setVitalsErrorMessage(null);
-        await fetchVitalsData(selectedAppointmentId); // Refresh vitals data
+
+      if (response.status === 201) {
+        const successMessage = response.data.success || "Vitals have been successfully updated.";
+        setSuccessMessage(successMessage);
+        handleShow(successMessage);
+        await fetchVitalsData(selectedAppointmentId);
       } else {
-        setVitalsErrorMessage(response.data.error || ""); // Use backend error message if available
+        setErrorMessage("Failed to save vitals data.");
+        handleShow("Failed to update vitals.");
       }
     } catch (error) {
-      setVitalsErrorMessage(error.response?.data?.error || ""); // Use backend error message if available
+      const errorMessage = error.response?.data?.error;
+      setErrorMessage(errorMessage);
+      handleShow(errorMessage);
     }
   };
- 
+
   const [symptomsData, setSymptomsData] = useState([]);
   const [fetchError, setFetchError] = useState("");
- 
-  // Function to automatically hide success and error messages after 5 seconds
+
   const clearMessagesAfterTimeout = () => {
     setTimeout(() => {
       setSuccessMessage("");
       setErrorMessage("");
       setFetchError("");
-    }, 10000); // 5 seconds
+    }, 10000);
   };
- 
+
   const fetchSymptomsData = async (appointmentId) => {
     setFetchError("");
     setSuccessMessage("");
     setErrorMessage("");
-    setLoading(true); // Start loader
+    setLoading(true);
     try {
       const response = await BaseUrl.get(`/doctor/symptomsdetail/`, {
         params: {
           appointment_id: appointmentId,
         },
       });
- 
+
       if (response.status === 200 && response.data.length > 0) {
         setSymptomsData(response.data);
       } else {
@@ -1322,14 +1320,12 @@ const DoctorHome = () => {
       }
     } catch (error) {
       setSymptomsData([]);
-      setFetchError(
-        error.response?.data?.error || error.message || "An error occurred."
-      );
+      setFetchError(error.response?.data?.error || error.message || "An error occurred.");
     } finally {
-      setLoading(false); // End loader
+      setLoading(false);
     }
   };
- 
+
   const handleSymptomsClick = () => {
     setSelectedHeading("symptoms");
     if (selectedAppointmentId) {
@@ -1338,14 +1334,13 @@ const DoctorHome = () => {
       );
     }
   };
- 
- 
+
+  const [showAddSymptomRow, setShowAddSymptomRow] = useState(false);
+
   const renderSymptomsData = () => {
     return (
       <div>
         {loading && <div className="loader">Loading...</div>}
- 
-        {/* Success and Error Messages */}
         {successMessage && (
           <div className="alert alert-success text-center" role="alert">
             {successMessage}
@@ -1361,133 +1356,153 @@ const DoctorHome = () => {
             {fetchError}
           </div>
         )}
- 
-        {/* Search Box */}
+
         <Form inline className="mb-3">
           <Form.Group
             className="mb-0"
-            style={{ display: "flex", alignItems: "center" }}
+            style={{ display: "flex", alignItems: "center", position: "relative" }}
           >
-            <Form.Control
-              type="text"
-              placeholder="Search Symptoms"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ marginRight: "10px", flex: 1 }}
-            />
-            <Button variant="primary" onClick={handleSearch}>
-              Search
-            </Button>
+            <div className="mb-4 w-100">
+              <div className="mb-3">
+                <Button
+                  variant="primary"
+                  onClick={() => setShowAddSymptomRow(true)}
+                  disabled={showAddSymptomRow}
+                >
+                  Add Symptom
+                </Button>
+              </div>
+
+              <div className="d-flex w-100">
+                <Form.Control
+                  type="text"
+                  placeholder="Search Symptoms"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ flex: 1, borderRadius: "0.25rem 0 0 0.25rem" }}
+                />
+                <Button variant="primary" onClick={handleSearch} style={{ flexShrink: 0, borderRadius: "0 0.25rem 0.25rem 0" }}>
+                  Search
+                </Button>
+              </div>
+            </div>
+
+            {searchResults.length > 0 && (
+              <div
+                ref={searchRef}
+                className="search-results"
+                style={{
+                  position: "absolute",
+                  top: "40px",
+                  left: 0,
+                  right: 0,
+                  border: "1px solid #ddd",
+                  padding: "10px",
+                  backgroundColor: "#f9f9f9",
+                  fontWeight: "bold",
+                  zIndex: 10,
+                  maxHeight: "150px",
+                  overflowY: "auto",
+                }}
+              >
+                {searchResults.map((result) => (
+                  <p
+                    key={result.id}
+                    onClick={() => handleSelectSearchResult(result)}
+                    style={{ cursor: "pointer", padding: "5px 0" }}
+                  >
+                    {result.symptoms_name}
+                  </p>
+                ))}
+              </div>
+            )}
           </Form.Group>
         </Form>
- 
-        {/* Search Results */}
-        {searchResults.length > 0 && (
-          <div
-            className="search-results"
-            style={{
-              marginTop: "-15px",
-              border: "1px solid #ddd",
-              padding: "10px",
-              backgroundColor: "#f9f9f9",
-              fontWeight: "bold",
-              backgroundColor: "#D7EAF0",
-            }}
-          >
-            {searchResults.map((result) => (
-              <p
-                key={result.id}
-                onClick={() => handleSelectSearchResult(result)}
-                style={{ cursor: "pointer", padding: "5px 0" }}
-              >
-                {result.symptoms_name}
-              </p>
-            ))}
+        <hr />
+
+        {showAddSymptomRow && (
+          <div>
+            <h4>Add New Symptom</h4>
+            <Row className="mt-3">
+              <Col md={3}>
+                <Form.Group>
+                  <Form.Label>
+                    <strong>Symptom Name:</strong>
+                  </Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={newSymptom.symptoms_name}
+                    onChange={(e) =>
+                      setNewSymptom({
+                        ...newSymptom,
+                        symptoms_name: e.target.value,
+                      })
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={3}>
+                <Form.Group>
+                  <Form.Label>
+                    <strong>Since:</strong>
+                  </Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={newSymptom.since}
+                    onChange={(e) =>
+                      setNewSymptom({ ...newSymptom, since: e.target.value })
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={3}>
+                <Form.Group>
+                  <Form.Label>
+                    <strong>Severity:</strong>
+                  </Form.Label>
+                  <Form.Select
+                    name="severity"
+                    value={newSymptom.severity}
+                    onChange={(e) =>
+                      setNewSymptom({ ...newSymptom, severity: e.target.value })
+                    }
+                  >
+                    <option value="">Select Severity</option>
+                    <option value="mild">Mild</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="severe">Severe</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col md={3}>
+                <Form.Group>
+                  <Form.Label>
+                    <strong>More Options:</strong>
+                  </Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={newSymptom.more_options}
+                    onChange={(e) =>
+                      setNewSymptom({ ...newSymptom, more_options: e.target.value })
+                    }
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Button
+              variant="success"
+              onClick={() => {
+                handleAddSymptom();
+                setShowAddSymptomRow(false);
+              }}
+              style={{ marginTop: "20px" }}
+            >
+              Save Symptom
+            </Button>
+            <hr />
           </div>
         )}
- 
-        <hr />
- 
-        {/* Add New Symptom Form - Moved Below Search Box */}
-        <h4>Add New Symptom</h4>
-        <Row className="mt-3">
-          <Col md={3}>
-            <Form.Group>
-              <Form.Label>
-                <strong>Symptom Name:</strong>
-              </Form.Label>
-              <Form.Control
-                type="text"
-                value={newSymptom.symptoms_name}
-                onChange={(e) =>
-                  setNewSymptom({
-                    ...newSymptom,
-                    symptoms_name: e.target.value,
-                  })
-                }
-              />
-            </Form.Group>
-          </Col>
-          <Col md={3}>
-            <Form.Group>
-              <Form.Label>
-                <strong>Since:</strong>
-              </Form.Label>
-              <Form.Control
-                type="text"
-                value={newSymptom.since}
-                onChange={(e) =>
-                  setNewSymptom({ ...newSymptom, since: e.target.value })
-                }
-              />
-            </Form.Group>
-          </Col>
- 
-          <Col md={3}>
-            <Form.Group>
-              <Form.Label>
-                <strong>Severity:</strong>
-              </Form.Label>
-              <Form.Select
-                name="severity"
-                value={newSymptom.severity}
-                onChange={(e) =>
-                  setNewSymptom({ ...newSymptom, severity: e.target.value })
-                }
-              >
-                <option value="">Select Severity</option>
-                <option value="mild">Mild</option>
-                <option value="moderate">Moderate</option>
-                <option value="severe">Severe</option>
-              </Form.Select>
-            </Form.Group>
-          </Col>
- 
-          <Col md={3}>
-            <Form.Group>
-              <Form.Label>
-                <strong>More Options:</strong>
-              </Form.Label>
-              <Form.Control
-                type="text"
-                value={newSymptom.more_options}
-                onChange={(e) =>
-                  setNewSymptom({ ...newSymptom, more_options: e.target.value })
-                }
-              />
-            </Form.Group>
-          </Col>
-        </Row>
-        <Button
-          variant="success"
-          onClick={handleAddSymptom}
-          style={{ marginTop: "20px" }}
-        >
-          Save Symptom
-        </Button>
-        <hr />
- 
-        {/* Symptoms List */}
+
         {symptomsData.map((symptom, index) => (
           <div key={symptom.id} className="mb-3">
             <Row className="mt-3">
@@ -1555,7 +1570,6 @@ const DoctorHome = () => {
                   />
                 </Form.Group>
               </Col>
- 
               <Col md={3} className="mt-2">
                 <Form.Label>
                   <strong>Action</strong>
@@ -1565,7 +1579,7 @@ const DoctorHome = () => {
                   drop="end"
                   title={<i className="bi bi-three-dots" />}
                   variant="secondary"
-                  id={`dropdown-${document.id}`}
+                  id={`dropdown-${symptom.id}`}
                 >
                   <Dropdown.Item
                     onClick={() => handleUpdateSymptoms(symptom.id, index)}
@@ -1574,11 +1588,7 @@ const DoctorHome = () => {
                   </Dropdown.Item>
                   <Dropdown.Item
                     onClick={() =>
-                      handleRemoveSymptom(
-                        symptom.symptoms,
-                        symptom.appointment,
-                        index
-                      )
+                      handleRemoveSymptom(symptom.symptoms, symptom.appointment, index)
                     }
                   >
                     Remove
@@ -1592,15 +1602,15 @@ const DoctorHome = () => {
       </div>
     );
   };
- 
+
   useEffect(() => {
     if (successMessage || errorMessage || fetchError) {
       clearMessagesAfterTimeout();
     }
   }, [successMessage, errorMessage, fetchError]);
- 
+
   const handleUpdateSymptoms = async (symptomId, index) => {
-    setLoading(true); // Start loading
+    setLoading(true);
     try {
       const symptomData = symptomsData[index];
       const updateData = {
@@ -1611,41 +1621,57 @@ const DoctorHome = () => {
         more_options: symptomData.more_options,
         appointment_id: selectedAppointmentId,
       };
- 
       const response = await BaseUrl.put(`/doctor/symptomsdetail/`, updateData);
- 
-      if (response.status === 200) {
-        setSuccessMessage(response.data.success || "");
-        setErrorMessage(""); // Clear any previous error message
+      if (response.status === 201) {
+        const successMessage =
+          response.data.success || "Details have been successfully updated.";
+        setSuccessMessage(successMessage);
+        handleShow(successMessage);
       } else {
         setErrorMessage(response.data.error || "");
-        setSuccessMessage(""); // Clear any previous success message
+        setSuccessMessage("");
+        handleShow("Failed to update symptoms.");
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.error || error.message || "");
-      setSuccessMessage(""); // Clear any previous success message
+      const errorMessage = error.response?.data?.error;
+      setErrorMessage(errorMessage);
+      handleShow(errorMessage);
     } finally {
-      setLoading(false); // End loading
+      setLoading(false);
     }
   };
- 
+
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState([]); // Define searchResults and setSearchResults here
- 
+  const [searchResults, setSearchResults] = useState([]);
+  const searchRef = useRef(null);
+
+  const handleClickOutside = (event) => {
+    if (searchRef.current && !searchRef.current.contains(event.target)) {
+      setSearchResults([]);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const [newSymptom, setNewSymptom] = useState({
     symptoms_name: "",
     since: "",
     severity: "",
     more_options: "",
   });
- 
+
   const handleSearch = async () => {
     try {
       const response = await BaseUrl.get("/doctor/symptomssearch/", {
         params: { name: searchTerm },
       });
       if (response.status === 200 && response.data.length > 0) {
-        setSearchResults(response.data); // Populate search results instead of symptomsData
+        setSearchResults(response.data);
         setSuccessMessage(response.data.success || "Symptoms found");
         setErrorMessage("");
       } else {
@@ -1653,12 +1679,15 @@ const DoctorHome = () => {
         setErrorMessage(response.data.error || "No symptoms found");
         setSuccessMessage("");
       }
+      setSearchTerm("");
     } catch (error) {
       setErrorMessage(error.response?.data?.error || error.message || "");
       setSuccessMessage("");
+      setSearchResults([]);
+      setSearchTerm("");
     }
   };
- 
+
   const handleSelectSearchResult = (selectedSymptom) => {
     setNewSymptom({
       symptoms_name: selectedSymptom.symptoms_name,
@@ -1667,13 +1696,14 @@ const DoctorHome = () => {
       more_options: "",
       id: selectedSymptom.id,
     });
-    setSearchResults([]); // Clear search results after selection
+    setSearchResults([]);
     setErrorMessage("");
     setSuccessMessage("");
+    setSearchTerm("");
   };
- 
+
   const handleAddSymptom = async () => {
-    setLoading(true); // Start loader before adding symptom
+    setLoading(true);
     try {
       const response = await BaseUrl.post("/doctor/symptomsdetail/", {
         symptoms: newSymptom.id,
@@ -1682,14 +1712,10 @@ const DoctorHome = () => {
         more_options: newSymptom.more_options,
         appointment: selectedAppointmentId,
       });
- 
       if (response.status === 201) {
-        setSuccessMessage(
-          response.data.success || "Symptom added successfully"
-        );
-        setErrorMessage("");
- 
-        // Merge the new symptom with the existing symptoms data
+        const successMessage = response.data.success || "Details have been successfully updated.";
+        setSuccessMessage(successMessage);
+        handleShow(successMessage);
         const newSymptomData = {
           id: newSymptom.id,
           symptoms_name: newSymptom.symptoms_name,
@@ -1697,109 +1723,89 @@ const DoctorHome = () => {
           severity: newSymptom.severity,
           more_options: newSymptom.more_options,
         };
- 
         setSymptomsData((prevSymptoms) => [...prevSymptoms, newSymptomData]);
- 
         setNewSymptom({
           symptoms_name: "",
           since: "",
           severity: "",
           more_options: "",
         });
- 
-        // Optionally, re-fetch all symptoms to ensure the data is in sync with the backend
         await fetchSymptomsData(selectedAppointmentId);
       } else {
         setErrorMessage(response.data.error || "");
         setSuccessMessage("");
+        handleShow("Failed to add Symptoms.");
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.error || error.message || "");
-      setSuccessMessage("");
+      const errorMessage = error.response?.data?.error;
+      setErrorMessage(errorMessage);
+      handleShow(errorMessage);
     } finally {
-      setLoading(false); // End loader after API response
+      setLoading(false);
     }
   };
- 
+
   const handleRemoveSymptom = async (symptomsId, appointmentId, index) => {
     try {
-      // Optimistically update the local state to remove the symptom
       const updatedSymptoms = symptomsData.filter((_, i) => i !== index);
-      setSymptomsData(updatedSymptoms); // Update the state immediately
- 
+      setSymptomsData(updatedSymptoms);
       const response = await BaseUrl.delete(`/doctor/symptomsdetail/`, {
         data: {
-          symptoms_id: symptomsId, // Ensure this is the symptoms ID from the response
-          appointment_id: appointmentId, // Ensure this is the correct appointment ID
+          symptoms_id: symptomsId,
+          appointment_id: appointmentId,
         },
       });
- 
       if (response.status === 200) {
-        setSuccessMessage("");
-        setErrorMessage(null);
- 
-        // Refresh the symptoms data after successful deletion
+        const successMessage = response.data.success || "Details have been successfully updated.";
+        setSuccessMessage(successMessage);
+        handleShow(successMessage);
         await fetchSymptomsData(appointmentId);
       } else {
         setErrorMessage("");
         setSuccessMessage("");
+        handleShow("Failed to remove Symptom.");
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.error || "");
-      setSuccessMessage("");
+      const errorMessage = error.response?.data?.error;
+      setErrorMessage(errorMessage);
+      handleShow(errorMessage);
     }
   };
- 
- 
- const handleAppointmentDateClick = async (
-    appointment_date,
-    appointment_id,
-    index
-  ) => {
+
+  const handleAppointmentDateClick = async (appointment_date, appointment_id) => {
     setSelectedAppointmentDate(appointment_date);
-    setSelectedDateIndex(index);
     setSelectedAppointmentId(appointment_id);
-    // if (displayedData === 'patientDetails') {
-    //   fetchPatientDetails(appointment_id);
-    // }
     if (displayedData === "vitals") {
       await fetchVitalsData(appointment_id);
-    }
-    if (displayedData === "symptoms") {
+    } else if (displayedData === "symptoms") {
       fetchSymptomsData(appointment_id);
-    }
-    if (displayedData === "prescription") {
-      await fetchPrescriptionData(
-        selectedAppointment.patient_id,
-        appointment_id
-      );
+    } else if (displayedData === "prescription") {
+      await fetchPrescriptionData(selectedAppointment.patient_id, appointment_id);
       await fetchUploadedPrescriptionDocument(appointment_id, appointment_date);
-    }
-    if (displayedData === "documents") {
-      await handleDocumentsClick(appointment_id);
-    } else {
+    } else if (displayedData === "patientDetails") {
       await fetchPatientDetails(selectedAppointment.patient_id, appointment_id);
+    } else if (displayedData === "documents") {
+      await handleDocumentsClick(appointment_id, appointment_date);
     }
   };
- 
+
   const handleDocumentsClick = async () => {
-    setFetchError("");
-    setSuccessMessage("");
-    setErrorMessage("");
     setSelectedHeading("documents");
- 
-    if (selectedAppointmentId && selectedAppointmentDate) {
+    if (selectedAppointmentId && formattedDate) {
       try {
+        const formattedDate = selectedAppointmentDate
+        ? new Date(selectedAppointmentDate).toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0]; 
+
         const response = await BaseUrl.get(
           `/patient/patientdocumentusingappointmentid/`,
           {
             params: {
               appointment: selectedAppointmentId,
-              document_date: selectedAppointmentDate,
+              document_date: formattedDate,
             },
           }
         );
- 
         if (response.status === 200 && response.data.length > 0) {
           setDocumentsData(response.data);
           setDisplayedData("documents");
@@ -1810,14 +1816,18 @@ const DoctorHome = () => {
       } catch (error) {
         setDocumentsData([]);
         setDisplayedData("documents");
-        setFetchError(error.response?.data?.error || error.message || "");
+        setError(
+          error.response?.data?.error ||
+            error.message ||
+            "An unexpected error occurred."
+        );
       }
     } else {
       setDocumentsData([]);
       setDisplayedData("documents");
     }
   };
- 
+
   const [showFormModal, setShowFormModal] = useState(false);
   const [formData, setFormData] = useState({
     document_name: "",
@@ -1827,110 +1837,92 @@ const DoctorHome = () => {
     document_file: "",
   });
   const [selectedFiles, setSelectedFiles] = useState([]);
- 
+
   const toggleFormModal = async (document = null) => {
     try {
-      const appointmentId = selectedAppointmentId; // Use the stored appointment ID
- 
+      const appointmentId = selectedAppointmentId;
       if (!appointmentId) {
         setErrorMessage("Appointment ID is missing.");
         return;
       }
- 
-      // Fetch the patient name based on the appointment ID
       const patientNameResponse = await BaseUrl.get(`/patient/patientname/`, {
         params: {
           appointment_id: appointmentId,
         },
       });
- 
       if (patientNameResponse.status === 200) {
+        handleDocumentsClick();
         const patientData = patientNameResponse.data;
- 
-        // If editing a document, populate form with document data
         if (document) {
           setFormData({
             document_name: document.document_name || "",
-            patient_name: patientData.name || "", // Set patient name from the API response
+            patient_name: patientData.name || "",
             document_date: document.document_date || "",
             document_type: document.document_type || "",
             document_file: "",
           });
-          setEditingDocumentId(document.id); // Store document ID for PATCH request
+          setEditingDocumentId(document.id);
         } else {
-          // Clear form for creating a new document
           setFormData({
             document_name: "",
-            patient_name: patientData.name || "", // Set patient name from the API response
+            patient_name: patientData.name || "",
             document_date: "",
             document_type: "",
             document_file: "",
           });
-          setEditingDocumentId(null); // Clear editing ID for POST request
+          setEditingDocumentId(null);
         }
- 
-        setErrorMessage(""); // Clear any previous error messages
+        setErrorMessage("");
       } else {
         setErrorMessage(patientNameResponse.data.error || "");
       }
     } catch (error) {
       setErrorMessage(error.response?.data?.error || error.message || "");
     } finally {
-      setShowFormModal(!showFormModal); // Toggle the modal state
+      setShowFormModal(!showFormModal);
     }
   };
- 
+
   const handleFileSelect = (event) => {
     const files = Array.from(event.target.files);
     setSelectedFiles([...selectedFiles, ...files]);
   };
- 
+
   const handleAddFileClick = () => {
     document.getElementById("fileInput").click();
   };
- 
+
   const handleDeleteFile = (index) => {
     const updatedFiles = selectedFiles.filter((_, i) => i !== index);
     setSelectedFiles(updatedFiles);
   };
- 
-  const handleFileChange = (e) => {
-    setSelectedFiles(e.target.files);
-  };
- 
- 
+
   const handleSave = async () => {
     try {
       const token = localStorage.getItem("token");
       const decodedToken = jwtDecode(token);
-      const appointmentId = selectedAppointmentId; // Ensure correct appointment is used
-      const patientId = selectedAppointment.patient_id; // Ensure correct patient is used
+      const appointmentId = selectedAppointmentId;
+      const patientId = selectedAppointment.patient_id;
       const userType = decodedToken.user_type;
       const userId = decodedToken.doctor_id;
-     
-     
- 
+
       const formDataToSend = new FormData();
       formDataToSend.append("appointment", appointmentId);
       formDataToSend.append("document_name", formData.document_name);
       formDataToSend.append("patient_name", formData.patient_name);
       formDataToSend.append("document_date", formData.document_date);
       formDataToSend.append("document_type", formData.document_type);
-      formDataToSend.append("patient_id", patientId); // Use selected patient's ID
+      formDataToSend.append("patient_id", patientId);
       formDataToSend.append("user_type", userType);
       formDataToSend.append("user_id", userId);
- 
+
       if (selectedFiles.length > 0) {
         formDataToSend.append("document_file", selectedFiles[0]);
       }
- 
       let response;
- 
       if (editingDocumentId) {
         formDataToSend.append("document_id", editingDocumentId);
-        response = await BaseUrl.patch(
-          `/patient/patientdocumentusingappointmentid/`,
-          formDataToSend,
+        response = await BaseUrl.patch(`/patient/patientdocumentusingappointmentid/`, formDataToSend,
           {
             headers: {
               "Content-Type": "multipart/form-data",
@@ -1948,32 +1940,26 @@ const DoctorHome = () => {
           }
         );
       }
- 
-      if (response.status === 200) {
-        setSuccessMessage(
-          editingDocumentId
-            ? "Document updated successfully"
-            : "Document uploaded successfully"
-        );
-        setShowFormModal(false);
-        await handleDocumentsClick(); // Ensure it refreshes the documents for the correct appointment
+      if (response.status === 201) {
+        const successMessage = response.data.success || "Details have been successfully updated.";
+        setSuccessMessage(successMessage);
+        handleShow(successMessage);
+        await handleDocumentsClick();
+        toggleFormModal();
       } else {
         setErrorMessage("");
+        handleShow("Documents updated successfully.");
       }
     } catch (error) {
-      setErrorMessage("Error saving document: " + error.message);
+      const errorMessage = error.response?.data?.error;
+      setErrorMessage(errorMessage);
+      handleShow(errorMessage);
     }
   };
- 
+
   const handleDeleteDocument = async (documentId) => {
     try {
-      if (!documentId) {
-        setErrorMessage("");
-        return;
-      }
- 
-      const response = await BaseUrl.delete(
-        `/patient/patientdocumentusingappointmentid/`,
+      const response = await BaseUrl.delete(`/patient/patientdocumentusingappointmentid/`,
         {
           data: { document_id: documentId },
           headers: {
@@ -1981,25 +1967,25 @@ const DoctorHome = () => {
           },
         }
       );
- 
-      if (response.status === 200 && response.data.success) {
-        setSuccessMessage(response.data.success);
-        setErrorMessage("");
-        await handleDocumentsClick();
-      } else if (response.data.error) {
-        setErrorMessage(response.data.error);
-        setSuccessMessage("");
+      if (response.status === 204) {
+        const successMessage = response.data.success || "Details have been successfully updated.";
+        setSuccessMessage(successMessage);
+        handleShow(successMessage);
+        handleDocumentsClick();
+      } else {
+        setErrorMessage("Failed to delete document.");
+        handleShow("Failed to remove Documents.");
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.error || "");
-      setSuccessMessage("");
+      const errorMessage = error.response?.data?.error;
+      setErrorMessage(errorMessage);
+      handleShow(errorMessage);
     }
   };
- 
+
   const renderDocumentsData = () => {
     return (
       <div>
-        {/* Success and Error Messages */}
         {successMessage && (
           <div className="alert alert-success text-center" role="alert">
             {successMessage}
@@ -2113,11 +2099,10 @@ const DoctorHome = () => {
                 </Form.Group>
               </Col>
               <Col md={3} className="mt-4">
-                {/* Ellipsis menu for Modify, Download, and Delete */}
                 <DropdownButton
                   align="end"
                   drop="end"
-                  title={<i className="bi bi-three-dots" />} // Bootstrap 3 dots icon
+                  title={<i className="bi bi-three-dots" />}
                   variant="secondary"
                   id={`dropdown-${document.id}`}
                 >
@@ -2138,33 +2123,27 @@ const DoctorHome = () => {
       </div>
     );
   };
- 
- 
-const [previewFileType, setPreviewFileType] = useState(null);
+
+  const [previewFileType, setPreviewFileType] = useState(null);
   const [previewFileUrl, setPreviewFileUrl] = useState(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
- 
+
   const viewDocument = async (documentId) => {
     try {
-      if (!documentId) {
-        throw new Error("Document ID is required");
-      }
- 
       const response = await BaseUrl.get(`/patient/viewdocumentbyid/`, {
         params: {
           document_id: documentId,
         },
         responseType: "blob",
       });
- 
       const fileType = response.headers["content-type"];
       const url = URL.createObjectURL(response.data);
       setPreviewFileType(fileType);
       setPreviewFileUrl(url);
       setShowPreviewModal(true);
-    } catch (error) {}
+    } catch (error) { }
   };
- 
+
   const renderDocumentPreviewModal = () => (
     <Modal
       show={showPreviewModal}
@@ -2203,31 +2182,55 @@ const [previewFileType, setPreviewFileType] = useState(null);
       </Modal.Footer>
     </Modal>
   );
- 
+
   const handleEndVisit = async (appointmentId) => {
     try {
-      await BaseUrl.patch("/doctorappointment/completedappointment/", {
+      const response = await BaseUrl.patch("/doctorappointment/completedappointment/", {
         appointment_id: appointmentId,
       });
-      setIsVisitEnded(true);
-      setSuccessMessage("Visit ended successfully.");
+
+      if (response.status === 201 || response.status === 200) {
+        const successMessage = response.data.success || "Appointment have been Completed sucessfully.";
+        setSuccessMessage(successMessage);
+        handleShow(successMessage);
+        setIsVisitEnded(true);
+        fetchSlots();
+        fetchAllAppointments();
+        fetchAppointmentCounts();
+      } else {
+        setErrorMessage("Failed to update prescription.");
+        handleShow("Failed to update patient Prescription.");
+      }
     } catch (error) {
-      setErrorMessage("Error ending visit: " + error.message);
+      const errorMessage = error.response?.data?.error || "An unexpected error occurred.";
+      setErrorMessage(errorMessage);
+      handleShow(errorMessage);
     }
   };
- 
+
   const handleCancelAppointment = async (appointmentId) => {
     try {
-      await BaseUrl.patch("/doctorappointment/canceledappointment/", {
+      const response = await BaseUrl.patch("/doctorappointment/canceledappointment/", {
         appointment_id: appointmentId,
       });
-      setIsCanceled(true);
-      setSuccessMessage("Appointment canceled successfully.");
+      if (response.status === 201 || response.status === 200) {
+        const successMessage = response.data.success || "Appointment have been Canceled sucessfully.";
+        setSuccessMessage(successMessage);
+        handleShow(successMessage);
+        fetchSlots();
+        fetchAllAppointments();
+        fetchAppointmentCounts();
+      } else {
+        setErrorMessage("Failed to cancel the appointment.");
+        handleShow("Failed to cancel the appointment.");
+      }
     } catch (error) {
-      setErrorMessage("Error canceling appointment: " + error.message);
+      const errorMessage = error.response?.data?.error || "An unexpected error occurred.";
+      setErrorMessage("Error canceling appointment: " + errorMessage);
+      handleShow(errorMessage);
     }
   };
- 
+
   const handleConfirmAction = () => {
     if (confirmAction === "endVisit") {
       handleEndVisit(selectedAppointment.appointment_id);
@@ -2236,18 +2239,19 @@ const [previewFileType, setPreviewFileType] = useState(null);
     }
     setShowConfirmModal(false);
   };
- 
+
   const handleAppointmentClick = async (slotOrAppointment, section) => {
-    if (selectedAppointment && selectedAppointment.appointment_id === slotOrAppointment.appointment_id) {
+    if (
+      selectedAppointment &&
+      selectedAppointment.appointment_id === slotOrAppointment.appointment_id
+    ) {
       resetModalState();
       return;
     }
- 
     resetModalState();
     setSelectedAppointment(slotOrAppointment);
-    setSelectedAppointmentId(slotOrAppointment.appointment_id);  // Set the clicked appointment ID
+    setSelectedAppointmentId(slotOrAppointment.appointment_id);
     setSelectedHeading("patientDetails");
- 
     try {
       const patientDetailsResponse = await BaseUrl.get(`/patient/patient/`, {
         params: {
@@ -2255,28 +2259,26 @@ const [previewFileType, setPreviewFileType] = useState(null);
           appointment_id: slotOrAppointment.appointment_id,
         },
       });
- 
       if (patientDetailsResponse.status === 200) {
         setPatientDetails(patientDetailsResponse.data);
-        setDisplayedData('patientDetails');
+        setDisplayedData("patientDetails");
       }
- 
-      const appointmentResponse = await BaseUrl.get(`/patientappointment/viewslot/`, {
-        params: {
-          patient_id: slotOrAppointment.patient_id,
-          doctor_id: slotOrAppointment.doctor,
-        },
-      });
- 
+      const appointmentResponse = await BaseUrl.get(`/patientappointment/viewslot/`,
+        {
+          params: {
+            patient_id: slotOrAppointment.patient_id,
+            doctor_id: slotOrAppointment.doctor,
+          },
+        }
+      );
       if (appointmentResponse.status === 200) {
         setAppointmentDetails(appointmentResponse.data.data);
       }
- 
-      if (section === 'today') {
+      if (section === "today") {
         setSelectedTodayAppointment(slotOrAppointment);
-      } else if (section === 'completed') {
+      } else if (section === "completed") {
         setSelectedCompletedAppointment(slotOrAppointment);
-      } else if (section === 'canceled') {
+      } else if (section === "canceled") {
         setSelectedCanceledAppointment(slotOrAppointment);
       } else {
         console.warn(section);
@@ -2285,57 +2287,128 @@ const [previewFileType, setPreviewFileType] = useState(null);
       setErrorMessage();
     }
   };
+
   const resetModalState = () => {
     setSelectedAppointment(null);
     setVitalsData([]);
     setDisplayedData(null);
     setSelectedAppointmentId(null);
     setSelectedAppointmentDate(null);
-    setSelectedDateIndex(null);
     setSelectedTodayAppointment(null);
     setSelectedCompletedAppointment(null);
     setSelectedCanceledAppointment(null);
   };
- 
-  const renderSlotCards = (slots) => {
+
+  const [morningIndex, setMorningIndex] = useState(0);
+  const [afternoonIndex, setAfternoonIndex] = useState(0);
+  const [eveningIndex, setEveningIndex] = useState(0);
+  const slotsPerPage = 4;
+
+  const handleMorningPrevious = () => {
+    setMorningIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+  };
+
+  const handleMorningNext = () => {
+    setMorningIndex((prevIndex) =>
+      Math.min(prevIndex + 1, Math.ceil(morningSlots.length / slotsPerPage) - 1)
+    );
+  };
+
+  const handleAfternoonPrevious = () => {
+    setAfternoonIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+  };
+
+  const handleAfternoonNext = () => {
+    setAfternoonIndex((prevIndex) =>
+      Math.min(
+        prevIndex + 1,
+        Math.ceil(afternoonSlots.length / slotsPerPage) - 1
+      )
+    );
+  };
+
+  const handleEveningPrevious = () => {
+    setEveningIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+  };
+
+  const handleEveningNext = () => {
+    setEveningIndex((prevIndex) =>
+      Math.min(prevIndex + 1, Math.ceil(eveningSlots.length / slotsPerPage) - 1)
+    );
+  };
+
+  const renderSlotCards = (slots, index) => {
+    const startIndex = index * slotsPerPage * 4;
+    const endIndex = Math.min(startIndex + slotsPerPage * 4, slots.length);
+    const displayedSlots = slots.slice(startIndex, endIndex);
     const rows = [];
- 
-    for (let i = 0; i < slots.length; i += 4) {
-      const slotChunk = slots.slice(i, i + 4);
+    for (let i = 0; i < displayedSlots.length; i += 4) {
+      const slotChunk = displayedSlots.slice(i, i + 4);
       rows.push(
-        <Row key={i} className="mb-2">
+        <Row key={i} className="mb-3">
           {slotChunk.map((slot, index) => {
             let cardStyle = {};
- 
             if (slot.is_canceled) {
               cardStyle = {
-                backgroundColor: "#BC1B2E", // Red for canceled slots
+                backgroundColor: "#BC1B2E",
                 color: "#fff",
               };
             } else if (slot.is_booked) {
               cardStyle = {
-                backgroundColor: "#A48B08", // Yellow for booked slots
+                backgroundColor: "#229799",
                 color: "#fff",
               };
             } else if (slot.is_blocked) {
               cardStyle = {
-                backgroundColor: "#2E56E2", // Blue for blocked slots
+                backgroundColor: "#CB6040",
                 color: "#fff",
               };
             } else {
               cardStyle = {
-                backgroundColor: "#16B12F", // Green for available slots
+                backgroundColor: "#16B12F",
                 color: "#fff",
               };
             }
- 
- 
- return (
-              <Col key={index} md={3} style={{ padding: "4px" }}>
-                <Card style={{ margin: "0", padding: "8px", ...cardStyle }}>
-                  <Card.Body>
-                    <Card.Text>{slot.appointment_slot}</Card.Text>
-                    {/* {slot.is_booked && <Card.Text>Booked</Card.Text>} */}
+            return (
+              <Col
+                key={index}
+                xs={12}
+                sm={6}
+                md={4}
+                lg={3}
+                style={{ padding: "8px" }}
+              >
+                <Card
+                  style={{
+                    ...cardStyle,
+                    width: "100%",
+                    height: "5vh",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginBottom: "-10px",
+                  }}
+                >
+                  <Card.Body
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      padding: "0.5rem",
+                    }}
+                  >
+                    <Card.Text
+                      style={{
+                        fontSize: "1rem",
+                        textAlign: "center",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        width: "100%",
+                      }}
+                    >
+                      {slot.appointment_slot}
+                    </Card.Text>
                   </Card.Body>
                 </Card>
               </Col>
@@ -2344,40 +2417,43 @@ const [previewFileType, setPreviewFileType] = useState(null);
         </Row>
       );
     }
- 
     return rows;
   };
- 
-  const [selectedDateIndex, setSelectedDateIndex] = useState(null);
+
   const renderAppointmentDate = () => {
     return appointmentDetails.map((appointment, index) => (
-<Col key={appointment.id} xs={12} className="mb-2">
-<button
-                onClick={() => handleAppointmentDateClick(appointment.appointment_date, appointment.id, index)}
-                style={{
-                    cursor: 'pointer',
-                    backgroundColor: selectedAppointmentId === appointment.id ? '#3795BD' : 'transparent',  // Highlight if appointment.id matches selectedAppointmentId
-                    color: selectedAppointmentId === appointment.id ? 'white' : 'black',
-                    borderRadius: '5px',
-                    padding: '10px',
-                    width: '100%',
-                    textAlign: 'center',
-                    transition: 'background-color 0.8s, color 0.8s',
-                }}
->
-                {appointment.appointment_date}
-</button>
-</Col>
+      <Col key={appointment.id} xs={12} className="mb-2">
+        <button
+          onClick={() =>
+            handleAppointmentDateClick(
+              appointment.appointment_date,
+              appointment.id,
+              index
+            )
+          }
+          style={{
+            cursor: "pointer",
+            backgroundColor: selectedAppointmentId === appointment.id ? "#3795BD" : "transparent",
+            color: selectedAppointmentId === appointment.id ? "white" : "black",
+            borderRadius: "5px",
+            padding: "10px",
+            width: "100%",
+            textAlign: "center",
+            transition: "background-color 0.8s, color 0.8s",
+          }}
+        >
+          {appointment.appointment_date}
+        </button>
+      </Col>
     ));
-};
- 
+  };
+
   const renderCompletedAppointments = () => {
     const endIndex = Math.min(completedIndex + 4, completedAppointments.length);
     const displayedAppointments = completedAppointments.slice(
       completedIndex,
       endIndex
     );
- 
     return displayedAppointments.map((appointment, index) => (
       <Col key={index}>
         <Card
@@ -2393,14 +2469,13 @@ const [previewFileType, setPreviewFileType] = useState(null);
       </Col>
     ));
   };
- 
+
   const renderCanceledAppointments = () => {
     const endIndex = Math.min(canceledIndex + 4, canceledAppointments.length);
     const displayedAppointments = canceledAppointments.slice(
       canceledIndex,
       endIndex
     );
- 
     return displayedAppointments.map((appointment, index) => (
       <Col key={index}>
         <Card
@@ -2416,14 +2491,11 @@ const [previewFileType, setPreviewFileType] = useState(null);
       </Col>
     ));
   };
- 
- 
+
   const renderSelectedAppointmentDetails = () => {
     if (!selectedAppointment) return null;
- 
     const isCompleted = selectedAppointment.is_complete;
     const isCanceled = selectedAppointment.is_canceled;
- 
     return (
       <div
         className="mt-4 click-box"
@@ -2450,8 +2522,7 @@ const [previewFileType, setPreviewFileType] = useState(null);
         >
           <FaTimes size={24} color="#333" />
         </button>
- 
-        {/* Conditionally render End Visit and Cancel Appointment switches if the appointment is not completed or canceled */}
+
         {!isCompleted && !isCanceled && (
           <Row>
             <Col xs={6}>
@@ -2489,7 +2560,7 @@ const [previewFileType, setPreviewFileType] = useState(null);
             </Col>
           </Row>
         )}
- 
+
         <Row style={{ paddingTop: "40px" }}>
           <Col
             md={3}
@@ -2510,9 +2581,8 @@ const [previewFileType, setPreviewFileType] = useState(null);
             <hr />
             {renderAppointmentDate()}
           </Col>
- 
           <Col md={9} className="content-col">
-          <Row className="mb-3 mt-4">
+            <Row className="mb-3 mt-4">
               <Col xs={2}>
                 <h6
                   className="text-center clickable"
@@ -2521,26 +2591,16 @@ const [previewFileType, setPreviewFileType] = useState(null);
                     cursor: "pointer",
                     padding: "5px 10px",
                     borderRadius: "5px",
-                    border:
-                      selectedHeading === "patientDetails"
-                        ? "2px solid #3795BD"
-                        : "2px solid transparent",
-                    backgroundColor:
-                      selectedHeading === "patientDetails"
-                        ? "#d1e9f6"
-                        : "transparent",
+                    border: selectedHeading === "patientDetails" ? "2px solid #3795BD" : "2px solid transparent",
+                    backgroundColor: selectedHeading === "patientDetails" ? "#d1e9f6" : "transparent",
                     color: "#007bff",
-                    boxShadow:
-                      selectedHeading === "patientDetails"
-                        ? "0 2px 4px rgba(0, 0, 0, 0.1)"
-                        : "none",
+                    boxShadow: selectedHeading === "patientDetails" ? "0 2px 4px rgba(0, 0, 0, 0.1)" : "none",
                     display: "inline",
                   }}
                 >
                   Details
                 </h6>
               </Col>
- 
               <Col xs={2}>
                 <h6
                   className="text-center clickable"
@@ -2549,17 +2609,10 @@ const [previewFileType, setPreviewFileType] = useState(null);
                     cursor: "pointer",
                     padding: "5px 10px",
                     borderRadius: "5px",
-                    border:
-                      selectedHeading === "vitals"
-                        ? "2px solid #3795BD"
-                        : "2px solid transparent",
-                    backgroundColor:
-                      selectedHeading === "vitals" ? "#d1e9f6" : "transparent",
+                    border: selectedHeading === "vitals" ? "2px solid #3795BD" : "2px solid transparent",
+                    backgroundColor: selectedHeading === "vitals" ? "#d1e9f6" : "transparent",
                     color: "#007bff",
-                    boxShadow:
-                      selectedHeading === "vitals"
-                        ? "0 2px 4px rgba(0, 0, 0, 0.1)"
-                        : "none",
+                    boxShadow: selectedHeading === "vitals" ? "0 2px 4px rgba(0, 0, 0, 0.1)" : "none",
                     display: "inline",
                   }}
                 >
@@ -2574,19 +2627,10 @@ const [previewFileType, setPreviewFileType] = useState(null);
                     cursor: "pointer",
                     padding: "5px 10px",
                     borderRadius: "5px",
-                    border:
-                      selectedHeading === "symptoms"
-                        ? "2px solid #3795BD"
-                        : "2px solid transparent",
-                    backgroundColor:
-                      selectedHeading === "symptoms"
-                        ? "#d1e9f6"
-                        : "transparent",
+                    border: selectedHeading === "symptoms" ? "2px solid #3795BD" : "2px solid transparent",
+                    backgroundColor: selectedHeading === "symptoms" ? "#d1e9f6" : "transparent",
                     color: "#007bff",
-                    boxShadow:
-                      selectedHeading === "symptoms"
-                        ? "0 2px 4px rgba(0, 0, 0, 0.1)"
-                        : "none",
+                    boxShadow: selectedHeading === "symptoms" ? "0 2px 4px rgba(0, 0, 0, 0.1)" : "none",
                     display: "inline",
                   }}
                 >
@@ -2602,19 +2646,10 @@ const [previewFileType, setPreviewFileType] = useState(null);
                     padding: "5px 10px",
                     paddingRight: "32px",
                     borderRadius: "5px",
-                    border:
-                      selectedHeading === "prescription"
-                        ? "2px solid #3795BD"
-                        : "2px solid transparent",
-                    backgroundColor:
-                      selectedHeading === "prescription"
-                        ? "#d1e9f6"
-                        : "transparent",
+                    border: selectedHeading === "prescription" ? "2px solid #3795BD" : "2px solid transparent",
+                    backgroundColor: selectedHeading === "prescription" ? "#d1e9f6" : "transparent",
                     color: "#007bff",
-                    boxShadow:
-                      selectedHeading === "prescription"
-                        ? "0 2px 4px rgba(0, 0, 0, 0.1)"
-                        : "none",
+                    boxShadow: selectedHeading === "prescription" ? "0 2px 4px rgba(0, 0, 0, 0.1)" : "none",
                     display: "inline",
                   }}
                 >
@@ -2629,19 +2664,10 @@ const [previewFileType, setPreviewFileType] = useState(null);
                     cursor: "pointer",
                     padding: "5px 10px",
                     borderRadius: "5px",
-                    border:
-                      selectedHeading === "documents"
-                        ? "2px solid #3795BD"
-                        : "2px solid transparent",
-                    backgroundColor:
-                      selectedHeading === "documents"
-                        ? "#d1e9f6"
-                        : "transparent",
+                    border: selectedHeading === "documents" ? "2px solid #3795BD" : "2px solid transparent",
+                    backgroundColor: selectedHeading === "documents" ? "#d1e9f6" : "transparent",
                     color: "#007bff",
-                    boxShadow:
-                      selectedHeading === "documents"
-                        ? "0 2px 4px rgba(0, 0, 0, 0.1)"
-                        : "none",
+                    boxShadow: selectedHeading === "documents" ? "0 2px 4px rgba(0, 0, 0, 0.1)" : "none",
                     display: "inline",
                   }}
                 >
@@ -2662,45 +2688,32 @@ const [previewFileType, setPreviewFileType] = useState(null);
       </div>
     );
   };
- 
+
   const handleCanceledPrevious = () => {
     setCanceledIndex((prevIndex) => Math.max(prevIndex - 1, 0));
   };
- 
+
   const handleCanceledNext = () => {
     setCanceledIndex((prevIndex) =>
       Math.min(prevIndex + 1, canceledAppointments.length - 4)
     );
   };
- 
+
   const renderAppointments = () => {
     const endIndex = Math.min(currentIndex + 4, todayAppointments.length);
     const displayedAppointments = todayAppointments.slice(
       currentIndex,
       endIndex
     );
- 
     return displayedAppointments.map((appointment, index) => (
       <Col key={index}>
         <Card
-          className={`mb-4 shadow-sm reception-card ${
-            selectedAppointment &&
-            selectedAppointment.appointment_id === appointment.appointment_id
-              ? "selected-slot"
-              : ""
-          }`}
+          className={`mb-4 shadow-sm reception-card ${selectedAppointment && selectedAppointment.appointment_id === appointment.appointment_id ? "selected-slot" : ""}`}
           onClick={() => handleAppointmentClick(appointment, "today")}
           style={{
-            border:
-              selectedAppointment &&
-              selectedAppointment.appointment_id === appointment.appointment_id
-                ? "2px solid #3795BD"
-                : "none",
+            border: selectedAppointment && selectedAppointment.appointment_id === appointment.appointment_id ? "2px solid #3795BD" : "none",
             cursor: "pointer",
-            backgroundColor:
-              appointment.appointment_type === "follow-up"
-                ? "#FB8369"
-                : "#2D9CED",
+            backgroundColor: appointment.appointment_type === "follow-up" ? "#FB8369" : "#2D9CED",
           }}
         >
           <Card.Body>
@@ -2711,293 +2724,278 @@ const [previewFileType, setPreviewFileType] = useState(null);
       </Col>
     ));
   };
- 
   return (
     <div className="doctor-container" style={{ backgroundColor: "#D7EAF0" }}>
-      <header
-        className="header"
-        style={{
-          fontFamily: "sans-serif",
-          color: "#0C1187",
-          textAlign: "center",
-        }}
-      >
-        <Row className="align-items-center mb-4 justify-content-center">
-          <Col xs={12} md={2} className="text-center">
-            <img
-              src={clinicPhoto}
-              alt="Clinic Logo"
-              className="logo img-fluid"
-              style={{ borderRadius: "50%", height: "100px", width: "100px" }}
-            />
-          </Col>
-          <Col xs={12} md={10} className="text-center">
-            <h1
-              className="heading"
-              style={{
-                fontSize: "40px",
-                fontWeight: "900",
-                paddingRight: "80px",
-              }}
-            >
-              Welcome to {clinicName}
-            </h1>
-            <h3
-              style={{
-                fontSize: "20px",
-                fontWeight: "400",
-                color: "#333333",
-                paddingRight: "80px",
-              }}
-            >
-              Providing the best care for you and your family
-            </h3>
-          </Col>
-        </Row>
+      <header className="mb-2 mt-4 reception-header d-flex flex-column flex-md-row justify-content-between align-items-center text-center text-md-start">
+        {clinicName && clinicPhoto && (
+          <>
+            <Col xs={12} md="auto">
+              <img
+                src={clinicPhoto}
+                className="left-logo img-fluid"
+                alt="Clinic Logo"
+              />
+            </Col>
+            <Col xs={12} md="auto" className="flex-grow-1">
+              <h1 className="text-center" style={{ color: "#0174BE" }}>
+                Welcome to {clinicName}
+              </h1>
+            </Col>
+          </>
+        )}
       </header>
- 
-      <Row className="align-items-center mb-4 justify-content-center">
-        <Col xs="auto">
-          <Button variant="outline-primary" onClick={handlePreviousDate}>
-            <BsChevronLeft />
-          </Button>
-        </Col>
-        <Col xs="auto" className="text-center">
-          <h2>{formattedDate}</h2>
-        </Col>
-        <Col xs="auto">
-          <Button variant="outline-primary" onClick={handleNextDate}>
-            <BsChevronRight />
-          </Button>
-        </Col>
-      </Row>
- 
-      <Row className="mb-4 text-center">
+
+      <div className="d-flex justify-content-center align-items-center mt-2">
+        <button
+          className="btn btn-outline-primary me-3"
+          onClick={handlePreviousDate}
+        >
+          &larr;
+        </button>
+        <h4 className="text-center">{formattedDate}</h4>
+        <button
+          className="btn btn-outline-primary ms-3"
+          onClick={handleNextDate}
+        >
+          &rarr;
+        </button>
+      </div>
+
+      <Row className="text-center mt-4">
         <Col>
           <Card.Body>
-            <Card.Title>Appointments</Card.Title>
-            <Card.Text style={{ paddingTop: "10px", fontSize: "22px" }}>
+            <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
+              Appointments
+            </Card.Title>
+            <Card.Text style={{ fontWeight: "700" }}>
               {totalAppointments}
             </Card.Text>
           </Card.Body>
         </Col>
- 
         <Col>
           <Card.Body>
-            <Card.Title>Booked</Card.Title>
-            <Card.Text style={{ paddingTop: "10px", fontSize: "22px" }}>
+            <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
+              Booked
+            </Card.Title>
+            <Card.Text style={{ fontWeight: "700" }}>
               {bookedAppointmentCount}
             </Card.Text>
           </Card.Body>
         </Col>
- 
         <Col>
           <Card.Body>
-            <Card.Title>Completed</Card.Title>
-            <Card.Text style={{ paddingTop: "10px", fontSize: "22px" }}>
+            <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
+              Completed
+            </Card.Title>
+            <Card.Text style={{ fontWeight: "700" }}>
               {completedAppointmentsCount}
             </Card.Text>
           </Card.Body>
         </Col>
- 
         <Col>
           <Card.Body>
-            <Card.Title>Canceled</Card.Title>
-            <Card.Text style={{ paddingTop: "10px", fontSize: "22px" }}>
+            <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
+              Canceled
+            </Card.Title>
+            <Card.Text style={{ fontWeight: "700" }}>
               {canceledAppointmentsCount}
             </Card.Text>
           </Card.Body>
         </Col>
- 
         <Col>
           <Card.Body>
-            <Card.Title>Walk-Ins</Card.Title>
-            <Card.Text style={{ paddingTop: "10px", fontSize: "22px" }}>
-              {walkInCount}
-            </Card.Text>
+            <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
+              Online
+            </Card.Title>
+            <Card.Text style={{ fontWeight: "700" }}>{onlineCount}</Card.Text>
           </Card.Body>
         </Col>
- 
         <Col>
           <Card.Body>
-            <Card.Title>Online</Card.Title>
-            <Card.Text style={{ paddingTop: "10px", fontSize: "22px" }}>
-              {onlineCount}
-            </Card.Text>
+            <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
+              Walk-Ins
+            </Card.Title>
+            <Card.Text style={{ fontWeight: "700" }}>{walkInCount}</Card.Text>
           </Card.Body>
         </Col>
- 
         <Col>
           <Card.Body>
-            <Card.Title>Follow-Ups</Card.Title>
-            <Card.Text style={{ paddingTop: "10px", fontSize: "22px" }}>
-              {followUpCount}
-            </Card.Text>
+            <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
+              Follow-Ups
+            </Card.Title>
+            <Card.Text style={{ fontWeight: "700" }}>{followUpCount}</Card.Text>
           </Card.Body>
         </Col>
       </Row>
       <hr />
- 
+
       <div className="new">
         <style>{`
-    .legend {
-      display: flex;
-      justify-content: center;
-      margin-top: 10px;
-    }
- 
-    .legend > div {
-      display: flex;
-      align-items: center;
-      margin-right: 20px;
-    }
- 
-    .legend-dot {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      margin-right: 5px;
-    }
- 
-    .legend-text {
-      font-size: 25px;
-    }
-  `}</style>
- 
-        <div className="legend text-center">
+        .legend {
+          display: flex;
+          justify-content: center;
+        }
+        .legend > div {
+          display: flex;
+          align-items: center;
+          margin-right: 14px;
+        }
+        .legend-dot {
+          display: inline-block;
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          margin-right: 5px;
+        }
+        .legend-text {
+          font-size: 16px;
+        }
+        .selected-slot {
+          border: 2px solid #3795BD;
+          background-color: #D1E9F6;
+        }
+        .appointment-list {
+          max-height: 400px;
+          overflow-y: auto;
+        }
+      `}</style>
+
+        <div className="legend">
           <div>
             <span
               className="legend-dot"
-              style={{
-                backgroundColor: "#16B12F",
-                width: "8px",
-                height: "8px",
-              }}
+              style={{ backgroundColor: "#16B12F" }}
             ></span>
-            <span className="legend-text" style={{ fontSize: "16px" }}>
-              Available
-            </span>
+            <span className="legend-text">Available</span>
           </div>
           <div>
             <span
               className="legend-dot"
-              style={{
-                backgroundColor: "#A48B08",
-                width: "8px",
-                height: "8px",
-              }}
+              style={{ backgroundColor: "#229799" }}
             ></span>
-            <span className="legend-text" style={{ fontSize: "16px" }}>
-              Booked
-            </span>
+            <span className="legend-text">Booked</span>
           </div>
           <div>
             <span
               className="legend-dot"
-              style={{
-                backgroundColor: "#BC1B2E",
-                width: "8px",
-                height: "8px",
-              }}
+              style={{ backgroundColor: "#CB6040" }}
             ></span>
-            <span className="legend-text" style={{ fontSize: "16px" }}>
-              Canceled
-            </span>
+            <span className="legend-text">Blocked</span>
           </div>
           <div>
             <span
               className="legend-dot"
-              style={{
-                backgroundColor: "#2E56E2",
-                width: "8px",
-                height: "8px",
-              }}
+              style={{ backgroundColor: "#BC1B2E" }}
             ></span>
-            <span className="legend-text" style={{ fontSize: "16px" }}>
-              Blocked
-            </span>
+            <span className="legend-text">Canceled</span>
           </div>
         </div>
- 
+
         <Row>
-          <Col>
-            <h5
-              className="text-center"
-              style={{
-                fontFamily: "sans-serif",
-                color: "#000000",
-                fontSize: "25px",
-                fontWeight: "600",
-              }}
-            >
-              Morning
-            </h5>
-            {appointments.morning.length > 0 ? (
-              renderSlotCards(appointments.morning)
+          <Col className="ms-4">
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              {morningSlots.length > 16 && (
+                <Button
+                  variant="outline-primary"
+                  onClick={handleMorningPrevious}
+                  disabled={morningIndex === 0}
+                >
+                  <BsChevronLeft />
+                </Button>
+              )}
+              <h5 className="text-center flex-grow-1 mb-0">Morning</h5>
+              {morningSlots.length > 16 && (
+                <Button
+                  variant="outline-primary"
+                  onClick={handleMorningNext}
+                  disabled={
+                    morningIndex >=
+                    Math.ceil(morningSlots.length / (slotsPerPage * 4)) - 1
+                  }
+                >
+                  <BsChevronRight />
+                </Button>
+              )}
+            </div>
+            {morningSlots.length > 0 ? (
+              renderSlotCards(morningSlots, morningIndex)
             ) : (
-              <p className="text-center text-danger">
+              <p className="text-center text-danger mt-4">
                 Slots are not available in the morning.
               </p>
             )}
           </Col>
-          <Col>
-            <h5
-              className="text-center"
-              style={{
-                fontFamily: "sans-serif",
-                color: "#000000",
-                fontSize: "25px",
-                fontWeight: "600",
-              }}
-            >
-              Afternoon
-            </h5>
-            {appointments.afternoon.length > 0 ? (
-              renderSlotCards(appointments.afternoon)
+          <Col className="ms-4">
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              {afternoonSlots.length > 16 && (
+                <Button
+                  variant="outline-primary"
+                  onClick={handleAfternoonPrevious}
+                  disabled={afternoonIndex === 0}
+                >
+                  <BsChevronLeft />
+                </Button>
+              )}
+              <h5 className="text-center flex-grow-1 mb-0">Afternoon</h5>
+              {afternoonSlots.length > 16 && (
+                <Button
+                  variant="outline-primary"
+                  onClick={handleAfternoonNext}
+                  disabled={
+                    afternoonIndex >=
+                    Math.ceil(afternoonSlots.length / (slotsPerPage * 4)) - 1
+                  }
+                >
+                  <BsChevronRight />
+                </Button>
+              )}
+            </div>
+            {afternoonSlots.length > 0 ? (
+              renderSlotCards(afternoonSlots, afternoonIndex)
             ) : (
-              <p className="text-center text-danger">
+              <p className="text-center text-danger mt-4">
                 Slots are not available in the afternoon.
               </p>
             )}
           </Col>
-          <Col>
-            <h5
-              className="text-center"
-              style={{
-                fontFamily: "sans-serif",
-                color: "#000000",
-                fontSize: "25px",
-                fontWeight: "600",
-              }}
-            >
-              Evening
-            </h5>
-            {appointments.evening.length > 0 ? (
-              renderSlotCards(appointments.evening)
+          <Col className="ms-4">
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              {eveningSlots.length > 16 && (
+                <Button
+                  variant="outline-primary"
+                  onClick={handleEveningPrevious}
+                  disabled={eveningIndex === 0}
+                >
+                  <BsChevronLeft />
+                </Button>
+              )}
+              <h5 className="text-center flex-grow-1 mb-0">Evening</h5>
+              {eveningSlots.length > 16 && (
+                <Button
+                  variant="outline-primary"
+                  onClick={handleEveningNext}
+                  disabled={
+                    eveningIndex >=
+                    Math.ceil(eveningSlots.length / (slotsPerPage * 4)) - 1
+                  }
+                >
+                  <BsChevronRight />
+                </Button>
+              )}
+            </div>
+            {eveningSlots.length > 0 ? (
+              renderSlotCards(eveningSlots, eveningIndex)
             ) : (
-              <p className="text-center text-danger">
+              <p className="text-center text-danger mt-4">
                 Slots are not available in the evening.
               </p>
             )}
           </Col>
         </Row>
- 
         <hr />
       </div>
- 
-      <h3
-        className="text-center"
-        style={{
-          fontFamily: "sans-serif",
-          color: "#000000",
-          fontSize: "35px",
-          fontWeight: "600",
-        }}
-      >
-        Today's Appointments
-      </h3>
- 
+
+      <h3 className="text-center">Today's Appointments</h3>
       <div className="legend">
         <div>
           <span
@@ -3015,19 +3013,21 @@ const [previewFileType, setPreviewFileType] = useState(null);
         </div>
       </div>
       <Row className="mb-4 text-center align-items-center justify-content-center appointment-list">
-        <Col xs="auto">
-          <Button
-            variant="outline-primary"
-            onClick={handlePrevious}
-            disabled={currentIndex === 0}
-          >
-            <BsChevronLeft />
-          </Button>
-        </Col>
+        {todayAppointments.length > 4 && currentIndex > 0 && (
+          <Col xs="auto">
+            <Button
+              variant="outline-primary"
+              onClick={handlePrevious}
+              disabled={currentIndex === 0}
+            >
+              <BsChevronLeft />
+            </Button>
+          </Col>
+        )}
         {todayAppointments.length > 0 ? (
           renderAppointments()
         ) : (
-          <Col xs="auto" className="d-flex justify-content-center">
+          <Col xs="auto" className="d-flex justify-content-center mt-3">
             <div
               className="alert alert-danger p-2"
               style={{ maxWidth: "350px", display: "inline-block" }}
@@ -3037,45 +3037,40 @@ const [previewFileType, setPreviewFileType] = useState(null);
             </div>
           </Col>
         )}
-        <Col xs="auto">
-          <Button
-            variant="outline-primary"
-            onClick={handleNext}
-            disabled={currentIndex >= todayAppointments.length - 4}
-          >
-            <BsChevronRight />
-          </Button>
-        </Col>
+        {todayAppointments.length > 4 &&
+          currentIndex < todayAppointments.length - 4 && (
+            <Col xs="auto">
+              <Button
+                variant="outline-primary"
+                onClick={handleNext}
+                disabled={currentIndex >= todayAppointments.length - 4}
+              >
+                <BsChevronRight />
+              </Button>
+            </Col>
+          )}
       </Row>
       {selectedTodayAppointment &&
         renderSelectedAppointmentDetails(selectedTodayAppointment)}
- 
       <hr />
-      <h3
-        className="text-center"
-        style={{
-          fontFamily: "sans-serif",
-          color: "#000000",
-          fontSize: "35px",
-          fontWeight: "600",
-        }}
-      >
-        Completed Appointments
-      </h3>
+
+      <h3 className="text-center">Completed Appointments</h3>
       <Row className="mb-4 text-center align-items-center justify-content-center">
-        <Col xs="auto">
-          <Button
-            variant="outline-primary"
-            onClick={handleCompletedPrevious}
-            disabled={completedIndex === 0}
-          >
-            <BsChevronLeft />
-          </Button>
-        </Col>
+        {completedAppointments.length > 4 && completedIndex > 0 && (
+          <Col xs="auto">
+            <Button
+              variant="outline-primary"
+              onClick={handleCompletedPrevious}
+              disabled={completedIndex === 0}
+            >
+              <BsChevronLeft />
+            </Button>
+          </Col>
+        )}
         {completedAppointments.length > 0 ? (
           renderCompletedAppointments()
         ) : (
-          <Col xs="auto" className="d-flex justify-content-center">
+          <Col xs="auto" className="d-flex justify-content-center mt-3">
             <div
               className="alert alert-danger p-2"
               style={{ maxWidth: "350px", display: "inline-block" }}
@@ -3085,45 +3080,40 @@ const [previewFileType, setPreviewFileType] = useState(null);
             </div>
           </Col>
         )}
-        <Col xs="auto">
-          <Button
-            variant="outline-primary"
-            onClick={handleCompletedNext}
-            disabled={completedIndex >= completedAppointments.length - 4}
-          >
-            <BsChevronRight />
-          </Button>
-        </Col>
+        {completedAppointments.length > 4 &&
+          completedIndex < completedAppointments.length - 4 && (
+            <Col xs="auto">
+              <Button
+                variant="outline-primary"
+                onClick={handleCompletedNext}
+                disabled={completedIndex >= completedAppointments.length - 4}
+              >
+                <BsChevronRight />
+              </Button>
+            </Col>
+          )}
       </Row>
       {selectedCompletedAppointment &&
         renderSelectedAppointmentDetails(selectedCompletedAppointment)}
- 
       <hr />
-      <h3
-        className="text-center"
-        style={{
-          fontFamily: "sans-serif",
-          color: "#000000",
-          fontSize: "35px",
-          fontWeight: "600",
-        }}
-      >
-        Canceled Appointments
-      </h3>
+
+      <h3 className="text-center">Canceled Appointments</h3>
       <Row className="mb-4 text-center align-items-center justify-content-center">
-        <Col xs="auto">
-          <Button
-            variant="outline-primary"
-            onClick={handleCanceledPrevious}
-            disabled={canceledIndex === 0}
-          >
-            <BsChevronLeft />
-          </Button>
-        </Col>
+        {canceledAppointments.length > 4 && canceledIndex > 0 && (
+          <Col xs="auto">
+            <Button
+              variant="outline-primary"
+              onClick={handleCanceledPrevious}
+              disabled={canceledIndex === 0}
+            >
+              <BsChevronLeft />
+            </Button>
+          </Col>
+        )}
         {canceledAppointments.length > 0 ? (
           renderCanceledAppointments()
         ) : (
-          <Col xs="auto" className="d-flex justify-content-center">
+          <Col xs="auto" className="d-flex justify-content-center mt-3">
             <div
               className="alert alert-danger p-2"
               style={{ maxWidth: "350px", display: "inline-block" }}
@@ -3133,88 +3123,22 @@ const [previewFileType, setPreviewFileType] = useState(null);
             </div>
           </Col>
         )}
-        <Col xs="auto">
-          <Button
-            variant="outline-primary"
-            onClick={handleCanceledNext}
-            disabled={canceledIndex >= canceledAppointments.length - 4}
-          >
-            <BsChevronRight />
-          </Button>
-        </Col>
+        {canceledAppointments.length > 4 &&
+          canceledIndex < canceledAppointments.length - 4 && (
+            <Col xs="auto">
+              <Button
+                variant="outline-primary"
+                onClick={handleCanceledNext}
+                disabled={canceledIndex >= canceledAppointments.length - 4}
+              >
+                <BsChevronRight />
+              </Button>
+            </Col>
+          )}
       </Row>
       {selectedCanceledAppointment &&
         renderSelectedAppointmentDetails(selectedCanceledAppointment)}
- 
-      {/* Modal for Today's Appointment with toggle buttons */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Appointment Details</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedAppointment && (
-            <>
-              <p>
-                <strong>Appointment Date:</strong>{" "}
-                {format(
-                  new Date(selectedAppointment.appointment_date),
-                  "dd/MM/yyyy"
-                )}
-              </p>
-              <p>
-                <strong>Appointment Slot:</strong>{" "}
-                {selectedAppointment.appointment_slot}
-              </p>
-              <p>
-                <strong>Booked By:</strong> {selectedAppointment.booked_by}
-              </p>
-              <p>
-                <strong>Doctor Name:</strong> {selectedAppointment.doctor_name}
-              </p>
-              <p>
-                <strong>Mobile Number:</strong>{" "}
-                {selectedAppointment.mobile_number}
-              </p>
-            </>
-          )}
-        </Modal.Body>
-        <Row>
-          <Col xs={6}>
-            <Form.Check
-              type="switch"
-              id="end-visit-switch"
-              label="End Visit"
-              checked={isVisitEnded}
-              onChange={() => {
-                setConfirmAction("endVisit");
-                setShowConfirmModal(true);
-              }}
-              className="me-2"
-              style={{
-                fontSize: "1.25rem", // Increase font size
-                fontWeight: "600", // Increase font weight
-              }}
-            />
-          </Col>
-          <Col xs={6}>
-            <Form.Check
-              type="switch"
-              id="cancel-appointment-switch"
-              label="Cancel Appointment"
-              checked={isCanceled}
-              onChange={() => {
-                setConfirmAction("cancelAppointment");
-                setShowConfirmModal(true);
-              }}
-              style={{
-                fontSize: "1.25rem", // Increase font size
-                fontWeight: "600", // Increase font weight
-              }}
-            />
-          </Col>
-        </Row>
-      </Modal>
- 
+
       <Modal
         show={showCompletedModal}
         onHide={() => setShowCompletedModal(false)}
@@ -3250,9 +3174,7 @@ const [previewFileType, setPreviewFileType] = useState(null);
           )}
         </Modal.Body>
       </Modal>
- 
- 
- {/* Modal for Canceled Appointment without toggle buttons */}
+
       <Modal
         show={showCanceledModal}
         onHide={() => setShowCanceledModal(false)}
@@ -3265,10 +3187,7 @@ const [previewFileType, setPreviewFileType] = useState(null);
             <>
               <p>
                 <strong>Appointment Date:</strong>{" "}
-                {format(
-                  new Date(selectedAppointment.appointment_date),
-                  "dd/MM/yyyy"
-                )}
+                {format(new Date(selectedAppointment.appointment_date), "dd/MM/yyyy")}
               </p>
               <p>
                 <strong>Appointment Slot:</strong>{" "}
@@ -3288,7 +3207,7 @@ const [previewFileType, setPreviewFileType] = useState(null);
           )}
         </Modal.Body>
       </Modal>
- 
+
       <Modal
         show={showConfirmModal}
         onHide={() => setShowConfirmModal(false)}
@@ -3300,10 +3219,7 @@ const [previewFileType, setPreviewFileType] = useState(null);
         <Modal.Body>
           <p>
             Are you sure you want to{" "}
-            {confirmAction === "endVisit"
-              ? "end this visit"
-              : "cancel this appointment"}
-            ?
+            {confirmAction === "endVisit" ? "end this visit" : "cancel this appointment"} ?
           </p>
         </Modal.Body>
         <Modal.Footer>
@@ -3318,15 +3234,11 @@ const [previewFileType, setPreviewFileType] = useState(null);
           </Button>
         </Modal.Footer>
       </Modal>
- 
+
       <Modal show={showFormModal} onHide={toggleFormModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>
-            {isPrescriptionDocs
-              ? "Upload Document Files"
-              : editingRecordId
-              ? "Edit Medical Record"
-              : "Upload Medical Record"}
+            {isPrescriptionDocs ? "Upload Document Files" : editingRecordId ? "Edit Medical Record" : "Upload Medical Record"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -3342,7 +3254,6 @@ const [previewFileType, setPreviewFileType] = useState(null);
                 }
               />
             </Form.Group>
- 
             <Form.Group controlId="patientName">
               <Form.Label>Patient Name</Form.Label>
               <Form.Control
@@ -3354,7 +3265,6 @@ const [previewFileType, setPreviewFileType] = useState(null);
                 }
               />
             </Form.Group>
- 
             <Form.Group controlId="documentDate">
               <Form.Label>Document Date</Form.Label>
               <Form.Control
@@ -3365,15 +3275,12 @@ const [previewFileType, setPreviewFileType] = useState(null);
                 }
               />
             </Form.Group>
- 
             <Form.Group controlId="documentType">
               <Form.Label>Document Type</Form.Label>
               <div className="d-flex">
                 <Button
                   variant={
-                    formData.document_type === "report"
-                      ? "primary"
-                      : "outline-primary"
+                    formData.document_type === "report" ? "primary" : "outline-primary"
                   }
                   className="me-2"
                   onClick={() =>
@@ -3384,9 +3291,7 @@ const [previewFileType, setPreviewFileType] = useState(null);
                 </Button>
                 <Button
                   variant={
-                    formData.document_type === "invoice"
-                      ? "primary"
-                      : "outline-primary"
+                    formData.document_type === "invoice" ? "primary" : "outline-primary"
                   }
                   onClick={() =>
                     setFormData({ ...formData, document_type: "invoice" })
@@ -3396,7 +3301,6 @@ const [previewFileType, setPreviewFileType] = useState(null);
                 </Button>
               </div>
             </Form.Group>
- 
             <Form.Group controlId="documentFile">
               <Form.Label>Document File</Form.Label>
               <div className="file-input">
@@ -3432,10 +3336,20 @@ const [previewFileType, setPreviewFileType] = useState(null);
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <Modal show={showModal} onHide={handleClose} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Action Status</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{modalContent}</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
- 
+
 export default DoctorHome;
- 
- 

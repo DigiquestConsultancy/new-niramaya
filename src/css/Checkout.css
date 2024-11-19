@@ -1,0 +1,93 @@
+/* Checkout.css */
+.checkout-container {
+    max-width: 450px;
+    margin: 0 auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #888;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+  
+  .close-button:hover {
+    color: #333;
+  }
+  
+  .checkout-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    text-align: center;
+    margin-bottom: 5px;
+  }
+  
+  .checkout-description {
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    margin-bottom: 25px;
+  }
+  
+  .checkout-form .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .checkout-form .form-group label {
+    font-weight: 600;
+    color: #555;
+  }
+  
+  .checkout-form .form-control {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    transition: border-color 0.2s;
+  }
+  
+  .checkout-form .form-control:focus {
+    border-color: #5A67D8;
+    box-shadow: 0px 0px 5px rgba(90, 103, 216, 0.5);
+  }
+  
+  .checkout-form .input-group-text {
+    background-color: #f7f7f7;
+    border: 1px solid #ddd;
+    border-right: none;
+    border-radius: 5px 0 0 5px;
+    color: #666;
+  }
+  
+  .pay-button {
+    background-color: #5A67D8;
+    border: none;
+    color: #ffffff;
+    font-size: 16px;
+    padding: 12px;
+    border-radius: 5px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+  }
+  
+  .pay-button:hover {
+    background-color: #4c51bf;
+  }
+  
+  .pay-button:disabled {
+    background-color: #9fa3f0;
+    cursor: not-allowed;
+  }
+  

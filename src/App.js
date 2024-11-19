@@ -41,20 +41,21 @@ import ReceptionAddSlot from './components/reception/CreateSlot';
 import ReceptionBookedAppointment from './components/reception/BookedAppointment';
 import ClinicBookedAppointment from './components/clinic/BookedAppointment';
 import MedicalRecords from './components/patient/MedicalRecords';
+import Transaction from './components/patient/Transaction';
 import Footer from './components/MainFooter/Footer';
- 
+
 function App() {
   const [isDoctorLoggedIn, setIsDoctorLoggedIn] = useState(false);
   const [isPatientLoggedIn, setIsPatientLoggedIn] = useState(false);
- 
+
   const handleDoctorLogin = () => {
     setIsDoctorLoggedIn(true);
   };
- 
+
   const handlePatientLogin = () => {
     setIsPatientLoggedIn(true);
   };
- 
+
   return (
     <Router>
       <div className="App">
@@ -82,6 +83,7 @@ function App() {
           <Route exact path="/patient/home" component={PatientHome} />
           <Route exact path="/patient/details" component={PatientDetails} />
           <Route exact path="/patient/medicalrecords" component={MedicalRecords} />
+          <Route exact path="/patient/transaction" component={Transaction} />
           <Route exact path="/doctor/details" component={DoctorDetails} />
           <Route exact path="/doctor/appointments" component={AppointmentSlot} />
           <Route exact path="/patient/slots" component={PatientSlot} />
@@ -112,5 +114,5 @@ function App() {
     </Router>
   );
 }
- 
+
 export default App;

@@ -234,7 +234,7 @@ const PatientSlot = () => {
 
   const handleSave = async () => {
     let decodedToken = null;
- 
+
     try {
       // Retrieve and decode the patient token (assuming it's stored as 'patient_token')
       const token = localStorage.getItem("patient_token");
@@ -244,39 +244,41 @@ const PatientSlot = () => {
       setErrorMessage("Error decoding patient token.");
       return;
     }
- 
+
     const patientId = decodedToken.patient_id; // Extract patient_id from token
-    const userType = decodedToken.user_type;  // Extract user_type from token
- 
+    const userType = decodedToken.user_type; // Extract user_type from token
+
     const formDataToSend = new FormData();
-    formDataToSend.append("appointment", expandedAppointmentId);  // Pass appointment ID
-    formDataToSend.append("document_name", formData.document_name);  // Document name
-    formDataToSend.append("patient_name", formData.patient_name);  // Patient name
-    formDataToSend.append("document_date", formData.document_date);  // Document date
-    formDataToSend.append("document_type", formData.document_type);  // Document type
- 
+    formDataToSend.append("appointment", expandedAppointmentId); // Pass appointment ID
+    formDataToSend.append("document_name", formData.document_name); // Document name
+    formDataToSend.append("patient_name", formData.patient_name); // Patient name
+    formDataToSend.append("document_date", formData.document_date); // Document date
+    formDataToSend.append("document_type", formData.document_type); // Document type
+
     // If a file is selected, append the file to the formData
     if (selectedFiles.length > 0) {
       formDataToSend.append("document_file", selectedFiles[0]);
     }
- 
+
     // Append user_type and patient_id decoded from token
     formDataToSend.append("user_type", userType);
-    formDataToSend.append("patient_id", patientId);  // Change from user_id to patient_id if needed by backend
- 
+    formDataToSend.append("patient_id", patientId); // Change from user_id to patient_id if needed by backend
+
     try {
       let response;
       if (editingRecordId) {
         // Update (PATCH request)
-        formDataToSend.append("document_id", editingRecordId);  // Include document ID for updating
- 
+        formDataToSend.append("document_id", editingRecordId); // Include document ID for updating
+
         response = await BaseUrl.patch(
           `/patient/patientdocumentusingappointmentid/`,
           formDataToSend
         );
         setShowFormModal(false);
-        await fetchMedicalRecords(expandedAppointmentId);  // Refresh the medical records after update
-        setSuccessMessage(response.data.success || "Document file updated successfully");
+        await fetchMedicalRecords(expandedAppointmentId); // Refresh the medical records after update
+        setSuccessMessage(
+          response.data.success || "Document file updated successfully"
+        );
       } else {
         // Create new (POST request)
         response = await BaseUrl.post(
@@ -284,13 +286,19 @@ const PatientSlot = () => {
           formDataToSend
         );
         setShowFormModal(false);
-        await fetchMedicalRecords(expandedAppointmentId);  // Refresh the medical records after saving
-        setSuccessMessage(response.data.success || "Document record saved successfully");
+        await fetchMedicalRecords(expandedAppointmentId); // Refresh the medical records after saving
+        setSuccessMessage(
+          response.data.success || "Document record saved successfully"
+        );
       }
     } catch (error) {
       console.error("Error saving document:", error);
-      if (error.response && error.response.data && error.response.data.message) {
-        setErrorMessage(error.response.data.error);  // Show backend error message
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        setErrorMessage(error.response.data.error); // Show backend error message
       } else {
         setErrorMessage("Failed to save document record");
       }

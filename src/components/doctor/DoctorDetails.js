@@ -5,6 +5,7 @@ import Select from "react-select";
 import { components } from "react-select";
 import styled from "styled-components";
 import { FaTrash } from "react-icons/fa";
+import { Table, Button, Modal } from "react-bootstrap";
 
 const LoaderWrapper = styled.div`
   display: flex;
@@ -143,9 +144,9 @@ const DoctorDetails = () => {
   const [opdData, setOpdData] = useState({
     clinic_name: "",
     start_day: "",
+    consultation_fee: "",
     end_day: "",
     doc_file: "",
-    consultation_fee: "",
     opd_timings: [{ start_time: "", end_time: "" }],
   });
 
@@ -170,8 +171,14 @@ const DoctorDetails = () => {
   const [profilePicPreview, setProfilePicPreview] = useState("");
   const [clinicPicPreview, setClinicPicPreview] = useState("");
   const [formErrors, setFormErrors] = useState({});
+  const [loadingPersonal, setLoadingPersonal] = useState(false);
+  // const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalType, setModalType] = useState(""); // "success" or "error"
 
   const updateProgress = async () => {
+    setSuccessMessage("");
+    setErrorMessage("");
     try {
       const token = localStorage.getItem("token");
       const decodedToken = jwtDecode(token);
@@ -194,7 +201,7 @@ const DoctorDetails = () => {
         setProgress(calculatedProgress);
       }
     } catch (error) {
-      setErrorMessage("Failed to update progress.");
+      setErrorMessage("");
     }
   };
 
@@ -206,7 +213,7 @@ const DoctorDetails = () => {
       await fetchQualifications();
       await updateProgress();
     } catch (error) {
-      console.error("Error in fetchData:", error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -230,11 +237,18 @@ const DoctorDetails = () => {
         mobile_number: mobile_number,
       }));
     } catch (error) {
-      console.error("Error decoding token:", error);
+      console.error(error);
     }
   };
 
+  // Loader control for address and OPD
+  const [loadingAddress, setLoadingAddress] = useState(false);
+  const [loadingOpd, setLoadingOpd] = useState(false);
+  const [loadingTimings, setLoadingTimings] = useState(false); // New state for loading timings
+
   const fetchDoctorDetails = async () => {
+    setSuccessMessage("");
+    setErrorMessage("");
     try {
       const mobile_number = localStorage.getItem("mobile_number");
       if (!mobile_number)
@@ -263,7 +277,7 @@ const DoctorDetails = () => {
         await updateProgress();
       }
     } catch (error) {
-      console.error("Error fetching doctor details:", error);
+      console.error(error);
     }
   };
 
@@ -292,12 +306,13 @@ const DoctorDetails = () => {
       );
       window.open(fileUrl, "_blank");
     } catch (error) {
-      console.error("Error fetching document:", error);
       alert("Unable to fetch document.");
     }
   };
 
   const fetchQualifications = async () => {
+    setSuccessMessage("");
+    setErrorMessage("");
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("Token not found in local storage");
@@ -324,7 +339,6 @@ const DoctorDetails = () => {
           .map((qual) => qual.value),
       }));
     } catch (error) {
-      console.error("Error fetching qualifications:", error);
       setErrorMessage(
         error.response?.data?.error || "Error fetching qualifications."
       );
@@ -332,6 +346,7 @@ const DoctorDetails = () => {
   };
 
   const fetchAddressDetails = async () => {
+    setLoadingAddress(true); // Start loader for fetching address
     if (!isPersonalComplete) return;
 
     try {
@@ -351,11 +366,14 @@ const DoctorDetails = () => {
         await updateProgress();
       }
     } catch (error) {
-      console.error("Error fetching address details:", error);
+      console.error(error);
+    } finally {
+      setLoadingAddress(false); // Stop loader after fetching address
     }
   };
 
   const fetchOpdDetails = async () => {
+    setLoadingOpd(true); // Start loader for fetching OPD details
     try {
       const token = localStorage.getItem("token");
       const decodedToken = jwtDecode(token);
@@ -389,12 +407,17 @@ const DoctorDetails = () => {
         setShowOpdTimings(true);
       }
     } catch (error) {
-      console.error("Error fetching OPD details:", error);
       setErrorMessage("Failed to fetch OPD details.");
+    } finally {
+      setLoadingOpd(false); // Stop loader after fetching OPD details
     }
   };
 
   const fetchOpdTimings = async (opdId) => {
+    setLoadingTimings(true); // Start loader for fetching timings
+    setSuccessMessage("");
+    setErrorMessage("");
+
     try {
       const response = await BaseUrl.get(`/doctor/timeopd/?opd_id=${opdId}`);
       const timings = response.data.map((timing) => ({
@@ -408,8 +431,9 @@ const DoctorDetails = () => {
         opd_timings: timings,
       }));
     } catch (error) {
-      console.error("Error fetching OPD timings:", error);
       setErrorMessage("Failed to fetch OPD timings.");
+    } finally {
+      setLoadingTimings(false); // Stop loader after fetching timings
     }
   };
 
@@ -444,6 +468,7 @@ const DoctorDetails = () => {
       if (name === "profile_pic" && file) {
         const reader = new FileReader();
         reader.onloadend = () => {
+          setProfilePicPreview(reader.result);
           setFormData((prevFormData) => ({
             ...prevFormData,
             profile_pic: file,
@@ -504,51 +529,90 @@ const DoctorDetails = () => {
   };
 
   const handleSubmit = async (e) => {
+    setLoadingPersonal(true);
+    setSuccessMessage("");
+    setErrorMessage("");
     e.preventDefault();
-    const token = localStorage.getItem("token");
 
     const errors = {};
-    if (!formData.name) errors.name = ["This field may not be blank."];
-    if (!formData.specialization) errors.specialization = ['This field may not be blank.'];
-    if (!formData.registration_no)
-      errors.registration_no = ["This field may not be blank."];
-    if (!formData.gender) errors.gender = ['"Select a valid gender."'];
-    if (!Number.isInteger(parseInt(formData.experience)))
-      errors.experience = ["A valid integer is required."];
 
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-    } else {
-      console.log("Form submitted successfully", formData);
+    if (!formData.name) {
+      errors.name = ["This field may not be blank."];
+    } else if (!/^[A-Za-z\s]+$/.test(formData.name)) {
+      errors.name = ["Name can only contain letters and spaces."];
     }
 
-    if (!token) {
-      setErrorMessage("No token found, please login again.");
+    if (!formData.specialization) {
+      errors.specialization = ["This field may not be blank."];
+    }
+
+    if (!formData.registration_no) {
+      errors.registration_no = ["This field may not be blank."];
+    } else if (!/^[A-Za-z\d]+$/.test(formData.registration_no)) {
+      errors.registration_no = [
+        "Registration No must contain only letters and numbers.",
+      ];
+    }
+
+    if (!formData.gender) {
+      errors.gender = ["Select a valid gender."];
+    }
+
+    if (!formData.experience) {
+      errors.experience = ["This field may not be blank."];
+    } else if (!Number.isInteger(parseInt(formData.experience))) {
+      errors.experience = ["A valid integer is required."];
+    }
+
+    if (!formData.email) {
+      errors.email = ["This field may not be blank."];
+    } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email)) {
+      errors.email = ["Enter a valid email address."];
+    }
+
+    if (!formData.mobile_number) {
+      errors.mobile_number = ["Mobile number is missing."];
+    }
+
+    if (
+      formData.date_of_birth &&
+      new Date(formData.date_of_birth) > new Date()
+    ) {
+      errors.date_of_birth = ["Date of birth cannot be in the future."];
+    }
+
+    if (!formData.qualification || formData.qualification.length === 0) {
+      errors.qualification = ["Please select at least one qualification."];
+    }
+
+    setFormErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      setLoadingPersonal(false);
       return;
     }
 
     try {
+      const token = localStorage.getItem("token");
       const decodedToken = jwtDecode(token);
       const doctor_id = decodedToken.doctor_id;
-
-      if (!doctor_id) {
-        throw new Error("Doctor ID not found in token");
-      }
-
       const formDataToSubmit = new FormData();
+
+      // Append form data
+      formDataToSubmit.append("name", formData.name);
+      formDataToSubmit.append("specialization", formData.specialization);
+      formDataToSubmit.append("registration_no", formData.registration_no);
+      formDataToSubmit.append("gender", formData.gender);
+      formDataToSubmit.append("experience", formData.experience);
+      formDataToSubmit.append("email", formData.email);
+      formDataToSubmit.append("mobile_number", formData.mobile_number);
+      if (formData.date_of_birth) {
+        formDataToSubmit.append("date_of_birth", formData.date_of_birth);
+      }
 
       if (formData.profile_pic) {
         formDataToSubmit.append("profile_pic", formData.profile_pic);
       }
-      formDataToSubmit.append("name", formData.name);
-      formDataToSubmit.append("gender", formData.gender);
-      formDataToSubmit.append("date_of_birth", formData.date_of_birth);
-      formDataToSubmit.append("registration_no", formData.registration_no);
-      formDataToSubmit.append("specialization", formData.specialization);
-      formDataToSubmit.append("experience", formData.experience);
-      formDataToSubmit.append("mobile_number", formData.mobile_number);
-      formDataToSubmit.append("email", formData.email);
-      formDataToSubmit.append("languages_spoken", formData.languages_spoken);
 
       if (formData.doc_file) {
         formDataToSubmit.append("doc_file", formData.doc_file);
@@ -559,32 +623,57 @@ const DoctorDetails = () => {
         response = await BaseUrl.put(
           `/doctor/doctordetail/?doctor_id=${doctor_id}`,
           formDataToSubmit,
-          
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
         );
       } else {
         response = await BaseUrl.post(
           `/doctor/doctordetail/`,
           formDataToSubmit,
-          
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
         );
       }
 
       if (response.status === 200 || response.status === 201) {
-        setSuccessMessage("Personal details saved successfully.");
+        setModalMessage(response.data.success || "");
+        setModalType("success");
+        setShowModal(true);
+
         setIsExistingUser(true);
         setIsPersonalComplete(true);
         await updateProgress();
         await updateQualifications(doctor_id);
+        // setActiveTab('address');
       }
     } catch (error) {
-      console.error("Error submitting personal details:", error);
-      setErrorMessage(
-        error.response?.data?.error || "Error submitting personal details."
-      );
+      if (error.response?.data?.error) {
+        setModalMessage(error.response.data.error);
+        setModalType("error");
+        setShowModal(true);
+      } else {
+        setModalMessage("An unexpected error occurred. Please try again.");
+        setModalType("error");
+        setShowModal(true);
+      }
+    } finally {
+      setLoadingPersonal(false);
     }
+
+    setTimeout(() => {
+      setShowModal(false);
+    }, 10000);
   };
 
   const updateQualifications = async (doctor_id) => {
+    setSuccessMessage("");
+    setErrorMessage("");
     try {
       const qualificationsToUpdate = qualifications.map((qual) => ({
         id: qual.value,
@@ -597,20 +686,21 @@ const DoctorDetails = () => {
       });
 
       if (response.status === 200) {
-        setSuccessMessage("Qualifications updated successfully");
+        setSuccessMessage("");
         setErrorMessage("");
         fetchQualifications();
       }
     } catch (error) {
-      console.error("Error updating qualifications:", error);
       setErrorMessage(
         error.response?.data?.error || "Error updating qualifications."
       );
       setSuccessMessage("");
     }
   };
-
   const handleAddressSubmit = async (e) => {
+    setLoadingAddress(true);
+    setSuccessMessage("");
+    setErrorMessage("");
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
@@ -619,6 +709,7 @@ const DoctorDetails = () => {
 
       let response;
       const errors = {};
+
       if (!addressData.country) errors.country = ["Country is required."];
       if (!addressData.state) errors.state = ["State is required."];
       if (!addressData.city) errors.city = ["City is required."];
@@ -628,6 +719,7 @@ const DoctorDetails = () => {
 
       if (Object.keys(errors).length > 0) {
         setFormErrors(errors);
+        setLoadingAddress(false);
         return;
       }
 
@@ -650,15 +742,56 @@ const DoctorDetails = () => {
         setAddressId(response.data.id);
       }
 
-      setIsAddressComplete(true);
-      await updateProgress();
+      if (response.status === 200 || response.status === 201) {
+        setModalMessage(response.data.success || "");
+        setModalType("success");
+        setShowModal(true);
+        setIsAddressComplete(true);
+        await updateProgress();
+        // setActiveTab('opd');
+      }
     } catch (error) {
-      console.error("Error saving address:", error);
+      if (error.response?.data?.error) {
+        setModalMessage(error.response.data.error);
+        setModalType("error");
+        setShowModal(true);
+      } else {
+        setModalMessage("");
+        setModalType("error");
+        setShowModal(true);
+      }
+    } finally {
+      setLoadingAddress(false);
     }
+
+    setTimeout(() => {
+      setShowModal(false);
+    }, 10000);
   };
 
+  const [previousDocFile, setPreviousDocFile] = useState(null);
+
   const handleOpdSubmit = async (e) => {
+    setLoadingOpd(true);
+    setSuccessMessage("");
+    setErrorMessage("");
     e.preventDefault();
+
+    const errors = {};
+    if (!opdData.clinic_name) errors.clinic_name = ["Clinic Name is required."];
+    if (!opdData.start_day) errors.start_day = ["Start Day is required."];
+    if (!opdData.end_day) errors.end_day = ["End Day is required."];
+    if (!opdData.consultation_fee)
+      errors.consultation_fee = ["Consultation fee is required."];
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors((prevErrors) => ({
+        ...prevErrors,
+        opd: errors,
+      }));
+      setLoadingOpd(false);
+      return;
+    }
 
     try {
       const token = localStorage.getItem("token");
@@ -672,48 +805,77 @@ const DoctorDetails = () => {
       formDataToSubmit.append("end_day", opdData.end_day);
       formDataToSubmit.append("consultation_fee", opdData.consultation_fee);
 
-      if (opdData.doc_file) {
+      if (
+        opdData.doc_file instanceof File &&
+        opdData.doc_file !== previousDocFile
+      ) {
         formDataToSubmit.append("doc_file", opdData.doc_file);
       }
 
-      const errors = {};
-      if (!opdData.clinic_name)
-        errors.clinic_name = ["Clinic Name is required."];
-      if (!opdData.start_day) errors.start_day = ["Start Day is required."];
-      if (!opdData.end_day) errors.end_day = ["Last Day is required."];
-      if (!opdData.consultation_fee)
-        errors.consultation_fee = ["consultation_fee is required."];
-
-      if (Object.keys(errors).length > 0) {
-        setFormErrors(errors);
-        return;
-      }
       let response;
       if (opdId) {
         response = await BaseUrl.put(
           `/doctor/opddays/?opd_id=${opdId}`,
-          formDataToSubmit
+          formDataToSubmit,
+          { headers: { "Content-Type": "multipart/form-data" } }
         );
       } else {
-        response = await BaseUrl.post(`/doctor/opddays/`, formDataToSubmit);
+        response = await BaseUrl.post(`/doctor/opddays/`, formDataToSubmit, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
       }
 
       if (response.status === 200 || response.status === 201) {
-        setSuccessMessage("OPD details saved successfully.");
+        setSuccessMessage(response.data.success || "");
+        setModalType("success");
+        setShowModal(true);
+
         if (!opdId) {
           setOpdId(response.data.id);
         }
+
+        setPreviousDocFile(opdData.doc_file);
         setShowOpdTimings(true);
-      } else {
-        throw new Error("Failed to save OPD details.");
       }
     } catch (error) {
-      console.error("Error saving OPD details:", error);
-      setErrorMessage("Failed to save OPD details.");
+      setErrorMessage(error.response?.data?.error || "");
+      setModalType("error");
+      setShowModal(true);
+    } finally {
+      setLoadingOpd(false);
     }
   };
 
   const handleSaveTimings = async () => {
+    setLoadingTimings(true);
+
+    const timingErrors = opdData.opd_timings.map((timing, index) => {
+      const timingError = {};
+      if (!timing.start_time) {
+        timingError.start_time = "Start time is required.";
+      }
+      if (!timing.end_time) {
+        timingError.end_time = "End time is required.";
+      }
+      if (
+        timing.start_time &&
+        timing.end_time &&
+        timing.start_time >= timing.end_time
+      ) {
+        timingError.end_time = "End time must be after start time.";
+      }
+      return timingError;
+    });
+
+    if (timingErrors.some((error) => Object.keys(error).length > 0)) {
+      setFormErrors((prevErrors) => ({
+        ...prevErrors,
+        opd_timings: timingErrors,
+      }));
+      setLoadingTimings(false);
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
       const decodedToken = jwtDecode(token);
@@ -721,8 +883,12 @@ const DoctorDetails = () => {
 
       if (!doctor_id || !opdId) {
         setErrorMessage("Doctor ID or OPD ID is missing.");
+        setModalType("error");
+        setShowModal(true);
+        setLoadingTimings(false);
         return;
       }
+
       const promises = opdData.opd_timings.map(async (timing, index) => {
         const formData = new FormData();
         formData.append("opd_id", opdId);
@@ -731,16 +897,36 @@ const DoctorDetails = () => {
 
         if (timing.time_id) {
           formData.append("time_id", timing.time_id);
-          return BaseUrl.put(`/doctor/timeopd/?opd_id=${opdId}`, formData, {});
+          return BaseUrl.put(`/doctor/timeopd/?opd_id=${opdId}`, formData);
         } else {
-          return BaseUrl.post(`/doctor/timeopd/`, formData, {});
+          return BaseUrl.post(`/doctor/timeopd/`, formData);
         }
       });
-      setSuccessMessage("Timings saved successfully.");
-      fetchOpdTimings();
+
+      const responses = await Promise.all(promises);
+
+      const allSuccess = responses.every((response) => {
+        return response.status === 201 || response.status === 200;
+      });
+
+      if (allSuccess) {
+        setSuccessMessage("Timings saved successfully.");
+        setModalType("success");
+        setShowModal(true);
+        setIsOpdComplete(true);
+        setProgress(100);
+
+        fetchOpdTimings(opdId);
+      } else {
+        setModalType("error");
+        setShowModal(true);
+      }
     } catch (error) {
-      console.error("Error saving timings:", error);
-      setErrorMessage("Failed to save timings.");
+      setErrorMessage(error.response?.data?.error || "");
+      setModalType("error");
+      setShowModal(true);
+    } finally {
+      setLoadingTimings(false);
     }
   };
 
@@ -764,27 +950,48 @@ const DoctorDetails = () => {
     }));
   };
 
-  const handleDeleteTiming = async (timeId) => {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [timingToDelete, setTimingToDelete] = useState(null);
+
+  const handleDeleteClick = (timeId) => {
+    setTimingToDelete(timeId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteTiming = async () => {
+    setLoading(true);
+    setSuccessMessage("");
+    setErrorMessage("");
+
     try {
       const response = await BaseUrl.delete(
-        `/doctor/timeopd/?time_id=${timeId}`
+        `/doctor/timeopd/?time_id=${timingToDelete}`
       );
 
-      if (response.status === 204) {
-        setSuccessMessage("Timing deleted successfully.");
-        setOpdData((prevOpdData) => ({
-          ...prevOpdData,
-          opd_timings: prevOpdData.opd_timings.filter(
-            (timing) => timing.time_id !== timeId
-          ),
-        }));
-      } else {
-        throw new Error("Failed to delete timing.");
+      if (response.status === 200) {
+        setSuccessMessage(response.data.success);
+        setModalType("success");
+        setShowModal(true);
+        await fetchOpdTimings(opdId);
+      } else if (response.data.error) {
+        setErrorMessage(response.data.error);
+        setModalType("error");
+        setShowModal(true);
       }
     } catch (error) {
-      console.error("Error deleting timing:", error);
-      setErrorMessage("Failed to delete timing.");
+      setErrorMessage(error.response?.data?.error);
+      setModalType("error");
+      setShowModal(true);
+    } finally {
+      setLoading(false);
+      setShowDeleteModal(false);
+      setTimingToDelete(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setTimingToDelete(null);
   };
 
   const renderForm = () => {
@@ -810,6 +1017,52 @@ const DoctorDetails = () => {
       encType="multipart/form-data"
     >
       <h2>Personal Details</h2>
+
+      {loadingPersonal && (
+        <LoaderWrapper>
+          <LoaderImage
+            src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif"
+            alt="Loading..."
+          />
+        </LoaderWrapper>
+      )}
+
+      {showModal && (
+        <div className="modal fade show d-block" tabIndex="-1" role="dialog">
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  {modalType === "success" ? "Success" : "Error"}
+                </h5>
+                <button
+                  type="button"
+                  className="close"
+                  onClick={() => setShowModal(false)}
+                >
+                  <span>&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                {/* Display success message in green and error message in red */}
+                <p style={{ color: modalType === "success" ? "green" : "red" }}>
+                  {modalMessage}
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="row mb-3">
         <div className="col-md-6">
           <div style={{ display: "flex", alignItems: "center" }}>
@@ -821,7 +1074,7 @@ const DoctorDetails = () => {
             <input
               id="profileUpload"
               type="file"
-              className="form-control"
+              className={`form-control ${formErrors.profile_pic ? "is-invalid" : ""}`}
               name="profile_pic"
               style={{ display: "none" }}
               onChange={handleChange}
@@ -830,40 +1083,45 @@ const DoctorDetails = () => {
               <CircularImage src={profilePicPreview} alt="Profile Preview" />
             )}
           </div>
+          {formErrors.profile_pic && (
+            <p className="text-danger">{formErrors.profile_pic[0]}</p>
+          )}
         </div>
 
         <div className="col-md-6">
           <label>Full Name</label>
           <span className="text-danger">*</span>
-          {formErrors.name && (
-            <p className="text-danger">{formErrors.name[0]}</p>
-          )}
           <input
             type="text"
-            className="form-control"
+            className={`form-control ${formErrors.name ? "is-invalid" : ""}`}
             name="name"
             value={formData.name}
             required
             onChange={handleChange}
           />
+          {formErrors.name && (
+            <p className="text-danger">{formErrors.name[0]}</p>
+          )}
         </div>
       </div>
+
       <div className="row mb-3">
         <div className="col-md-4">
           <label>Specialization</label>
           <span className="text-danger">*</span>
-          {formErrors.specialization && (
-            <p className="text-danger">{formErrors.specialization[0]}</p>
-          )}
           <input
             type="text"
-            className="form-control"
+            className={`form-control ${formErrors.specialization ? "is-invalid" : ""}`}
             name="specialization"
             value={formData.specialization}
             required
             onChange={handleChange}
           />
+          {formErrors.specialization && (
+            <p className="text-danger">{formErrors.specialization[0]}</p>
+          )}
         </div>
+
         <div className="col-md-4">
           <label>Qualification</label>
           <span className="text-danger">*</span>
@@ -876,50 +1134,53 @@ const DoctorDetails = () => {
             value={qualifications.filter((option) =>
               formData.qualification.includes(option.value)
             )}
-            required
             onChange={handleQualificationChange}
+            className={formErrors.qualification ? "is-invalid" : ""}
           />
+          {formErrors.qualification && (
+            <p className="text-danger">{formErrors.qualification}</p>
+          )}
         </div>
+
         <div className="col-md-4">
           <label>Experience</label>
           <span className="text-danger">*</span>
-          {formErrors.experience && (
-            <p className="text-danger">{formErrors.experience[0]}</p>
-          )}
           <input
             type="number"
-            className="form-control"
+            className={`form-control ${formErrors.experience ? "is-invalid" : ""}`}
             name="experience"
             value={formData.experience}
             required
             onChange={handleChange}
           />
+          {formErrors.experience && (
+            <p className="text-danger">{formErrors.experience[0]}</p>
+          )}
         </div>
       </div>
+
       <div className="row mb-3">
         <div className="col-md-4">
           <label>Registration No</label>
           <span className="text-danger">*</span>
-          {formErrors.registration_no && (
-            <p className="text-danger">{formErrors.registration_no[0]}</p>
-          )}
           <input
             type="text"
-            className="form-control"
+            className={`form-control ${formErrors.registration_no ? "is-invalid" : ""}`}
             name="registration_no"
             value={formData.registration_no}
             required
             onChange={handleChange}
           />
+          {formErrors.registration_no && (
+            <p className="text-danger">{formErrors.registration_no[0]}</p>
+          )}
         </div>
+
         <div className="col-md-4">
           <label>Gender</label>
           <span className="text-danger">*</span>
-          {formErrors.gender && (
-            <p className="text-danger">{formErrors.gender[0]}</p>
-          )}
           <select
-            className="form-control"
+            className={`form-control ${formErrors.gender ? "is-invalid" : ""}`}
             name="gender"
             value={formData.gender}
             onChange={handleChange}
@@ -930,19 +1191,27 @@ const DoctorDetails = () => {
             <option value="female">Female</option>
             <option value="other">Other</option>
           </select>
+          {formErrors.gender && (
+            <p className="text-danger">{formErrors.gender[0]}</p>
+          )}
         </div>
+
         <div className="col-md-4">
           <label>Date of Birth</label>
           <input
             type="date"
-            className="form-control"
+            className={`form-control ${formErrors.date_of_birth ? "is-invalid" : ""}`}
             name="date_of_birth"
             value={formData.date_of_birth}
             max={today}
             onChange={handleChange}
           />
+          {formErrors.date_of_birth && (
+            <p className="text-danger">{formErrors.date_of_birth[0]}</p>
+          )}
         </div>
       </div>
+
       <div className="row mb-3">
         <div className="col-md-4">
           <label>Languages Spoken</label>
@@ -954,33 +1223,39 @@ const DoctorDetails = () => {
             onChange={handleChange}
           />
         </div>
+
         <div className="col-md-4">
           <label>Mobile No</label>
           <span className="text-danger">*</span>
           <input
             type="number"
-            className="form-control"
+            className={`form-control ${formErrors.mobile_number ? "is-invalid" : ""}`}
             name="mobile_number"
             value={formData.mobile_number}
             disabled
           />
+          {formErrors.mobile_number && (
+            <p className="text-danger">{formErrors.mobile_number[0]}</p>
+          )}
         </div>
+
         <div className="col-md-4">
           <label>Email</label>
           <span className="text-danger">*</span>
-          {formErrors.email && (
-            <p className="text-danger">{formErrors.email[0]}</p>
-          )}
           <input
             type="email"
-            className="form-control"
+            className={`form-control ${formErrors.email ? "is-invalid" : ""}`}
             name="email"
             value={formData.email}
             required
             onChange={handleChange}
           />
+          {formErrors.email && (
+            <p className="text-danger">{formErrors.email[0]}</p>
+          )}
         </div>
       </div>
+
       <div className="row mb-3">
         <div className="col-md-4">
           <label>
@@ -990,12 +1265,16 @@ const DoctorDetails = () => {
           <input
             id="documentUpload"
             type="file"
-            className="form-control"
+            className={`form-control ${formErrors.doc_file ? "is-invalid" : ""}`}
             name="doc_file"
             accept=".pdf"
             onChange={handleChange}
           />
+          {formErrors.doc_file && (
+            <p className="text-danger">{formErrors.doc_file[0]}</p>
+          )}
         </div>
+
         <div className="col-md-4 pt-4">
           <button
             type="button"
@@ -1006,6 +1285,7 @@ const DoctorDetails = () => {
           </button>
         </div>
       </div>
+
       <button className="btn btn-primary" onClick={handleSubmit}>
         Save Personal Details
       </button>
@@ -1022,6 +1302,50 @@ const DoctorDetails = () => {
       onSubmit={handleAddressSubmit}
     >
       <h2>Address Details</h2>
+
+      {loadingAddress && (
+        <LoaderWrapper>
+          <LoaderImage
+            src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif"
+            alt="Loading..."
+          />
+        </LoaderWrapper>
+      )}
+
+      {showModal && (
+        <div className="modal fade show d-block" tabIndex="-1" role="dialog">
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  {modalType === "success" ? "Success" : "Error"}
+                </h5>
+                <button
+                  type="button"
+                  className="close"
+                  onClick={() => setShowModal(false)}
+                >
+                  <span>&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <p style={{ color: modalType === "success" ? "green" : "red" }}>
+                  {modalMessage}
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="row mb-3">
         <div className="col-md-4">
           <label>Country</label>
@@ -1038,6 +1362,7 @@ const DoctorDetails = () => {
             required
           />
         </div>
+
         <div className="col-md-4">
           <label>State</label>
           <span className="text-danger">*</span>
@@ -1124,8 +1449,53 @@ const DoctorDetails = () => {
         backgroundColor: "#f8f9fa",
         boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
       }}
+      onSubmit={handleOpdSubmit}
     >
       <h2>OPD Details</h2>
+      {loadingOpd && (
+        <LoaderWrapper>
+          <LoaderImage
+            src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif"
+            alt="Loading..."
+          />
+        </LoaderWrapper>
+      )}
+
+      {showModal && (
+        <div className="modal fade show d-block" tabIndex="-1" role="dialog">
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  {modalType === "success" ? "Success" : "Error"}
+                </h5>
+                <button
+                  type="button"
+                  className="close"
+                  onClick={() => setShowModal(false)}
+                >
+                  <span>&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <p style={{ color: modalType === "success" ? "green" : "red" }}>
+                  {modalType === "success" ? successMessage : errorMessage}
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="row mb-3">
         <div className="col-md-6">
           <div style={{ display: "flex", alignItems: "center" }}>
@@ -1137,7 +1507,7 @@ const DoctorDetails = () => {
             <input
               id="clinicUpload"
               type="file"
-              className="form-control"
+              className={`form-control ${formErrors.opd?.doc_file ? "is-invalid" : ""}`}
               name="doc_file"
               style={{ display: "none" }}
               onChange={(e) => handleOpdChange("doc_file", e)}
@@ -1150,73 +1520,81 @@ const DoctorDetails = () => {
         <div className="col-md-6">
           <label>Clinic Name</label>
           <span className="text-danger">*</span>
-          {formErrors.clinic_name && (
-            <p className="text-danger">{formErrors.clinic_name[0]}</p>
-          )}
           <input
             type="text"
-            className="form-control"
+            className={`form-control ${formErrors.opd?.clinic_name ? "is-invalid" : ""}`}
             name="clinic_name"
             value={opdData.clinic_name}
-            onChange={(e) => handleOpdChange("clinic_name", e)}
             required
+            onChange={(e) => handleOpdChange("clinic_name", e)}
           />
+          {formErrors.opd?.clinic_name && (
+            <div className="invalid-feedback">
+              {formErrors.opd.clinic_name[0]}
+            </div>
+          )}
         </div>
       </div>
+
       <div className="row mb-3">
         <div className="col-md-6">
           <label>Start Day</label>
           <span className="text-danger">*</span>
-          {formErrors.start_day && (
-            <p className="text-danger">{formErrors.start_day[0]}</p>
-          )}
           <input
             type="text"
-            className="form-control"
+            className={`form-control ${formErrors.opd?.start_day ? "is-invalid" : ""}`}
             name="start_day"
             value={opdData.start_day}
+            required
             onChange={(e) => handleOpdChange("start_day", e)}
             placeholder="e.g., Monday"
-            required
           />
+          {formErrors.opd?.start_day && (
+            <div className="invalid-feedback">
+              {formErrors.opd.start_day[0]}
+            </div>
+          )}
         </div>
+
         <div className="col-md-6">
           <label>Last Day</label>
           <span className="text-danger">*</span>
-          {formErrors.end_day && (
-            <p className="text-danger">{formErrors.end_day[0]}</p>
-          )}
           <input
             type="text"
-            className="form-control"
+            className={`form-control ${formErrors.opd?.end_day ? "is-invalid" : ""}`}
             name="end_day"
             value={opdData.end_day}
+            required
             onChange={(e) => handleOpdChange("end_day", e)}
             placeholder="e.g., Friday"
-            required
           />
+          {formErrors.opd?.end_day && (
+            <div className="invalid-feedback">{formErrors.opd.end_day[0]}</div>
+          )}
         </div>
+      </div>
+
+      <div className="row mb-3">
         <div className="col-md-6">
           <label>Consultation Fee</label>
           <span className="text-danger">*</span>
-          {formErrors.consultation_fee && (
-            <p className="text-danger">{formErrors.consultation_fee[0]}</p>
-          )}
           <input
             type="text"
-            className="form-control"
+            className={`form-control ${formErrors.opd?.consultation_fee ? "is-invalid" : ""}`}
             name="consultation_fee"
             value={opdData.consultation_fee}
-            onChange={(e) => handleOpdChange("consultation_fee", e)}
             required
+            onChange={(e) => handleOpdChange("consultation_fee", e)}
           />
+          {formErrors.opd?.consultation_fee && (
+            <div className="invalid-feedback">
+              {formErrors.opd.consultation_fee[0]}
+            </div>
+          )}
         </div>
       </div>
-      <button
-        type="submit"
-        className="btn btn-primary mt-3"
-        onClick={handleOpdSubmit}
-      >
+
+      <button type="submit" className="btn btn-primary mt-3">
         Save OPD Details
       </button>
 
@@ -1224,43 +1602,104 @@ const DoctorDetails = () => {
         <div className="row mb-3 mt-4">
           <div className="col-12">
             <h5>OPD Timings</h5>
+            {showModal && (
+              <div
+                className="modal fade show d-block"
+                tabIndex="-1"
+                role="dialog"
+              >
+                <div className="modal-dialog" role="document">
+                  <div className="modal-content">
+                    <div className="modal-header">
+                      <h5 className="modal-title">
+                        {modalType === "success" ? "Success" : "Error"}
+                      </h5>
+                      <button
+                        type="button"
+                        className="close"
+                        onClick={() => setShowModal(false)}
+                      >
+                        <span>&times;</span>
+                      </button>
+                    </div>
+                    <div className="modal-body">
+                      <p
+                        style={{
+                          color: modalType === "success" ? "green" : "red",
+                        }}
+                      >
+                        {modalType === "success"
+                          ? successMessage
+                          : errorMessage}
+                      </p>
+                    </div>
+                    <div className="modal-footer">
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => setShowModal(false)}
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
-          {(opdData.opd_timings || []).map((timing, index) => (
-            <div key={index} className="row mb-3">
-              <div className="col-md-5">
-                <label>Start Time</label>
-                <span className="text-danger">*</span>
-                <input
-                  type="time"
-                  className="form-control"
-                  value={timing.start_time || ""}
-                  onChange={(e) =>
-                    handleOpdTimingChange(index, "start_time", e.target.value)
-                  }
-                />
-              </div>
-              <div className="col-md-5">
-                <label>End Time</label>
-                <span className="text-danger">*</span>
-                <input
-                  type="time"
-                  className="form-control"
-                  value={timing.end_time || ""}
-                  onChange={(e) =>
-                    handleOpdTimingChange(index, "end_time", e.target.value)
-                  }
-                />
-              </div>
-              <div className="col-md-2 d-flex align-items-center justify-content-center">
-                <FaTrash
-                  className="text-danger"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => handleDeleteTiming(timing.time_id)}
-                />
-              </div>
-            </div>
-          ))}
+          <Table striped bordered hover className="mt-4">
+            <thead>
+              <tr>
+                <th>
+                  Start Time <span className="text-danger">*</span>
+                </th>
+                <th>
+                  End Time <span className="text-danger">*</span>
+                </th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {opdData.opd_timings.map((timing, index) => (
+                <tr key={index}>
+                  <td>
+                    <input
+                      type="time"
+                      className="form-control"
+                      value={timing.start_time || ""}
+                      required
+                      onChange={(e) =>
+                        handleOpdTimingChange(
+                          index,
+                          "start_time",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="time"
+                      className="form-control"
+                      value={timing.end_time || ""}
+                      required
+                      onChange={(e) =>
+                        handleOpdTimingChange(index, "end_time", e.target.value)
+                      }
+                    />
+                  </td>
+                  <td>
+                    <FaTrash
+                      className="text-danger"
+                      style={{ cursor: "pointer" }}
+                      onClick={() => handleDeleteClick(timing.time_id)}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
 
           <div className="col-12 d-flex justify-content-between mt-3">
             <button
@@ -1280,6 +1719,23 @@ const DoctorDetails = () => {
           </div>
         </div>
       )}
+
+      <Modal show={showDeleteModal} onHide={cancelDelete} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Deletion</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to delete this OPD timing?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={cancelDelete}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={confirmDeleteTiming}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </form>
   );
 
@@ -1295,40 +1751,51 @@ const DoctorDetails = () => {
   }
 
   return (
-    <div className="container mt-5">
-      <TabWrapper style={{ marginBottom: "0", paddingBottom: "0" }}>
-        <Tab
-          active={activeTab === "personal"}
-          isCompleted={isPersonalComplete}
-          onClick={() => handleTabClick("personal")}
-        >
-          Personal Details{" "}
-          {isPersonalComplete && <span style={{ color: "green" }}></span>}
-        </Tab>
-        <Tab
-          active={activeTab === "address"}
-          isCompleted={isAddressComplete}
-          onClick={() => handleTabClick("address")}
-        >
-          Address Details{" "}
-          {isAddressComplete && <span style={{ color: "green" }}></span>}
-        </Tab>
-        <Tab
-          active={activeTab === "opd"}
-          isCompleted={isOpdComplete}
-          onClick={() => handleTabClick("opd")}
-        >
-          OPD Details{" "}
-          {isOpdComplete && <span style={{ color: "green" }}></span>}
-        </Tab>
-      </TabWrapper>
+    <div
+      style={{
+        backgroundColor: "#D7EAF0", // Apply background color to entire UI
+        minHeight: "200vh", // Make sure the background color covers the whole screen
+        fontFamily: "sans-serif",
+      }}
+    >
+      <div
+        className="container mt-5"
+        style={{ backgroundColor: "#D7EAF0", fontFamily: "sans-serif" }}
+      >
+        <TabWrapper style={{ marginBottom: "0", paddingBottom: "0" }}>
+          <Tab
+            active={activeTab === "personal"}
+            isCompleted={isPersonalComplete}
+            onClick={() => handleTabClick("personal")}
+          >
+            Personal Details{" "}
+            {isPersonalComplete && <span style={{ color: "green" }}></span>}
+          </Tab>
+          <Tab
+            active={activeTab === "address"}
+            isCompleted={isAddressComplete}
+            onClick={() => handleTabClick("address")}
+          >
+            Address Details{" "}
+            {isAddressComplete && <span style={{ color: "green" }}></span>}
+          </Tab>
+          <Tab
+            active={activeTab === "opd"}
+            isCompleted={isOpdComplete}
+            onClick={() => handleTabClick("opd")}
+          >
+            OPD Details{" "}
+            {isOpdComplete && <span style={{ color: "green" }}></span>}
+          </Tab>
+        </TabWrapper>
 
-      <ProgressBar
-        progress={progress}
-        style={{ marginTop: "0", paddingTop: "0" }}
-      />
+        <ProgressBar
+          progress={progress}
+          style={{ marginTop: "0", paddingTop: "0" }}
+        />
 
-      {renderForm()}
+        {renderForm()}
+      </div>
     </div>
   );
 };

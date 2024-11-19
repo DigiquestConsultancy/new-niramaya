@@ -1,267 +1,561 @@
-import React, { useState, useEffect, useRef } from 'react';
-import BaseUrl from '../../api/BaseUrl'; // Import the BaseUrl instance
-import { jwtDecode } from 'jwt-decode';
-import { Modal, Button, Form } from 'react-bootstrap';
- 
+import React, { useState, useEffect, useRef } from "react";
+import BaseUrl from "../../api/BaseUrl";
+import { jwtDecode } from "jwt-decode";
+import { Modal, Button, Form } from "react-bootstrap";
+import styled from "styled-components";
+import Loader from "react-js-loader";
+
+const LoaderWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: rgba(255, 255, 255, 0.7);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+`;
+
+const LoaderImage = styled.div`
+  width: 400px;
+`;
+
+const ProfilePicCircle = styled.div`
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 2px dashed #199fd9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  color: #199fd9;
+  cursor: pointer;
+  margin-bottom: 10px;
+  position: relative;
+`;
+
+const ProfilePicPreview = styled.img`
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-left: 20px;
+`;
+
 const AddClinic = () => {
-    const [mobileNumber, setMobileNumber] = useState('');
-    const [verificationStatus, setVerificationStatus] = useState('');
-    const [otp, setOtp] = useState(new Array(6).fill(''));
-    const [showOtpModal, setShowOtpModal] = useState(false);
-    const [message, setMessage] = useState('');
-    const [showDetailsForm, setShowDetailsForm] = useState(false);
-    const today = new Date().toISOString().split('T')[0];
-    const inputRefs = useRef([]);
-    const [formData, setFormData] = useState({
-        name: '',
-        gender: '',
-        address: '',
-        date_of_birth: '',
-        profile_pic: '',
-        qualification: '',
-        specialization: '',
-        mobile_number: ''
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [verificationStatus, setVerificationStatus] = useState("");
+  const [otp, setOtp] = useState(new Array(6).fill(""));
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [showDetailsForm, setShowDetailsForm] = useState(false);
+  const today = new Date().toISOString().split("T")[0];
+  const inputRefs = useRef([]);
+  const [loading, setLoading] = useState(false);
+  const [profilePicPreview, setProfilePicPreview] = useState("");
+
+  const [formData, setFormData] = useState({
+    name: "",
+    gender: "",
+    address: "",
+    date_of_birth: "",
+    profile_pic: "",
+    qualification: "",
+    specialization: "",
+    mobile_number: "",
+    age: "",
+  });
+  const [doctorId, setDoctorId] = useState("");
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        setDoctorId(decodedToken.doctor_id);
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    }
+  }, []);
+
+  const handleVerify = async () => {
+    setMessage("");
+    setLoading(true);
+    try {
+      const response = await BaseUrl.get(
+        `/clinic/register/?mobile_number=${mobileNumber}`
+      );
+      if (response.status === 200) {
+        setVerificationStatus(response.data.success);
+        setShowOtpModal(true);
+      } else {
+        setMessageType("error");
+        setShowMessageModal(true);
+      }
+    } catch (error) {
+      setMessage(error.response?.data?.error || "");
+      setMessageType("error");
+      setShowMessageModal(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOtpChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return;
+
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    if (value.length === 1 && index < 5) {
+      inputRefs.current[index + 1].focus();
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    setMessage("");
+    setLoading(true);
+    try {
+      const enteredOtp = otp.join("");
+      const response = await BaseUrl.post("/clinic/register/", {
+        mobile_number: mobileNumber,
+        otp: enteredOtp,
+        doctor_id: doctorId,
+      });
+      if (response.status === 201) {
+        setShowOtpModal(false);
+        setShowDetailsForm(true);
+        localStorage.setItem("mobile_number", mobileNumber);
+        setFormData({ ...formData, mobile_number: mobileNumber });
+        setMessage(response.data.success);
+        setMessageType("success");
+        setShowMessageModal(true);
+      } else {
+        setMessage("OTP verification failed");
+        setMessageType("error");
+        setShowMessageModal(true);
+      }
+    } catch (error) {
+      setMessage(error.response?.data?.error || "");
+      setMessageType("error");
+      setShowMessageModal(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setMessage("");
+    setLoading(true);
+    try {
+      const response = await BaseUrl.get(
+        `/clinic/register/?mobile_number=${mobileNumber}`
+      );
+      if (response.status === 200) {
+        setMessage(response.data.success);
+        setMessageType("success");
+        setOtp(new Array(6).fill(""));
+        inputRefs.current[0].focus();
+      }
+    } catch (error) {
+      setMessage(error.response?.data?.error || "OTP resend failed");
+      setMessageType("error");
+    } finally {
+      setLoading(false);
+      setShowMessageModal(true);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    let newErrors = { ...errors };
+    switch (name) {
+      case "name":
+        if (!/^[a-zA-Z\s]*$/.test(value)) {
+          newErrors[name] = "Name should contain only alphabets";
+        } else {
+          delete newErrors[name];
+        }
+        break;
+      case "address":
+        if (!value.trim()) {
+          newErrors[name] = "Address cannot be blank";
+        } else {
+          delete newErrors[name];
+        }
+        break;
+      case "gender":
+        if (!value) {
+          newErrors[name] = "Gender is required";
+        } else {
+          delete newErrors[name];
+        }
+        break;
+      case "date_of_birth":
+        if (!value) {
+          newErrors[name] = "Date of birth is required";
+        } else {
+          delete newErrors[name];
+        }
+        break;
+      case "age":
+        if (!value) {
+          newErrors[name] = "Age is required";
+        } else {
+          delete newErrors[name];
+        }
+        break;
+      default:
+        break;
+    }
+    setErrors(newErrors);
+  };
+
+  const handleProfilePicChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData({ ...formData, profile_pic: file });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePicPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const data = new FormData();
+    Object.keys(formData).forEach((key) => {
+      if (key !== "profile_pic") {
+        data.append(key, formData[key]);
+      }
     });
-    const [doctorId, setDoctorId] = useState('');
-    const [errors, setErrors] = useState({}); // State to manage errors
- 
-    useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            try {
-                const decodedToken = jwtDecode(token);
-                setDoctorId(decodedToken.doctor_id);
-            } catch (error) {
-                console.error('Error decoding token:', error);
-            }
-        }
-    }, []);
- 
-    const handleVerify = async () => {
-        try {
-            const response = await BaseUrl.get(`/clinic/register/?mobile_number=${mobileNumber}`);
-            if (response.status === 200) {
-                setVerificationStatus(response.data.success);
-                setShowOtpModal(true);
-            } else {
-                setVerificationStatus('Verification failed');
-            }
-        } catch (error) {
-            setVerificationStatus(error.response?.data?.error || 'Verification failed');
-        }
-    };
- 
-    const handleOtpChange = (index, value) => {
-        const newOtp = [...otp];
-        newOtp[index] = value;
-        setOtp(newOtp);
- 
-        // Move to the next input field when a digit is entered
-        if (value.length === 1 && index < 5) {
-            inputRefs.current[index + 1].focus();
-        }
-    };
- 
-    const handleVerifyOtp = async () => {
-        try {
-            const enteredOtp = otp.join('');
-            const response = await BaseUrl.post('/clinic/register/', {
-                mobile_number: mobileNumber,
-                otp: enteredOtp,
-                doctor_id: doctorId
-            });
-            if (response.status === 201) {
-                setShowOtpModal(false);
-                setShowDetailsForm(true);
-                localStorage.setItem('mobile_number', mobileNumber);
-                setFormData({ ...formData, mobile_number: mobileNumber });
-                setMessage(response.data.success);
-            } else {
-                setVerificationStatus('OTP verification failed');
-            }
-        } catch (error) {
-            setVerificationStatus(error.response?.data?.error || 'OTP verification failed');
-        }
-    };
- 
-    const handleResendOtp = async () => {
-        try {
-            const response = await BaseUrl.get(`/clinic/register/?mobile_number=${mobileNumber}`);
-            if (response.status === 200) {
-                setMessage(response.data.success);
-                setOtp(new Array(6).fill(''));
-                inputRefs.current[0].focus(); // Focus on the first input field when resending OTP
-            }
-        } catch (error) {
-            setVerificationStatus(error.response?.data?.error || 'OTP resend failed');
-        }
-    };
- 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
- 
-        // Validation logic
-        let newErrors = { ...errors };
- 
-        switch (name) {
-            case 'name':
-                if (!/^[a-zA-Z\s]*$/.test(value)) {
-                    newErrors[name] = 'Name should contain only alphabets';
-                } else {
-                    delete newErrors[name];
+
+    if (formData.profile_pic instanceof File) {
+      data.append("profile_pic", formData.profile_pic);
+    }
+
+    try {
+      const response = await BaseUrl.post("/clinic/details/", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      if (response.status === 201) {
+        setMessage(response.data.success);
+        setMessageType("success");
+      } else {
+        setMessageType("error");
+      }
+    } catch (error) {
+      setMessage(error.response?.data?.error || "");
+      setMessageType("error");
+    } finally {
+      setLoading(false);
+      setShowMessageModal(true);
+    }
+  };
+
+  return (
+    <div
+      style={{
+        backgroundColor: "#D7EAF0",
+        minHeight: "150vh",
+        paddingTop: "20px",
+      }}
+    >
+      <div
+        className="container mt-5"
+        style={{
+          backgroundColor: "white",
+          borderRadius: "8px",
+          padding: "20px",
+        }}
+      >
+        <h2 style={{ color: "#0174BE" }} className="mb-5 text-center">
+          Add Clinic
+        </h2>
+
+        {loading && (
+          <LoaderWrapper>
+            <LoaderImage>
+              <Loader
+                type="spinner-circle"
+                bgColor="#0091A5"
+                color="#0091A5"
+                title="Loading..."
+                size={100}
+              />
+            </LoaderImage>
+          </LoaderWrapper>
+        )}
+
+        {!showDetailsForm && (
+          <div className="form-group row">
+            <label htmlFor="mobileNumber" className="col-sm-2 col-form-label">
+              Mobile Number:
+            </label>
+            <div className="col-sm-8">
+              <input
+                type="number"
+                placeholder="Please Enter Mobile Number"
+                className="form-control"
+                id="mobileNumber"
+                value={mobileNumber}
+                onChange={(e) => setMobileNumber(e.target.value)}
+              />
+            </div>
+            <div className="col-sm-1">
+              <button
+                className="btn"
+                style={{ backgroundColor: "#199fd9", color: "#f1f8dc" }}
+                onClick={handleVerify}
+              >
+                Verify
+              </button>
+            </div>
+          </div>
+        )}
+
+        {showDetailsForm && (
+          <Form
+            onSubmit={handleSubmit}
+            className="mt-4"
+            encType="multipart/form-data"
+          >
+            <div className="d-flex align-items-center mb-4">
+              <ProfilePicCircle
+                onClick={() =>
+                  document.getElementById("profilePicInput").click()
                 }
-                break;
-            case 'address':
-                if (!value.trim()) {
-                    newErrors[name] = 'Address cannot be blank';
-                } else {
-                    delete newErrors[name];
-                }
-                break;
-            case 'gender':
-                if (!value) {
-                    newErrors[name] = 'Gender is required';
-                } else {
-                    delete newErrors[name];
-                }
-                break;
-            case 'date_of_birth':
-                if (!value) {
-                    newErrors[name] = 'Date of birth is required';
-                } else {
-                    delete newErrors[name];
-                }
-                break;
-            default:
-                break;
-        }
- 
-        setErrors(newErrors);
-    };
- 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const data = new FormData();
-        Object.keys(formData).forEach(key => {
-            data.append(key, formData[key]);
-        });
-        try {
-            const response = await BaseUrl.post('/clinic/details/', data);
-            if (response.status === 201) {
-                setMessage(response.data.success);
-            } else {
-                setMessage('Form submission failed');
-            }
-        } catch (error) {
-            setMessage(error.response?.data?.error || 'Form submission failed');
-        }
-    };
- 
-    return (
-        <div className="container mt-5">
-            <h2>Manage Clinic</h2>
-            {!showDetailsForm && (
-                <div className="form-group row">
-                    <label htmlFor="mobileNumber" className="col-sm-2 col-form-label">Mobile Number:</label>
-                    <div className="col-sm-8">
-                        <input
-                            type="text"
-                            className="form-control"
-                            id="mobileNumber"
-                            value={mobileNumber}
-                            onChange={(e) => setMobileNumber(e.target.value)}
-                        />
-                    </div>
-                    <div className="col-sm-2">
-                        <button className="btn" style={{ backgroundColor: '#199fd9', color: '#f1f8dc' }} onClick={handleVerify}>Verify</button>
-                    </div>
-                </div>
-            )}
-            {verificationStatus && (
-                <div className="mt-3 alert alert-info">
-                    {verificationStatus}
-                </div>
-            )}
-            {showDetailsForm && (
-                <Form onSubmit={handleSubmit} className="mt-4" encType="multipart/form-data">
-                    <div className="row">
-                        <Form.Group controlId="formProfilePic" className="col-md-4">
-                            <Form.Label>Profile Picture</Form.Label>
-                            <Form.Control type="file" name="profile_pic" onChange={handleInputChange} />
-                        </Form.Group>
-                    </div>
-                    <div className="row">
-                        <Form.Group controlId="formMobileNumber" className="col-md-4">
-                            <Form.Label>Mobile Number</Form.Label><span className="text-danger">*</span> {/* Mandatory indicator */}
-                            <Form.Control type="text" name="mobile_number" value={formData.mobile_number} disabled />
-                        </Form.Group>
-                        <Form.Group controlId="formName" className="col-md-4">
-                            <Form.Label>Name</Form.Label><span className="text-danger">*</span> {/* Mandatory indicator */}
-                            <Form.Control type="text" name="name" value={formData.name} onChange={handleInputChange} />
-                            {errors.name && <p className="text-danger">{errors.name}</p>}
-                        </Form.Group>
-                        <Form.Group controlId="formGender" className="col-md-4">
-                            <Form.Label>Gender</Form.Label><span className="text-danger">*</span> {/* Mandatory indicator */}
-                            <Form.Control as="select" name="gender" value={formData.gender} onChange={handleInputChange}>
-                                <option value="">Select Gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="other">Other</option>
-                            </Form.Control>
-                            {errors.gender && <p className="text-danger">{errors.gender}</p>}
-                        </Form.Group>
-                    </div>
-                    <div className="row mt-3">
-                        <Form.Group controlId="formDateOfBirth" className="col-md-4">
-                            <Form.Label>Date of Birth</Form.Label><span className="text-danger">*</span> {/* Mandatory indicator */}
-                            <Form.Control type="date" name="date_of_birth" value={formData.date_of_birth} max={today} onChange={handleInputChange} />
-                            {errors.date_of_birth && <p className="text-danger">{errors.date_of_birth}</p>}
-                        </Form.Group>
-                        <Form.Group controlId="formQualification" className="col-md-4">
-                            <Form.Label>Qualification</Form.Label>
-                            <Form.Control type="text" name="qualification" value={formData.qualification} onChange={handleInputChange} />
-                        </Form.Group>
-                        <Form.Group controlId="formSpecialization" className="col-md-4">
-                            <Form.Label>Specialization</Form.Label>
-                            <Form.Control type="text" name="specialization" value={formData.specialization} onChange={handleInputChange} />
-                        </Form.Group>
-                    </div>
-                    <div className="row mt-3">
-                        <Form.Group controlId="formAddress" className="col-md-12">
-                            <Form.Label>Address</Form.Label><span className="text-danger">*</span> {/* Mandatory indicator */}
-                            <Form.Control type="text" name="address" value={formData.address} onChange={handleInputChange} />
-                            {errors.address && <p className="text-danger">{errors.address}</p>}
-                        </Form.Group>
-                    </div>
-                    <Button variant="btn" style={{ backgroundColor: '#199fd9', color: '#f1f8dc' }} type="submit" className="mt-3">Submit</Button>
-                    {message && <p className="mt-3 alert alert-info">{message}</p>}
-                </Form>
-            )}
-            <Modal show={showOtpModal} onHide={() => setShowOtpModal(false)} centered>
-                <Modal.Header closeButton>
-                    <Modal.Title>OTP Verification</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <div className="otp-container d-flex justify-content-between mb-3">
-                        {otp.map((digit, index) => (
-                            <input
-                                key={index}
-                                type="text"
-                                maxLength="1"
-                                className="form-control otp-input"
-                                value={digit}
-                                onChange={(e) => handleOtpChange(index, e.target.value)}
-                                ref={(el) => (inputRefs.current[index] = el)}
-                            />
-                        ))}
-                    </div>
-                    <Button variant="btn" style={{ backgroundColor: '#199fd9', color: '#f1f8dc' }} onClick={handleVerifyOtp}>Verify OTP</Button>
-                    <Button variant="btn" style={{ backgroundColor: '#199fd9', color: '#f1f8dc' }} onClick={handleResendOtp} className="ms-2">Resend OTP</Button>
-                </Modal.Body>
-            </Modal>
-        </div>
-    );
+              >
+                <span>+</span>
+              </ProfilePicCircle>
+              <input
+                id="profilePicInput"
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={handleProfilePicChange}
+              />
+              {profilePicPreview && (
+                <ProfilePicPreview
+                  src={profilePicPreview}
+                  alt="Profile Preview"
+                />
+              )}
+            </div>
+
+            <div className="row">
+              <Form.Group controlId="formMobileNumber" className="col-md-4">
+                <Form.Label>Mobile Number</Form.Label>
+                <span className="text-danger">*</span>
+                <Form.Control
+                  type="number"
+                  name="mobile_number"
+                  value={formData.mobile_number}
+                  required
+                  disabled
+                />
+              </Form.Group>
+              <Form.Group controlId="formName" className="col-md-4">
+                <Form.Label>Name</Form.Label>
+                <span className="text-danger">*</span>
+                <Form.Control
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  required
+                  onChange={handleInputChange}
+                />
+                {errors.name && <p className="text-danger">{errors.name}</p>}
+              </Form.Group>
+              <Form.Group controlId="formGender" className="col-md-4">
+                <Form.Label>Gender</Form.Label>
+                <span className="text-danger">*</span>
+                <Form.Control
+                  as="select"
+                  name="gender"
+                  value={formData.gender}
+                  required
+                  onChange={handleInputChange}
+                >
+                  <option value="">Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </Form.Control>
+                {errors.gender && (
+                  <p className="text-danger">{errors.gender}</p>
+                )}
+              </Form.Group>
+            </div>
+            <div className="row mt-3">
+              <Form.Group controlId="formDateOfBirth" className="col-md-4">
+                <Form.Label>Date of Birth</Form.Label>
+                <Form.Control
+                  type="date"
+                  name="date_of_birth"
+                  value={formData.date_of_birth}
+                  max={today}
+                  onChange={handleInputChange}
+                />
+                {errors.date_of_birth && (
+                  <p className="text-danger">{errors.date_of_birth}</p>
+                )}
+              </Form.Group>
+              <Form.Group controlId="formAge" className="col-md-4">
+                <Form.Label>Age</Form.Label>
+                <span className="text-danger">*</span>
+                <Form.Control
+                  type="text"
+                  name="age"
+                  value={formData.age}
+                  required
+                  onChange={handleInputChange}
+                />
+                {errors.age && <p className="text-danger">{errors.age}</p>}
+              </Form.Group>
+              <Form.Group controlId="formQualification" className="col-md-4">
+                <Form.Label>Qualification</Form.Label>
+                <span className="text-danger">*</span>
+                <Form.Control
+                  type="text"
+                  name="qualification"
+                  value={formData.qualification}
+                  required
+                  onChange={handleInputChange}
+                />
+              </Form.Group>
+            </div>
+            <div className="row mt-3">
+              <Form.Group controlId="formSpecialization" className="col-md-4">
+                <Form.Label>Specialization</Form.Label>
+                <span className="text-danger">*</span>
+                <Form.Control
+                  type="text"
+                  name="specialization"
+                  value={formData.specialization}
+                  required
+                  onChange={handleInputChange}
+                />
+              </Form.Group>
+              <Form.Group controlId="formAddress" className="col-md-8">
+                <Form.Label>Address</Form.Label>
+                <span className="text-danger">*</span>
+                <Form.Control
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  required
+                  onChange={handleInputChange}
+                />
+                {errors.address && (
+                  <p className="text-danger">{errors.address}</p>
+                )}
+              </Form.Group>
+            </div>
+            <Button
+              variant="btn"
+              style={{ backgroundColor: "#199fd9", color: "#f1f8dc" }}
+              type="submit"
+              className="mt-3"
+            >
+              Submit
+            </Button>
+          </Form>
+        )}
+
+        <Modal
+          show={showOtpModal}
+          onHide={() => setShowOtpModal(false)}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>OTP Verification</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <div className="otp-container d-flex justify-content-between mb-3">
+              {otp.map((digit, index) => (
+                <input
+                  key={index}
+                  type="text"
+                  maxLength="1"
+                  className="form-control otp-input"
+                  value={digit}
+                  onChange={(e) => handleOtpChange(index, e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Backspace" && !otp[index] && index > 0) {
+                      inputRefs.current[index - 1].focus();
+                    }
+                  }}
+                  ref={(el) => (inputRefs.current[index] = el)}
+                />
+              ))}
+            </div>
+            <div className="d-flex justify-content-between">
+              <Button
+                variant="btn"
+                style={{ backgroundColor: "#199fd9", color: "#f1f8dc" }}
+                onClick={handleResendOtp}
+              >
+                Resend OTP
+              </Button>
+              <Button
+                variant="btn"
+                style={{ backgroundColor: "#199fd9", color: "#f1f8dc" }}
+                onClick={handleVerifyOtp}
+              >
+                Verify OTP
+              </Button>
+            </div>
+          </Modal.Body>
+        </Modal>
+
+        <Modal
+          show={showMessageModal}
+          onHide={() => setShowMessageModal(false)}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>
+              {messageType === "success" ? "Success" : "Error"}
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p
+              className={
+                messageType === "success" ? "text-success" : "text-danger"
+              }
+            >
+              {message}
+            </p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowMessageModal(false)}
+            >
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </div>
+    </div>
+  );
 };
- 
+
 export default AddClinic;
