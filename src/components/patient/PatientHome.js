@@ -6642,63 +6642,6 @@ const PatientHome = () => {
     }
   }, [isPaymentConfirmed]);
 
-
-  // const handleConfirmAppointment = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const slotId = localStorage.getItem("selectedSlotId");
-  //     const orderId = localStorage.getItem("order_id");
-  //     const selectedConsultationType = localStorage.getItem("consultationType");
-  //     const savedPatientId = localStorage.getItem("savedPatientId"); // Retrieve the patient ID
-
-  //     const paymentStatusResponse = await fetch(`http://192.168.29.95:8001/payment/get/?order_id=${orderId}`);
-  //     const paymentStatusData = await paymentStatusResponse.json();
-
-  //     if (paymentStatusData.status === "SUCCESS") {
-  //       const postResponse = await BaseUrl.post("/patientappointment/bookslot/", {
-  //         patient: savedPatientId,
-  //         doctor: selectedDoctor.doctor,
-  //         appointment_status: "upcoming",
-  //         appointment_slot: slotId,
-  //         consultation_type: selectedConsultationType,
-  //       });
-
-  //       if (postResponse && postResponse.data) {
-  //         setSuccessMessage(postResponse.data.success);
-  //         setShowSuccessPopup(true);
-  //         setTimeout(() => setShowSuccessPopup(false), 5000);
-  //       } else {
-  //         setErrorMessage("Failed to confirm the appointment.");
-  //         setShowSuccessPopup(true);
-  //         setTimeout(() => setShowSuccessPopup(false), 5000);
-  //         await BaseUrl.put("/payment/updateappointment", {
-  //           appointment_id: slotId,
-  //           is_selected: false,
-  //         });
-  //       }
-  //     } else {
-  //       setErrorMessage("Payment was not successful. Please try again.");
-  //       setShowSuccessPopup(true);
-  //       setTimeout(() => setShowSuccessPopup(false), 5000);
-
-  //       await BaseUrl.put("/payment/updateappointment", {
-  //         appointment_id: slotId,
-  //         is_selected: false,
-  //       });
-  //     }
-  //   } catch (error) {
-  //     setErrorMessage("Payment was not successful. Please try again.");
-  //     setShowSuccessPopup(true);
-  //     setTimeout(() => setShowSuccessPopup(false), 5000);
-  //   } finally {
-  //     setLoading(false);
-  //     localStorage.removeItem("selectedSlotId");
-  //     localStorage.removeItem("order_id");
-  //     localStorage.removeItem("consultationType");
-  //   }
-  // };
-
-
   const handleConfirmAppointment = async () => {
     try {
       setLoading(true);
