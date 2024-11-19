@@ -3758,7 +3758,7 @@ const PatientHome = () => {
           <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={handleConfirmAppointment}> {/* Confirm Button */}
+          <Button variant="primary" onClick={handleConfirmAppointment}>
             Confirm
           </Button>
         </Modal.Footer>
@@ -3780,8 +3780,8 @@ const PatientHome = () => {
         show={showSuccessPopup}
         onHide={() => {
           setShowSuccessPopup(false);
-          setErrorMessage(""); // Clear error message when modal is closed
-          setSuccessMessage(""); // Clear success message when modal is closed
+          setErrorMessage(""); 
+          setSuccessMessage("");
         }}
         centered
       >
@@ -3805,15 +3805,6 @@ const PatientHome = () => {
             {errorMessage || successMessage}
           </Modal.Title>
         </Modal.Header>
-        {/* <Modal.Body
-          style={{
-            backgroundColor: errorMessage ? '#f8d7da' : '#d4edda',
-            color: errorMessage ? '#721c24' : '#155724',
-            textAlign: 'center',
-          }}
-        >
-          {errorMessage || successMessage}
-        </Modal.Body> */}
         <Modal.Footer
           style={{
             backgroundColor: errorMessage ? '#f8d7da' : '#d4edda',
@@ -3821,7 +3812,6 @@ const PatientHome = () => {
           }}
         />
       </Modal>
-
 
       <Modal show={isPaymentSuccessful} centered onHide={() => setIsPaymentSuccessful(false)}>
         <Modal.Header closeButton>
