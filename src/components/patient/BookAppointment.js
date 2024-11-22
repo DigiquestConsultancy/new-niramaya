@@ -648,35 +648,29 @@
 
 
 import React, { useState, useEffect } from "react";
-import { Button, Row, Col, Card, Form, Tabs, Tab, Alert, } from "react-bootstrap";
+import { Button, Row, Col, Card, Form, Tabs, Tab, Alert, Modal } from "react-bootstrap";
 import { load } from "@cashfreepayments/cashfree-js";
 import clinicVisitImage from "../../images/a-53-512.webp";
 import onlineConsultationImage from "../../images/2562653-200.png";
 import BaseUrl from "../../api/BaseUrl";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
-
 import { format, addDays } from "date-fns";
+import { FaExclamationCircle } from "react-icons/fa";
+import { FaCheckCircle } from "react-icons/fa";
 
 const BookAppointment = () => {
-  // const [appointmentType, setAppointmentType] = useState("clinic");
 
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isFormVisible, setIsFormVisible] = useState(false);
-  const [appointmentType, setAppointmentType] = useState("clinic"); // Default is "clinic"
-
-  // State to store patientId and selected appointmentSlotId
-  const [patientId, setPatientId] = useState(null); // For patient ID
-  const [appointmentSlotId, setAppointmentSlotId] = useState(null); // For appointment slot ID
-
+  const [appointmentType, setAppointmentType] = useState("clinic");
+  const [patientId, setPatientId] = useState(null);
+  const [appointmentSlotId, setAppointmentSlotId] = useState(null);
   const [availableDates, setAvailableDates] = useState([]);
   const [loading, setLoading] = useState(false);
-  // const [patientId, setPatientId] = useState(null); // Add this to your state declarations
-
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [currentDateIndex, setCurrentDateIndex] = useState(0);
 
-  // Form Fields
   const [name, setName] = useState("");
   const [mobile_number, setMobile] = useState("");
   const [age, setAge] = useState("");
@@ -687,10 +681,23 @@ const BookAppointment = () => {
   const [morningIndex, setMorningIndex] = useState(0);
   const [afternoonIndex, setAfternoonIndex] = useState(0);
   const [eveningIndex, setEveningIndex] = useState(0);
-  const slotsPerPage = 4; // Number of slots to display per page
+  const slotsPerPage = 4;
 
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
+
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const handleCloseSuccessModal = () => setShowSuccessModal(false);
+
+  const chunkArray = (array, chunkSize) => {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+      chunks.push(array.slice(i, i + chunkSize));
+    }
+    return chunks;
+  };
+
   const categorizeSlots = (slots) => {
     const morningSlots = slots.filter((slot) => {
       const hours = parseInt(slot.appointment_slot.split(":")[0], 10);
@@ -713,19 +720,17 @@ const BookAppointment = () => {
     evening: [],
   });
 
-  const doctorId = 4;
+  const doctorId = 5;
 
   useEffect(() => {
     loadAvailableDates();
     initializeCashfree();
   }, []);
 
-  // Initialize Cashfree SDK
   const initializeCashfree = async () => {
     await load({ mode: "sandbox" });
   };
 
-  // Load available dates
   const loadAvailableDates = () => {
     const today = new Date();
     const dates = [
@@ -747,33 +752,26 @@ const BookAppointment = () => {
     }
   };
 
-  // Fetch patient ID from the token
-  const fetchPatientIdFromToken = () => {
-    const token = localStorage.getItem("token"); // Replace with your token mechanism
-    if (!token) {
-      console.error("Token not found");
-      return null;
+  useEffect(() => {
+    if (availableDates.length > 0) {
+      fetchSlots(availableDates[0], appointmentType);
     }
+  }, [availableDates, appointmentType]);
 
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1])); // Decode JWT
-      return payload.patient_id || null;
-    } catch (error) {
-      console.error("Error decoding token:", error);
-      return null;
-    }
-  };
+  useEffect(() => {
+    const today = new Date();
+    const dates = Array.from({ length: 30 }, (_, i) =>
+      format(addDays(today, i), "yyyy-MM-dd")
+    );
+    setAvailableDates(dates);
+  }, []);
 
-  // Fetch available slots
-  const fetchSlots = async (selectedDate) => {
+  const fetchSlots = async (selectedDate, appointmentType) => {
     try {
-      const endpoint = `/doctorappointment/blankslot/?doctor_id=4&slot_date=${selectedDate}`;
+      const endpoint = `/doctorappointment/blankslot/?doctor_id=${doctorId}&slot_date=${selectedDate}&appointment_type=${appointmentType}`;
       const slotsResponse = await BaseUrl.get(endpoint);
       const fetchedSlots = slotsResponse.data;
-
-      // Categorize slots
-      const { morningSlots, afternoonSlots, eveningSlots } =
-        categorizeSlots(fetchedSlots);
+      const { morningSlots, afternoonSlots, eveningSlots } = categorizeSlots(fetchedSlots);
 
       setSlots({
         morning: morningSlots,
@@ -786,6 +784,7 @@ const BookAppointment = () => {
       console.error("Error fetching slots:", error);
     }
   };
+
   const formatTime = (time) => {
     const [hours, minutes] = time.split(":");
     const date = new Date();
@@ -798,92 +797,55 @@ const BookAppointment = () => {
   const handleDateNavigation = (direction) => {
     if (direction === "prev" && currentDateIndex > 0) {
       setCurrentDateIndex(currentDateIndex - 1);
-      fetchSlots(availableDates[currentDateIndex - 1]); // Fetch slots for the previous date
     } else if (
       direction === "next" &&
       currentDateIndex + 1 < availableDates.length
     ) {
       setCurrentDateIndex(currentDateIndex + 1);
-      fetchSlots(availableDates[currentDateIndex + 1]); // Fetch slots for the next date
     }
   };
-
-  useEffect(() => {
-    if (availableDates.length > 0) {
-      fetchSlots();
-    }
-  }, [currentDateIndex, appointmentType]);
 
   const handleSlotClick = (slot) => {
     setSelectedSlot(slot);
-    setAppointmentSlotId(slot.id); // Set appointment slot ID
-    localStorage.setItem("appointmentSlotId", slot.id); // Save appointment slot ID to local storage
+    setAppointmentSlotId(slot.id);
+    localStorage.setItem("appointmentSlotId", slot.id);
     setIsFormVisible(true);
   };
 
-
   const patchPatientData = async (appointmentId) => {
     try {
-      const storedPatientId = localStorage.getItem("patientId"); // Retrieve patient ID from local storage
-
-      if (!storedPatientId) {
-        throw new Error("Patient ID not found in local storage.");
-      }
-
+      const storedPatientId = localStorage.getItem("patientId");
       const patchResponse = await BaseUrl.patch("/patient/patient/", {
         appointment: appointmentId,
-        patient_id: storedPatientId, // Use the patientId from local storage
+        patient_id: storedPatientId,
       });
-
-      if (patchResponse.status === 200) {
-        console.log("Patient data updated successfully!");
-      } else {
-        throw new Error("Failed to update patient data.");
-      }
     } catch (error) {
       setErrorMessage("Error updating patient data.");
-      console.error("Patch operation error:", error);
     }
   };
-
 
   useEffect(() => {
     console.log("Patient ID:", patientId);
     console.log("Appointment Slot ID:", appointmentSlotId);
   }, [patientId, appointmentSlotId]);
 
-
   const bookSlot = async () => {
     try {
-      const storedPatientId = localStorage.getItem("patientId"); // Retrieve patient ID
-      const storedAppointmentSlotId = localStorage.getItem("appointmentSlotId"); // Retrieve slot ID
-      const storedAppointmentType = localStorage.getItem("appointmentType"); // Retrieve appointment type
-
-      if (!storedPatientId || !storedAppointmentSlotId || !storedAppointmentType) {
-        throw new Error("Missing required data in local storage.");
-      }
-
-      console.log("Consultation Type:", storedAppointmentType); // Debug log
-
+      const storedPatientId = localStorage.getItem("patientId");
+      const storedAppointmentSlotId = localStorage.getItem("appointmentSlotId");
+      const storedAppointmentType = localStorage.getItem("appointmentType");
       const bookingResponse = await BaseUrl.post("/patientappointment/bookslot/", {
         patient: storedPatientId,
         doctor: doctorId,
         appointment_slot: storedAppointmentSlotId,
-        consultation_type: storedAppointmentType === "clinic" ? "walk-in" : "online", // Map properly
+        consultation_type: storedAppointmentType === "clinic" ? "walk-in" : "online",
       });
-
       const newAppointmentId = bookingResponse.data?.data?.id;
-      if (!newAppointmentId) throw new Error("Appointment ID not found.");
-
-      console.log("Slot booked successfully!");
-
-      // Update patient data
       await patchPatientData(newAppointmentId);
-
-      setSuccessMessage("Appointment booked successfully!");
+      setPopupMessage(bookingResponse.data.success);
+      setShowSuccessModal(true);
     } catch (error) {
-      setErrorMessage("Error booking slot. Please try again.");
-      console.error("Booking slot error:", error);
+      setErrorMessage();
     }
   };
 
@@ -892,15 +854,11 @@ const BookAppointment = () => {
       setLoading(true);
       setErrorMessage("");
       setSuccessMessage("");
-
-      // Validate email for online consultation
       if (appointmentType === "online" && !email) {
         setErrorMessage("Email is mandatory for online consultations.");
         setLoading(false);
         return;
       }
-
-      // Save patient details
       const patientResponse = await BaseUrl.post("/patient/patient/", {
         name,
         mobile_number,
@@ -913,27 +871,20 @@ const BookAppointment = () => {
       });
 
       const fetchedPatientId = patientResponse.data?.data?.id;
-      if (!fetchedPatientId) throw new Error("Patient ID not found.");
-      setPatientId(fetchedPatientId); // Store in state
-      localStorage.setItem("patientId", fetchedPatientId); // Save to localStorage
+      setPatientId(fetchedPatientId);
+      localStorage.setItem("patientId", fetchedPatientId);
 
-      // Create payment order
       const paymentResponse = await BaseUrl.post("/payment/create/", {
-        amount: "1000", // Dynamic amount
+        amount: "1000",
         currency: "INR",
         customer_name: name,
         customer_phone: mobile_number,
       });
 
       const paymentSessionId = paymentResponse.data?.payment_session_id;
-      const orderId = paymentResponse.data?.order_id; // Capture order_id
-      if (!paymentSessionId || !orderId)
-        throw new Error("Payment session or order ID not found.");
+      const orderId = paymentResponse.data?.order_id;
+      localStorage.setItem("orderId", orderId);
 
-      console.log("Order ID:", orderId); // Debug log
-      localStorage.setItem("orderId", orderId); // Save order_id to localStorage
-
-      // Trigger payment gateway
       await triggerPaymentGateway(paymentSessionId);
     } catch (error) {
       setErrorMessage("Error during submission. Please try again.");
@@ -943,18 +894,13 @@ const BookAppointment = () => {
     }
   };
 
-
   const triggerPaymentGateway = async (paymentSessionId, appointmentType) => {
     try {
       const cashfree = await load({ mode: "sandbox" });
       await cashfree.checkout({
         paymentSessionId,
-        returnUrl: "http://localhost:3000/patient/bookappointment", // Update as needed
+        returnUrl: "http://localhost:3000/patient/bookappointment",
       });
-
-      console.log("Payment gateway initiated successfully.");
-
-      // Poll payment status after initiating payment
       await pollPaymentStatus(appointmentType);
     } catch (error) {
       console.error("Failed to initiate payment gateway:", error);
@@ -962,37 +908,30 @@ const BookAppointment = () => {
     }
   };
 
-
-
   const pollPaymentStatus = async (appointmentType) => {
-    const orderId = localStorage.getItem("orderId"); // Retrieve order_id from localStorage
-    if (!orderId) {
-      setErrorMessage("Order ID not found in localStorage.");
-      return;
-    }
-
-    console.log("Polling payment status for order_id:", orderId);
-
+    const orderId = localStorage.getItem("orderId");
     try {
       setLoading(true);
-
-      // Poll the payment confirmation API
       const response = await BaseUrl.get(`/payment/get/?order_id=${orderId}`);
-      console.log("Payment confirmation response:", response.data);
+      console.log("Payment Response:", response.data);
 
       if (response.data?.status === "SUCCESS") {
-        console.log("Payment successful. Proceeding with slot booking...");
-        await bookSlot(appointmentType); // Pass the correct appointmentType
-        setSuccessMessage("Payment successful! Appointment booked successfully.");
+        await bookSlot(appointmentType);
       } else if (response.data?.status === "PENDING") {
-        console.log("Payment still pending. Retrying...");
-        setTimeout(() => pollPaymentStatus(appointmentType), 5000); // Retry after 5 seconds
+        setTimeout(() => pollPaymentStatus(appointmentType), 5000);
       } else {
-        setErrorMessage("Payment failed. Please try again.");
+        const errorMsg = "Payment failed. Please try again.";
+        console.log("Setting Error Message:", errorMsg);
+        localStorage.setItem("errorMessage", errorMsg);
+        setPopupMessage(errorMsg);
+        setShowSuccessModal(true); // Show modal with error message
       }
     } catch (error) {
-      console.error("Error confirming payment:", error);
-      setErrorMessage("Error confirming payment. Please try again.");
+      const genericErrorMsg = "An unexpected error occurred. Please try again.";
+      console.log("Caught Error:", error);
+      localStorage.setItem("errorMessage", genericErrorMsg);
+      setPopupMessage(genericErrorMsg);
+      setShowSuccessModal(true); // Show modal with generic error
     } finally {
       setLoading(false);
     }
@@ -1000,38 +939,28 @@ const BookAppointment = () => {
 
   useEffect(() => {
     const handlePaymentConfirmation = async () => {
-      const orderId = localStorage.getItem("orderId"); // Retrieve order_id from localStorage
-
-      console.log("Using order_id for payment confirmation:", orderId);
-
+      const orderId = localStorage.getItem("orderId");
       try {
         setLoading(true);
-
-        // Hit the payment confirmation API
         const response = await BaseUrl.get(`/payment/get/?order_id=${orderId}`);
-        console.log("Payment confirmation response:", response.data);
 
         if (response.data?.status === "SUCCESS") {
-          console.log("Payment successful. Proceeding with slot booking...");
-          await bookSlot(); // Proceed with booking the slot
-          setSuccessMessage("Payment successful! Appointment booked successfully.");
+          await bookSlot();
+          setSuccessMessage();
         } else {
-          setErrorMessage("Payment failed. Please try again.");
+          setErrorMessage();
         }
       } catch (error) {
-        console.error("Error confirming payment:", error);
-        setErrorMessage("Error confirming payment. Please try again.");
+        setErrorMessage();
       } finally {
         setLoading(false);
       }
     };
-
     handlePaymentConfirmation();
   }, []);
 
-
   useEffect(() => {
-    console.log("Slots Updated:", slots); // Log slots data when it updates
+    console.log("Slots Updated:", slots);
   }, [slots]);
 
   useEffect(() => {
@@ -1052,7 +981,6 @@ const BookAppointment = () => {
       {successMessage && <Alert variant="success">{successMessage}</Alert>}
 
       <div className="d-flex justify-content-center mb-4">
-        {/* Clinic Visit Card */}
         <Card
           className="clinic-visit-card mx-3 shadow text-center"
           style={{
@@ -1066,8 +994,7 @@ const BookAppointment = () => {
           }}
           onClick={() => {
             setAppointmentType("clinic");
-            localStorage.setItem("appointmentType", "clinic"); // Store in localStorage
-            console.log("Appointment Type Set to: Clinic Visit");
+            localStorage.setItem("appointmentType", "clinic");
           }}
         >
           <Card.Body className="d-flex align-items-center justify-content-center">
@@ -1091,7 +1018,6 @@ const BookAppointment = () => {
           </Card.Body>
         </Card>
 
-        {/* Online Consultation Card */}
         <Card
           className="online-consultation-card mx-3 shadow text-center"
           style={{
@@ -1105,8 +1031,7 @@ const BookAppointment = () => {
           }}
           onClick={() => {
             setAppointmentType("online");
-            localStorage.setItem("appointmentType", "online"); // Store in localStorage
-            console.log("Appointment Type Set to: Online Consultation");
+            localStorage.setItem("appointmentType", "online");
           }}
         >
           <Card.Body className="d-flex align-items-center justify-content-center">
@@ -1139,7 +1064,6 @@ const BookAppointment = () => {
           justifyContent: "center",
         }}
       >
-        {/* Left Arrow */}
         <Button
           variant="outline-secondary"
           onClick={() => handleDateNavigation("prev")}
@@ -1149,7 +1073,6 @@ const BookAppointment = () => {
           &#8592;
         </Button>
 
-        {/* Dates with dynamic labels */}
         <div
           className="date-button-row d-flex overflow-auto"
           style={{
@@ -1167,31 +1090,20 @@ const BookAppointment = () => {
                 variant="outline-primary"
                 onClick={() => {
                   setCurrentDateIndex(index + currentDateIndex);
-                  fetchSlots(date); // Fetch slots for the selected date
+                  fetchSlots(date);
                 }}
                 style={{
                   margin: "0 10px",
-                  backgroundColor:
-                    index + currentDateIndex === currentDateIndex
-                      ? "#3D9F41"
-                      : "#fff",
-                  color:
-                    index + currentDateIndex === currentDateIndex
-                      ? "#fff"
-                      : "#000",
+                  backgroundColor: index + currentDateIndex === currentDateIndex ? "#3D9F41" : "#fff",
+                  color: index + currentDateIndex === currentDateIndex ? "#fff" : "#000",
                   borderColor: "#3D9F41",
                 }}
               >
-                {index + currentDateIndex === 0
-                  ? "Today"
-                  : index + currentDateIndex === 1
-                    ? "Tomorrow"
-                    : format(new Date(date), "MMM dd")}
+                {index + currentDateIndex === 0 ? "Today" : index + currentDateIndex === 1 ? "Tomorrow" : format(new Date(date), "MMM dd")}
               </Button>
             ))}
         </div>
 
-        {/* Right Arrow */}
         <Button
           variant="outline-secondary"
           onClick={() => handleDateNavigation("next")}
@@ -1202,7 +1114,7 @@ const BookAppointment = () => {
         </Button>
       </div>
 
-      <div className="slot-section">
+      <div className="slot-section mt-5">
         {slots && slots.length > 0 ? (
           <>
             <h4 className="slot-section-header">Available Slots</h4>
@@ -1220,7 +1132,7 @@ const BookAppointment = () => {
             </div>
           </>
         ) : (
-          <p className="text-center mt-4"> slots available</p>
+          <p className="text-center mt-4"></p>
         )}
       </div>
 
@@ -1247,10 +1159,9 @@ const BookAppointment = () => {
       </div>
 
       <Row className="text-center mb-3">
+        {/* Morning Slots */}
         <Col>
-          <h4 style={{ color: "#003F7D", marginBottom: "3rem" }}>Morning Slots</h4>
-
-          <div className="d-flex justify-content-between align-items-center ">
+          <div className="d-flex align-items-center justify-content-between mb-3">
             <FaArrowLeft
               onClick={() => handlePrev(setMorningIndex, morningIndex)}
               style={{
@@ -1258,44 +1169,47 @@ const BookAppointment = () => {
                 visibility: morningIndex > 0 ? "visible" : "hidden",
               }}
             />
-            {slots.morning
-              .slice(morningIndex, morningIndex + slotsPerPage)
-              .map((slot) => (
-                <Button
-                  key={slot.id}
-                  variant="outline-primary"
-                  className="slot-button mb-2 mx-1"
-                  onClick={() => handleSlotClick(slot)}
-                  style={{
-                    backgroundColor:
-                      selectedSlot?.id === slot.id ? "#B8E8B1" : "#FFFFFF",
-                    color: "#000000",
-                    borderColor: "#3D9F41",
-                    marginBottom: "50px",
-
-                  }}
-                >
-                  {formatTime(slot.appointment_slot)}
-                </Button>
-              ))}
+            <h4 style={{ color: "#003F7D", marginBottom: "0" }}>Morning Slots</h4>
             <FaArrowRight
-              onClick={() =>
-                handleNext(setMorningIndex, morningIndex, slots.morning)
-              }
+              onClick={() => handleNext(setMorningIndex, morningIndex, chunkArray(slots.morning, 4))}
               style={{
                 cursor: "pointer",
-                visibility:
-                  morningIndex + slotsPerPage < slots.morning.length
-                    ? "visible"
-                    : "hidden",
+                visibility: morningIndex + 3 < chunkArray(slots.morning, 4).length ? "visible" : "hidden",
               }}
             />
           </div>
+          <div className="slot-grid">
+            {slots.morning.length > 0 ? (
+              chunkArray(slots.morning, 4)
+                .slice(morningIndex, morningIndex + 3)
+                .map((row, rowIndex) => (
+                  <div className="slot-row d-flex justify-content-center mb-3" key={rowIndex}>
+                    {row.map((slot) => (
+                      <Button
+                        key={slot.id}
+                        variant="outline-primary"
+                        className="slot-button mx-2"
+                        onClick={() => handleSlotClick(slot)}
+                        style={{
+                          backgroundColor: selectedSlot?.id === slot.id ? "#B8E8B1" : "#FFFFFF",
+                          color: "#000000",
+                          borderColor: "#3D9F41",
+                        }}
+                      >
+                        {formatTime(slot.appointment_slot)}
+                      </Button>
+                    ))}
+                  </div>
+                ))
+            ) : (
+              <p style={{ color: "red", marginTop: "10px" }}>No slots are available for the morning.</p>
+            )}
+          </div>
         </Col>
 
+        {/* Afternoon Slots */}
         <Col>
-          <h4 style={{ color: "#003F7D", marginBottom: "3rem" }}>Afternoon Slots</h4>
-          <div className="d-flex justify-content-between align-items-center">
+          <div className="d-flex align-items-center justify-content-between mb-3">
             <FaArrowLeft
               onClick={() => handlePrev(setAfternoonIndex, afternoonIndex)}
               style={{
@@ -1303,44 +1217,47 @@ const BookAppointment = () => {
                 visibility: afternoonIndex > 0 ? "visible" : "hidden",
               }}
             />
-            {slots.afternoon
-              .slice(afternoonIndex, afternoonIndex + slotsPerPage)
-              .map((slot) => (
-                <Button
-                  key={slot.id}
-                  variant="outline-primary"
-                  className="slot-button mb-2 mx-1"
-                  onClick={() => handleSlotClick(slot)}
-                  style={{
-                    backgroundColor:
-                      selectedSlot?.id === slot.id ? "#B8E8B1" : "#FFFFFF",
-                    color: "#000000",
-                    borderColor: "#3D9F41",
-                    marginBottom: "50px",
-
-                  }}
-                >
-                  {formatTime(slot.appointment_slot)}
-                </Button>
-              ))}
+            <h4 style={{ color: "#003F7D", marginBottom: "0" }}>Afternoon Slots</h4>
             <FaArrowRight
-              onClick={() =>
-                handleNext(setAfternoonIndex, afternoonIndex, slots.afternoon)
-              }
+              onClick={() => handleNext(setAfternoonIndex, afternoonIndex, chunkArray(slots.afternoon, 4))}
               style={{
                 cursor: "pointer",
-                visibility:
-                  afternoonIndex + slotsPerPage < slots.afternoon.length
-                    ? "visible"
-                    : "hidden",
+                visibility: afternoonIndex + 3 < chunkArray(slots.afternoon, 4).length ? "visible" : "hidden",
               }}
             />
           </div>
+          <div className="slot-grid">
+            {slots.afternoon.length > 0 ? (
+              chunkArray(slots.afternoon, 4)
+                .slice(afternoonIndex, afternoonIndex + 3)
+                .map((row, rowIndex) => (
+                  <div className="slot-row d-flex justify-content-center mb-3" key={rowIndex}>
+                    {row.map((slot) => (
+                      <Button
+                        key={slot.id}
+                        variant="outline-primary"
+                        className="slot-button mx-2"
+                        onClick={() => handleSlotClick(slot)}
+                        style={{
+                          backgroundColor: selectedSlot?.id === slot.id ? "#B8E8B1" : "#FFFFFF",
+                          color: "#000000",
+                          borderColor: "#3D9F41",
+                        }}
+                      >
+                        {formatTime(slot.appointment_slot)}
+                      </Button>
+                    ))}
+                  </div>
+                ))
+            ) : (
+              <p style={{ color: "red", marginTop: "10px" }}>No slots are available for the afternoon.</p>
+            )}
+          </div>
         </Col>
 
+        {/* Evening Slots */}
         <Col>
-          <h4 style={{ color: "#003F7D", marginBottom: "3rem" }}>Evening Slots</h4>
-          <div className="d-flex justify-content-between align-items-center">
+          <div className="d-flex align-items-center justify-content-between mb-3">
             <FaArrowLeft
               onClick={() => handlePrev(setEveningIndex, eveningIndex)}
               style={{
@@ -1348,45 +1265,48 @@ const BookAppointment = () => {
                 visibility: eveningIndex > 0 ? "visible" : "hidden",
               }}
             />
-            {slots.evening
-              .slice(eveningIndex, eveningIndex + slotsPerPage)
-              .map((slot) => (
-                <Button
-                  key={slot.id}
-                  variant="outline-primary"
-                  className="slot-button mb-2 mx-1"
-                  onClick={() => handleSlotClick(slot)}
-                  style={{
-                    backgroundColor:
-                      selectedSlot?.id === slot.id ? "#B8E8B1" : "#FFFFFF",
-                    color: "#000000",
-                    borderColor: "#3D9F41",
-                    marginBottom: "50px",
-
-                  }}
-                >
-                  {formatTime(slot.appointment_slot)}
-                </Button>
-              ))}
+            <h4 style={{ color: "#003F7D", marginBottom: "0" }}>Evening Slots</h4>
             <FaArrowRight
-              onClick={() =>
-                handleNext(setEveningIndex, eveningIndex, slots.evening)
-              }
+              onClick={() => handleNext(setEveningIndex, eveningIndex, chunkArray(slots.evening, 4))}
               style={{
                 cursor: "pointer",
-                visibility:
-                  eveningIndex + slotsPerPage < slots.evening.length
-                    ? "visible"
-                    : "hidden",
+                visibility: eveningIndex + 3 < chunkArray(slots.evening, 4).length ? "visible" : "hidden",
               }}
             />
+          </div>
+          <div className="slot-grid">
+            {slots.evening.length > 0 ? (
+              chunkArray(slots.evening, 4)
+                .slice(eveningIndex, eveningIndex + 3)
+                .map((row, rowIndex) => (
+                  <div className="slot-row d-flex justify-content-center mb-3" key={rowIndex}>
+                    {row.map((slot) => (
+                      <Button
+                        key={slot.id}
+                        variant="outline-primary"
+                        className="slot-button mx-2"
+                        onClick={() => handleSlotClick(slot)}
+                        style={{
+                          backgroundColor: selectedSlot?.id === slot.id ? "#B8E8B1" : "#FFFFFF",
+                          color: "#000000",
+                          borderColor: "#3D9F41",
+                        }}
+                      >
+                        {formatTime(slot.appointment_slot)}
+                      </Button>
+                    ))}
+                  </div>
+                ))
+            ) : (
+              <p style={{ color: "red", marginTop: "10px" }}>No slots are available for the evening.</p>
+            )}
           </div>
         </Col>
       </Row>
 
       {isFormVisible && (
         <Card
-          className="form-card p-4 shadow mt-4"
+          className="form-card p-4 shadow mt-5 mb-5"
           style={{
             backgroundColor: "#E8F4F8",
             borderRadius: "10px",
@@ -1394,6 +1314,21 @@ const BookAppointment = () => {
             margin: "0 auto",
           }}
         >
+          <Button
+            variant="link"
+            onClick={() => setIsFormVisible(false)}
+            style={{
+              position: "absolute",
+              top: "10px",
+              right: "10px",
+              textDecoration: "none",
+              color: "#003F7D",
+              fontSize: "20px",
+              fontWeight: "bold",
+            }}
+          >
+            &times;
+          </Button>
           <h5
             className="text-center"
             style={{
@@ -1411,7 +1346,7 @@ const BookAppointment = () => {
                   <Form.Label>Name</Form.Label>
                   <Form.Control
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => /^[A-Za-z\s]*$/.test(e.target.value) && setName(e.target.value)}
                     placeholder="Name"
                     style={{
                       borderColor: "#3D9F41",
@@ -1425,7 +1360,7 @@ const BookAppointment = () => {
                   <Form.Label>Mobile</Form.Label>
                   <Form.Control
                     value={mobile_number}
-                    onChange={(e) => setMobile(e.target.value)}
+                    onChange={(e) => /^\d*$/.test(e.target.value) && setMobile(e.target.value)}
                     placeholder="Mobile"
                     style={{
                       borderColor: "#3D9F41",
@@ -1439,7 +1374,7 @@ const BookAppointment = () => {
                   <Form.Label>Age</Form.Label>
                   <Form.Control
                     value={age}
-                    onChange={(e) => setAge(e.target.value)}
+                    onChange={(e) => /^\d*$/.test(e.target.value) && setAge(e.target.value)}
                     placeholder="Age"
                     style={{
                       borderColor: "#3D9F41",
@@ -1455,8 +1390,8 @@ const BookAppointment = () => {
                   <Form.Label>Blood Group</Form.Label>
                   <Form.Control
                     value={bloodGroup}
-                    onChange={(e) => setBloodGroup(e.target.value)}
-                    placeholder="Blood Group"
+                    onChange={(e) => /^[A-Z+-]*$/.test(e.target.value.toUpperCase()) && setBloodGroup(e.target.value.toUpperCase())}
+                    placeholder="Blood Group (e.g., A+)"
                     style={{
                       borderColor: "#3D9F41",
                       borderRadius: "5px",
@@ -1531,7 +1466,51 @@ const BookAppointment = () => {
           </Form>
         </Card>
       )}
-
+      <Modal
+        show={showSuccessModal}
+        onHide={handleCloseSuccessModal}
+        centered
+      >
+        <Modal.Header
+          style={{
+            backgroundColor: popupMessage === "Payment failed. Please try again." ? '#f8d7da' : '#d4edda',
+            borderBottom: 'none',
+          }}
+        >
+          <Modal.Title
+            className="d-flex align-items-center mt-5"
+            style={{
+              color: popupMessage === "Payment failed. Please try again." ? '#721c24' : '#155724',
+            }}
+          >
+            {popupMessage === "Payment failed. Please try again." ? (
+              <FaExclamationCircle style={{ marginRight: '10px' }} />
+            ) : (
+              <FaCheckCircle style={{ marginRight: '10px' }} />
+            )}
+            {popupMessage || "No message to display"}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Footer
+          style={{
+            backgroundColor: popupMessage === "Payment failed. Please try again." ? '#f8d7da' : '#d4edda',
+            borderTop: 'none',
+          }}
+        >
+          <Button
+            variant="success"
+            onClick={handleCloseSuccessModal}
+            style={{
+              backgroundColor: popupMessage === "Payment failed. Please try again." ? '#f5c6cb' : '#c3e6cb',
+              color: popupMessage === "Payment failed. Please try again." ? '#721c24' : '#155724',
+              borderColor: 'transparent',
+              borderRadius: '10px',
+            }}
+          >
+            OK
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
