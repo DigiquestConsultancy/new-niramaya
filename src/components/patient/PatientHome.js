@@ -4006,7 +4006,7 @@ const PatientHome = () => {
   const [afternoonSlotIndex, setAfternoonSlotIndex] = useState(0);
   const [eveningSlotIndex, setEveningSlotIndex] = useState(0);
 
-  const SLOTS_PER_BATCH = 12;
+  const SLOTS_PER_BATCH = 15;
 
   const isMorning = (time) => {
     const hour = parseInt(time.split(":")[0], 10);
