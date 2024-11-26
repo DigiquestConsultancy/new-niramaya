@@ -4,6 +4,8 @@ import { Link, useHistory } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../css/AuthForms.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import  doct from '../../images/logindoc.png'
+ 
  
 const PatientRegister = () => {
   const [countryCode, setCountryCode] = useState("91");
@@ -157,24 +159,85 @@ const PatientRegister = () => {
     setPasswordVisible(!passwordVisible);
   };
  
-  return (
-    <div className="container-fluid preg-box d-flex justify-content-center align-items-center">
+ 
+return (
+  <div className="container-fluid p-0" >
+    {/* Login and Register Tabs with White Background */}
+    <div
+      style={{
+        backgroundColor: "white", // White background for the tabs only
+        padding: "15px 0",
+        borderBottom: "1px solid #ddd",
+        zIndex: 2,
+   
+      }}
+    >
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{
+          fontSize: "30px",
+          fontWeight: "bold",
+        }}
+      >
+        <span
+          onClick={() => toggleAuthMode(false)}
+          style={{
+            color: "#007bff",
+            cursor: "pointer",
+            marginRight: "10px",
+          }}
+          className="auth-link"
+        >
+          Login
+        </span>
+        <span
+          style={{
+            color: "#000",
+            margin: "0 10px",
+          }}
+        >
+          |
+        </span>
+        <span
+          onClick={() => toggleAuthMode(true)}
+          style={{
+            color: "orange",
+            cursor: "pointer",
+            marginLeft: "10px",
+          }}
+          className="auth-link active"
+        >
+          Register
+        </span>
+      </div>
+    </div>
+ 
+    {/* Existing Container */}
+    <div
+      className="container-fluid preg-box d-flex justify-content-center align-items-center"
+      style={{
+        backgroundColor: "transparent", // Remove background from the container
+      }}
+    >
+      {/* Background Image Layer */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundImage: `url(${doct})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          zIndex: -1, // Place behind the content
+        }}
+      ></div>
       <div className="row w-100 d-flex justify-content-lg-end">
         <div className="col-md-12 col-lg-6 d-flex justify-content-center justify-content-lg-end align-items-center form-container">
-          <div className="auth-toggle">
-            <span onClick={() => toggleAuthMode(false)} className="auth-link">
-              Login
-            </span>
-            <span className="divider">|</span>
-            <span
-              onClick={() => toggleAuthMode(true)}
-              className="auth-link active"
-            >
-              Register
-            </span>
-          </div>
           {!showVerification ? (
-            <form className="login-form mb-4" onSubmit={handleRegister}>
+            <form className="login-form mb-4 mt-2" onSubmit={handleRegister}>
               <div className="doctor-login-link">
                 <p className="text-link">
                   Are you a Doctor?{" "}
@@ -282,7 +345,7 @@ const PatientRegister = () => {
                     onChange={(e) => handleChangeOtp(index, e.target.value)}
                     onKeyDown={(e) => handleOtpKeyDown(index, e)}
                     onInput={(e) =>
-                    (e.target.value = e.target.value.replace(/[^0-9]/g, ""))
+                      (e.target.value = e.target.value.replace(/[^0-9]/g, ""))
                     }
                     ref={(el) => (inputRefs.current[index] = el)}
                   />
@@ -322,7 +385,10 @@ const PatientRegister = () => {
         </div>
       </div>
     </div>
-  );
+  </div>
+);
+ 
+ 
 };
  
 export default PatientRegister;
