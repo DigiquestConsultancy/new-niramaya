@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import { Modal, Button, Form } from "react-bootstrap";
 import styled from "styled-components";
 import Loader from "react-js-loader";
-
+ 
 const LoaderWrapper = styled.div`
   display: flex;
   justify-content: center;
@@ -17,11 +17,11 @@ const LoaderWrapper = styled.div`
   left: 0;
   z-index: 9999;
 `;
-
+ 
 const LoaderImage = styled.div`
   width: 400px;
 `;
-
+ 
 const ProfilePicCircle = styled.div`
   width: 150px;
   height: 150px;
@@ -36,7 +36,7 @@ const ProfilePicCircle = styled.div`
   margin-bottom: 10px;
   position: relative;
 `;
-
+ 
 const ProfilePicPreview = styled.img`
   width: 150px;
   height: 150px;
@@ -44,7 +44,7 @@ const ProfilePicPreview = styled.img`
   object-fit: cover;
   margin-left: 20px;
 `;
-
+ 
 const AddReception = () => {
   const [mobileNumber, setMobileNumber] = useState("");
   const [verificationStatus, setVerificationStatus] = useState("");
@@ -71,7 +71,7 @@ const AddReception = () => {
   });
   const [errors, setErrors] = useState({});
   const [doctorId, setDoctorId] = useState("");
-
+ 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -83,42 +83,46 @@ const AddReception = () => {
       }
     }
   }, []);
-
+ 
   const handleVerify = async () => {
     setLoading(true);
+    setMessage(""); // Clear any previous message
     try {
       const response = await BaseUrl.get(
         `/reception/register/?mobile_number=${mobileNumber}`
       );
+ 
       if (response.status === 200) {
         setVerificationStatus(response.data.success);
+        setMessage(response.data.success);
+        setMessageType("success");
         setShowOtpModal(true);
       } else {
-        setMessage("Verification failed");
+        setMessage(response.data.success);
         setMessageType("error");
-        setShowMessageModal(true);
+        setShowOtpModal(true);
       }
     } catch (error) {
-      setMessage(error.response?.data?.error || "Verification failed");
+      setMessage(error.response?.data?.error || "");
       setMessageType("error");
-      setShowMessageModal(true);
+      setShowOtpModal(true);
     } finally {
       setLoading(false);
     }
   };
-
+ 
   const handleOtpChange = (index, value) => {
     if (!/^\d*$/.test(value)) return;
-
+ 
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
-
+ 
     if (value.length === 1 && index < 5) {
       inputRefs.current[index + 1].focus();
     }
   };
-
+ 
   const handleVerifyOtp = async () => {
     setLoading(true);
     try {
@@ -135,21 +139,21 @@ const AddReception = () => {
         setFormData({ ...formData, mobile_number: mobileNumber });
         setMessage(response.data.success);
         setMessageType("success");
-        setShowMessageModal(true);
+        // setShowMessageModal(true);
       } else {
         setMessage("OTP verification failed");
         setMessageType("error");
-        setShowMessageModal(true);
+        // setShowMessageModal(true);
       }
     } catch (error) {
-      setMessage(error.response?.data?.error || "OTP verification failed");
+      setMessage(error.response?.data?.error || "");
       setMessageType("error");
-      setShowMessageModal(true);
+      // setShowMessageModal(true);
     } finally {
       setLoading(false);
     }
   };
-
+ 
   const handleProfilePicChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -161,7 +165,7 @@ const AddReception = () => {
       reader.readAsDataURL(file);
     }
   };
-
+ 
   const handleResendOtp = async () => {
     try {
       const response = await BaseUrl.get(
@@ -177,34 +181,39 @@ const AddReception = () => {
     } catch (error) {
       setMessage(error.response?.data?.error || "OTP resend failed");
       setMessageType("error");
-      setShowMessageModal(true);
+      // setShowMessageModal(true);
     }
   };
-
+ 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let newValue = value;
-
-    if (
-      name === "name" ||
-      name === "qualification" ||
-      name === "specialization"
-    ) {
-      newValue = value.replace(/[^a-zA-Z\s]/g, "");
+ 
+    if (name === "name") {
+      newValue = value.replace(/[^a-zA-Z\s.]/g, "");
+    } else if (name === "qualification" || name === "specialization") {
+      newValue = value.replace(/[^a-zA-Z\s.,]/g, "");
     } else if (name === "age") {
       newValue = value.replace(/[^0-9]/g, "");
     }
-
+ 
     setFormData({ ...formData, [name]: newValue });
-
+ 
     let newErrors = { ...errors };
     switch (name) {
       case "name":
+        if (!/^[a-zA-Z\s.]*$/.test(newValue)) {
+          newErrors[name] =
+            "Name should contain only alphabets, spaces, and dots";
+        } else {
+          delete newErrors[name];
+        }
+        break;
       case "qualification":
       case "specialization":
-        if (!/^[a-zA-Z\s]*$/.test(newValue)) {
+        if (!/^[a-zA-Z\s.,]*$/.test(newValue)) {
           newErrors[name] =
-            `${name.charAt(0).toUpperCase() + name.slice(1)} should contain only alphabets`;
+            `${name.charAt(0).toUpperCase() + name.slice(1)} should contain only alphabets, spaces, dots, and commas`;
         } else {
           delete newErrors[name];
         }
@@ -240,34 +249,27 @@ const AddReception = () => {
       default:
         break;
     }
-
+ 
     setErrors(newErrors);
   };
-
-  const validateForm = () => {
-    let formErrors = {};
-    if (!formData.name) formErrors.name = "Name is required";
-    if (!formData.gender) formErrors.gender = "Gender is required";
-
-    if (!formData.qualification)
-      formErrors.qualification = "Qualification is required";
-    if (!formData.address) formErrors.address = "Address is required";
-    if (!formData.age) formErrors.age = "Age is required";
-    return formErrors;
-  };
-
+ 
   const handleSubmit = async (e) => {
-    setLoading(true);
     e.preventDefault();
-    const formErrors = validateForm();
+    setLoading(true);
+ 
+    // Validate form data
+    const formErrors = validateForm(); // Calls validateForm to populate errors
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
+      setLoading(false); // Stop loader if there are validation errors
       return;
     }
+ 
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
       data.append(key, formData[key]);
     });
+ 
     try {
       const response = await BaseUrl.post("/reception/details/", data, {
         headers: {
@@ -289,12 +291,22 @@ const AddReception = () => {
       setShowMessageModal(true);
     }
   };
-
+ 
+  const validateForm = () => {
+    let formErrors = {};
+    if (!formData.name) formErrors.name = "Name is required";
+    if (!formData.gender) formErrors.gender = "Gender is required";
+    if (!formData.qualification)
+      formErrors.qualification = "Qualification is required";
+    if (!formData.address) formErrors.address = "Address is required"; // Ensure address is required
+    if (!formData.age) formErrors.age = "Age is required";
+    return formErrors;
+  };
   return (
     <div
       style={{
         backgroundColor: "#D7EAF0",
-        minHeight: "100vh",
+        minHeight: "150vh",
         paddingTop: "20px",
       }}
     >
@@ -322,7 +334,7 @@ const AddReception = () => {
             </LoaderImage>
           </LoaderWrapper>
         )}
-
+ 
         {!showDetailsForm && (
           <div className="form-group row">
             <label htmlFor="mobileNumber" className="col-sm-2 col-form-label">
@@ -349,7 +361,7 @@ const AddReception = () => {
             </div>
           </div>
         )}
-
+ 
         {showDetailsForm && (
           <Form
             onSubmit={handleSubmit}
@@ -400,9 +412,6 @@ const AddReception = () => {
                   required
                   onChange={handleInputChange}
                 />
-                {errors.name && (
-                  <span className="text-danger">{errors.name}</span>
-                )}
               </Form.Group>
               <Form.Group controlId="formGender" className="col-md-4">
                 <Form.Label>Gender</Form.Label>
@@ -448,9 +457,6 @@ const AddReception = () => {
                   onChange={handleInputChange}
                   required
                 />
-                {errors.age && (
-                  <span className="text-danger">{errors.age}</span>
-                )}
               </Form.Group>
               <Form.Group controlId="formQualification" className="col-md-4">
                 <Form.Label>Qualification</Form.Label>
@@ -486,12 +492,9 @@ const AddReception = () => {
                   type="text"
                   name="address"
                   value={formData.address}
-                  reuired
+                  required
                   onChange={handleInputChange}
                 />
-                {errors.address && (
-                  <span className="text-danger">{errors.address}</span>
-                )}
               </Form.Group>
             </div>
             <Button
@@ -504,7 +507,7 @@ const AddReception = () => {
             </Button>
           </Form>
         )}
-
+ 
         <Modal
           show={showOtpModal}
           onHide={() => setShowOtpModal(false)}
@@ -514,6 +517,16 @@ const AddReception = () => {
             <Modal.Title>OTP Verification</Modal.Title>
           </Modal.Header>
           <Modal.Body>
+            {/* Display the success or error message within the OTP modal */}
+            {message && (
+              <p
+                className={
+                  messageType === "success" ? "text-success" : "text-danger"
+                }
+              >
+                {message}
+              </p>
+            )}
             <div className="otp-container d-flex justify-content-between mb-3">
               {otp.map((digit, index) => (
                 <input
@@ -550,7 +563,7 @@ const AddReception = () => {
             </div>
           </Modal.Body>
         </Modal>
-
+ 
         <Modal
           show={showMessageModal}
           onHide={() => setShowMessageModal(false)}
@@ -583,5 +596,5 @@ const AddReception = () => {
     </div>
   );
 };
-
+ 
 export default AddReception;

@@ -24,6 +24,25 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import BaseUrl from "../../api/BaseUrl";
 import { jwtDecode } from "jwt-decode";
+import styled from "styled-components";
+import Loader from "react-js-loader";
+
+const LoaderWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: rgba(255, 255, 255, 0.7);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+`;
+
+const LoaderImage = styled.div`
+  width: 400px;
+`;
 
 const DoctorBookedAppointment = () => {
   const [appointments, setAppointments] = useState([]);
@@ -45,6 +64,7 @@ const DoctorBookedAppointment = () => {
     { medicine_name: "", time: [], comment: "", description: "" },
   ]);
   const [showRecordForm, setShowRecordForm] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [recordDetails, setRecordDetails] = useState({
     mobile_number: "",
     blood_pressure: "",
@@ -144,6 +164,7 @@ const DoctorBookedAppointment = () => {
   };
 
   const handleDownloadFile = async (record) => {
+    setLoading(true);
     try {
       const response = await BaseUrl.get(`/patient/viewdocumentbyid/`, {
         params: {
@@ -164,6 +185,8 @@ const DoctorBookedAppointment = () => {
     } catch (error) {
       console.error("Error downloading file:", error);
       setErrorMessage(error.response?.data?.error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -271,6 +294,7 @@ const DoctorBookedAppointment = () => {
   };
 
   const handleSave = async () => {
+    setLoading(true);
     let decodedToken = null;
 
     try {
@@ -320,6 +344,8 @@ const DoctorBookedAppointment = () => {
     } catch (error) {
       console.error("Error saving document:", error);
       setErrorMessage(error.response?.data?.error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -348,6 +374,7 @@ const DoctorBookedAppointment = () => {
   };
 
   const handleDeleteRecord = async (recordId) => {
+    setLoading(true);
     try {
       const response = await BaseUrl.delete(
         `/patient/patientdocumentusingappointmentid/`,
@@ -371,6 +398,8 @@ const DoctorBookedAppointment = () => {
       setErrorMessage(
         error.response?.data?.error || "Failed to delete the record."
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -387,6 +416,7 @@ const DoctorBookedAppointment = () => {
   };
 
   const handleViewFile = async (record) => {
+    setLoading(true);
     try {
       const response = await BaseUrl.get(`/patient/viewdocumentbyid/`, {
         params: {
@@ -407,6 +437,8 @@ const DoctorBookedAppointment = () => {
       setShowToast(true);
       setToastMessage("Failed to preview file.");
       setToastVariant("danger");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -431,6 +463,7 @@ const DoctorBookedAppointment = () => {
   };
 
   const handlePreview = async (documentId) => {
+    setLoading(true);
     try {
       const response = await BaseUrl.get(
         `/patient/patientprescriptonfileView/`,
@@ -449,6 +482,8 @@ const DoctorBookedAppointment = () => {
       setShowToast(true);
       setToastMessage("Failed to preview document.");
       setToastVariant("danger");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -477,10 +512,12 @@ const DoctorBookedAppointment = () => {
   }, []);
 
   const fetchAppointments = async (doctorId) => {
+    setLoading(true);
     try {
       const response = await BaseUrl.get(
         `/doctorappointment/getslot/?doctor_id=${doctorId}`
       );
+
       const fetchedAppointments = response.data.map((appointment) => ({
         appointment_id: appointment.appointment_id,
         appointment_date: appointment.appointment_date,
@@ -490,7 +527,13 @@ const DoctorBookedAppointment = () => {
         mobile_number: appointment.mobile_number,
         patient_id: appointment.patient_id,
         is_patient: appointment.is_patient,
+        status: appointment.is_canceled
+          ? "Canceled"
+          : appointment.is_complete
+            ? "Completed"
+            : "Upcoming",
       }));
+
       setAppointments(fetchedAppointments);
       if (fetchedAppointments.length > 0) {
         setSelectedPatientId(fetchedAppointments[0].patient_id);
@@ -500,6 +543,8 @@ const DoctorBookedAppointment = () => {
       setShowToast(true);
       setToastMessage("Failed to fetch appointments.");
       setToastVariant("danger");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -530,7 +575,6 @@ const DoctorBookedAppointment = () => {
     setPrescriptionDocuments([]);
     setMedicalRecords([]); // Clear medical records
 
-    // Check if the same appointment is clicked (to close the expanded section)
     if (expandedAppointmentId === appointment_id) {
       setExpandedAppointmentId(null); // Close the expanded section
       setShowPrescriptionForm(false);
@@ -542,7 +586,6 @@ const DoctorBookedAppointment = () => {
       // Set the newly selected appointment
       setExpandedAppointmentId(appointment_id);
 
-      // Set the form details for the new patient
       setFormDetails({
         name: details.name || "",
         age: details.age || "",
@@ -559,13 +602,14 @@ const DoctorBookedAppointment = () => {
       setShowMedicalRecords(true);
 
       try {
-        // Fetch data for the patient, without waiting for each API to complete before proceeding to the next
+        setLoading(true);
+
         const fetchDataForPatient = async () => {
           const patientPromise = BaseUrl.get(
             `/patient/patient/?patient_id=${details.patient_id}&appointment_id=${appointment_id}`
           );
 
-          const checkupPromise = BaseUrl.get(`/patient/patientcheckup/`, {
+          const checkupPromise = BaseUrl.get(`/patient/vital/`, {
             params: { appointment_id: appointment_id },
           });
 
@@ -584,9 +628,6 @@ const DoctorBookedAppointment = () => {
             `/doctor/symptomsdetail/?appointment_id=${appointment_id}`
           );
 
-          // You can also await these individually if you want to handle them sequentially
-
-          // Use Promise.allSettled to ensure all promises are hit, regardless of whether any fail
           const results = await Promise.allSettled([
             patientPromise,
             checkupPromise,
@@ -597,7 +638,6 @@ const DoctorBookedAppointment = () => {
             fetchMedicalRecords(appointment_id), // fetch medical records
           ]);
 
-          // Handle patient details response
           const patientResponse = results[0];
           if (
             patientResponse.status === "fulfilled" &&
@@ -615,7 +655,6 @@ const DoctorBookedAppointment = () => {
             );
           }
 
-          // Handle checkup details response
           const checkupResponse = results[1];
           if (
             checkupResponse.status === "fulfilled" &&
@@ -633,7 +672,6 @@ const DoctorBookedAppointment = () => {
             );
           }
 
-          // Handle prescriptions response
           const prescriptionResponse = results[2];
           if (
             prescriptionResponse.status === "fulfilled" &&
@@ -647,7 +685,6 @@ const DoctorBookedAppointment = () => {
             );
           }
 
-          // Handle prescription documents response
           const prescriptionDocResponse = results[3];
           if (
             prescriptionDocResponse.status === "fulfilled" &&
@@ -661,7 +698,6 @@ const DoctorBookedAppointment = () => {
             );
           }
 
-          // Handle symptoms response
           const symptomsResponse = results[4];
           if (
             symptomsResponse.status === "fulfilled" &&
@@ -673,17 +709,17 @@ const DoctorBookedAppointment = () => {
           }
         };
 
-        // Run the fetch operation for the patient
         await fetchDataForPatient();
       } catch (error) {
         console.error("Error fetching patient data:", error);
+      } finally {
+        setLoading(false);
       }
     }
   };
 
   const getPrescriptions = async (appointmentId) => {
     try {
-      // Call the GET API to fetch prescriptions for a specific appointment
       const response = await BaseUrl.get(`/patient/patientpriscription/`, {
         params: { appointment_id: appointmentId },
       });
@@ -707,7 +743,6 @@ const DoctorBookedAppointment = () => {
     setRecordDetails((prevDetails) => {
       const updatedDetails = { ...prevDetails, [name]: value };
 
-      // Check if height and weight are present and calculate BMI
       const heightInMeters = parseFloat(updatedDetails.height) / 100; // Convert cm to meters
       const weight = parseFloat(updatedDetails.weight);
 
@@ -724,15 +759,12 @@ const DoctorBookedAppointment = () => {
     });
   };
 
-  // Function to fetch prescription documents for a specific appointment
   const fetchPrescriptionDocuments = async (appointment_id) => {
     try {
-      // Make the GET request to fetch prescription documents
       const response = await BaseUrl.get(`/patient/patientprescriptonfile/`, {
         params: { appointment_id: appointment_id }, // Pass the appointment ID in the request params
       });
 
-      // Check if the response is successful
       if (response.status === 200) {
         const prescriptionDocuments = response.data; // Assuming the response contains the document data
         console.log(
@@ -763,25 +795,20 @@ const DoctorBookedAppointment = () => {
       );
 
       if (response.status === 200) {
-        // Retrieve the success message from the response if available
         const successMessage =
           response.data.success || "Prescription document deleted successfully";
         setSuccessMessage(successMessage);
 
-        // Immediately update the frontend to remove the deleted document row
         setPrescriptionDocuments((prevDocuments) => {
-          // Remove the document that matches the deleted docId
           return prevDocuments.filter((doc) => doc.id !== docId); // Use the correct id here
         });
 
-        // Optionally re-fetch appointments if needed, without re-fetching the documents list
         await fetchAppointments(doctorId);
       } else {
         throw new Error("Failed to delete prescription document");
       }
     } catch (error) {
       console.error("Error deleting prescription document:", error);
-      // Display error message from backend if available, or a default message
       setErrorMessage(
         error.response?.data?.error || "An error occurred. Please try again."
       );
@@ -789,6 +816,7 @@ const DoctorBookedAppointment = () => {
   };
 
   const handleDownloadPrescriptionDoc = async (doc) => {
+    setLoading(true);
     try {
       const response = await BaseUrl.get(
         `/patient/patientprescriptonfileView/`,
@@ -816,6 +844,9 @@ const DoctorBookedAppointment = () => {
 
       // Use backend error message if available, otherwise provide a default
       setErrorMessage(error.response?.data?.error);
+    } finally {
+      // Set loading to false once all operations are complete
+      setLoading(false);
     }
   };
 
@@ -855,7 +886,6 @@ const DoctorBookedAppointment = () => {
     }
   };
 
-  // Function to download the appointment data (can modify according to your API)
   const handleDownload = async (appointment_id) => {
     try {
       const response = await BaseUrl.get(`/patient/printrepport/`, {
@@ -880,6 +910,7 @@ const DoctorBookedAppointment = () => {
   };
 
   const handleUpdate = async () => {
+    setLoading(true);
     try {
       const selectedAppointment = appointments.find(
         (appointment) => appointment.appointment_id === expandedAppointmentId
@@ -915,35 +946,32 @@ const DoctorBookedAppointment = () => {
 
       // Use the backend error message if available, or a fallback message
       setErrorMessage(error.response?.data?.error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (appointment_id) => {
+    setLoading(true);
+
     try {
-      // Make the DELETE request to remove the appointment
       const response = await BaseUrl.delete(`/doctorappointment/getslot/`, {
-        data: { appointment_id }, // Pass the appointment ID for deletion
+        data: { appointment_id },
       });
 
       if (response.status === 200) {
-        // Fetch the updated appointments after successfully deleting the appointment
-        await fetchAppointments(doctorId); // Fetch updated appointments using doctorId
-
-        // Use backend message if available, otherwise provide a default message
+        await fetchAppointments(doctorId);
 
         setSuccessMessage(response.data.success);
-
-        // Optional: You can also perform a redirect here if needed
-        // window.location.href = '/doctor/booked-appointments'; // Uncomment if you want to redirect
       } else {
-        // If the response status is not 200, handle it as an error with backend message
         throw new Error(response.data?.message);
       }
     } catch (error) {
       console.error("Error deleting appointment:", error);
 
-      // Use backend error message if available, otherwise provide a default message
       setErrorMessage(error.response?.data?.error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -956,18 +984,15 @@ const DoctorBookedAppointment = () => {
       if (response.status === 200) {
         await fetchAppointments(doctorId);
 
-        // Use the backend message if available, or provide a default message
         setSuccessMessage(response.data.success);
       } else {
         console.error("Failed to cancel appointment");
 
-        // Use the backend error message if available, or provide a default message
         setErrorMessage(response.data?.message);
       }
     } catch (error) {
       console.error("Error canceling appointment:", error);
 
-      // Use the backend error message if available, or provide a default message
       setErrorMessage(error.response?.data?.error);
     }
   };
@@ -988,6 +1013,7 @@ const DoctorBookedAppointment = () => {
   };
 
   const removePrescriptionRow = async (index) => {
+    setLoading(true);
     const prescriptionToDelete = prescriptions[index];
 
     // Check if the prescription doesn't have an ID (i.e., it hasn't been submitted to the backend)
@@ -1000,7 +1026,6 @@ const DoctorBookedAppointment = () => {
       return; // Exit here since there's no need to call the backend
     }
 
-    // If the prescription has been submitted and has an ID, proceed with the DELETE API call
     try {
       const prescription_id = prescriptionToDelete.id;
 
@@ -1015,14 +1040,12 @@ const DoctorBookedAppointment = () => {
         );
         setPrescriptions(updatedPrescriptions);
 
-        // Use backend message if available, otherwise provide a default message
         setSuccessMessage(
           response.data.success || "Prescription removed successfully"
         );
       } else {
         console.error("Failed to remove prescription");
 
-        // Use backend message if available, otherwise provide a default message
         setErrorMessage(
           response.data?.message || "Failed to remove prescription"
         );
@@ -1034,10 +1057,13 @@ const DoctorBookedAppointment = () => {
       setErrorMessage(
         error.response?.data?.error || "Error removing prescription"
       );
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchPrescriptions = async (appointment_id, patient_id) => {
+    setLoading(true);
     try {
       // Make the GET API call to fetch prescriptions for the given appointment and patient
       const response = await BaseUrl.get("/patient/patientpriscription/", {
@@ -1057,10 +1083,13 @@ const DoctorBookedAppointment = () => {
       }
     } catch (error) {
       console.error("Error fetching prescriptions:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handlePrescriptionSubmit = async (index) => {
+    setLoading(true);
     try {
       const selectedAppointment = appointments.find(
         (appointment) => appointment.appointment_id === expandedAppointmentId
@@ -1116,10 +1145,13 @@ const DoctorBookedAppointment = () => {
 
       // Use backend error message if available, otherwise provide a default message
       setErrorMessage(error.response?.data?.error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleUpdatePrescription = async (index) => {
+    setLoading(true);
     try {
       const selectedAppointment = appointments.find(
         (appointment) => appointment.appointment_id === expandedAppointmentId
@@ -1171,6 +1203,8 @@ const DoctorBookedAppointment = () => {
 
       // Use the backend error message if available, otherwise provide a default message
       setErrorMessage(error.response?.data?.error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -1210,15 +1244,12 @@ const DoctorBookedAppointment = () => {
         if (selectedAppointment) {
           const appointment_date = selectedAppointment.appointment_date;
 
-          const fetchDataResponse = await BaseUrl.get(
-            `/patient/patientcheckup/`,
-            {
-              params: {
-                appointment_id: appointment_id,
-                appointment_date: appointment_date,
-              },
-            }
-          );
+          const fetchDataResponse = await BaseUrl.get(`/patient/vital/`, {
+            params: {
+              appointment_id: appointment_id,
+              appointment_date: appointment_date,
+            },
+          });
 
           if (
             fetchDataResponse.status === 200 &&
@@ -1264,6 +1295,7 @@ const DoctorBookedAppointment = () => {
   };
 
   const handleVitalSubmit = async () => {
+    setLoading(true);
     try {
       // Find the selected appointment based on the expanded appointment ID
       const selectedAppointment = appointments.find(
@@ -1279,7 +1311,7 @@ const DoctorBookedAppointment = () => {
       const appointment_date = selectedAppointment.appointment_date;
 
       // Make the POST API call to submit vitals
-      const postResponse = await BaseUrl.post("/patient/patientcheckup/", {
+      const postResponse = await BaseUrl.post("/patient/vital/", {
         patient_id: patient_id,
         appointment_id: expandedAppointmentId,
         record_date: appointment_date,
@@ -1323,10 +1355,13 @@ const DoctorBookedAppointment = () => {
       setShowToast(true);
       setToastMessage("Error submitting vitals.");
       setToastVariant("danger");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleVitalUpdate = async () => {
+    setLoading(true);
     try {
       // Find the selected appointment based on the expanded appointment ID
       const selectedAppointment = appointments.find(
@@ -1358,7 +1393,7 @@ const DoctorBookedAppointment = () => {
       };
 
       // Make the PUT API call to update the vitals
-      const response = await BaseUrl.put(`/patient/patientcheckup/`, payload);
+      const response = await BaseUrl.put(`/patient/vital/`, payload);
 
       if (response.status === 200) {
         // Use the backend message if available, otherwise provide a default message
@@ -1374,6 +1409,8 @@ const DoctorBookedAppointment = () => {
 
       // Use backend error message if available, otherwise provide a default message
       setErrorMessage(error.response?.data?.error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -1490,6 +1527,7 @@ const DoctorBookedAppointment = () => {
   };
 
   const handleRemoveSymptom = async (symptom) => {
+    setLoading(true);
     // Check if the symptom has not been saved yet (i.e., no `id`)
     if (!symptom.id) {
       console.log("Unsaved symptom, removing from frontend state:", symptom);
@@ -1534,10 +1572,13 @@ const DoctorBookedAppointment = () => {
         error.response?.data?.message || "An error occurred.";
       console.error("Error deleting symptom:", error.response?.data?.error);
       setErrorMessage(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSaveSymptoms = async () => {
+    setLoading(true);
     try {
       const selectedAppointment = appointments.find(
         (appointment) => appointment.appointment_id === expandedAppointmentId
@@ -1606,10 +1647,13 @@ const DoctorBookedAppointment = () => {
     } catch (error) {
       console.error("Error saving symptoms:", error);
       setErrorMessage("An error occurred while saving symptoms");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleUpdateSymptom = async () => {
+    setLoading(true);
     try {
       const selectedAppointment = appointments.find(
         (appointment) => appointment.appointment_id === expandedAppointmentId
@@ -1670,6 +1714,8 @@ const DoctorBookedAppointment = () => {
       await fetchMedicalRecords(expandedAppointmentId); // Fetch updated medical records
     } catch (error) {
       console.error("Error updating symptoms:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -1794,10 +1840,14 @@ const DoctorBookedAppointment = () => {
   };
   const handleSearchChange = (e) => {
     const { name, value } = e.target;
+
     setSearchParams((prevParams) => ({
       ...prevParams,
       [name]: value,
     }));
+
+    // Automatically trigger search after each change
+    handleSearch();
   };
 
   // Function to reset the page to default content
@@ -1822,9 +1872,7 @@ const DoctorBookedAppointment = () => {
     return () => clearTimeout(delayDebounceFn); // Cleanup the timeout
   }, [searchParams.booked_by]); // Only run the effect when searchParams.booked_by changes
 
-  // Function to handle search API call
   const handleSearch = async () => {
-    setIsSearching(true); // Optional: Set loading state
     try {
       const response = await BaseUrl.get("/doctorappointment/searchslot/", {
         params: {
@@ -1832,12 +1880,29 @@ const DoctorBookedAppointment = () => {
           query: searchParams.booked_by,
         },
       });
-      // Handle the response data
-      console.log(response.data);
+
+      const fetchedAppointments = response.data.map((appointment) => ({
+        appointment_id: appointment.appointment_id,
+        appointment_date: appointment.appointment_date,
+        appointment_slot: appointment.appointment_slot,
+        doctor_name: appointment.doctor_name,
+        booked_by: appointment.booked_by,
+        mobile_number: appointment.mobile_number,
+        patient_id: appointment.patient_id,
+        is_patient: appointment.is_patient,
+        status: appointment.is_canceled
+          ? "Canceled"
+          : appointment.is_complete
+            ? "Completed"
+            : "Upcoming",
+      }));
+
+      setAppointments(fetchedAppointments);
+      setErrorMessage(""); // Clear error message if appointments are found
     } catch (error) {
-      console.error("Error fetching search results:", error);
-    } finally {
-      setIsSearching(false); // Optional: Remove loading state
+      console.error("Error searching appointments:", error);
+      setErrorMessage("No appointments found");
+      setAppointments([]); // Clear appointments list if an error occurs
     }
   };
 
@@ -1846,7 +1911,33 @@ const DoctorBookedAppointment = () => {
       {errorMessage && (
         <div className="alert alert-danger" role="alert">
           {errorMessage}
+          {loading && (
+            <LoaderWrapper>
+              <LoaderImage>
+                <Loader
+                  type="spinner-circle"
+                  bgColor="#0091A5"
+                  color="#0091A5"
+                  title="Loading..."
+                  size={100}
+                />
+              </LoaderImage>
+            </LoaderWrapper>
+          )}
         </div>
+      )}
+      {loading && (
+        <LoaderWrapper>
+          <LoaderImage>
+            <Loader
+              type="spinner-circle"
+              bgColor="#0091A5"
+              color="#0091A5"
+              title="Loading..."
+              size={100}
+            />
+          </LoaderImage>
+        </LoaderWrapper>
       )}
 
       <div className="mb-3">
@@ -1872,7 +1963,7 @@ const DoctorBookedAppointment = () => {
             <Form
               onSubmit={(e) => {
                 e.preventDefault(); // Prevent page reload on Enter
-                handleSearch(); // Execute search manually if button is pressed
+                handleSearch(); // Execute the search
               }}
             >
               <Form.Group
@@ -1927,37 +2018,10 @@ const DoctorBookedAppointment = () => {
                     paddingRight: "12px",
                   }}
                 >
-                  {isSearching ? "Searching..." : "Search"}
+                  Search
                 </Button>
               </Form.Group>
             </Form>
-
-            {/* <Form>
-              <Row>
-                <Col xs={12} md={9}>
-                  <Form.Group>
-                    <Form.Control
-                      type="text"
-                      value={searchParams.booked_by}
-                      onChange={handleSearchChange}
-                      placeholder="Date/Time Slot/Doctor/Booked By/Mobile Number"
-                      className="mb-2 mb-md-0"
-                    />
-                  </Form.Group>
-                </Col>
-                <Col xs={12} md={3}>
-                  <Button variant="primary" block onClick={handleSearch}>
-                    Search
-                  </Button>
-                </Col>
-              </Row>
-            </Form> */}
-            {/* <Button
-  className="btn mt-3"
-  style={{ backgroundColor: '#0166CB', color: 'white' }}
-  onClick={handleSearch}>
-  Search
-</Button> */}
           </Card.Body>
         </Card>
       </div>
@@ -1993,9 +2057,31 @@ const DoctorBookedAppointment = () => {
             style={{
               color: "#ffffff", // Text color
               fontFamily: "Sans-Serif", // Font family
+              display: "flex", // Align items horizontally
+              alignItems: "center", // Center vertically
+              gap: "50px", // Spacing between text and legend symbol
             }}
           >
             Booked Appointments
+            <span
+              style={{
+                color: "#ffffff",
+                fontSize: "14px",
+                marginLeft: "8px", // Space between title and label text
+              }}
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "12px",
+                  height: "12px",
+                  backgroundColor: " #f5c6cb", // Legend color
+                  borderRadius: "50%", // Make it circular
+                  marginRight: "8px", // Space between icon and text
+                }}
+              ></span>
+              (Booked By Patient)
+            </span>
           </h5>
 
           <Table className="table table-hover">
@@ -2039,6 +2125,14 @@ const DoctorBookedAppointment = () => {
                     color: "#003366", // Text color
                   }}
                 >
+                  Status
+                </th>
+                <th
+                  style={{
+                    background: "#D7EAF0",
+                    color: "#003366", // Text color
+                  }}
+                >
                   Mobile Number
                 </th>
                 <th
@@ -2060,24 +2154,10 @@ const DoctorBookedAppointment = () => {
                     <td>{appointment.appointment_slot}</td>
                     <td>{appointment.doctor_name}</td>
                     <td>{appointment.booked_by}</td>
+                    <td>{appointment.status}</td>
+
                     <td>{appointment.mobile_number}</td>
                     <td>
-                      {/* <FaEdit
-                        className="me-2 text-primary"
-                        onClick={() =>
-                          toggleForm(appointment.appointment_id, appointment)
-                        }
-                        style={{ cursor: "pointer" }}
-                      /> */}
-                      {/* <FaTrash
-                        className="me-2"
-                        onClick={() => {
-                          setShowConfirmation(true);
-                          setAppointmentIdToDelete(appointment.appointment_id);
-                        }}
-                        style={{ cursor: "pointer", color: "black" }} // Set color to black
-                      /> */}
-
                       {expandedAppointmentId === appointment.appointment_id ? (
                         <FaChevronUp
                           onClick={() => setExpandedAppointmentId(null)}
@@ -2096,7 +2176,7 @@ const DoctorBookedAppointment = () => {
 
                   {expandedAppointmentId === appointment.appointment_id && (
                     <tr>
-                      <td colSpan="6">
+                      <td colSpan="7">
                         <Card
                           className="shadow-sm mt-3"
                           style={{
@@ -2266,27 +2346,31 @@ const DoctorBookedAppointment = () => {
                                   >
                                     <Form.Label
                                       style={{
-                                        color: "#003366", // Text color (adjusted to match other fields)
-                                        fontFamily: "Sans-Serif", // Font family
-                                        fontSize: "25px", // Font size
-                                        fontWeight: 600, // Bold font weight
-                                        lineHeight: "29.3px", // Line height for proper spacing
-                                        textAlign: "left", // Align text to the left
-                                        width: "100%", // Ensure the label takes full width
+                                        color: "#003366",
+                                        fontFamily: "Sans-Serif",
+                                        fontSize: "25px",
+                                        fontWeight: 600,
+                                        lineHeight: "29.3px",
+                                        textAlign: "left",
+                                        width: "100%",
                                       }}
                                     >
                                       Gender
                                     </Form.Label>
 
-                                    <Form.Control
-                                      type="text"
+                                    <Form.Select
                                       name="gender"
                                       value={formDetails.gender || ""}
                                       onChange={handleInputChange}
                                       style={{
-                                        textAlign: "left", // Ensure the input text is left-aligned
+                                        textAlign: "left",
                                       }}
-                                    />
+                                    >
+                                      <option value="">Select Gender</option>
+                                      <option value="male">Male</option>
+                                      <option value="female">Female</option>
+                                      <option value="others">Others</option>
+                                    </Form.Select>
                                   </Form.Group>
                                 </Col>
                                 <Col sm={6} md={4}>
@@ -2381,7 +2465,7 @@ const DoctorBookedAppointment = () => {
                   {showSymptomsForm &&
                     expandedAppointmentId === appointment.appointment_id && (
                       <tr>
-                        <td colSpan="6">
+                        <td colSpan="7">
                           <Card
                             className="shadow-sm mt-3"
                             style={{
@@ -2613,7 +2697,7 @@ const DoctorBookedAppointment = () => {
                   {showVitalForm &&
                     expandedAppointmentId === appointment.appointment_id && (
                       <tr>
-                        <td colSpan="6">
+                        <td colSpan="7">
                           <Card
                             className="shadow-sm mt-3"
                             style={{
@@ -2879,7 +2963,7 @@ const DoctorBookedAppointment = () => {
                   {showPrescriptionForm &&
                     expandedAppointmentId === appointment.appointment_id && (
                       <tr>
-                        <td colSpan="6">
+                        <td colSpan="7">
                           <Card
                             className="shadow-sm mt-3"
                             style={{
@@ -3300,7 +3384,7 @@ const DoctorBookedAppointment = () => {
                   {showRecordForm &&
                     expandedAppointmentId === appointment.appointment_id && (
                       <tr>
-                        <td colSpan="6">
+                        <td colSpan="7">
                           <Card
                             className="shadow-sm mt-3"
                             style={{

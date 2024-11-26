@@ -1,3 +1,4 @@
+ 
 import React, { useState, useEffect } from "react";
 import BaseUrl from "../../api/BaseUrl";
 import { jwtDecode } from "jwt-decode";
@@ -17,11 +18,11 @@ const LoaderWrapper = styled.div`
   left: 0;
   z-index: 9999;
 `;
-
+ 
 const LoaderImage = styled.div`
   width: 100px;
 `;
-
+ 
 const BookAppointment = () => {
   const [doctorName, setDoctorName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -60,27 +61,27 @@ const BookAppointment = () => {
     gender: "",
     date_of_birth: "",
   });
-
+ 
   const [currentPage, setCurrentPage] = useState(1);
   const slotsPerPage = 30;
-
+ 
   const startIdx = (currentPage - 1) * slotsPerPage;
   const endIdx = startIdx + slotsPerPage;
-
+ 
   const currentSlots = slots.slice(startIdx, endIdx);
-
+ 
   const handleNextPage = () => {
     if (endIdx < slots.length) {
       setCurrentPage(currentPage + 1);
     }
   };
-
+ 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
     }
   };
-
+ 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -94,39 +95,39 @@ const BookAppointment = () => {
       }
     }
   }, []);
-
+ 
   useEffect(() => {
     if (selectedDoctorId) {
       fetchDoctorName(selectedDoctorId);
     }
   }, [selectedDoctorId]);
-
+ 
   const fetchDoctorName = async (doctorId) => {
     setLoading(true);
     try {
       const response = await BaseUrl.get(
         `/doctor/doctorname/?doctor_id=${doctorId}`
       );
-
+ 
       if (response.status === 200 && response.data.length > 0) {
         setDoctorName(response.data[0].name);
         setErrorMessage("");
       } else if (response.status === 404) {
-        setErrorMessage(response.data.error || "Doctor not found");
+        setErrorMessage(response.data.error);
       } else {
-        setErrorMessage("Failed to fetch doctor name");
+        setErrorMessage("");
       }
     } catch (error) {
       if (error.response && error.response.data && error.response.data.error) {
         setErrorMessage(error.response.data.error);
       } else {
-        setErrorMessage("An error occurred while fetching doctor name.");
+        setErrorMessage("");
       }
     } finally {
       setLoading(false);
     }
   };
-
+ 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setPatientDetails({
@@ -134,13 +135,13 @@ const BookAppointment = () => {
       [name]: value,
     });
   };
-
+ 
   const validateForm = () => {
     const errors = {};
     const nameRegex = /^[A-Za-z\s]+$/;
     const mobileRegex = /^\d{10}$/;
     const ageRegex = /^\d+$/;
-
+ 
     if (!nameRegex.test(patientDetails.name)) {
       errors.name = "Name must contain only alphabets and spaces.";
     }
@@ -156,62 +157,56 @@ const BookAppointment = () => {
     if (!patientDetails.gender) {
       errors.gender = "Gender is required.";
     }
-    if (!patientDetails.date_of_birth) {
-      errors.date_of_birth = "Date of Birth is required.";
-    }
-
+    // if (!patientDetails.date_of_birth) {
+    //   errors.date_of_birth = "";
+    // }
+ 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
-
+ 
   const handleSaveDetails = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
+ 
     setLoading(true);
     try {
-      const response = await BaseUrl.post(
-        "/patient/patient/",
-        patientDetails,
-        {}
-      );
-      if (response.status === 201) {
+      const response = await BaseUrl.post("/patient/patient/", patientDetails, {});
+ 
+      if (response.data.success) {
         setSuccessMessage(response.data.success);
         setErrorMessage("");
         setPatientId(response.data.data.id);
       } else {
-        setErrorMessage(
-          response.data.error || "Failed to save patient details"
-        );
+        setErrorMessage(response.data.error );
       }
     } catch (error) {
       if (error.response && error.response.data && error.response.data.error) {
         setErrorMessage(error.response.data.error);
-      } else {
-        setErrorMessage("An error occurred while saving patient details.");
       }
+ 
     } finally {
       setLoading(false);
     }
   };
-
+ 
   useEffect(() => {
     const handleSlotCount = async () => {
       if (!doctorId) return;
-
+ 
       setLoading(true);
-
+ 
       try {
         const dates = [
           format(new Date(), "yyyy-MM-dd"),
           format(addDays(new Date(), 1), "yyyy-MM-dd"),
           format(addDays(new Date(), 2), "yyyy-MM-dd"),
         ];
-
+ 
         const response = await BaseUrl.get(
           `/clinic/countavailableslots/?doctor_id=${doctorId}&dates=${dates.join("&dates=")}`
         );
-
+ 
         if (response.status === 200) {
           const counts = {};
           response.data.forEach((item) => {
@@ -221,66 +216,61 @@ const BookAppointment = () => {
           setErrorMessage("");
         } else {
           setSlotCount({});
-          setErrorMessage(response.data.error || "Failed to fetch slot counts");
+          setErrorMessage(response.data.error);
         }
       } catch (error) {
         setSlotCount({});
-        setErrorMessage(
-          error.response?.data?.error ||
-            "An error occurred while fetching slot counts."
-        );
+        setErrorMessage(error.response?.data?.error);
       } finally {
         setLoading(false);
       }
     };
-
+ 
     handleSlotCount();
   }, [doctorId]);
-
+ 
   const getSlotCountStyle = (count) => {
     return { color: count === 0 ? "red" : "green" };
   };
-
+ 
   const handleToday = () => {
     const today = new Date();
     setSelectedDate(today);
     setDatesToFetch([format(today, "yyyy-MM-dd")]);
     handleViewSlots(today);
   };
-
+ 
   const handleTomorrow = () => {
     const tomorrow = addDays(new Date(), 1);
     setSelectedDate(tomorrow);
     setDatesToFetch([format(tomorrow, "yyyy-MM-dd")]);
     handleViewSlots(tomorrow);
   };
-
+ 
   const handleDayAfterTomorrow = () => {
     const dayAfterTomorrow = addDays(new Date(), 2);
     setSelectedDate(dayAfterTomorrow);
     setDatesToFetch([format(dayAfterTomorrow, "yyyy-MM-dd")]);
     handleViewSlots(dayAfterTomorrow);
   };
-
+ 
   const handleViewSlots = async (date) => {
     if (!doctorId) {
       setErrorMessage("Doctor ID is missing");
       return;
     }
-
+ 
     try {
       setLoading(true);
       const formattedDate = format(date, "yyyy-MM-dd");
       const response = await BaseUrl.get(
         `/doctorappointment/blankslot/?doctor_id=${doctorId}&slot_date=${formattedDate}`
       );
-
+ 
       if (response.status === 200) {
         setSlots(response.data);
         setShowSlots(true);
         setErrorMessage("");
-      } else {
-        setErrorMessage("Failed to fetch slots");
       }
     } catch (error) {
       setErrorMessage(
@@ -290,7 +280,7 @@ const BookAppointment = () => {
       setLoading(false);
     }
   };
-
+ 
   const renderSlots = (slots) => {
     return slots.map((slot, index) => (
       <div className="col-md-2 mb-2" key={index}>
@@ -303,13 +293,13 @@ const BookAppointment = () => {
       </div>
     ));
   };
-
+ 
   const handleSlotClick = (slot) => {
     setSelectedSlot(slot);
     setAppointmentId(slot.id);
     setIsModalOpen(true);
   };
-
+ 
   const handleConfirmAppointment = async () => {
     try {
       const response = await BaseUrl.post("/doctor/doctorbook/", {
@@ -318,46 +308,43 @@ const BookAppointment = () => {
         appointment_status: "upcoming",
         appointment_slot: selectedSlot.id,
       });
-
+ 
       if (response.status === 200 || response.status === 201) {
         setSuccessMessage(response.data.success);
         await patchPatientAppointment(); // Call the PATCH API after successful booking
         setIsModalOpen(false);
       } else {
-        setErrorMessage("Failed to confirm appointment. Please try again.");
+        setErrorMessage(response.data.error);
       }
     } catch (error) {
-      console.error("Error confirming booking:", error.response?.data);
-      setErrorMessage("Failed to confirm appointment. Please try again.");
+      setErrorMessage(error.response?.data?.error);
     }
   };
-
+ 
   const patchPatientAppointment = async () => {
+    setLoading(true);
     try {
       const patchResponse = await BaseUrl.patch(`/patient/patient/`, {
         patient_id: patientId,
         appointment: appointmentId,
       });
-
-      if (patchResponse.status === 200) {
-        setSuccessMessage(
-          "Appointment confirmed and patient details updated successfully."
-        );
+ 
+      if (patchResponse.data.success) {
+        setSuccessMessage(patchResponse.data.success);
       } else {
-        setErrorMessage(
-          "Failed to update patient details with appointment ID."
-        );
+        setErrorMessage(patchResponse.data.error);
       }
     } catch (error) {
-      console.error("Error patching patient details:", error.response?.data);
-      setErrorMessage("Failed to update patient details with appointment ID.");
+      setErrorMessage(error.response?.data?.error);
+    } finally {
+      setLoading(false);
     }
   };
-
+ 
   const handleCancelAppointment = () => {
     setIsModalOpen(false);
   };
-
+ 
   const handleSearchInputChange = (e) => {
     const { value } = e.target;
     setSearchInput(value);
@@ -367,7 +354,7 @@ const BookAppointment = () => {
       setSearchResults([]);
     }
   };
-
+ 
   const handleSearch = async (query) => {
     try {
       const response = await BaseUrl.get(
@@ -388,11 +375,11 @@ const BookAppointment = () => {
       );
     }
   };
-
+ 
   const handleSelectPatient = async (patient) => {
     const appointmentId = patient.appointment;
     const patientId = patient.patient;
-
+ 
     try {
       const response = await BaseUrl.get(
         `/patient/patient/?appointment_id=${appointmentId}&patient_id=${patientId}`
@@ -408,20 +395,19 @@ const BookAppointment = () => {
           gender: patientData.gender,
           address: patientData.address,
         });
-
+ 
         // Set the patient ID here
         setPatientId(patientData.id);
-
+ 
         setErrorMessage("");
       } else {
         setErrorMessage("Failed to fetch patient details");
       }
     } catch (error) {
-      console.error("Error fetching patient details:", error);
       setErrorMessage("An error occurred while fetching patient details.");
     }
   };
-
+ 
   const handleClickOutside = (event) => {
     if (searchResults.length > 0) {
       const searchResultsElement = document.getElementById("searchResults");
@@ -433,7 +419,7 @@ const BookAppointment = () => {
       }
     }
   };
-
+ 
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -441,7 +427,7 @@ const BookAppointment = () => {
     };
   }, [searchResults]);
   const totalPages = Math.ceil(slots.length / slotsPerPage);
-
+ 
   const renderSearchResults = () => {
     return (
       <div
@@ -485,7 +471,7 @@ const BookAppointment = () => {
       </div>
     );
   };
-
+ 
   return (
     <div className="container-fluid mt-4">
       {/* Loader Component */}
@@ -502,7 +488,7 @@ const BookAppointment = () => {
           </LoaderImage>
         </LoaderWrapper>
       )}
-
+ 
       <div
         style={{
           backgroundColor: "#f5f5f5",
@@ -567,7 +553,7 @@ const BookAppointment = () => {
               >
                 Name<span className="text-danger">*</span>
               </label>
-              <input
+              {/* <input
                 type="text"
                 className="form-control"
                 id="name"
@@ -575,7 +561,22 @@ const BookAppointment = () => {
                 value={patientDetails.name}
                 required
                 onChange={handleInputChange}
+              /> */}
+              <input
+                type="text"
+                className="form-control"
+                id="name"
+                name="name"
+                value={patientDetails.name}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (/^[a-zA-Z\s.]*$/.test(value)) {
+                    handleInputChange(e);
+                  }
+                }}
+                required
               />
+ 
               {formErrors.name && (
                 <div className="text-danger">{formErrors.name}</div>
               )}
@@ -592,7 +593,7 @@ const BookAppointment = () => {
               >
                 Mobile Number<span className="text-danger">*</span>
               </label>
-              <input
+              {/* <input
                 type="text"
                 className="form-control"
                 id="mobile_number"
@@ -600,7 +601,22 @@ const BookAppointment = () => {
                 value={patientDetails.mobile_number}
                 required
                 onChange={handleInputChange}
+              /> */}
+              <input
+                type="text"
+                className="form-control"
+                id="mobile_number"
+                name="mobile_number"
+                value={patientDetails.mobile_number}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (/^[0-9]*$/.test(value)) {
+                    handleInputChange(e);
+                  }
+                }}
+                required
               />
+ 
               {formErrors.mobile_number && (
                 <div className="text-danger">{formErrors.mobile_number}</div>
               )}
@@ -615,7 +631,7 @@ const BookAppointment = () => {
                   display: "block",
                 }}
               >
-                Date of Birth<span className="text-danger">*</span>
+                Date of Birth
               </label>
               <input
                 type="date"
@@ -623,13 +639,13 @@ const BookAppointment = () => {
                 id="date_of_birth"
                 name="date_of_birth"
                 value={patientDetails.date_of_birth}
-                required
+                // required
                 onChange={handleInputChange}
                 max={today}
               />
-              {formErrors.date_of_birth && (
+              {/* {formErrors.date_of_birth && (
                 <div className="text-danger">{formErrors.date_of_birth}</div>
-              )}
+              )} */}
             </div>
             <div className="col-md-3">
               <label
@@ -657,7 +673,7 @@ const BookAppointment = () => {
               )}
             </div>
           </div>
-
+ 
           <div className="row mb-4">
             <div className="col-md-3">
               <label
@@ -752,7 +768,7 @@ const BookAppointment = () => {
               />
             </div>
           </div>
-
+ 
           <div className="row mb-3">
             <div>
               <button type="submit" className="btn btn-primary">
@@ -774,7 +790,7 @@ const BookAppointment = () => {
           >
             Select Slot
           </h3>
-
+ 
           <div className="row justify-content-center mb-3">
             {/* Today Button */}
             <div className="col-12 col-md-4 mb-3">
@@ -802,7 +818,7 @@ const BookAppointment = () => {
                 </div>
               </div>
             </div>
-
+ 
             {/* Tomorrow Button */}
             <div className="col-12 col-md-4 mb-3">
               <div className="text-center">
@@ -829,7 +845,7 @@ const BookAppointment = () => {
                 </div>
               </div>
             </div>
-
+ 
             {/* Day After Tomorrow Button */}
             <div className="col-12 col-md-4 mb-3">
               <div className="text-center">
@@ -858,14 +874,14 @@ const BookAppointment = () => {
               </div>
             </div>
           </div>
-
+ 
           {/* Slot Display with Pagination */}
           {currentSlots.length > 0 && (
             <div className="row justify-content-center">
               {renderSlots(currentSlots)}
             </div>
           )}
-
+ 
           <div className="d-flex justify-content-center mt-3 align-items-center">
             <Button
               variant="outline-secondary"
@@ -875,12 +891,12 @@ const BookAppointment = () => {
             >
               &larr;
             </Button>
-
+ 
             {/* Display current page and total pages */}
             <span style={{ margin: "0 15px" }}>
               Page {currentPage} of {totalPages}
             </span>
-
+ 
             <Button
               variant="outline-secondary"
               onClick={handleNextPage}
@@ -915,5 +931,5 @@ const BookAppointment = () => {
     </div>
   );
 };
-
+ 
 export default BookAppointment;

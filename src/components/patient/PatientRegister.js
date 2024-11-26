@@ -4,7 +4,7 @@ import { Link, useHistory } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../css/AuthForms.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-
+ 
 const PatientRegister = () => {
   const [countryCode, setCountryCode] = useState("91");
   const [mobileNumber, setMobileNumber] = useState("");
@@ -17,11 +17,11 @@ const PatientRegister = () => {
   const [timer, setTimer] = useState(60);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
   const [passwordVisible, setPasswordVisible] = useState(false);
-
+ 
   const startTimer = () => {
     setIsResendDisabled(true);
     setTimer(60);
-
+ 
     const countdown = setInterval(() => {
       setTimer((prevTimer) => {
         if (prevTimer <= 1) {
@@ -33,32 +33,39 @@ const PatientRegister = () => {
       });
     }, 1000);
   };
-
+ 
   useEffect(() => {
     if (showVerification) {
       startTimer();
     }
   }, [showVerification]);
-
+ 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
       const response = await BaseUrl.get(
         `/patient/patientregister/?mobile_number=${mobileNumber}&password=${password}`
       );
+ 
       if (response.status === 200) {
-        setMessage({ type: "", text: "" });
-        setShowVerification(true);
+        if (response.data.success) {
+          setMessage({ type: "success", text: response.data.success });
+          setShowVerification(true);
+        }
+        else if (response.data.error) {
+          setMessage({ type: "error", text: response.data.error });
+        }
       }
     } catch (error) {
       setMessage({
         type: "error",
-        text:
-          error.response?.data?.error || "An error occurred. Please try again.",
+        text: error.response?.data?.error || "",
       });
     }
   };
-
+ 
+ 
+ 
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
     try {
@@ -67,51 +74,77 @@ const PatientRegister = () => {
         mobile_number: mobileNumber,
         otp: enteredOtp,
       });
-
-      const successMessage =
-        response.data.message || "Registration successful!";
-      setMessage({ type: "success", text: successMessage });
-
-      const token = response.data.access;
-      localStorage.setItem("token", token);
-
-      setTimeout(() => {
-        history.push("/patient/login");
-      }, 2000);
+      if (response.data.success) {
+        const successMessage =
+          response.data.success || "Registration successful!";
+        setMessage({ type: "success", text: successMessage });
+ 
+        const token = response.data.access;
+        localStorage.setItem("token", token);
+ 
+        setTimeout(() => {
+          history.push("/patient/login");
+        }, 2000);
+      }
+      else if (response.data.error) {
+        setMessage({ type: "error", text: response.data.error });
+      }
     } catch (error) {
       setMessage({
         type: "error",
-        text: error.response?.data?.error || "Invalid OTP. Please try again.",
+        text: error.response?.data?.error,
       });
     }
   };
-
+ 
+ 
+ 
+ 
   const handleResendOTP = async () => {
     try {
       const response = await BaseUrl.get(
         `/patient/patientregister/?mobile_number=${mobileNumber}&password=${password}`
       );
-      if (response.status === 200) {
-        setMessage("OTP resent successfully");
+      if (response.status === 200 && response.data.success) {
+        setMessage({ type: "success", text: response.data.success });
         setOtp(["", "", "", "", "", ""]);
         startTimer();
       }
+      else if (response.data.error) {
+        setMessage({ type: "error", text: response.data.error });
+      }
     } catch (error) {
-      setMessage(
-        error.response?.data?.error || "An error occurred. Please try again."
-      );
+      setMessage({
+        type: "error",
+        text: error.response?.data?.error,
+      });
     }
   };
-
+ 
   const handleChangeOtp = (index, value) => {
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-    if (value.length === 1 && index < otp.length - 1) {
-      inputRefs.current[index + 1].focus();
+    if (!isNaN(value) && value !== " ") {
+      const newOtp = [...otp];
+      newOtp[index] = value;
+      setOtp(newOtp);
+ 
+      if (value.length === 1 && index < otp.length - 1) {
+        inputRefs.current[index + 1].focus();
+      }
     }
   };
-
+ 
+  const handleOtpKeyDown = (index, event) => {
+    if (event.key === "Backspace") {
+      const newOtp = [...otp];
+      newOtp[index] = "";
+      setOtp(newOtp);
+ 
+      if (index > 0) {
+        inputRefs.current[index - 1].focus();
+      }
+    }
+  };
+ 
   const toggleAuthMode = (isRegister) => {
     if (isRegister) {
       history.push("/patient/register");
@@ -119,11 +152,11 @@ const PatientRegister = () => {
       history.push("/patient/login");
     }
   };
-
+ 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
-
+ 
   return (
     <div className="container-fluid preg-box d-flex justify-content-center align-items-center">
       <div className="row w-100 d-flex justify-content-lg-end">
@@ -175,6 +208,9 @@ const PatientRegister = () => {
                     value={mobileNumber}
                     onChange={(e) => setMobileNumber(e.target.value)}
                     required
+                    onInput={(e) =>
+                      (e.target.value = e.target.value.replace(/[^0-9]/g, ""))
+                    }
                   />
                 </div>
               </div>
@@ -204,7 +240,7 @@ const PatientRegister = () => {
                   </span>
                 </div>
               </div>
-
+ 
               <div className="d-flex justify-content-between align-items-center mb-4">
                 <div className="form-check">
                   <input
@@ -221,7 +257,7 @@ const PatientRegister = () => {
               <button type="submit" className="btn btn-primary w-45 mb-3">
                 SEND OTP
               </button>
-
+ 
               {message.text && (
                 <p
                   style={{ color: message.type === "error" ? "red" : "green" }}
@@ -234,6 +270,7 @@ const PatientRegister = () => {
             <form className="otp-form" onSubmit={handleVerifyOTP}>
               <h2 className="text-dark mb-4">OTP Verification</h2>
               <p>An OTP has been sent to your mobile number</p>
+ 
               <div className="otp-container mb-3">
                 {otp.map((digit, index) => (
                   <input
@@ -243,10 +280,15 @@ const PatientRegister = () => {
                     className="form-control otp-input"
                     value={digit}
                     onChange={(e) => handleChangeOtp(index, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                    onInput={(e) =>
+                    (e.target.value = e.target.value.replace(/[^0-9]/g, ""))
+                    }
                     ref={(el) => (inputRefs.current[index] = el)}
                   />
                 ))}
               </div>
+ 
               <div className="d-flex justify-content-between">
                 <button
                   type="buttons"
@@ -282,5 +324,6 @@ const PatientRegister = () => {
     </div>
   );
 };
-
+ 
 export default PatientRegister;
+ 

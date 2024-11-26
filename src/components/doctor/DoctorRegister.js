@@ -2,14 +2,14 @@ import React, { useState, useRef, useEffect } from "react";
 import BaseUrl from "../../api/BaseUrl";
 import { Link, useHistory } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import the eye icons
-
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+ 
 const DoctorRegister = () => {
   const [countryCode, setCountryCode] = useState("91");
   const [mobileNumber, setMobileNumber] = useState("");
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [message, setMessage] = useState({ type: "", text: "" }); // Updated message state
+  const [message, setMessage] = useState({ type: "", text: "" });
   // const [message, setMessage] = useState('');
   const [showVerification, setShowVerification] = useState(false);
   const history = useHistory(); // For navigation
@@ -17,49 +17,50 @@ const DoctorRegister = () => {
   const [timer, setTimer] = useState(60); // Timer starts at 60 seconds
   const [isResendDisabled, setIsResendDisabled] = useState(true); // Initially, disable the Resend OTP button
   const [passwordVisible, setPasswordVisible] = useState(false); // State to toggle password visibility
-
-  // Timer function to handle OTP resend
+ 
   const startTimer = () => {
-    setIsResendDisabled(true); // Disable the button
-    setTimer(60); // Set timer to 60 seconds
-
+    setIsResendDisabled(true);
+    setTimer(60);
+ 
     const countdown = setInterval(() => {
       setTimer((prevTimer) => {
         if (prevTimer <= 1) {
-          clearInterval(countdown); // Stop the countdown
-          setIsResendDisabled(false); // Enable the Resend OTP button
-          return 0; // Ensure the timer shows 0
+          clearInterval(countdown);
+          setIsResendDisabled(false);
+          return 0;
         }
-        return prevTimer - 1; // Decrease the timer by 1 each second
+        return prevTimer - 1;
       });
-    }, 1000); // Run every second
+    }, 1000);
   };
-
+ 
   useEffect(() => {
     if (showVerification) {
-      startTimer(); // Start the timer when the OTP screen is shown
+      startTimer();
     }
   }, [showVerification]);
-
+ 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
       const response = await BaseUrl.get(
         `/doctor/register/?mobile_number=${mobileNumber}&password=${password}`
       );
-      if (response.status === 200) {
-        setMessage({ type: "", text: "" });
+ 
+      if (response.status === 200 && response.data.success) {
+        setMessage({ type: "success", text: response.data.success });
         setShowVerification(true);
+      } else if (response.data.error) {
+        setMessage({ type: "error", text: response.data.error });
       }
     } catch (error) {
       setMessage({
         type: "error",
-        text:
-          error.response?.data?.error || "An error occurred. Please try again.",
+        text: error.response?.data?.error || "",
       });
     }
   };
-
+ 
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
     try {
@@ -69,61 +70,75 @@ const DoctorRegister = () => {
         otp: enteredOtp,
         password,
       });
-
+ 
       if (response.status === 200 || response.status === 201) {
-        const successMessage =
-          response.data.message || "Registration successful!";
-        setMessage({ type: "success", text: successMessage });
-
-        const token = response.data.access;
-        localStorage.setItem("token", token);
-
-        // Redirect to login after a short delay (2 seconds)
-        setTimeout(() => {
-          history.push("/doctor/login");
-        }, 2000);
-      } else {
-        // If the status is not 200 or 201, handle the case as an error
-        setMessage({
-          type: "error",
-          text: "Unexpected response from the server.",
-        });
+        if (response.data.success) {
+          setMessage({ type: "success", text: response.data.success });
+ 
+          const token = response.data.access;
+          localStorage.setItem("token", token);
+ 
+          setTimeout(() => {
+            history.push("/doctor/login");
+          }, 2000);
+        }
+      } else if (response.data.error) {
+        setMessage({ type: "error", text: response.data.error });
       }
     } catch (error) {
       setMessage({
         type: "error",
-        text: error.response?.data?.error || "Invalid OTP. Please try again.",
+        text: error.response?.data?.error || "",
       });
     }
   };
-
+ 
   const handleResendOTP = async () => {
     try {
       const response = await BaseUrl.get(
         `/doctor/register/?mobile_number=${mobileNumber}&password=${password}`
       );
       if (response.status === 200) {
-        setMessage("OTP resent successfully");
-        setOtp(["", "", "", "", "", ""]); // Clear OTP input fields
-        startTimer(); // Restart the timer and disable the button again
+        if (response.data.success) {
+          setMessage({ type: "success", text: response.data.success });
+          setOtp(["", "", "", "", "", ""]);
+          startTimer();
+        }
+      } else if (response.data.error) {
+        setMessage({ type: "error", text: response.data.error });
       }
     } catch (error) {
-      setMessage(
-        error.response?.data?.error || "An error occurred. Please try again."
-      );
+      setMessage({
+        type: "error",
+        text: error.response?.data?.error || "",
+      });
     }
   };
-
+ 
   const handleChangeOtp = (index, value) => {
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-    if (value.length === 1 && index < otp.length - 1) {
-      inputRefs.current[index + 1].focus();
+    if (!isNaN(value) && value !== " ") {
+      const newOtp = [...otp];
+      newOtp[index] = value;
+      setOtp(newOtp);
+ 
+      if (value.length === 1 && index < otp.length - 1) {
+        inputRefs.current[index + 1].focus();
+      }
     }
   };
-
-  // This function will handle redirection to the respective route
+ 
+  const handleOtpKeyDown = (index, event) => {
+    if (event.key === "Backspace") {
+      const newOtp = [...otp];
+      newOtp[index] = "";
+      setOtp(newOtp);
+ 
+      if (index > 0) {
+        inputRefs.current[index - 1].focus();
+      }
+    }
+  };
+ 
   const toggleAuthMode = (isRegister) => {
     if (isRegister) {
       history.push("/doctor/register");
@@ -131,12 +146,11 @@ const DoctorRegister = () => {
       history.push("/doctor/login");
     }
   };
-
-  // Function to toggle password visibility
+ 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
-
+ 
   return (
     <div className="container-fluid reg-box d-flex justify-content-center align-items-center">
       <div className="row w-100 d-flex justify-content-lg-end">
@@ -192,6 +206,9 @@ const DoctorRegister = () => {
                     value={mobileNumber}
                     onChange={(e) => setMobileNumber(e.target.value)}
                     required
+                    onInput={(e) =>
+                      (e.target.value = e.target.value.replace(/[^0-9]/g, ""))
+                    }
                   />
                 </div>
               </div>
@@ -205,7 +222,7 @@ const DoctorRegister = () => {
                 </label>
                 <div className="input-group">
                   <input
-                    type={passwordVisible ? "text" : "password"} // Change the input type based on visibility state
+                    type={passwordVisible ? "text" : "password"}
                     className="form-control"
                     placeholder="Create Password"
                     value={password}
@@ -218,11 +235,10 @@ const DoctorRegister = () => {
                     style={{ cursor: "pointer" }}
                   >
                     {passwordVisible ? <FaEyeSlash /> : <FaEye />}{" "}
-                    {/* Toggle between eye and eye slash icons */}
                   </span>
                 </div>
               </div>
-
+ 
               <div className="d-flex justify-content-between align-items-center mb-4">
                 <div className="form-check">
                   <input
@@ -239,7 +255,7 @@ const DoctorRegister = () => {
               <button type="submit" className="btn btn-primary w-45 mb-3">
                 SEND OTP
               </button>
-
+ 
               {message.text && (
                 <p
                   style={{ color: message.type === "error" ? "red" : "green" }}
@@ -252,6 +268,7 @@ const DoctorRegister = () => {
             <form className="otp-form" onSubmit={handleVerifyOTP}>
               <h2 className="text-dark mb-4">OTP Verification</h2>
               <p>An OTP has been sent to your mobile number</p>
+ 
               <div className="otp-container mb-3">
                 {otp.map((digit, index) => (
                   <input
@@ -261,10 +278,15 @@ const DoctorRegister = () => {
                     className="form-control otp-input"
                     value={digit}
                     onChange={(e) => handleChangeOtp(index, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                    onInput={(e) =>
+                      (e.target.value = e.target.value.replace(/[^0-9]/g, ""))
+                    }
                     ref={(el) => (inputRefs.current[index] = el)}
                   />
                 ))}
               </div>
+ 
               <div className="d-flex justify-content-between">
                 <button
                   type="buttons"
@@ -284,7 +306,6 @@ const DoctorRegister = () => {
                     OTP has been sent, Reset OTP will be sent after{" "}
                   </span>
                   <span style={{ color: "red" }}>{timer} sec</span>{" "}
-                  {/* Show the countdown */}
                 </p>
               </div>
               {message.text && (
@@ -301,5 +322,5 @@ const DoctorRegister = () => {
     </div>
   );
 };
-
+ 
 export default DoctorRegister;

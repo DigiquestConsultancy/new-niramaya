@@ -8,7 +8,7 @@ import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 import { FaTimes } from "react-icons/fa";
 import { faFileAlt, faReceipt, faTimes as faTimesSolid } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
+ 
 const DoctorHome = () => {
   const [totalAppointments, setTotalAppointments] = useState();
   const [bookedAppointmentCount, setBookedAppointmentCount] = useState();
@@ -17,14 +17,14 @@ const DoctorHome = () => {
   const [walkInCount, setWalkInCount] = useState();
   const [onlineCount, setOnlineCount] = useState();
   const [followUpCount, setFollowUpCount] = useState();
-
+ 
   const [clinicPhoto, setClinicPhoto] = useState(null);
   const [clinicName, setClinicName] = useState();
   const mobileNumber = useState(null);
   const [loading, setLoading] = useState(false);
   const isPrescriptionDocs = useState(false);
   const editingRecordId = useState(null);
-
+ 
   const fetchClinicDetails = async () => {
     try {
       const response = await BaseUrl.get(`/doctor/opddays/`, {
@@ -36,7 +36,7 @@ const DoctorHome = () => {
       if (response.status === 200 && response.data.length > 0) {
         const data = response.data[0];
         setClinicName(data.clinic_name);
-
+ 
         if (data.doc_file) {
           const fullImageUrl = `${BaseUrl.defaults.baseURL}${data.doc_file}`;
           setClinicPhoto(fullImageUrl);
@@ -52,29 +52,29 @@ const DoctorHome = () => {
       setClinicPhoto("");
     }
   };
-
+ 
   const [doctorId, setDoctorId] = useState(null);
   const [todayAppointments, setTodayAppointments] = useState([]);
   const [completedAppointments, setCompletedAppointments] = useState([]);
   const [canceledAppointments, setCanceledAppointments] = useState([]);
-
+ 
   const [showModal, setShowModal] = useState(false);
   const [showCompletedModal, setShowCompletedModal] = useState(false);
   const [showCanceledModal, setShowCanceledModal] = useState(false);
-
+ 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentIndex, setCurrentIndex] = useState(0);
   const [completedIndex, setCompletedIndex] = useState(0);
   const [canceledIndex, setCanceledIndex] = useState(0);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
-
+ 
   const formattedISODate = format(currentDate, "yyyy-MM-dd");
   const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
-
+ 
   const [morningSlots, setMorningSlots] = useState([]);
   const [afternoonSlots, setAfternoonSlots] = useState([]);
   const [eveningSlots, setEveningSlots] = useState([]);
-
+ 
   const [appointmentDetails, setAppointmentDetails] = useState([]);
   const [prescriptionData, setPrescriptionData] = useState(null);
   const [patientDetails, setPatientDetails] = useState(null);
@@ -89,26 +89,26 @@ const DoctorHome = () => {
   const [isVisitEnded, setIsVisitEnded] = useState(false);
   const [error, setError] = useState(null);
   const [editingDocumentId, setEditingDocumentId] = useState(null);
-
+ 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
-
+ 
   const [selectedTodayAppointment, setSelectedTodayAppointment] = useState(null);
   const [selectedCompletedAppointment, setSelectedCompletedAppointment] = useState(null);
   const [selectedCanceledAppointment, setSelectedCanceledAppointment] = useState(null);
-
+ 
   const handleClose = () => setShowModal(false);
   const [modalContent, setModalContent] = useState("");
-
+ 
   const handleShow = (message) => {
     setModalContent(message);
     setShowModal(true);
   };
-
+ 
   const handlePrevious = () => {
     setCurrentIndex((prevIndex) => Math.max(prevIndex - 1, 0));
   };
-
+ 
   const handleNext = () => {
     if (todayAppointments && todayAppointments.length > 0) {
       setCurrentIndex((prevIndex) =>
@@ -116,17 +116,17 @@ const DoctorHome = () => {
       );
     }
   };
-
+ 
   const handleCompletedPrevious = () => {
     setCompletedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
   };
-
+ 
   const handleCompletedNext = () => {
     setCompletedIndex((prevIndex) =>
       Math.min(prevIndex + 1, completedAppointments.length - 4)
     );
   };
-
+ 
   const fetchAppointmentCounts = async () => {
     try {
       const response = await BaseUrl.get(`/reception/walkincount/`, {
@@ -150,7 +150,7 @@ const DoctorHome = () => {
       }
     } catch (error) { }
   };
-
+ 
   const fetchSlots = useCallback(
     async (date = currentDate) => {
       try {
@@ -161,11 +161,11 @@ const DoctorHome = () => {
             slot_date: formattedDate,
           },
         });
-
+ 
         const morningSlots = [];
         const afternoonSlots = [];
         const eveningSlots = [];
-
+ 
         if (responseSlots.data && responseSlots.data.length > 0) {
           responseSlots.data.forEach((slot) => {
             const appointmentTime = slot.appointment_slot;
@@ -190,7 +190,7 @@ const DoctorHome = () => {
     },
     [doctorId, currentDate]
   );
-
+ 
   const fetchAllAppointments = useCallback(async () => {
     try {
       const response = await BaseUrl.get(`/reception/allappointments/`, {
@@ -206,7 +206,7 @@ const DoctorHome = () => {
     } catch (error) {
     }
   }, [doctorId]);
-
+ 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -214,26 +214,26 @@ const DoctorHome = () => {
       setDoctorId(decoded.doctor_id);
     }
   }, []);
-
+ 
   useEffect(() => {
     fetchSlots();
     fetchAllAppointments();
     fetchClinicDetails();
     fetchAppointmentCounts();
   }, [doctorId, currentDate]);
-
+ 
   const handlePreviousDate = () => {
     const newDate = subDays(currentDate, 1);
     setCurrentDate(newDate);
   };
-
+ 
   const handleNextDate = () => {
     const newDate = addDays(currentDate, 1);
     setCurrentDate(newDate);
   };
-
+ 
   const [uploadedPrescription, setUploadedPrescription] = useState(null);
-
+ 
   const fetchUploadedPrescriptionDocument = async (appointmentId) => {
     try {
       const formattedDate = selectedAppointmentDate
@@ -255,7 +255,7 @@ const DoctorHome = () => {
       setError(error.response?.data?.error || error.message || "An unexpected error occurred.");
     }
   };
-
+ 
   const handlePrescriptionClick = () => {
     setSelectedHeading("prescription");
     if (selectedAppointmentId && selectedAppointment.patient_id) {
@@ -281,7 +281,7 @@ const DoctorHome = () => {
         });
     }
   };
-
+ 
   const fetchPrescriptionData = async (patientId, appointmentId) => {
     setFetchError("");
     try {
@@ -304,14 +304,14 @@ const DoctorHome = () => {
       );
     }
   };
-
+ 
   const [formPrescription, setFormPrescription] = useState({
     medicine_name: "",
     comment: "",
     time: "",
     description: "",
   });
-
+ 
   const handleViewPrescription = async (documentId) => {
     setFetchError("");
     try {
@@ -340,7 +340,7 @@ const DoctorHome = () => {
       setError(error.response?.data?.error || error.message || "An unexpected error occurred.");
     }
   };
-
+ 
   const renderPrescriptionData = () => {
     const hasPrescriptions = prescriptionData && prescriptionData.length > 0;
     return (
@@ -535,7 +535,7 @@ const DoctorHome = () => {
             </Col>
           </Row>
         )}
-
+ 
         <Col md={6} className="mb-5 mt-4">
           <Form.Group>
             <div style={{ display: "flex", gap: "10px" }}>
@@ -554,14 +554,14 @@ const DoctorHome = () => {
             </div>
           </Form.Group>
         </Col>
-
+ 
         <input
           type="file"
           id="fileUpload"
           style={{ display: "none" }}
           onChange={handleFileUpload}
         />
-
+ 
         {uploadedPrescription && uploadedPrescription.length > 0 && (
           <div className="mt-4">
             <h5>Uploaded Prescription Documents:</h5>
@@ -600,26 +600,26 @@ const DoctorHome = () => {
       </div>
     );
   };
-
+ 
   const handleAddPrescription = () => {
     setPrescriptionData([
       ...prescriptionData,
       { medicine_name: "", comment: "", time: "", description: "" },
     ]);
   };
-
+ 
   const handlePrescriptionFieldChange = (e, index, field) => {
     const { value } = e.target;
     const updatedPrescriptions = [...prescriptionData];
     updatedPrescriptions[index][field] = value;
     setPrescriptionData(updatedPrescriptions);
   };
-
+ 
   const handlePrescriptionChange = (e) => {
     const { name, value } = e.target;
     setFormPrescription((prev) => ({ ...prev, [name]: value }));
   };
-
+ 
   const handlePrescriptionSubmit = async () => {
     try {
       const hasExistingPrescriptions = prescriptionData.length > 0;
@@ -642,7 +642,7 @@ const DoctorHome = () => {
         : await BaseUrl.put(endpoint, prescriptions, {
           headers: { "Content-Type": "application/json" },
         });
-
+ 
       if (response.status === 201 && response.data.success) {
         const successMessage =
           response.data.success || "Details have been successfully updated.";
@@ -662,7 +662,7 @@ const DoctorHome = () => {
       handleShow(errorMessage);
     }
   };
-
+ 
   const handleUpdatePrescription = async (prescriptionId, index) => {
     try {
       const prescriptionDataItem = prescriptionData[index];
@@ -676,7 +676,7 @@ const DoctorHome = () => {
       updateData.append("time", prescriptionDataItem.time);
       updateData.append("comment", prescriptionDataItem.comment);
       updateData.append("description", prescriptionDataItem.description);
-
+ 
       const response = await BaseUrl.put(`/patient/patientpriscription/`, updateData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -701,7 +701,7 @@ const DoctorHome = () => {
       handleShow(errorMessage);
     }
   };
-
+ 
   const deletePrescription = async (prescriptionId) => {
     try {
       const response = await BaseUrl.delete(`/patient/patientpriscription/`, {
@@ -725,7 +725,7 @@ const DoctorHome = () => {
       handleShow(errorMessage);
     }
   };
-
+ 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     const formattedDate = selectedAppointmentDate ? new Date(selectedAppointmentDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0];
@@ -735,7 +735,7 @@ const DoctorHome = () => {
     formData.append("document_file", file);
     formData.append("appointment", appointmentId);
     formData.append("document_date", formattedDate);
-
+ 
     try {
       const response = await BaseUrl.post("/patient/patientprescriptonfile/", formData);
       if (response.status === 201) {
@@ -754,7 +754,7 @@ const DoctorHome = () => {
       handleShow(errorMessage);
     }
   };
-
+ 
   const handleDeleteDocumentFile = async (documentId) => {
     const formattedDate = selectedAppointmentDate ? new Date(selectedAppointmentDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0];
     const matchingAppointment = appointmentDetails.find((appointment) => appointment.appointment_date === formattedDate);
@@ -782,7 +782,7 @@ const DoctorHome = () => {
       handleShow(errorMessage);
     }
   };
-
+ 
   const fetchPatientDetails = async (patientId, appointmentId) => {
     setFetchError("");
     setSuccessMessage("");
@@ -800,7 +800,7 @@ const DoctorHome = () => {
       setFetchError(error.response?.data?.error || error.message || "");
     }
   };
-
+ 
   const handlePatientDetailsClick = () => {
     setSelectedHeading("patientDetails");
     if (selectedAppointment) {
@@ -814,7 +814,7 @@ const DoctorHome = () => {
         });
     }
   };
-
+ 
   const renderPatientDetails = () => {
     return (
       <div>
@@ -833,7 +833,7 @@ const DoctorHome = () => {
             {fetchError}
           </div>
         )}
-
+ 
         <Row className="mt-3">
           <Col md={3}>
             <Form.Group>
@@ -969,7 +969,7 @@ const DoctorHome = () => {
             </Form.Group>
           </Col>
         </Row>
-
+ 
         <Button
           variant="primary"
           onClick={handleUpdatePatientDetails}
@@ -980,7 +980,7 @@ const DoctorHome = () => {
       </div>
     );
   };
-
+ 
   const handleUpdatePatientDetails = async () => {
     try {
       const updateData = {
@@ -988,9 +988,9 @@ const DoctorHome = () => {
         patient_id: selectedAppointment.patient_id,
         appointment_id: selectedAppointment.appointment_id,
       };
-
+ 
       const response = await BaseUrl.put(`/patient/patient/`, updateData);
-
+ 
       if (response.status === 200 || response.status === 201) {
         const successMessage = response.data.success || "Details have been successfully updated.";
         setSuccessMessage(successMessage);
@@ -1006,11 +1006,11 @@ const DoctorHome = () => {
       handleShow(errorMessage);
     }
   };
-
+ 
   const [isNewVitals, setIsNewVitals] = useState(true);
   const [vitalsSuccessMessage, setVitalsSuccessMessage] = useState("");
   const [vitalsErrorMessage, setVitalsErrorMessage] = useState("");
-
+ 
   const fetchVitalsData = async (appointmentId) => {
     setFetchError("");
     setVitalsSuccessMessage("");
@@ -1019,7 +1019,7 @@ const DoctorHome = () => {
       const response = await BaseUrl.get(`/patient/vital/`, {
         params: { appointment_id: appointmentId },
       });
-
+ 
       if (response.status === 200 && response.data.length > 0) {
         setVitalsData(response.data);
         setIsNewVitals(false);
@@ -1065,7 +1065,7 @@ const DoctorHome = () => {
       setIsNewVitals(true);
     }
   };
-
+ 
   const handleVitalsClick = () => {
     setSelectedHeading("vitals");
     if (selectedAppointmentId) {
@@ -1074,7 +1074,7 @@ const DoctorHome = () => {
       );
     }
   };
-
+ 
   const [formVitals, setFormVitals] = useState({
     height: vitalsData?.[0]?.height || "",
     weight: vitalsData?.[0]?.weight || "",
@@ -1086,7 +1086,7 @@ const DoctorHome = () => {
     sugar_level: vitalsData?.[0]?.sugar_level || "",
     bmi: vitalsData?.[0]?.bmi || "",
   });
-
+ 
   const renderVitalsData = () => {
     return (
       <div style={{ padding: "20px" }}>
@@ -1234,7 +1234,7 @@ const DoctorHome = () => {
       </div>
     );
   };
-
+ 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormVitals((prev) => {
@@ -1247,14 +1247,14 @@ const DoctorHome = () => {
             weight /
             (heightInMeters * heightInMeters)
           ).toFixed(2);
-
+ 
           updatedVitals.bmi = calculatedBMI;
         }
       }
       return updatedVitals;
     });
   };
-
+ 
   const handleVitalsSubmit = async () => {
     try {
       const vitalRequestData = {
@@ -1273,7 +1273,7 @@ const DoctorHome = () => {
       const response = isNewVitals
         ? await BaseUrl.post(`/patient/vital/`, vitalRequestData)
         : await BaseUrl.put(`/patient/vital/`, vitalRequestData);
-
+ 
       if (response.status === 201) {
         const successMessage = response.data.success || "Vitals have been successfully updated.";
         setSuccessMessage(successMessage);
@@ -1289,10 +1289,10 @@ const DoctorHome = () => {
       handleShow(errorMessage);
     }
   };
-
+ 
   const [symptomsData, setSymptomsData] = useState([]);
   const [fetchError, setFetchError] = useState("");
-
+ 
   const clearMessagesAfterTimeout = () => {
     setTimeout(() => {
       setSuccessMessage("");
@@ -1300,7 +1300,7 @@ const DoctorHome = () => {
       setFetchError("");
     }, 10000);
   };
-
+ 
   const fetchSymptomsData = async (appointmentId) => {
     setFetchError("");
     setSuccessMessage("");
@@ -1312,7 +1312,7 @@ const DoctorHome = () => {
           appointment_id: appointmentId,
         },
       });
-
+ 
       if (response.status === 200 && response.data.length > 0) {
         setSymptomsData(response.data);
       } else {
@@ -1325,7 +1325,7 @@ const DoctorHome = () => {
       setLoading(false);
     }
   };
-
+ 
   const handleSymptomsClick = () => {
     setSelectedHeading("symptoms");
     if (selectedAppointmentId) {
@@ -1334,9 +1334,10 @@ const DoctorHome = () => {
       );
     }
   };
-
+ 
+ 
   const [showAddSymptomRow, setShowAddSymptomRow] = useState(false);
-
+ 
   const renderSymptomsData = () => {
     return (
       <div>
@@ -1356,7 +1357,7 @@ const DoctorHome = () => {
             {fetchError}
           </div>
         )}
-
+ 
         <Form inline className="mb-3">
           <Form.Group
             className="mb-0"
@@ -1372,7 +1373,7 @@ const DoctorHome = () => {
                   Add Symptom
                 </Button>
               </div>
-
+ 
               <div className="d-flex w-100">
                 <Form.Control
                   type="text"
@@ -1386,7 +1387,7 @@ const DoctorHome = () => {
                 </Button>
               </div>
             </div>
-
+ 
             {searchResults.length > 0 && (
               <div
                 ref={searchRef}
@@ -1419,7 +1420,7 @@ const DoctorHome = () => {
           </Form.Group>
         </Form>
         <hr />
-
+ 
         {showAddSymptomRow && (
           <div>
             <h4>Add New Symptom</h4>
@@ -1502,7 +1503,7 @@ const DoctorHome = () => {
             <hr />
           </div>
         )}
-
+ 
         {symptomsData.map((symptom, index) => (
           <div key={symptom.id} className="mb-3">
             <Row className="mt-3">
@@ -1602,13 +1603,13 @@ const DoctorHome = () => {
       </div>
     );
   };
-
+ 
   useEffect(() => {
     if (successMessage || errorMessage || fetchError) {
       clearMessagesAfterTimeout();
     }
   }, [successMessage, errorMessage, fetchError]);
-
+ 
   const handleUpdateSymptoms = async (symptomId, index) => {
     setLoading(true);
     try {
@@ -1640,31 +1641,31 @@ const DoctorHome = () => {
       setLoading(false);
     }
   };
-
+ 
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const searchRef = useRef(null);
-
+ 
   const handleClickOutside = (event) => {
     if (searchRef.current && !searchRef.current.contains(event.target)) {
       setSearchResults([]);
     }
   };
-
+ 
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
+ 
   const [newSymptom, setNewSymptom] = useState({
     symptoms_name: "",
     since: "",
     severity: "",
     more_options: "",
   });
-
+ 
   const handleSearch = async () => {
     try {
       const response = await BaseUrl.get("/doctor/symptomssearch/", {
@@ -1687,7 +1688,7 @@ const DoctorHome = () => {
       setSearchTerm("");
     }
   };
-
+ 
   const handleSelectSearchResult = (selectedSymptom) => {
     setNewSymptom({
       symptoms_name: selectedSymptom.symptoms_name,
@@ -1701,7 +1702,7 @@ const DoctorHome = () => {
     setSuccessMessage("");
     setSearchTerm("");
   };
-
+ 
   const handleAddSymptom = async () => {
     setLoading(true);
     try {
@@ -1744,7 +1745,7 @@ const DoctorHome = () => {
       setLoading(false);
     }
   };
-
+ 
   const handleRemoveSymptom = async (symptomsId, appointmentId, index) => {
     try {
       const updatedSymptoms = symptomsData.filter((_, i) => i !== index);
@@ -1771,7 +1772,7 @@ const DoctorHome = () => {
       handleShow(errorMessage);
     }
   };
-
+ 
   const handleAppointmentDateClick = async (appointment_date, appointment_id) => {
     setSelectedAppointmentDate(appointment_date);
     setSelectedAppointmentId(appointment_id);
@@ -1788,15 +1789,15 @@ const DoctorHome = () => {
       await handleDocumentsClick(appointment_id, appointment_date);
     }
   };
-
+ 
   const handleDocumentsClick = async () => {
     setSelectedHeading("documents");
     if (selectedAppointmentId && formattedDate) {
       try {
         const formattedDate = selectedAppointmentDate
         ? new Date(selectedAppointmentDate).toISOString().split("T")[0]
-        : new Date().toISOString().split("T")[0]; 
-
+        : new Date().toISOString().split("T")[0];
+ 
         const response = await BaseUrl.get(
           `/patient/patientdocumentusingappointmentid/`,
           {
@@ -1827,7 +1828,7 @@ const DoctorHome = () => {
       setDisplayedData("documents");
     }
   };
-
+ 
   const [showFormModal, setShowFormModal] = useState(false);
   const [formData, setFormData] = useState({
     document_name: "",
@@ -1837,7 +1838,7 @@ const DoctorHome = () => {
     document_file: "",
   });
   const [selectedFiles, setSelectedFiles] = useState([]);
-
+ 
   const toggleFormModal = async (document = null) => {
     try {
       const appointmentId = selectedAppointmentId;
@@ -1882,21 +1883,21 @@ const DoctorHome = () => {
       setShowFormModal(!showFormModal);
     }
   };
-
+ 
   const handleFileSelect = (event) => {
     const files = Array.from(event.target.files);
     setSelectedFiles([...selectedFiles, ...files]);
   };
-
+ 
   const handleAddFileClick = () => {
     document.getElementById("fileInput").click();
   };
-
+ 
   const handleDeleteFile = (index) => {
     const updatedFiles = selectedFiles.filter((_, i) => i !== index);
     setSelectedFiles(updatedFiles);
   };
-
+ 
   const handleSave = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -1905,7 +1906,7 @@ const DoctorHome = () => {
       const patientId = selectedAppointment.patient_id;
       const userType = decodedToken.user_type;
       const userId = decodedToken.doctor_id;
-
+ 
       const formDataToSend = new FormData();
       formDataToSend.append("appointment", appointmentId);
       formDataToSend.append("document_name", formData.document_name);
@@ -1915,7 +1916,7 @@ const DoctorHome = () => {
       formDataToSend.append("patient_id", patientId);
       formDataToSend.append("user_type", userType);
       formDataToSend.append("user_id", userId);
-
+ 
       if (selectedFiles.length > 0) {
         formDataToSend.append("document_file", selectedFiles[0]);
       }
@@ -1956,7 +1957,7 @@ const DoctorHome = () => {
       handleShow(errorMessage);
     }
   };
-
+ 
   const handleDeleteDocument = async (documentId) => {
     try {
       const response = await BaseUrl.delete(`/patient/patientdocumentusingappointmentid/`,
@@ -1982,7 +1983,7 @@ const DoctorHome = () => {
       handleShow(errorMessage);
     }
   };
-
+ 
   const renderDocumentsData = () => {
     return (
       <div>
@@ -2123,11 +2124,11 @@ const DoctorHome = () => {
       </div>
     );
   };
-
+ 
   const [previewFileType, setPreviewFileType] = useState(null);
   const [previewFileUrl, setPreviewFileUrl] = useState(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
-
+ 
   const viewDocument = async (documentId) => {
     try {
       const response = await BaseUrl.get(`/patient/viewdocumentbyid/`, {
@@ -2143,7 +2144,7 @@ const DoctorHome = () => {
       setShowPreviewModal(true);
     } catch (error) { }
   };
-
+ 
   const renderDocumentPreviewModal = () => (
     <Modal
       show={showPreviewModal}
@@ -2182,13 +2183,13 @@ const DoctorHome = () => {
       </Modal.Footer>
     </Modal>
   );
-
+ 
   const handleEndVisit = async (appointmentId) => {
     try {
       const response = await BaseUrl.patch("/doctorappointment/completedappointment/", {
         appointment_id: appointmentId,
       });
-
+ 
       if (response.status === 201 || response.status === 200) {
         const successMessage = response.data.success || "Appointment have been Completed sucessfully.";
         setSuccessMessage(successMessage);
@@ -2207,7 +2208,7 @@ const DoctorHome = () => {
       handleShow(errorMessage);
     }
   };
-
+ 
   const handleCancelAppointment = async (appointmentId) => {
     try {
       const response = await BaseUrl.patch("/doctorappointment/canceledappointment/", {
@@ -2230,7 +2231,7 @@ const DoctorHome = () => {
       handleShow(errorMessage);
     }
   };
-
+ 
   const handleConfirmAction = () => {
     if (confirmAction === "endVisit") {
       handleEndVisit(selectedAppointment.appointment_id);
@@ -2239,7 +2240,7 @@ const DoctorHome = () => {
     }
     setShowConfirmModal(false);
   };
-
+ 
   const handleAppointmentClick = async (slotOrAppointment, section) => {
     if (
       selectedAppointment &&
@@ -2287,7 +2288,7 @@ const DoctorHome = () => {
       setErrorMessage();
     }
   };
-
+ 
   const resetModalState = () => {
     setSelectedAppointment(null);
     setVitalsData([]);
@@ -2298,26 +2299,28 @@ const DoctorHome = () => {
     setSelectedCompletedAppointment(null);
     setSelectedCanceledAppointment(null);
   };
-
+ 
+ 
+ 
   const [morningIndex, setMorningIndex] = useState(0);
   const [afternoonIndex, setAfternoonIndex] = useState(0);
   const [eveningIndex, setEveningIndex] = useState(0);
   const slotsPerPage = 4;
-
+ 
   const handleMorningPrevious = () => {
     setMorningIndex((prevIndex) => Math.max(prevIndex - 1, 0));
   };
-
+ 
   const handleMorningNext = () => {
     setMorningIndex((prevIndex) =>
       Math.min(prevIndex + 1, Math.ceil(morningSlots.length / slotsPerPage) - 1)
     );
   };
-
+ 
   const handleAfternoonPrevious = () => {
     setAfternoonIndex((prevIndex) => Math.max(prevIndex - 1, 0));
   };
-
+ 
   const handleAfternoonNext = () => {
     setAfternoonIndex((prevIndex) =>
       Math.min(
@@ -2326,17 +2329,17 @@ const DoctorHome = () => {
       )
     );
   };
-
+ 
   const handleEveningPrevious = () => {
     setEveningIndex((prevIndex) => Math.max(prevIndex - 1, 0));
   };
-
+ 
   const handleEveningNext = () => {
     setEveningIndex((prevIndex) =>
       Math.min(prevIndex + 1, Math.ceil(eveningSlots.length / slotsPerPage) - 1)
     );
   };
-
+ 
   const renderSlotCards = (slots, index) => {
     const startIndex = index * slotsPerPage * 4;
     const endIndex = Math.min(startIndex + slotsPerPage * 4, slots.length);
@@ -2419,7 +2422,7 @@ const DoctorHome = () => {
     }
     return rows;
   };
-
+ 
   const renderAppointmentDate = () => {
     return appointmentDetails.map((appointment, index) => (
       <Col key={appointment.id} xs={12} className="mb-2">
@@ -2447,7 +2450,7 @@ const DoctorHome = () => {
       </Col>
     ));
   };
-
+ 
   const renderCompletedAppointments = () => {
     const endIndex = Math.min(completedIndex + 4, completedAppointments.length);
     const displayedAppointments = completedAppointments.slice(
@@ -2469,7 +2472,7 @@ const DoctorHome = () => {
       </Col>
     ));
   };
-
+ 
   const renderCanceledAppointments = () => {
     const endIndex = Math.min(canceledIndex + 4, canceledAppointments.length);
     const displayedAppointments = canceledAppointments.slice(
@@ -2491,7 +2494,7 @@ const DoctorHome = () => {
       </Col>
     ));
   };
-
+ 
   const renderSelectedAppointmentDetails = () => {
     if (!selectedAppointment) return null;
     const isCompleted = selectedAppointment.is_complete;
@@ -2522,7 +2525,7 @@ const DoctorHome = () => {
         >
           <FaTimes size={24} color="#333" />
         </button>
-
+ 
         {!isCompleted && !isCanceled && (
           <Row>
             <Col xs={6}>
@@ -2560,7 +2563,7 @@ const DoctorHome = () => {
             </Col>
           </Row>
         )}
-
+ 
         <Row style={{ paddingTop: "40px" }}>
           <Col
             md={3}
@@ -2688,17 +2691,17 @@ const DoctorHome = () => {
       </div>
     );
   };
-
+ 
   const handleCanceledPrevious = () => {
     setCanceledIndex((prevIndex) => Math.max(prevIndex - 1, 0));
   };
-
+ 
   const handleCanceledNext = () => {
     setCanceledIndex((prevIndex) =>
       Math.min(prevIndex + 1, canceledAppointments.length - 4)
     );
   };
-
+ 
   const renderAppointments = () => {
     const endIndex = Math.min(currentIndex + 4, todayAppointments.length);
     const displayedAppointments = todayAppointments.slice(
@@ -2744,7 +2747,7 @@ const DoctorHome = () => {
           </>
         )}
       </header>
-
+ 
       <div className="d-flex justify-content-center align-items-center mt-2">
         <button
           className="btn btn-outline-primary me-3"
@@ -2760,7 +2763,7 @@ const DoctorHome = () => {
           &rarr;
         </button>
       </div>
-
+ 
       <Row className="text-center mt-4">
         <Col>
           <Card.Body>
@@ -2828,7 +2831,7 @@ const DoctorHome = () => {
         </Col>
       </Row>
       <hr />
-
+ 
       <div className="new">
         <style>{`
         .legend {
@@ -2859,7 +2862,7 @@ const DoctorHome = () => {
           overflow-y: auto;
         }
       `}</style>
-
+ 
         <div className="legend">
           <div>
             <span
@@ -2890,7 +2893,7 @@ const DoctorHome = () => {
             <span className="legend-text">Canceled</span>
           </div>
         </div>
-
+ 
         <Row>
           <Col className="ms-4">
             <div className="d-flex justify-content-between align-items-center mb-2">
@@ -2994,7 +2997,7 @@ const DoctorHome = () => {
         </Row>
         <hr />
       </div>
-
+ 
       <h3 className="text-center">Today's Appointments</h3>
       <div className="legend">
         <div>
@@ -3053,7 +3056,7 @@ const DoctorHome = () => {
       {selectedTodayAppointment &&
         renderSelectedAppointmentDetails(selectedTodayAppointment)}
       <hr />
-
+ 
       <h3 className="text-center">Completed Appointments</h3>
       <Row className="mb-4 text-center align-items-center justify-content-center">
         {completedAppointments.length > 4 && completedIndex > 0 && (
@@ -3096,7 +3099,7 @@ const DoctorHome = () => {
       {selectedCompletedAppointment &&
         renderSelectedAppointmentDetails(selectedCompletedAppointment)}
       <hr />
-
+ 
       <h3 className="text-center">Canceled Appointments</h3>
       <Row className="mb-4 text-center align-items-center justify-content-center">
         {canceledAppointments.length > 4 && canceledIndex > 0 && (
@@ -3138,8 +3141,9 @@ const DoctorHome = () => {
       </Row>
       {selectedCanceledAppointment &&
         renderSelectedAppointmentDetails(selectedCanceledAppointment)}
-
-      <Modal
+ 
+ 
+  <Modal
         show={showCompletedModal}
         onHide={() => setShowCompletedModal(false)}
       >
@@ -3174,7 +3178,7 @@ const DoctorHome = () => {
           )}
         </Modal.Body>
       </Modal>
-
+ 
       <Modal
         show={showCanceledModal}
         onHide={() => setShowCanceledModal(false)}
@@ -3207,7 +3211,7 @@ const DoctorHome = () => {
           )}
         </Modal.Body>
       </Modal>
-
+ 
       <Modal
         show={showConfirmModal}
         onHide={() => setShowConfirmModal(false)}
@@ -3234,7 +3238,7 @@ const DoctorHome = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-
+ 
       <Modal show={showFormModal} onHide={toggleFormModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>
@@ -3336,7 +3340,7 @@ const DoctorHome = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-
+ 
       <Modal show={showModal} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Action Status</Modal.Title>
@@ -3351,5 +3355,7 @@ const DoctorHome = () => {
     </div>
   );
 };
-
+ 
 export default DoctorHome;
+ 
+ 

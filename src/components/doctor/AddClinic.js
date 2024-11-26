@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import { Modal, Button, Form } from "react-bootstrap";
 import styled from "styled-components";
 import Loader from "react-js-loader";
-
+ 
 const LoaderWrapper = styled.div`
   display: flex;
   justify-content: center;
@@ -17,11 +17,11 @@ const LoaderWrapper = styled.div`
   left: 0;
   z-index: 9999;
 `;
-
+ 
 const LoaderImage = styled.div`
   width: 400px;
 `;
-
+ 
 const ProfilePicCircle = styled.div`
   width: 150px;
   height: 150px;
@@ -36,7 +36,7 @@ const ProfilePicCircle = styled.div`
   margin-bottom: 10px;
   position: relative;
 `;
-
+ 
 const ProfilePicPreview = styled.img`
   width: 150px;
   height: 150px;
@@ -44,7 +44,7 @@ const ProfilePicPreview = styled.img`
   object-fit: cover;
   margin-left: 20px;
 `;
-
+ 
 const AddClinic = () => {
   const [mobileNumber, setMobileNumber] = useState("");
   const [verificationStatus, setVerificationStatus] = useState("");
@@ -58,7 +58,7 @@ const AddClinic = () => {
   const inputRefs = useRef([]);
   const [loading, setLoading] = useState(false);
   const [profilePicPreview, setProfilePicPreview] = useState("");
-
+ 
   const [formData, setFormData] = useState({
     name: "",
     gender: "",
@@ -72,7 +72,7 @@ const AddClinic = () => {
   });
   const [doctorId, setDoctorId] = useState("");
   const [errors, setErrors] = useState({});
-
+ 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -84,7 +84,7 @@ const AddClinic = () => {
       }
     }
   }, []);
-
+ 
   const handleVerify = async () => {
     setMessage("");
     setLoading(true);
@@ -94,32 +94,35 @@ const AddClinic = () => {
       );
       if (response.status === 200) {
         setVerificationStatus(response.data.success);
+        setMessage(response.data.success); // Set success message
+        setMessageType("success");
         setShowOtpModal(true);
       } else {
+        setMessage(response.data.success || ""); // Set error message
         setMessageType("error");
-        setShowMessageModal(true);
+        setShowOtpModal(true);
       }
     } catch (error) {
       setMessage(error.response?.data?.error || "");
       setMessageType("error");
-      setShowMessageModal(true);
+      setShowOtpModal(true);
     } finally {
       setLoading(false);
     }
   };
-
+ 
   const handleOtpChange = (index, value) => {
     if (!/^\d*$/.test(value)) return;
-
+ 
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
-
+ 
     if (value.length === 1 && index < 5) {
       inputRefs.current[index + 1].focus();
     }
   };
-
+ 
   const handleVerifyOtp = async () => {
     setMessage("");
     setLoading(true);
@@ -137,21 +140,21 @@ const AddClinic = () => {
         setFormData({ ...formData, mobile_number: mobileNumber });
         setMessage(response.data.success);
         setMessageType("success");
-        setShowMessageModal(true);
+        // setShowMessageModal(true);
       } else {
         setMessage("OTP verification failed");
         setMessageType("error");
-        setShowMessageModal(true);
+        // setShowMessageModal(true);
       }
     } catch (error) {
       setMessage(error.response?.data?.error || "");
       setMessageType("error");
-      setShowMessageModal(true);
+      // setShowMessageModal(true);
     } finally {
       setLoading(false);
     }
   };
-
+ 
   const handleResendOtp = async () => {
     setMessage("");
     setLoading(true);
@@ -170,19 +173,20 @@ const AddClinic = () => {
       setMessageType("error");
     } finally {
       setLoading(false);
-      setShowMessageModal(true);
+      // setShowMessageModal(true);
     }
   };
-
+ 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-
+ 
     let newErrors = { ...errors };
     switch (name) {
       case "name":
-        if (!/^[a-zA-Z\s]*$/.test(value)) {
-          newErrors[name] = "Name should contain only alphabets";
+        if (!/^[a-zA-Z.\s]*$/.test(value)) {
+          // Updated to allow dots
+          newErrors[name] = "Name should contain only alphabets and dots";
         } else {
           delete newErrors[name];
         }
@@ -220,7 +224,7 @@ const AddClinic = () => {
     }
     setErrors(newErrors);
   };
-
+ 
   const handleProfilePicChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -232,22 +236,22 @@ const AddClinic = () => {
       reader.readAsDataURL(file);
     }
   };
-
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+ 
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
       if (key !== "profile_pic") {
         data.append(key, formData[key]);
       }
     });
-
+ 
     if (formData.profile_pic instanceof File) {
       data.append("profile_pic", formData.profile_pic);
     }
-
+ 
     try {
       const response = await BaseUrl.post("/clinic/details/", data, {
         headers: {
@@ -268,7 +272,7 @@ const AddClinic = () => {
       setShowMessageModal(true);
     }
   };
-
+ 
   return (
     <div
       style={{
@@ -288,7 +292,7 @@ const AddClinic = () => {
         <h2 style={{ color: "#0174BE" }} className="mb-5 text-center">
           Add Clinic
         </h2>
-
+ 
         {loading && (
           <LoaderWrapper>
             <LoaderImage>
@@ -302,7 +306,7 @@ const AddClinic = () => {
             </LoaderImage>
           </LoaderWrapper>
         )}
-
+ 
         {!showDetailsForm && (
           <div className="form-group row">
             <label htmlFor="mobileNumber" className="col-sm-2 col-form-label">
@@ -329,7 +333,7 @@ const AddClinic = () => {
             </div>
           </div>
         )}
-
+ 
         {showDetailsForm && (
           <Form
             onSubmit={handleSubmit}
@@ -358,7 +362,7 @@ const AddClinic = () => {
                 />
               )}
             </div>
-
+ 
             <div className="row">
               <Form.Group controlId="formMobileNumber" className="col-md-4">
                 <Form.Label>Mobile Number</Form.Label>
@@ -379,9 +383,13 @@ const AddClinic = () => {
                   name="name"
                   value={formData.name}
                   required
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^[a-zA-Z\s.]*$/.test(value)) {
+                      handleInputChange(e);
+                    }
+                  }}
                 />
-                {errors.name && <p className="text-danger">{errors.name}</p>}
               </Form.Group>
               <Form.Group controlId="formGender" className="col-md-4">
                 <Form.Label>Gender</Form.Label>
@@ -398,9 +406,6 @@ const AddClinic = () => {
                   <option value="female">Female</option>
                   <option value="other">Other</option>
                 </Form.Control>
-                {errors.gender && (
-                  <p className="text-danger">{errors.gender}</p>
-                )}
               </Form.Group>
             </div>
             <div className="row mt-3">
@@ -413,9 +418,6 @@ const AddClinic = () => {
                   max={today}
                   onChange={handleInputChange}
                 />
-                {errors.date_of_birth && (
-                  <p className="text-danger">{errors.date_of_birth}</p>
-                )}
               </Form.Group>
               <Form.Group controlId="formAge" className="col-md-4">
                 <Form.Label>Age</Form.Label>
@@ -425,9 +427,13 @@ const AddClinic = () => {
                   name="age"
                   value={formData.age}
                   required
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^\d*$/.test(value)) {
+                      handleInputChange(e);
+                    }
+                  }}
                 />
-                {errors.age && <p className="text-danger">{errors.age}</p>}
               </Form.Group>
               <Form.Group controlId="formQualification" className="col-md-4">
                 <Form.Label>Qualification</Form.Label>
@@ -437,7 +443,12 @@ const AddClinic = () => {
                   name="qualification"
                   value={formData.qualification}
                   required
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^[a-zA-Z\s.,]*$/.test(value)) {
+                      handleInputChange(e);
+                    }
+                  }}
                 />
               </Form.Group>
             </div>
@@ -450,7 +461,12 @@ const AddClinic = () => {
                   name="specialization"
                   value={formData.specialization}
                   required
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^[a-zA-Z\s.,]*$/.test(value)) {
+                      handleInputChange(e);
+                    }
+                  }}
                 />
               </Form.Group>
               <Form.Group controlId="formAddress" className="col-md-8">
@@ -463,9 +479,6 @@ const AddClinic = () => {
                   required
                   onChange={handleInputChange}
                 />
-                {errors.address && (
-                  <p className="text-danger">{errors.address}</p>
-                )}
               </Form.Group>
             </div>
             <Button
@@ -478,7 +491,7 @@ const AddClinic = () => {
             </Button>
           </Form>
         )}
-
+ 
         <Modal
           show={showOtpModal}
           onHide={() => setShowOtpModal(false)}
@@ -488,6 +501,17 @@ const AddClinic = () => {
             <Modal.Title>OTP Verification</Modal.Title>
           </Modal.Header>
           <Modal.Body>
+            {/* Display the success or error message within the OTP modal */}
+            {message && (
+              <p
+                className={
+                  messageType === "success" ? "text-success" : "text-danger"
+                }
+              >
+                {message}
+              </p>
+            )}
+ 
             <div className="otp-container d-flex justify-content-between mb-3">
               {otp.map((digit, index) => (
                 <input
@@ -524,7 +548,7 @@ const AddClinic = () => {
             </div>
           </Modal.Body>
         </Modal>
-
+ 
         <Modal
           show={showMessageModal}
           onHide={() => setShowMessageModal(false)}
@@ -557,5 +581,5 @@ const AddClinic = () => {
     </div>
   );
 };
-
+ 
 export default AddClinic;

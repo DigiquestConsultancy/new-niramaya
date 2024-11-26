@@ -560,7 +560,7 @@ const ClinicBookedAppointment = () => {
             `/patient/patient/?patient_id=${details.patient_id}&appointment_id=${appointment_id}`
           );
 
-          const checkupPromise = BaseUrl.get(`/patient/patientcheckup/`, {
+          const checkupPromise = BaseUrl.get(`/patient/vital/`, {
             params: { appointment_id: appointment_id },
           });
 
@@ -1205,15 +1205,12 @@ const ClinicBookedAppointment = () => {
         if (selectedAppointment) {
           const appointment_date = selectedAppointment.appointment_date;
 
-          const fetchDataResponse = await BaseUrl.get(
-            `/patient/patientcheckup/`,
-            {
-              params: {
-                appointment_id: appointment_id,
-                appointment_date: appointment_date,
-              },
-            }
-          );
+          const fetchDataResponse = await BaseUrl.get(`/patient/vital/`, {
+            params: {
+              appointment_id: appointment_id,
+              appointment_date: appointment_date,
+            },
+          });
 
           if (
             fetchDataResponse.status === 200 &&
@@ -1274,7 +1271,7 @@ const ClinicBookedAppointment = () => {
       const appointment_date = selectedAppointment.appointment_date;
 
       // Make the POST API call to submit vitals
-      const postResponse = await BaseUrl.post("/patient/patientcheckup/", {
+      const postResponse = await BaseUrl.post("/patient/vital/", {
         patient_id: patient_id,
         appointment_id: expandedAppointmentId,
         record_date: appointment_date,
@@ -1353,7 +1350,7 @@ const ClinicBookedAppointment = () => {
       };
 
       // Make the PUT API call to update the vitals
-      const response = await BaseUrl.put(`/patient/patientcheckup/`, payload);
+      const response = await BaseUrl.put(`/patient/vital/`, payload);
 
       if (response.status === 200) {
         // Use the backend message if available, otherwise provide a default message
@@ -1824,10 +1821,14 @@ const ClinicBookedAppointment = () => {
   };
   const handleSearchChange = (e) => {
     const { name, value } = e.target;
+
     setSearchParams((prevParams) => ({
       ...prevParams,
       [name]: value,
     }));
+
+    // Automatically trigger search after each change
+    handleSearch();
   };
 
   // Function to reset the page to default content
@@ -1852,7 +1853,6 @@ const ClinicBookedAppointment = () => {
     return () => clearTimeout(delayDebounceFn); // Cleanup the timeout
   }, [searchParams.booked_by]); // Only run the effect when searchParams.booked_by changes
 
-  // Function to handle search API call
   const handleSearch = async () => {
     setIsSearching(true); // Optional: Set loading state
     try {
@@ -1862,10 +1862,29 @@ const ClinicBookedAppointment = () => {
           query: searchParams.booked_by,
         },
       });
-      // Handle the response data
-      console.log(response.data);
+
+      const fetchedAppointments = response.data.map((appointment) => ({
+        appointment_id: appointment.appointment_id,
+        appointment_date: appointment.appointment_date,
+        appointment_slot: appointment.appointment_slot,
+        doctor_name: appointment.doctor_name,
+        booked_by: appointment.booked_by,
+        mobile_number: appointment.mobile_number,
+        patient_id: appointment.patient_id,
+        is_patient: appointment.is_patient,
+        status: appointment.is_canceled
+          ? "Canceled"
+          : appointment.is_complete
+            ? "Completed"
+            : "Upcoming",
+      }));
+
+      setAppointments(fetchedAppointments);
+      setErrorMessage(""); // Clear error message if appointments are found
     } catch (error) {
       console.error("Error fetching search results:", error);
+      setErrorMessage("No appointments found");
+      setAppointments([]); // Clear appointments list if an error occurs
     } finally {
       setIsSearching(false); // Optional: Remove loading state
     }
@@ -1931,15 +1950,10 @@ const ClinicBookedAppointment = () => {
                   name="booked_by"
                   value={searchParams.booked_by}
                   onChange={handleSearchChange}
-                  placeholder="Date/Time Slot/Doctor/Booked By/Mobile Number"
-                  style={{
-                    border: "2px solid #007bff",
-                    borderTopLeftRadius: "5px",
-                    borderBottomLeftRadius: "5px",
-                    height: "38px",
-                    flex: 1,
-                    marginRight: "-1px",
-                  }}
+                  placeholder={`Search by ${
+                    searchParams.criteria ||
+                    "Date/Time Slot/Doctor/Booked By/Mobile Number"
+                  }`}
                 />
                 <Button
                   onClick={handleSearch}
@@ -2069,6 +2083,14 @@ const ClinicBookedAppointment = () => {
                     color: "#003366", // Text color
                   }}
                 >
+                  Status
+                </th>
+                <th
+                  style={{
+                    background: "#D7EAF0",
+                    color: "#003366", // Text color
+                  }}
+                >
                   Mobile Number
                 </th>
                 <th
@@ -2090,6 +2112,7 @@ const ClinicBookedAppointment = () => {
                     <td>{appointment.appointment_slot}</td>
                     <td>{appointment.doctor_name}</td>
                     <td>{appointment.booked_by}</td>
+                    <td>{appointment.status}</td>
                     <td>{appointment.mobile_number}</td>
                     <td>
                       {/* <FaEdit
@@ -2296,27 +2319,31 @@ const ClinicBookedAppointment = () => {
                                   >
                                     <Form.Label
                                       style={{
-                                        color: "#003366", // Text color (adjusted to match other fields)
-                                        fontFamily: "Sans-Serif", // Font family
-                                        fontSize: "25px", // Font size
-                                        fontWeight: 600, // Bold font weight
-                                        lineHeight: "29.3px", // Line height for proper spacing
-                                        textAlign: "left", // Align text to the left
-                                        width: "100%", // Ensure the label takes full width
+                                        color: "#003366",
+                                        fontFamily: "Sans-Serif",
+                                        fontSize: "25px",
+                                        fontWeight: 600,
+                                        lineHeight: "29.3px",
+                                        textAlign: "left",
+                                        width: "100%",
                                       }}
                                     >
                                       Gender
                                     </Form.Label>
 
-                                    <Form.Control
-                                      type="text"
+                                    <Form.Select
                                       name="gender"
                                       value={formDetails.gender || ""}
                                       onChange={handleInputChange}
                                       style={{
-                                        textAlign: "left", // Ensure the input text is left-aligned
+                                        textAlign: "left",
                                       }}
-                                    />
+                                    >
+                                      <option value="">Select Gender</option>
+                                      <option value="male">Male</option>
+                                      <option value="female">Female</option>
+                                      <option value="others">Others</option>
+                                    </Form.Select>
                                   </Form.Group>
                                 </Col>
                                 <Col sm={6} md={4}>

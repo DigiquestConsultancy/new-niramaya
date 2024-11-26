@@ -332,9 +332,6 @@
 
 
 
-
-
-
 import React, { useState, useEffect, useCallback } from "react";
 import BaseUrl from "../../api/BaseUrl";
 import { useHistory } from "react-router-dom";
@@ -407,9 +404,6 @@ const MyClinicDetails = () => {
   const [detailsExist, setDetailsExist] = useState(false);
   const [loading, setLoading] = useState(false);
   const [profilePicPreview, setProfilePicPreview] = useState("");
- 
- 
- 
  
   const fetchClinicDetail = useCallback(async () => {
     setLoading(true);
@@ -700,5 +694,3 @@ const MyClinicDetails = () => {
 };
  
 export default MyClinicDetails;
- 
- 

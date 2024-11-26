@@ -1,4 +1,3 @@
-
 // import React, { useState, useEffect, useCallback } from "react";
 // import "react-datepicker/dist/react-datepicker.css";
 // import { format, parse } from "date-fns";
@@ -9,7 +8,7 @@
 // import { Modal, Button, Form } from "react-bootstrap";
 // import Loader from "react-js-loader";
 // import styled from "styled-components";
-// import Select from 'react-select';
+// import Select from "react-select";
 
 // const LoaderWrapper = styled.div`
 //   display: flex;
@@ -50,6 +49,7 @@
 //   const [currentDateIndex, setCurrentDateIndex] = useState(0);
 //   const [slots, setSlots] = useState([]);
 //   const [allSlots, setAllSlots] = useState([]);
+//   // const today = new Date().toISOString().split('T')[0];
 //   const dateRangeSize = 2;
 //   const [selectedDate, setSelectedDate] = useState("");
 //   const [doctorId, setDoctorId] = useState("");
@@ -63,7 +63,6 @@
 //     endTime: "",
 //   });
 //   const [unblockSlotData, setUnblockSlotData] = useState({
-
 //     startDate: "",
 //     endDate: "",
 //     startTime: "",
@@ -72,7 +71,6 @@
 
 //   const [currentPage, setCurrentPage] = useState(1);
 //   const slotsPerPage = 18;
-
 
 //   const totalPages = Math.ceil(slots.length / slotsPerPage);
 //   const startIdx = (currentPage - 1) * slotsPerPage;
@@ -272,7 +270,7 @@
 //       setErrorMessage("Error adding slot: " + error.message);
 //       setSuccessMessage("");
 //     } finally {
-//       setLoading(false);
+//       setLoading(false); // Stop loading after fetch
 //     }
 //   };
 
@@ -396,10 +394,11 @@
 //         error.response.data.error || "An error occurred while blocking slot."
 //       );
 //     } finally {
-//       setLoading(false); 
+//       setLoading(false); // Stop loading after fetch
 //     }
 //   };
 
+//   // New function for handling unblock slot
 //   const handleUnblockSlot = () => {
 //     setShowUnblockSlotModal(true);
 //   };
@@ -407,15 +406,6 @@
 //   const handleUnblockSlotClose = () => {
 //     setShowUnblockSlotModal(false);
 //   };
-
-//   const today = new Date().toISOString().split("T")[0];
-
-//   const currentTime = new Date().toLocaleTimeString("en-GB", {
-//     hour: "2-digit",
-//     minute: "2-digit",
-//   });
-
-//   const isTodaySelected = formData.start_date === today;
 
 //   const handleUnblockSlotSubmit = async (event) => {
 //     setLoading(true);
@@ -434,7 +424,7 @@
 //         setShowUnblockSlotModal(false);
 //         fetchAllAppointmentSlots();
 //         fetchSlots(doctorId);
-//         setSuccessMessage(response.data.success); 
+//         setSuccessMessage(response.data.success); // Set success message from response
 //       } else {
 //         setErrorMessage("Error unblocking slot.");
 //       }
@@ -444,7 +434,7 @@
 //         error.response.data.error || "An error occurred while unblocking slot."
 //       );
 //     } finally {
-//       setLoading(false);
+//       setLoading(false); // Stop loading after fetch
 //     }
 //   };
 
@@ -457,6 +447,30 @@
 //         slot.appointment_slot <= blockedSlot.endTime
 //     );
 //   };
+
+//   // const fetchAllAppointmentSlots = async () => {
+//   //   setLoading(true);
+//   //   try {
+//   //     const response = await BaseUrl.get(`/doctorappointment/todayafterslot/`, {
+//   //       params: { doctor_id: doctorId },
+//   //     });
+
+//   //     if (response.status === 200) {
+//   //       setAppointmentSlots(response.data || []);
+//   //       setErrorMessage("");
+//   //     } else {
+//   //       setErrorMessage("Error fetching all appointment slots.");
+//   //     }
+//   //   } catch (error) {
+//   //     console.error("Error fetching all appointment slots:", error);
+//   //     setErrorMessage(
+//   //       error.response.data.error ||
+//   //         "An error occurred while fetching appointment slots."
+//   //     );
+//   //   } finally {
+//   //     setLoading(false); // Stop loading after fetch
+//   //   }
+//   // };
 
 //   const fetchAllAppointmentSlots = async () => {
 //     try {
@@ -474,24 +488,34 @@
 //       console.error("Error fetching all appointment slots:", error);
 //       setErrorMessage(
 //         error.response.data.error ||
-//         "An error occurred while fetching appointment slots."
+//           "An error occurred while fetching appointment slots."
 //       );
 //     }
 //   };
 //   const dayOptions = [
-//     { label: 'Monday', value: 0 },
-//     { label: 'Tuesday', value: 1 },
-//     { label: 'Wednesday', value: 2 },
-//     { label: 'Thursday', value: 3 },
-//     { label: 'Friday', value: 4 },
-//     { label: 'Saturday', value: 5 },
-//     { label: 'Sunday', value: 6 },
+//     { label: "Monday", value: 0 },
+//     { label: "Tuesday", value: 1 },
+//     { label: "Wednesday", value: 2 },
+//     { label: "Thursday", value: 3 },
+//     { label: "Friday", value: 4 },
+//     { label: "Saturday", value: 5 },
+//     { label: "Sunday", value: 6 },
 //   ];
 //   const handleLeaveDaysChange = (selectedOptions) => {
 //     const selectedDays = selectedOptions.map((option) => option.value);
 //     setFormData({ ...formData, leave_days: selectedDays });
 //   };
 
+//   const today = new Date().toISOString().split("T")[0];
+
+//   // Get current time in "HH:MM" format
+//   const currentTime = new Date().toLocaleTimeString("en-GB", {
+//     hour: "2-digit",
+//     minute: "2-digit",
+//   });
+
+//   // Check if the selected date is today
+//   const isTodaySelected = formData.start_date === today;
 
 //   return (
 //     <div
@@ -544,67 +568,72 @@
 //             </div>
 
 //             <div className="form-group col-md-4">
-//             <label>Start Date</label>
-//             <input
-//               type="date"
-//               className="form-control"
-//               name="start_date"
-//               value={formData.start_date}
-//               onChange={handleChange}
-//               min={today} 
-//               required
-//             />
-//           </div>
-//           <div className="form-group col-md-4">
-//             <label>End Date</label>
-//             <input
-//               type="date"
-//               className="form-control"
-//               name="end_date"
-//               value={formData.end_date}
-//               onChange={handleChange}
-//               min={formData.start_date || today}  
-//               required
-//             />
-//           </div>
-
-//         <div className="col-md-4">
-//         <label>Leave Days</label>
-//         <Select
-//           isMulti
-//           closeMenuOnSelect={false}
-//           hideSelectedOptions={false}
-//           options={dayOptions}
-//           value={dayOptions.filter((option) => formData.leave_days.includes(option.value))}
-//           onChange={handleLeaveDaysChange}
-//         />
-//       </div>
+//               <label>Start Date</label>
+//               <input
+//                 type="date"
+//                 className="form-control"
+//                 name="start_date"
+//                 value={formData.start_date}
+//                 onChange={handleChange}
+//                 min={today} // Disable past dates
+//                 required
+//               />
+//             </div>
+//             <div className="form-group col-md-4">
+//               <label>End Date</label>
+//               <input
+//                 type="date"
+//                 className="form-control"
+//                 name="end_date"
+//                 value={formData.end_date}
+//                 onChange={handleChange}
+//                 min={formData.start_date || today} // Disable dates before the start date
+//                 required
+//               />
+//             </div>
+//             <div className="col-md-4">
+//               <label>Leave Days</label>
+//               <Select
+//                 isMulti
+//                 closeMenuOnSelect={false}
+//                 hideSelectedOptions={false}
+//                 options={dayOptions}
+//                 value={dayOptions.filter((option) =>
+//                   formData.leave_days.includes(option.value)
+//                 )}
+//                 onChange={handleLeaveDaysChange}
+//               />
+//             </div>
 //           </div>
 //           <div className="form-row mb-3">
-//           <div className="form-group col-md-4">
-//             <label>Start Time</label>
-//             <input
-//               type="time"
-//               className="form-control"
-//               name="start_time"
-//               value={formData.start_time}
-//               onChange={handleChange}
-//               min={isTodaySelected ? currentTime : ""}  
-//               required
-//             />
-//           </div>
-//           <div className="form-group col-md-4">
-//             <label>End Time</label>
-//             <input
-//               type="time"
-//               className="form-control"
-//               name="end_time"
-//               value={formData.end_time}
-//               onChange={handleChange}
-//               min={isTodaySelected && formData.start_time ? formData.start_time : ""} 
-//               required
-//             />
-//           </div>
+//             <div className="form-group col-md-4">
+//               <label>Start Time</label>
+//               <input
+//                 type="time"
+//                 className="form-control"
+//                 name="start_time"
+//                 value={formData.start_time}
+//                 onChange={handleChange}
+//                 min={isTodaySelected ? currentTime : ""} // Disable past time if today
+//                 required
+//               />
+//             </div>
+//             <div className="form-group col-md-4">
+//               <label>End Time</label>
+//               <input
+//                 type="time"
+//                 className="form-control"
+//                 name="end_time"
+//                 value={formData.end_time}
+//                 onChange={handleChange}
+//                 min={
+//                   isTodaySelected && formData.start_time
+//                     ? formData.start_time
+//                     : ""
+//                 } // Disable past time if today and after start time
+//                 required
+//               />
+//             </div>
 //             <div className="form-group col-md-4">
 //               <label>Interval (Minutes)</label>
 //               <select
@@ -690,13 +719,13 @@
 //           justify-content: center;
 //           margin-top: 10px;
 //         }
-
+ 
 //         .legend > div {
 //           display: flex;
 //           align-items: center;
 //           margin-right: 20px;
 //         }
-
+ 
 //         .legend-dot {
 //           display: inline-block;
 //           width: 10px;
@@ -704,7 +733,7 @@
 //           border-radius: 50%;
 //           margin-right: 5px;
 //         }
-
+ 
 //         .legend-text {
 //           font-size: 14px;
 //         }
@@ -864,6 +893,7 @@
 //             ))}
 //         </div>
 
+//         {/* Pagination Controls */}
 //         <div className="d-flex justify-content-center mt-3 align-items-center">
 //           <Button
 //             variant="outline-secondary"
@@ -874,6 +904,7 @@
 //             &larr;
 //           </Button>
 
+//           {/* Display current page and total pages */}
 //           <span style={{ margin: "0 15px" }}>
 //             Page {currentPage} of {totalPages}
 //           </span>
@@ -958,6 +989,7 @@
 //         </Modal.Body>
 //       </Modal>
 
+//       {/* Unblock Slot Modal */}
 //       <Modal show={showUnblockSlotModal} onHide={handleUnblockSlotClose}>
 //         <Modal.Header closeButton>
 //           <Modal.Title>Unblock Slot</Modal.Title>
@@ -1037,9 +1069,6 @@
 
 
 
-
-
-
 import React, { useState, useEffect, useCallback } from "react";
 import "react-datepicker/dist/react-datepicker.css";
 import { format, parse } from "date-fns";
@@ -1051,7 +1080,7 @@ import { Modal, Button, Form } from "react-bootstrap";
 import Loader from "react-js-loader";
 import styled from "styled-components";
 import Select from "react-select";
-
+ 
 const LoaderWrapper = styled.div`
   display: flex;
   justify-content: center;
@@ -1065,11 +1094,11 @@ const LoaderWrapper = styled.div`
   z-index: 9999;
   font-family: sans-serif;
 `;
-
+ 
 const LoaderImage = styled.div`
   width: 400px;
 `;
-
+ 
 const ClinicAddSlot = () => {
   const [formData, setFormData] = useState({
     start_date: "",
@@ -1080,7 +1109,7 @@ const ClinicAddSlot = () => {
     leave_days: [],
     doctor_id: "",
   });
-
+ 
   const [successMessage, setSuccessMessage] = useState("");
   const [appointmentSlots, setAppointmentSlots] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
@@ -1094,7 +1123,7 @@ const ClinicAddSlot = () => {
   const dateRangeSize = 2;
   const [selectedDate, setSelectedDate] = useState("");
   const [doctorId, setDoctorId] = useState("");
-
+ 
   const [showBlockSlotModal, setShowBlockSlotModal] = useState(false);
   const [showUnblockSlotModal, setShowUnblockSlotModal] = useState(false);
   const [blockSlotData, setBlockSlotData] = useState({
@@ -1109,22 +1138,22 @@ const ClinicAddSlot = () => {
     startTime: "",
     endTime: "",
   });
-
+ 
   const [currentPage, setCurrentPage] = useState(1);
   const slotsPerPage = 18;
   // const totalPages = Math.ceil(slots.length / slotsPerPage);
   const startIdx = (currentPage - 1) * slotsPerPage;
   const endIdx = startIdx + slotsPerPage;
   // const currentSlots = slots.slice(startIdx, endIdx);
-
+ 
   const handlePreviousPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
-
+ 
   const handleNextPage = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
-
+ 
   useEffect(() => {
     const storeUserIdInLocalStorage = () => {
       const token = localStorage.getItem("token");
@@ -1139,7 +1168,7 @@ const ClinicAddSlot = () => {
     storeUserIdInLocalStorage();
     fetchTodayAppointmentSlots();
   }, []);
-
+ 
   const fetchTodayAppointmentSlots = async () => {
     setLoading(true);
     try {
@@ -1147,7 +1176,7 @@ const ClinicAddSlot = () => {
       const response = await BaseUrl.get("/doctorappointment/todayslot/", {
         params: { doctor_id: doctor_id },
       });
-
+ 
       if (response.status === 200) {
         if (response.data.length === 0) {
           setErrorMessage("");
@@ -1165,9 +1194,9 @@ const ClinicAddSlot = () => {
       setLoading(false);
     }
   };
-
+ 
   const [blockedSlots, setBlockedSlots] = useState([]);
-
+ 
   const fetchSlots = useCallback(
     debounce(async (doctorId, slotDate = null) => {
       setLoading(true);
@@ -1179,7 +1208,7 @@ const ClinicAddSlot = () => {
         const response = await BaseUrl.get("/doctorappointment/slot/", {
           params,
         });
-
+ 
         if (response.status === 200) {
           setSlots(response.data);
           if (response.data.length === 0) {
@@ -1201,7 +1230,7 @@ const ClinicAddSlot = () => {
     }, 300),
     []
   );
-
+ 
   const fetchAllSlots = useCallback(
     debounce(async (doctorId) => {
       setLoading(true);
@@ -1224,7 +1253,7 @@ const ClinicAddSlot = () => {
     }, 300),
     []
   );
-
+ 
   useEffect(() => {
     const fetchDoctor = async (clinicId) => {
       setLoading(true);
@@ -1243,7 +1272,7 @@ const ClinicAddSlot = () => {
         setLoading(false);
       }
     };
-
+ 
     const token = localStorage.getItem("token");
     if (token) {
       try {
@@ -1258,7 +1287,7 @@ const ClinicAddSlot = () => {
       }
     }
   }, []);
-
+ 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -1266,12 +1295,12 @@ const ClinicAddSlot = () => {
       [name]: value,
     });
   };
-
+ 
   const handleDoctorChange = (e) => {
     setSelectedDoctor(e.target.value);
     fetchSlots(e.target.value);
   };
-
+ 
   const handleSubmit = async (e) => {
     setLoading(true);
     e.preventDefault();
@@ -1294,7 +1323,7 @@ const ClinicAddSlot = () => {
       setLoading(false);
     }
   };
-
+ 
   const generateIntervalMinutesOptions = () => {
     const options = [];
     for (let i = 5; i <= 60; i += 5) {
@@ -1306,7 +1335,7 @@ const ClinicAddSlot = () => {
     }
     return options;
   };
-
+ 
   const generateDates = useCallback(() => {
     const today = new Date();
     const datesArray = [];
@@ -1323,13 +1352,13 @@ const ClinicAddSlot = () => {
       format(parse(datesArray[0], "dd/MM/yyyy", new Date()), "yyyy-MM-dd")
     );
   }, [selectedDoctor, fetchSlots]);
-
+ 
   useEffect(() => {
     if (selectedDoctor) {
       generateDates();
     }
   }, [selectedDoctor, generateDates]);
-
+ 
   const groupSlotsByDate = (slots) => {
     return slots.reduce((acc, slot) => {
       const date = slot.appointment_date;
@@ -1340,17 +1369,17 @@ const ClinicAddSlot = () => {
       return acc;
     }, {});
   };
-
+ 
   const groupedSlots = groupSlotsByDate(allSlots);
-
+ 
   const handleBlockSlot = () => {
     setShowBlockSlotModal(true);
   };
-
+ 
   const handleBlockSlotClose = () => {
     setShowBlockSlotModal(false);
   };
-
+ 
   const handleBlockSlotSubmit = async (event) => {
     setLoading(true);
     event.preventDefault();
@@ -1362,7 +1391,7 @@ const ClinicAddSlot = () => {
         end_time: blockSlotData.endTime,
         doctor_id: doctorId,
       });
-
+ 
       if (response.status === 200) {
         setShowBlockSlotModal(false);
         fetchAllAppointmentSlots();
@@ -1379,15 +1408,15 @@ const ClinicAddSlot = () => {
       setLoading(false);
     }
   };
-
+ 
   const handleUnblockSlot = () => {
     setShowUnblockSlotModal(true);
   };
-
+ 
   const handleUnblockSlotClose = () => {
     setShowUnblockSlotModal(false);
   };
-
+ 
   const handleUnblockSlotSubmit = async (event) => {
     setLoading(true);
     event.preventDefault();
@@ -1413,7 +1442,7 @@ const ClinicAddSlot = () => {
       setLoading(false);
     }
   };
-
+ 
   const isSlotBlocked = (slot) => {
     return blockedSlots.some(
       (blockedSlot) =>
@@ -1423,7 +1452,7 @@ const ClinicAddSlot = () => {
         slot.appointment_slot <= blockedSlot.endTime
     );
   };
-
+ 
   const fetchAllAppointmentSlots = async () => {
     try {
       const response = await BaseUrl.get(`/doctorappointment/todayafterslot/`, {
@@ -1439,7 +1468,7 @@ const ClinicAddSlot = () => {
       setErrorMessage(error.response.data.error);
     }
   };
-
+ 
   const dayOptions = [
     { label: "Monday", value: 0 },
     { label: "Tuesday", value: 1 },
@@ -1449,23 +1478,23 @@ const ClinicAddSlot = () => {
     { label: "Saturday", value: 5 },
     { label: "Sunday", value: 6 },
   ];
-
+ 
   const handleLeaveDaysChange = (selectedOptions) => {
     const selectedDays = selectedOptions.map((option) => option.value);
     setFormData({ ...formData, leave_days: selectedDays });
   };
-
+ 
   const today = new Date().toISOString().split("T")[0];
-
+ 
   const currentTime = new Date().toLocaleTimeString("en-GB", {
     hour: "2-digit",
     minute: "2-digit",
   });
-
+ 
   const isTodaySelected = formData.start_date === today;
-
+ 
   const [isViewAll, setIsViewAll] = useState(false);
-
+ 
   const handleViewAllSlots = () => {
     if (selectedDoctor) {
       fetchAllSlots(selectedDoctor);
@@ -1476,7 +1505,7 @@ const ClinicAddSlot = () => {
       setErrorMessage("Please select a doctor to view all slots.");
     }
   };
-
+ 
   const handleDateRangeChange = (direction) => {
     if (direction === "prev" && currentDateIndex > 0) {
       setCurrentDateIndex(currentDateIndex - 1);
@@ -1498,10 +1527,10 @@ const ClinicAddSlot = () => {
     }
     setIsViewAll(false); // Disable "View All" mode when navigating dates
   };
-
+ 
   const totalPages = Math.ceil(slots.length / slotsPerPage); // Calculate pages dynamically
   const currentSlots = slots.slice(startIdx, endIdx);
-
+ 
   return (
     <div
       className="container-fluid mt-5"
@@ -1523,7 +1552,7 @@ const ClinicAddSlot = () => {
           </LoaderImage>
         </LoaderWrapper>
       )}
-
+ 
       {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
       {successMessage && (
         <div className="alert alert-success">{successMessage}</div>
@@ -1551,7 +1580,7 @@ const ClinicAddSlot = () => {
                 )}
               </select>
             </div>
-
+ 
             <div className="form-group col-md-4">
               <label>Start Date</label>
               <input
@@ -1629,7 +1658,7 @@ const ClinicAddSlot = () => {
               </select>
             </div>
           </div>
-
+ 
           <button
             type="submit"
             className="btn me-2"
@@ -1637,7 +1666,7 @@ const ClinicAddSlot = () => {
           >
             Add Slot
           </button>
-
+ 
           <button
             type="button"
             className="btn me-2"
@@ -1646,7 +1675,7 @@ const ClinicAddSlot = () => {
           >
             Block Slot
           </button>
-
+ 
           <button
             type="button"
             className="btn"
@@ -1657,7 +1686,7 @@ const ClinicAddSlot = () => {
           </button>
         </form>
       )}
-
+ 
       <div className="date-list mt-3 d-flex flex-wrap justify-content-center">
         <button
           className="btn btn-secondary mr-2 mb-2"
@@ -1695,7 +1724,7 @@ const ClinicAddSlot = () => {
           View All Slots
         </button>
       </div>
-
+ 
       <style>{`
         .legend {
           display: flex;
@@ -1752,7 +1781,7 @@ const ClinicAddSlot = () => {
         </div>
       </div>
       <div>
-
+ 
         <div className="row mt-5">
           {selectedDate &&
             currentSlots.map((slot, index) => (
@@ -1860,7 +1889,7 @@ const ClinicAddSlot = () => {
               </div>
             ))}
         </div>
-
+ 
         {/* Conditionally Render Pagination */}
         {!isViewAll && (
           <div className="d-flex justify-content-center mt-3 align-items-center">
@@ -1872,11 +1901,11 @@ const ClinicAddSlot = () => {
             >
               &larr;
             </Button>
-
+ 
             <span style={{ margin: "0 15px" }}>
               Page {currentPage} of {totalPages}
             </span>
-
+ 
             <Button
               variant="outline-secondary"
               onClick={handleNextPage}
@@ -1887,7 +1916,7 @@ const ClinicAddSlot = () => {
           </div>
         )}
       </div>
-
+ 
       <Modal show={showBlockSlotModal} onHide={handleBlockSlotClose}>
         <Modal.Header closeButton>
           <Modal.Title>Block Slot</Modal.Title>
@@ -1957,7 +1986,7 @@ const ClinicAddSlot = () => {
           </Form>
         </Modal.Body>
       </Modal>
-
+ 
       {/* Unblock Slot Modal */}
       <Modal show={showUnblockSlotModal} onHide={handleUnblockSlotClose}>
         <Modal.Header closeButton>
@@ -2031,5 +2060,5 @@ const ClinicAddSlot = () => {
     </div>
   );
 };
-
+ 
 export default ClinicAddSlot;

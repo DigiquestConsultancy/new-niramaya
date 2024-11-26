@@ -881,13 +881,13 @@ const DoctorDetails = () => {
       const decodedToken = jwtDecode(token);
       const doctor_id = decodedToken.doctor_id;
 
-      if (!doctor_id || !opdId) {
-        setErrorMessage("Doctor ID or OPD ID is missing.");
-        setModalType("error");
-        setShowModal(true);
-        setLoadingTimings(false);
-        return;
-      }
+      // if (!doctor_id || !opdId) {
+      //   setErrorMessage("Doctor ID or OPD ID is missing.");
+      //   setModalType("error");
+      //   setShowModal(true);
+      //   setLoadingTimings(false);
+      //   return;
+      // }
 
       const promises = opdData.opd_timings.map(async (timing, index) => {
         const formData = new FormData();

@@ -50,6 +50,7 @@ const ReceptionAddSlot = () => {
   const [currentDateIndex, setCurrentDateIndex] = useState(0);
   const [slots, setSlots] = useState([]);
   const [allSlots, setAllSlots] = useState([]);
+  // const today = new Date().toISOString().split('T')[0];
   const dateRangeSize = 2;
   const [selectedDate, setSelectedDate] = useState("");
   const [showBlockSlotModal, setShowBlockSlotModal] = useState(false);
@@ -443,7 +444,6 @@ const ReceptionAddSlot = () => {
       );
     }
   };
-  
   const dayOptions = [
     { label: "Monday", value: 0 },
     { label: "Tuesday", value: 1 },
@@ -453,14 +453,13 @@ const ReceptionAddSlot = () => {
     { label: "Saturday", value: 5 },
     { label: "Sunday", value: 6 },
   ];
-
   const handleLeaveDaysChange = (selectedOptions) => {
     const selectedDays = selectedOptions.map((option) => option.value);
     setFormData({ ...formData, leave_days: selectedDays });
   };
 
   const today = new Date().toISOString().split("T")[0];
-  
+
   // Get current time in "HH:MM" format
   const currentTime = new Date().toLocaleTimeString("en-GB", {
     hour: "2-digit",
@@ -469,7 +468,6 @@ const ReceptionAddSlot = () => {
 
   // Check if the selected date is today
   const isTodaySelected = formData.start_date === today;
-
 
   return (
     <div
@@ -528,7 +526,7 @@ const ReceptionAddSlot = () => {
               name="start_date"
               value={formData.start_date}
               onChange={handleChange}
-              min={today}  // Disable past dates
+              min={today} // Disable past dates
               required
             />
           </div>
@@ -540,7 +538,7 @@ const ReceptionAddSlot = () => {
               name="end_date"
               value={formData.end_date}
               onChange={handleChange}
-              min={formData.start_date || today}  // Disable dates before the start date
+              min={formData.start_date || today} // Disable dates before the start date
               required
             />
           </div>
@@ -560,7 +558,7 @@ const ReceptionAddSlot = () => {
           </div>
         </div>
         <div className="form-row mb-3">
-        <div className="form-group col-md-4">
+          <div className="form-group col-md-4">
             <label>Start Time</label>
             <input
               type="time"
@@ -568,7 +566,7 @@ const ReceptionAddSlot = () => {
               name="start_time"
               value={formData.start_time}
               onChange={handleChange}
-              min={isTodaySelected ? currentTime : ""}  // Disable past time if today
+              min={isTodaySelected ? currentTime : ""} // Disable past time if today
               required
             />
           </div>
@@ -580,7 +578,11 @@ const ReceptionAddSlot = () => {
               name="end_time"
               value={formData.end_time}
               onChange={handleChange}
-              min={isTodaySelected && formData.start_time ? formData.start_time : ""}  // Disable past time if today and after start time
+              min={
+                isTodaySelected && formData.start_time
+                  ? formData.start_time
+                  : ""
+              } // Disable past time if today and after start time
               required
             />
           </div>

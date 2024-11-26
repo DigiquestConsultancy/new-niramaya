@@ -86,6 +86,20 @@ const PatientNavbar = ({ isLoggedIn }) => {
                 <b>Book Appointments</b>
               </Link>
             </li>
+            <li className="nav-item">
+              <Link
+                className="nav-link"
+                to="/patient/bookappointment"
+                style={{
+                  border: "none",
+                  background: "none",
+                  padding: 0,
+                  color: "#f18dc",
+                }}
+              >
+                <b>Find Doctors</b>
+              </Link>
+            </li>
           </ul>
           <ul className="navbar-nav ml-auto">
             {isLoggedIn && (
@@ -130,13 +144,6 @@ const PatientNavbar = ({ isLoggedIn }) => {
                     onClick={toggleDropdown}
                   >
                     Medical Record
-                  </Link>
-                  <Link
-                    className="dropdown-item"
-                    to="/patient/transaction"
-                    onClick={toggleDropdown}
-                  >
-                    Tansaction History
                   </Link>
                 </div>
               </li>
