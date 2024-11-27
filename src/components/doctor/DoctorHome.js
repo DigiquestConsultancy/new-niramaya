@@ -3354,6 +3354,16 @@
 
 // export default DoctorHome;
 
+
+
+
+
+
+
+
+
+
+
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import BaseUrl from "../../api/BaseUrl";
 import {
@@ -3463,7 +3473,7 @@ const DoctorHome = () => {
   const [error, setError] = useState(null);
   const [editingDocumentId, setEditingDocumentId] = useState(null);
   const [whatsappReport, setWhatsappReport] = useState([]);
-
+  const [selectedImage, setSelectedImage] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
 
@@ -5759,13 +5769,6 @@ const DoctorHome = () => {
           </div>
         ))}
 
-        <h3
-          className="text-center"
-          style={{ fontWeight: "bold", textDecoration: "underline" }}
-        >
-          Whatsapp Report
-        </h3>
-
         <div className="d-flex flex-wrap justify-content-start">
           {visibleReports.map((report) => (
             <div key={report.id} className="p-3">
@@ -5781,7 +5784,11 @@ const DoctorHome = () => {
                     height: "200px", // Increased height
                     width: "100%", // Full width
                     borderRadius: "5px",
+                    cursor: "pointer"
                   }}
+                  onClick={() =>
+                    setSelectedImage(report.report_file)
+                  }
                 />
 
                 {/* Display Date on the Image */}
@@ -5836,6 +5843,32 @@ const DoctorHome = () => {
             </Button>
           </div>
         )}
+
+<Modal
+                                  show={!!selectedImage}
+                                  onHide={() => setSelectedImage(null)}
+                                  centered
+                                >
+                                  <Modal.Body style={{ padding: 0 }}>
+                                    <img
+                                      src={selectedImage}
+                                      alt="Selected Medical Record"
+                                      style={{
+                                        width: "100%",
+                                        borderRadius: "5px",
+                                      }}
+                                    />
+                                  </Modal.Body>
+                                  <Modal.Footer>
+                                    <Button
+                                      variant="secondary"
+                                      onClick={() => setSelectedImage(null)}
+                                    >
+                                      Close
+                                    </Button>
+                                  </Modal.Footer>
+                                </Modal>
+
       </div>
     );
   };
@@ -6485,19 +6518,12 @@ const DoctorHome = () => {
     return displayedAppointments.map((appointment, index) => (
       <Col key={index}>
         <Card
-          className={`mb-4 shadow-sm reception-card ${selectedAppointment && selectedAppointment.appointment_id === appointment.appointment_id ? "selected-slot" : ""}`}
+          className={`mb-4 shadow-sm ${selectedAppointment && selectedAppointment.appointment_id === appointment.appointment_id ? "selected-slot" : ""}`}
           onClick={() => handleAppointmentClick(appointment, "today")}
           style={{
-            border:
-              selectedAppointment &&
-              selectedAppointment.appointment_id === appointment.appointment_id
-                ? "2px solid #3795BD"
-                : "none",
+            border: selectedAppointment && selectedAppointment.appointment_id === appointment.appointment_id ? "2px solid #3795BD" : "none",
             cursor: "pointer",
-            backgroundColor:
-              appointment.appointment_type === "follow-up"
-                ? "#FB8369"
-                : "#2D9CED",
+            backgroundColor: appointment.appointment_type === "follow-up" ? "#FB8369" : "#2D9CED",
           }}
         >
           <Card.Body>
@@ -6508,9 +6534,10 @@ const DoctorHome = () => {
       </Col>
     ));
   };
+
   return (
     <div className="doctor-container" style={{ backgroundColor: "#D7EAF0" }}>
-      <header className="mb-2 mt-4 reception-header d-flex flex-column flex-md-row justify-content-between align-items-center text-center text-md-start">
+      <header className="mb-2 reception-header d-flex flex-column flex-md-row justify-content-between align-items-center text-center text-md-start">
         {clinicName && clinicPhoto && (
           <>
             <Col xs={12} md="auto">
@@ -6520,7 +6547,7 @@ const DoctorHome = () => {
                 alt="Clinic Logo"
               />
             </Col>
-            <Col xs={12} md="auto" className="flex-grow-1">
+            <Col xs={12} md="auto" className="flex-grow-1 mt-5 mb-5">
               <h1 className="text-center" style={{ color: "#0174BE" }}>
                 Welcome to {clinicName}
               </h1>
