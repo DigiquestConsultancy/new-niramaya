@@ -86,6 +86,20 @@ const PatientNavbar = ({ isLoggedIn }) => {
                 <b>Book Appointments</b>
               </Link>
             </li>
+            <li className="nav-item mr-3">
+              <Link
+                className="nav-link"
+                to="/patient/contact"
+                style={{
+                  border: "none",
+                  background: "none",
+                  padding: 0,
+                  color: "#f18dc",
+                }}
+              >
+                <b>Contact Us</b>
+              </Link>
+            </li>
           </ul>
           <ul className="navbar-nav ml-auto">
             {isLoggedIn && (

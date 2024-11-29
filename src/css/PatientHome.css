@@ -255,3 +255,18 @@
      flex-wrap: wrap;
      justify-content: center;
    }
+
+   .appointment-date-button {
+    gap: 10px;
+  }
+  
+  .appointment-date-button-container {
+    text-align: center;
+  }
+  
+  @media (max-width: 576px) {
+    .appointment-date-button {
+      padding: 5px;
+    }
+  }
+  

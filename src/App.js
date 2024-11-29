@@ -172,6 +172,8 @@ import ClinicBookedAppointment from './components/clinic/BookedAppointment';
 import MedicalRecords from './components/patient/MedicalRecords';
 import Transaction from './components/patient/Transaction';
 import PatientBook from './components/PatientBook';
+import ContactUs from './components/patient/ContactUs';
+import Footer from './components/MainFooter/Footer';
 
 function App() {
   const [isDoctorLoggedIn, setIsDoctorLoggedIn] = useState(false);
@@ -219,6 +221,7 @@ function App() {
               <Route exact path="/patient/details" component={PatientDetails} />
               <Route exact path="/patient/medicalrecords" component={MedicalRecords} />
               <Route exact path="/patient/transaction" component={Transaction} />
+              <Route exact path="/patient/contact" component={ContactUs} />
               <Route exact path="/doctor/details" component={DoctorDetails} />
               <Route exact path="/doctor/appointments" component={AppointmentSlot} />
               <Route exact path="/patient/slots" component={PatientSlot} />
@@ -244,9 +247,11 @@ function App() {
               <Route exact path="/reception/bookedappointment" component={ReceptionBookedAppointment} />
               <Route exact path="/" component={CardContainer} />
             </Switch>
+            {/* <Footer/> */}
           </div>
         </Route>
       </Switch>
+      
     </Router>
   );
 }
