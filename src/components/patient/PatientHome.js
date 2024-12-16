@@ -2575,6 +2575,23 @@
 
 // export default PatientHome;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ////Final code with 3 date buttons
 ////Final code with 3 date buttons
 ////Final code with 3 date buttons
@@ -5857,6 +5874,18 @@
 
 // export default PatientHome;
 
+
+
+
+
+
+
+
+
+
+
+
+
 import React, { useState, useEffect, useRef } from "react";
 import {
   Container,
@@ -5908,7 +5937,6 @@ const LoaderImage = styled.div`
 
 const PatientHome = () => {
   const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false);
-
   const [currentIndex, setCurrentIndex] = useState(0);
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [hoveredCard, setHoveredCard] = useState(null);
@@ -5923,7 +5951,7 @@ const PatientHome = () => {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const [selectedDoctor] = useState({ doctor: 2 });
+  const [selectedDoctor] = useState({ doctor: 59 });
   const [errorMessage, setErrorMessage] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [savedPatientId, setPatientId] = useState(null);
@@ -5950,8 +5978,21 @@ const PatientHome = () => {
   const slotSelectionRef = useRef(null);
   const [hoverMessage, setHoverMessage] = useState("");
   const [startIndex, setStartIndex] = useState(0);
-  const [selectedDate, setSelectedDate] = useState(null); // Track selected date
-  const [showCalendar, setShowCalendar] = useState(false); // State to toggle the calendar visibility
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [showCalendar, setShowCalendar] = useState(false); 
+  const calendarRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (calendarRef.current && !calendarRef.current.contains(event.target)) {
+        setShowCalendar(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const onClose = async () => {
     setIsModalOpen(false);
@@ -6042,7 +6083,7 @@ const PatientHome = () => {
   const getDateLabel = (date, index) => {
     const currentDate = new Date();
     const dateObj = new Date(date);
-
+  
     if (index === 0 && dateObj.toDateString() === currentDate.toDateString()) {
       return "Today";
     } else if (
@@ -6051,10 +6092,11 @@ const PatientHome = () => {
     ) {
       return "Tomorrow";
     } else {
-      // Otherwise, format the date as "Monday, Oct 16"
-      return format(dateObj, "EEEE, MMM d");
+      // Format the date as "Mon, Oct 16"
+      return format(dateObj, "EEE, MMM d");
     }
   };
+  
 
   const [morningSlotIndex, setMorningSlotIndex] = useState(0);
   const [afternoonSlotIndex, setAfternoonSlotIndex] = useState(0);
@@ -6294,10 +6336,6 @@ const PatientHome = () => {
     setLoading(true);
     try {
       const patientToken = localStorage.getItem("patient_token");
-      if (!patientToken) {
-        throw new Error("Patient token not found");
-      }
-
       const decodedToken = jwtDecode(patientToken);
       const patient_id = decodedToken?.patient_id;
 
@@ -6312,10 +6350,12 @@ const PatientHome = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            amount: "1000",
-            currency: "INR",
+            // amount: "1000",
+            // currency: "INR",
+            amount: consultationFee,
+            currency: currency,
             customer_name,
-            customer_phone,
+            // customer_phone,
             patient_id,
           }),
         }
@@ -6330,7 +6370,7 @@ const PatientHome = () => {
           const cashfree = await load({ mode: "sandbox" });
           await cashfree.checkout({
             paymentSessionId: payment_session_id,
-            returnUrl: "http://localhost:3000/patient/home",
+            returnUrl: "http://localhost:3001/patient/home",
           });
           localStorage.setItem("paymentSuccess", "true");
         } else {
@@ -6363,6 +6403,75 @@ const PatientHome = () => {
     }
   }, [isPaymentConfirmed]);
 
+  // const handleConfirmAppointment = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const slotId = localStorage.getItem("selectedSlotId");
+  //     const orderId = localStorage.getItem("order_id");
+  //     const selectedConsultationType = localStorage.getItem("consultationType");
+  //     const savedPatientId = localStorage.getItem("savedPatientId");
+
+  //     const paymentStatusResponse = await fetch(
+  //       `http://192.168.29.95:8001/payment/get/?order_id=${orderId}`
+  //     );
+  //     const paymentStatusData = await paymentStatusResponse.json();
+
+  //     if (paymentStatusData.status === "SUCCESS") {
+  //       try {
+  //         setLoading(true);
+  //         const postResponse = await BaseUrl.post(
+  //           "/patientappointment/bookslot/",
+  //           {
+  //             patient: savedPatientId,
+  //             doctor: selectedDoctor.doctor,
+  //             appointment_status: "upcoming",
+  //             appointment_slot: slotId,
+  //             consultation_type: selectedConsultationType,
+  //           }
+  //         );
+
+  //         if (postResponse && postResponse.data) {
+  //           setSuccessMessage(postResponse.data.success);
+  //           setShowSuccessPopup(true);
+  //           setTimeout(() => setShowSuccessPopup(false), 5000);
+  //         } else {
+  //           throw new Error("Failed to book the slot.");
+  //         }
+  //       } catch (postError) {
+  //         await BaseUrl.put("/payment/updateappointment", {
+  //           appointment_id: slotId,
+  //           is_selected: false,
+  //         });
+  //         setErrorMessage("Failed to confirm the appointment.");
+  //         setShowSuccessPopup(true);
+  //         setTimeout(() => setShowSuccessPopup(false), 5000);
+  //       }
+  //     } else {
+  //       await BaseUrl.put("/payment/updateappointment", {
+  //         appointment_id: slotId,
+  //         is_selected: false,
+  //       });
+  //       setErrorMessage("Payment was not successful. Please try again.");
+  //       setShowSuccessPopup(true);
+  //       setTimeout(() => setShowSuccessPopup(false), 5000);
+  //     }
+  //   } catch (error) {
+  //     const slotId = localStorage.getItem("selectedSlotId");
+  //     await BaseUrl.put("/payment/updateappointment", {
+  //       appointment_id: slotId,
+  //       is_selected: false,
+  //     });
+  //     setErrorMessage("An error occurred. Please try again.");
+  //     setShowSuccessPopup(true);
+  //     setTimeout(() => setShowSuccessPopup(false), 5000);
+  //   } finally {
+  //     setLoading(false);
+  //     localStorage.removeItem("selectedSlotId");
+  //     localStorage.removeItem("order_id");
+  //     localStorage.removeItem("consultationType");
+  //   }
+  // };
+
   const handleConfirmAppointment = async () => {
     try {
       setLoading(true);
@@ -6370,7 +6479,10 @@ const PatientHome = () => {
       const orderId = localStorage.getItem("order_id");
       const selectedConsultationType = localStorage.getItem("consultationType");
       const savedPatientId = localStorage.getItem("savedPatientId");
+      const selectedDoctorId = selectedDoctor.doctor; // Assuming `selectedDoctor` is defined elsewhere
+      const patientId = savedPatientId; // For clarity, assigning to patientId variable
 
+      // Check payment status
       const paymentStatusResponse = await fetch(
         `http://192.168.29.95:8001/payment/get/?order_id=${orderId}`
       );
@@ -6378,12 +6490,12 @@ const PatientHome = () => {
 
       if (paymentStatusData.status === "SUCCESS") {
         try {
-          setLoading(true);
+          // Book appointment (POST)
           const postResponse = await BaseUrl.post(
             "/patientappointment/bookslot/",
             {
-              patient: savedPatientId,
-              doctor: selectedDoctor.doctor,
+              patient: patientId,
+              doctor: selectedDoctorId,
               appointment_status: "upcoming",
               appointment_slot: slotId,
               consultation_type: selectedConsultationType,
@@ -6391,13 +6503,24 @@ const PatientHome = () => {
           );
 
           if (postResponse && postResponse.data) {
-            setSuccessMessage(postResponse.data.success);
-            setShowSuccessPopup(true);
-            setTimeout(() => setShowSuccessPopup(false), 5000);
+            // Update patient appointment (PATCH)
+            const patchResponse = await BaseUrl.patch(`/patient/patient/`, {
+              patient_id: patientId,
+              appointment: slotId,
+            });
+
+            if (patchResponse && patchResponse.data) {
+              setSuccessMessage("Appointment confirmed successfully!");
+              setShowSuccessPopup(true);
+              setTimeout(() => setShowSuccessPopup(false), 5000);
+            } else {
+              throw new Error("Failed to update patient appointment.");
+            }
           } else {
             throw new Error("Failed to book the slot.");
           }
-        } catch (postError) {
+        } catch (postOrPatchError) {
+          // Revert appointment selection
           await BaseUrl.put("/payment/updateappointment", {
             appointment_id: slotId,
             is_selected: false,
@@ -6407,6 +6530,7 @@ const PatientHome = () => {
           setTimeout(() => setShowSuccessPopup(false), 5000);
         }
       } else {
+        // Payment failed
         await BaseUrl.put("/payment/updateappointment", {
           appointment_id: slotId,
           is_selected: false,
@@ -6416,6 +6540,7 @@ const PatientHome = () => {
         setTimeout(() => setShowSuccessPopup(false), 5000);
       }
     } catch (error) {
+      // Handle generic errors
       const slotId = localStorage.getItem("selectedSlotId");
       await BaseUrl.put("/payment/updateappointment", {
         appointment_id: slotId,
@@ -6426,6 +6551,7 @@ const PatientHome = () => {
       setTimeout(() => setShowSuccessPopup(false), 5000);
     } finally {
       setLoading(false);
+      // Clean up local storage
       localStorage.removeItem("selectedSlotId");
       localStorage.removeItem("order_id");
       localStorage.removeItem("consultationType");
@@ -6552,20 +6678,40 @@ const PatientHome = () => {
     );
   };
 
-  const handleCardClick = (cardTitle) => {
+  const [consultationFee, setConsultationFee] = useState(null);
+  const [currency, setCurrency] = useState(null);
+
+  const handleCardClick = async (cardTitle) => {
     const selectedConsultationType =
       cardTitle === "Online Consultation" ? "online" : "walk-in";
-    setConsultationType(selectedConsultationType); // Update state for other parts of the app
-    localStorage.setItem("consultationType", selectedConsultationType); // Store it for immediate access
+    setConsultationType(selectedConsultationType);
+    try {
+      const mobileNumber = localStorage.getItem("mobile_number");
+      const response = await BaseUrl.get(`/patient/details/`, {
+        params: { mobile_number: mobileNumber },
+      });
 
-    console.log(
-      `Card clicked: ${cardTitle}, Consultation Type set to: ${selectedConsultationType}`
-    );
+      if (response.data.length > 0) {
+        const patientDetails = response.data[0];
+        const mobileString = patientDetails.mobile_number.toString();
 
+        const extractedMobileNumber = mobileString.slice(-10);
+        const countryCode = mobileString.slice(0, -10);
+        const feeResponse = await BaseUrl.get(
+          // `/patient/fee/?country_code=${countryCode}`
+          `/patient/fee/?country_code=91`
+        );
+
+        const feeData = feeResponse.data;
+        setConsultationFee(feeData.consultation_fee);
+        setCurrency(feeData.currency);
+      }
+    } catch (error) {
+      console.error(error);
+    }
     setShowSlotSelection(true);
     fetchSlots(availableDates[0]);
     fetchSlotCounts();
-
     setTimeout(() => {
       slotSelectionRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 100);
@@ -6732,8 +6878,8 @@ const PatientHome = () => {
         </LoaderWrapper>
       )}
 
-      <header className="mb-2 mt-2 patient-header text-center">
-        <h1 style={{ color: "#185C65", fontWeight: "bold", fontSize: "24px" }}>
+      <header className=" mt-4 patient-header text-center">
+        <h1 style={{ color: "#185C65", fontWeight: "bold", fontSize: "32px" }}>
           Welcome to Niramaya Homeopathy
         </h1>
       </header>
@@ -6799,42 +6945,51 @@ const PatientHome = () => {
 
             {/* Date Buttons */}
             {visibleDates.map((date, index) => (
-              <div
-                key={index}
-                className="appointment-date-button-container d-flex flex-column align-items-center flex-shrink-0"
-                style={{ margin: "0 5px" }}
-              >
-                <Button
-                  variant={
-                    selectedDateIndex === startIndex + index
-                      ? "success"
-                      : "outline-success"
-                  }
-                  onClick={() => handleDateChange(index)}
-                >
-                  {getDateLabel(date, index)}
-                </Button>
-                <div
-                  style={{
-                    fontSize: "12px",
-                    textAlign: "center",
-                    marginTop: "5px",
-                  }}
-                >
-                  <span
-                    className={`slot-count ${
-                      slotCounts[startIndex + index] > 0
-                        ? "text-success"
-                        : "text-danger"
-                    }`}
-                  >
-                    {slotCounts[startIndex + index] > 0
-                      ? `${slotCounts[startIndex + index]} slots available`
-                      : "0 slots available"}
-                  </span>
-                </div>
-              </div>
-            ))}
+  <div
+    key={index}
+    className="appointment-date-button-container d-flex flex-column align-items-center flex-shrink-0"
+    style={{ margin: "0 5px" }}
+  >
+    <Button
+      variant={
+        selectedDateIndex === startIndex + index
+          ? "success"
+          : "outline-success"
+      }
+      onClick={() => handleDateChange(index)}
+      style={{
+        width: "100px", // Set a fixed width
+        height: "40px", // Set a fixed height
+        display: "flex", // Use flexbox for alignment
+        alignItems: "center", // Center content vertically
+        justifyContent: "center", // Center content horizontally
+        textAlign: "center", // Additional text alignment
+      }}
+    >
+      {getDateLabel(date, index)}
+    </Button>
+    <div
+      style={{
+        fontSize: "12px",
+        textAlign: "center",
+        marginTop: "5px",
+      }}
+    >
+      <span
+        className={`slot-count ${
+          slotCounts[startIndex + index] > 0
+            ? "text-success"
+            : "text-danger"
+        }`}
+      >
+        {slotCounts[startIndex + index] > 0
+          ? `${slotCounts[startIndex + index]} slots available`
+          : "0 slots available"}
+      </span>
+    </div>
+  </div>
+))}
+
 
             {/* Right Arrow Button */}
             <Button
@@ -6847,43 +7002,59 @@ const PatientHome = () => {
             </Button>
           </div>
 
-          <Button
-            variant="success"
-            className="calendar-icon"
-            onClick={() => setShowCalendar((prev) => !prev)}
-            style={{
-              fontSize: "2rem",
-              position: "absolute",
-              top: 60,
-              right: 20,
-            }}
-          >
-            <FaCalendarAlt />
-          </Button>
-
-          {showCalendar && (
+          {consultationFee && currency && (
             <div
-              className="appointment-calendar"
               style={{
                 position: "absolute",
-                right: "20px",
-                top: "40px",
-                zIndex: 1000,
+                top: "22%",
+                right: "20%",
+                transform: "translateY(-50%)",
+                fontSize: "1.3rem",
+                fontWeight: "600",
+                color: "#0A3981",
               }}
             >
-              <DatePicker
-                selected={new Date(selectedDate || availableDates[0])}
-                onChange={(date) => {
-                  const formattedDate = format(date, "yyyy-MM-dd");
-                  setSelectedDate(formattedDate);
-                  fetchSlots(formattedDate);
-                  setShowCalendar(false);
-                }}
-                inline
-                minDate={new Date()}
-              />
+              Consultation Fees: {`${currency} ${consultationFee}`}
             </div>
           )}
+          <Button
+        variant="success"
+        className="calendar-icon"
+        onClick={() => setShowCalendar((prev) => !prev)}
+        style={{
+          fontSize: "2rem",
+          position: "absolute",
+          top: 60,
+          right: 20,
+        }}
+      >
+        <FaCalendarAlt />
+      </Button>
+
+      {showCalendar && (
+        <div
+          ref={calendarRef} // Attach the ref to the calendar container
+          className="appointment-calendar"
+          style={{
+            position: "absolute",
+            right: "20px",
+            top: "40px",
+            zIndex: 1000,
+          }}
+        >
+          <DatePicker
+            selected={new Date(selectedDate || availableDates[0])}
+            onChange={(date) => {
+              const formattedDate = format(date, "yyyy-MM-dd");
+              setSelectedDate(formattedDate);
+              fetchSlots(formattedDate);
+              setShowCalendar(false);
+            }}
+            inline
+            minDate={new Date()}
+          />
+        </div>
+      )}
 
           {loading ? (
             <p>Loading slots...</p>
@@ -7263,7 +7434,6 @@ const PatientHome = () => {
           </div>
         </Modal.Header>
         <Modal.Body style={{ padding: "20px 30px" }}>
-          {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
           <div className="container-fluid">
             <div className="row">
               <div className="col-md-4 form-group">

@@ -148,6 +148,7 @@ import PatientHome from './components/patient/PatientHome';
 import PatientDetails from './components/patient/PatientDetails';
 import DoctorDetails from './components/doctor/DoctorDetails';
 import AppointmentSlot from './components/doctor/AppointmentSlot';
+import PaymentHistory from './components/doctor/PaymentHistory';
 import PatientSlot from './components/patient/PatientSlot';
 import BookAppointment from './components/patient/BookAppointment';
 import AddSlot from './components/doctor/AddSlot';
@@ -234,6 +235,7 @@ function App() {
               <Route exact path="/doctor/manageclinic/details/:clinic_id" component={ClinicDetails} />
               <Route exact path="/doctor/managereception" component={ManageReception} />
               <Route exact path="/doctor/addreception" component={AddReception} />
+              <Route exact path="/doctor/paymenthistory" component={PaymentHistory} />
               <Route exact path="/doctor/receptiondetails/:reception_id" component={ReceptionDetails} />
               <Route exact path="/clinic/home" component={ClinicHome} />
               <Route exact path="/clinic/details" component={MyClinicDetails} />

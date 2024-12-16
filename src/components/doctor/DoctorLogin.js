@@ -53,22 +53,150 @@ const DoctorLogin = ({ setIsDoctorLoggedIn }) => {
     }
   }, [showVerification]);
  
+  // const handleLogin = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     let response;
+ 
+  //     if (forgotPassword) {
+  //       response = await BaseUrl.get(
+  //         `/doctor/userverification/?mobile_number=${mobileNumber}`
+  //       );
+  //       if (response.status === 200 && response.data.success) {
+  //         setShowVerification(true);
+  //         setMessage({ type: "success", text: response.data.success });
+  //       } else if (response.data.error) {
+  //         setMessage({ type: "error", text: response.data.error });
+  //       }
+  //     } else if (loginWithOtp) {
+  //       response = await BaseUrl.get(
+  //         `/doctor/login/?mobile_number=${mobileNumber}`
+  //       );
+  //       if (response.status === 200 && response.data.success) {
+  //         setShowVerification(true);
+  //         setMessage({ type: "success", text: response.data.success });
+  //       } else if (response.data.error) {
+  //         setMessage({ type: "error", text: response.data.error });
+  //       }
+  //     } else {
+  //       response = await BaseUrl.post("/doctor/doctorlogin/", {
+  //         mobile_number: mobileNumber,
+  //         password: password,
+  //       });
+ 
+  //       if (response.status === 200 && response.data.success) {
+  //         const token = response.data.access;
+  //         const userType = response.data.user_type;
+  //         const isReset = response.data.is_reset;
+ 
+  //         if (isValidToken(token)) {
+  //           localStorage.setItem("token", token);
+  //           localStorage.setItem("user_type", userType);
+  //           setIsDoctorLoggedIn(true);
+  //           setMessage({ type: "success", text: response.data.success });
+ 
+  //           if (
+  //             (userType === "clinic" || userType === "reception") &&
+  //             !isReset
+  //           ) {
+  //             setCreateNewPasswordModal(true);
+  //             return;
+  //           }
+ 
+  //           if (userType === "doctor") {
+  //             history.push("/doctor/home");
+  //           } else if (userType === "clinic") {
+  //             history.push("/clinic/home");
+  //           } else if (userType === "reception") {
+  //             history.push("/reception/home");
+  //           }
+  //         }
+  //       } else if (response.data.error) {
+  //         setMessage({ type: "error", text: response.data.error });
+  //       }
+  //     }
+  //   } catch (error) {
+  //     const errorMessage = error.response?.data?.error || "";
+  //     setMessage({ type: "error", text: errorMessage });
+  //   }
+  // };
+
+
+
+  // const handleLogin = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const response = await BaseUrl.post("/doctor/doctorlogin/", {
+  //       mobile_number: mobileNumber,
+  //       password: password,
+  //     });
+  
+  //     if (response.status === 200 && response.data.success) {
+  //       const { access, user_type, is_reset } = response.data;
+  
+  //       if (isValidToken(access)) {
+  //         localStorage.setItem("token", access);
+  //         localStorage.setItem("user_type", user_type);
+  
+  //         // Check if user needs to reset password and is of type clinic or reception
+  //         if ((user_type === "clinic" || user_type === "reception") && !is_reset) {
+  //           setCreateNewPasswordModal(true);  // Show modal or redirect to password creation page
+  //           return;  // Stop further processing
+  //         }
+  
+  //         setIsDoctorLoggedIn(true);
+  //         setMessage({ type: "success", text: response.data.success });
+  
+  //         routeUser(user_type);  // Function to handle user routing
+  //       }
+  //     } else if (response.data.error) {
+  //       setMessage({ type: "error", text: response.data.error });
+  //     }
+  //   } catch (error) {
+  //     const errorMessage = error.response?.data?.error || "";
+  //     setMessage({ type: "error", text: errorMessage });
+  //   }
+  // };
+  
+
+  // const routeUser = (userType) => {
+  //   switch(userType) {
+  //     case 'doctor':
+  //       history.push("/doctor/home");
+  //       break;
+  //     case 'clinic':
+  //       history.push("/clinic/home");
+  //       break;
+  //     case 'reception':
+  //       history.push("/reception/home");
+  //       break;
+  //     default:
+  //       // Handle unknown user type or show an error message
+  //       setMessage({ type: "error", text: "Invalid user type" });
+  //   }
+  // }
+
+
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       let response;
- 
+  
       if (forgotPassword) {
         response = await BaseUrl.get(
           `/doctor/userverification/?mobile_number=${mobileNumber}`
         );
         if (response.status === 200 && response.data.success) {
-          setShowVerification(true);
+          setShowVerification(true); 
           setMessage({ type: "success", text: response.data.success });
         } else if (response.data.error) {
           setMessage({ type: "error", text: response.data.error });
         }
-      } else if (loginWithOtp) {
+        return;
+      }
+  
+      if (loginWithOtp) {
         response = await BaseUrl.get(
           `/doctor/login/?mobile_number=${mobileNumber}`
         );
@@ -78,48 +206,57 @@ const DoctorLogin = ({ setIsDoctorLoggedIn }) => {
         } else if (response.data.error) {
           setMessage({ type: "error", text: response.data.error });
         }
-      } else {
-        response = await BaseUrl.post("/doctor/doctorlogin/", {
-          mobile_number: mobileNumber,
-          password: password,
-        });
- 
-        if (response.status === 200 && response.data.success) {
-          const token = response.data.access;
-          const userType = response.data.user_type;
-          const isReset = response.data.is_reset;
- 
-          if (isValidToken(token)) {
-            localStorage.setItem("token", token);
-            localStorage.setItem("user_type", userType);
-            setIsDoctorLoggedIn(true);
-            setMessage({ type: "success", text: response.data.success });
- 
-            if (
-              (userType === "clinic" || userType === "reception") &&
-              !isReset
-            ) {
-              setCreateNewPasswordModal(true);
-              return;
-            }
- 
-            if (userType === "doctor") {
-              history.push("/doctor/home");
-            } else if (userType === "clinic") {
-              history.push("/clinic/home");
-            } else if (userType === "reception") {
-              history.push("/reception/home");
-            }
+        return;
+      }
+  
+      response = await BaseUrl.post("/doctor/doctorlogin/", {
+        mobile_number: mobileNumber,
+        password: password,
+      });
+  
+      if (response.status === 200 && response.data.success) {
+        const { access, user_type, is_reset } = response.data;
+  
+        if (isValidToken(access)) {
+          localStorage.setItem("token", access);
+          localStorage.setItem("user_type", user_type);
+         
+  
+          if ((user_type === "clinic" || user_type === "reception") && !is_reset) {
+            setCreateNewPasswordModal(true);
+            return;
           }
-        } else if (response.data.error) {
-          setMessage({ type: "error", text: response.data.error });
+
+          setIsDoctorLoggedIn(true); 
+          setMessage({ type: "success", text: response.data.success });
+          routeUser(user_type);
+          
         }
+      } else if (response.data.error) {
+        setMessage({ type: "error", text: response.data.error });
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.error || "";
+      const errorMessage = error.response?.data?.error || "An error occurred.";
       setMessage({ type: "error", text: errorMessage });
     }
   };
+  
+  const routeUser = (userType) => {
+    switch (userType) {
+      case "doctor":
+        history.push("/doctor/home");
+        break;
+      case "clinic":
+        history.push("/clinic/home");
+        break;
+      case "reception":
+        history.push("/reception/home");
+        break;
+      default:
+        setMessage({ type: "error", text: "Invalid user type." });
+    }
+  };
+  
  
   const handleResendOTP = async () => {
     try {

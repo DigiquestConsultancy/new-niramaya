@@ -4,8 +4,10 @@ import { load } from "@cashfreepayments/cashfree-js";
 import clinicVisitImage from "../images/a-53-512.webp";
 import onlineConsultationImage from "../images/2562653-200.png";
 import BaseUrl from "../api/BaseUrl";
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaTimes } from "react-icons/fa";
 import { format, addDays } from "date-fns";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 const BookAppointment = () => {
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -18,7 +20,7 @@ const BookAppointment = () => {
   const [modalMessage, setModalMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [currentDateIndex, setCurrentDateIndex] = useState(0);
-  const [showSlots, setShowSlots] = useState(false);
+  const [slotCounts, setSlotCounts] = useState({});
   const [name, setName] = useState("");
   const [mobile_number, setMobile] = useState("");
   const [age, setAge] = useState("");
@@ -31,6 +33,7 @@ const BookAppointment = () => {
 
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
+  const [appointmentSlotId, setAppointmentSlotId] = useState(null);
 
   const categorizeSlots = (slots) => {
     const morningSlots = slots.filter((slot) => {
@@ -54,7 +57,7 @@ const BookAppointment = () => {
     evening: [],
   });
 
-  const doctorId = 2;
+  const doctorId = 59;
 
   useEffect(() => {
     loadAvailableDates();
@@ -86,35 +89,58 @@ const BookAppointment = () => {
     }
   };
 
+  const handleCloseForm = async () => {
+    try {
+      const response = await BaseUrl.put("/payment/updateappointment", {
+        appointment_id: appointmentSlotId,
+      });
+
+      if (response.status === 200) {
+        setIsFormVisible(false);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
-    // Set available dates
     const today = new Date();
     const dates = Array.from({ length: 30 }, (_, i) =>
       format(addDays(today, i), "yyyy-MM-dd")
     );
     setAvailableDates(dates);
-
-    // Fetch today's slots and counts
-    fetchAvailableSlotsCount(dates.slice(0, 3)); // Fetch counts for Today, Tomorrow, Next Day
-    fetchSlots(dates[0]); // Fetch slots for today
+    fetchAvailableSlotsCount(dates.slice(0, 3));
+    fetchSlots(dates[0]);
   }, []);
 
   const fetchAvailableSlotsCount = async (selectedDates) => {
     try {
       const datesQuery = selectedDates.map((date) => `dates=${date}`).join("&");
-      const endpoint = `/clinic/countavailableslots/?doctor_id=2&${datesQuery}`;
+      const endpoint = `/clinic/countavailableslots/?doctor_id=59&${datesQuery}`;
       const countResponse = await BaseUrl.get(endpoint);
-      const availableCounts = countResponse.data; // Assuming this returns an array of counts for the dates
-      console.log("Available counts for selected dates:", availableCounts);
-      // You can set this data to the state or handle it as needed
+      const availableCounts = countResponse.data;
+      const newSlotCounts = {};
+      availableCounts.forEach((count) => {
+        newSlotCounts[count.date] = count.count;
+      });
+
+      setSlotCounts((prevCounts) => ({
+        ...prevCounts,
+        ...newSlotCounts,
+      }));
+      for (let date of selectedDates) {
+        await BaseUrl.get(
+          `/clinic/availableslots/?doctor_id=59&date=${date}`
+        );
+      }
     } catch (error) {
-      console.error("Error fetching available slots count:", error);
+      console.error(error);
     }
   };
 
   const fetchSlots = async (selectedDate, appointmentType) => {
     try {
-      const endpoint = `/doctorappointment/blankslot/?doctor_id=2&slot_date=${selectedDate}&consultation_type=${appointmentType}`;
+      const endpoint = `/doctorappointment/blankslot/?doctor_id=59&slot_date=${selectedDate}&consultation_type=${appointmentType}`;
       const slotsResponse = await BaseUrl.get(endpoint);
       const fetchedSlots = slotsResponse.data;
       const { morningSlots, afternoonSlots, eveningSlots } =
@@ -124,10 +150,9 @@ const BookAppointment = () => {
         afternoon: afternoonSlots,
         evening: eveningSlots,
       });
-      setShowSlots(true);
       setIsFormVisible(false);
     } catch (error) {
-      console.error("Error fetching slots:", error);
+      console.error(error);
     }
   };
 
@@ -153,45 +178,56 @@ const BookAppointment = () => {
     }
   };
 
-  const handleSlotClick = (slot) => {
-    setSelectedSlot(slot);
-    localStorage.setItem("appointmentSlotId", slot.id);
-    setIsFormVisible(true);
-  };
+  const handleSlotClick = async (slot, selectedDate, type) => {
+    try {
+      setSelectedSlot(slot);
+      setAppointmentSlotId(slot.id);
+      localStorage.setItem("appointmentSlotId", slot.id);
+      setIsFormVisible(true);
 
-  const validateForm = () => {
-    const nameRegex = /^[A-Za-z\s]+$/;
-    const mobileRegex = /^[0-9]{10}$/;
-    const ageRegex = /^[0-9]{1,3}$/;
+      const updateResponse = await BaseUrl.put("/payment/updateappointment", {
+        appointment_id: slot.id,
+      });
 
-    if (!name || !nameRegex.test(name)) {
-      setErrorMessage("Name should only contain alphabets and spaces.");
-      return false;
+      if (updateResponse.status === 200) {
+        const fetchResponse = await BaseUrl.get(
+          `/doctorappointment/blankslot/?doctor_id=59&slot_date=${selectedDate}&consultation_type=${type}`
+        );
+
+        if (fetchResponse.status === 200) {
+          const fetchedSlots = fetchResponse.data;
+          const { morningSlots, afternoonSlots, eveningSlots } =
+            categorizeSlots(fetchedSlots);
+          setSlots({
+            morning: morningSlots,
+            afternoon: afternoonSlots,
+            evening: eveningSlots,
+          });
+          fetchedSlots.map((slot) => {
+            if (slot.id === appointmentSlotId) {
+              return { ...slot, is_selected: true };
+            } else {
+              return { ...slot, is_selected: false };
+            }
+          });
+          setIsFormVisible(false);
+        } else {
+          throw new Error("Failed to fetch updated slots");
+        }
+      } else {
+        throw new Error("Failed to update the appointment");
+      }
+    } catch (error) {
+      console.error(error);
     }
-    if (!mobile_number || !mobileRegex.test(mobile_number)) {
-      setErrorMessage("Mobile number must be exactly 10 digits.");
-      return false;
-    }
-    if (!age || !ageRegex.test(age) || parseInt(age, 10) > 150) {
-      setErrorMessage("Age must be a number between 0 and 150.");
-      return false;
-    }
-    if (
-      appointmentType === "online" &&
-      (!email || !/\S+@\S+\.\S+/.test(email))
-    ) {
-      setErrorMessage("Valid email is mandatory for online consultations.");
-      return false;
-    }
-    setErrorMessage("");
-    return true;
   };
 
   const patchPatientData = async (appointmentId) => {
     try {
+      const slotId = localStorage.getItem("selectedSlotId");
       const storedPatientId = localStorage.getItem("patientId");
-      const patchResponse = await BaseUrl.patch("/patient/patient/", {
-        appointment: appointmentId,
+      await BaseUrl.patch("/patient/patient/", {
+        appointment: slotId,
         patient_id: storedPatientId,
       });
     } catch (error) {
@@ -236,7 +272,6 @@ const BookAppointment = () => {
       setLoading(true);
       setErrorMessage("");
 
-      // Save patient details
       const patientResponse = await BaseUrl.post("/patient/patient/", {
         name,
         mobile_number,
@@ -247,27 +282,33 @@ const BookAppointment = () => {
         email,
         doctor_id: doctorId,
       });
-
       const fetchedPatientId = patientResponse.data?.data?.id;
       localStorage.setItem("patientId", fetchedPatientId);
+      localStorage.setItem("selectedSlotId", selectedSlot.id);
+      const mobileString = mobile_number.toString();
+      const extractedMobileNumber = mobileString.slice(-10);
+      const countryCode = mobileString.slice(0, -10);
+      const feeResponse = await BaseUrl.get(
+        `/patient/fee/?country_code=${countryCode}`
+      );
+      const { consultation_fee: amount, currency } = feeResponse.data;
 
-      // Create payment session
       const paymentResponse = await BaseUrl.post("/payment/create/", {
-        amount: "1000",
+        amount: amount.toString(),
+        // currency,
         currency: "INR",
-        customer_name: name,
-        customer_phone: mobile_number,
-        patient_id: fetchedPatientId, // Include patient ID in payment API
+        // customer_name: name,
+        customer_phone: extractedMobileNumber,
+        patient_id: fetchedPatientId,
       });
 
       const paymentSessionId = paymentResponse.data?.payment_session_id;
       const newOrderId = paymentResponse.data?.order_id;
       localStorage.setItem("orderId", newOrderId);
 
-      // Trigger payment gateway
       await triggerPaymentGateway(paymentSessionId);
     } catch (error) {
-      setErrorMessage("Error during submission. Please try again.");
+      setErrorMessage();
     } finally {
       setLoading(false);
     }
@@ -278,7 +319,7 @@ const BookAppointment = () => {
       const cashfree = await load({ mode: "sandbox" });
       await cashfree.checkout({
         paymentSessionId,
-        returnUrl: "http://localhost:3000/patientbook",
+        returnUrl: "http://localhost:3001/patientbook",
       });
 
       await pollPaymentStatus();
@@ -317,6 +358,7 @@ const BookAppointment = () => {
         const response = await BaseUrl.get(`/payment/get/?order_id=${orderId}`);
         if (response.data?.status === "SUCCESS") {
           await bookSlot();
+          await patchPatientData();
           setSuccessMessage("");
         } else {
           setErrorMessage("");
@@ -341,9 +383,9 @@ const BookAppointment = () => {
 
   return (
     <div
-      className="book-appointment-container min-vh-100"
+      className="book-appointment-container mb-5"
       style={{
-        backgroundColor: "#D7EAF0",
+        background: "linear-gradient(to bottom, #cdefe1, #ffffff)",
         padding: "20px",
         borderRadius: "10px",
       }}
@@ -359,12 +401,11 @@ const BookAppointment = () => {
       >
         Niramaya Homeopathy
       </h2>
-
+ 
       {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
       {successMessage && <Alert variant="success">{successMessage}</Alert>}
-
+ 
       <div className="d-flex justify-content-center mb-5">
-        {/* Clinic Visit Card */}
         <Card
           className="clinic-visit-card mx-3 shadow text-center"
           style={{
@@ -379,10 +420,9 @@ const BookAppointment = () => {
           }}
           onClick={() => {
             setAppointmentType("clinic");
-            localStorage.setItem("appointmentType", "clinic"); // Store in localStorage
-            const selectedDate = availableDates[currentDateIndex]; // Get current selected date
-            fetchSlots(selectedDate, "clinic"); // Fetch slots for the selected date and type
-            console.log("Appointment Type Set to: Clinic Visit");
+            localStorage.setItem("appointmentType", "clinic");
+            const selectedDate = availableDates[currentDateIndex];
+            fetchSlots(selectedDate, "clinic");
           }}
         >
           <Card.Body className="d-flex align-items-center justify-content-center">
@@ -405,8 +445,7 @@ const BookAppointment = () => {
             </div>
           </Card.Body>
         </Card>
-
-        {/* Online Consultation Card */}
+ 
         <Card
           className="online-consultation-card mx-3 shadow text-center"
           style={{
@@ -421,10 +460,9 @@ const BookAppointment = () => {
           }}
           onClick={() => {
             setAppointmentType("online");
-            localStorage.setItem("appointmentType", "online"); // Store in localStorage
-            const selectedDate = availableDates[currentDateIndex]; // Get current selected date
-            fetchSlots(selectedDate, "online"); // Fetch slots for the selected date and type
-            console.log("Appointment Type Set to: Online Consultation");
+            localStorage.setItem("appointmentType", "online");
+            const selectedDate = availableDates[currentDateIndex];
+            fetchSlots(selectedDate, "online");
           }}
         >
           <Card.Body className="d-flex align-items-center justify-content-center">
@@ -448,9 +486,9 @@ const BookAppointment = () => {
           </Card.Body>
         </Card>
       </div>
-
+ 
       <div
-        className="date-navigation-container d-flex align-items-center justify-content-center mb-5"
+        className="date-navigation-container d-flex align-items-center justify-content-center mb-3"
         style={{
           display: "flex",
           alignItems: "center",
@@ -465,7 +503,7 @@ const BookAppointment = () => {
         >
           &#8592;
         </Button>
-
+ 
         <div
           className="date-button-row d-flex overflow-auto"
           style={{
@@ -475,38 +513,67 @@ const BookAppointment = () => {
             whiteSpace: "nowrap",
           }}
         >
-          {availableDates
-            .slice(currentDateIndex, currentDateIndex + 5)
-            .map((date, index) => (
-              <Button
-                key={index}
-                variant="outline-primary"
-                onClick={() => {
-                  setCurrentDateIndex(index + currentDateIndex);
-                  fetchSlots(date);
-                }}
-                style={{
-                  margin: "0 10px",
-                  backgroundColor:
-                    index + currentDateIndex === currentDateIndex
-                      ? "#3D9F41"
-                      : "#fff",
-                  color:
-                    index + currentDateIndex === currentDateIndex
-                      ? "#fff"
-                      : "#000",
-                  borderColor: "#3D9F41",
-                }}
-              >
-                {index + currentDateIndex === 0
-                  ? "Today"
-                  : index + currentDateIndex === 1
-                    ? "Tomorrow"
-                    : format(new Date(date), "MMM dd")}
-              </Button>
-            ))}
-        </div>
-
+{availableDates
+  .slice(currentDateIndex, currentDateIndex + 5)
+  .map((date, index) => (
+    <div
+      key={index}
+      className="date-button-container"
+      style={{ textAlign: "center", margin: "0 10px" }}
+    >
+      <Button
+        variant="outline-primary"
+        onClick={() => {
+          const newCurrentDateIndex = index + currentDateIndex;
+          setCurrentDateIndex(newCurrentDateIndex);
+ 
+          // Fetch slots for the selected date
+          const selectedDate = availableDates[newCurrentDateIndex];
+          fetchSlots(selectedDate, appointmentType);
+ 
+          // Reset pagination indices
+          setMorningIndex(0);
+          setAfternoonIndex(0);
+          setEveningIndex(0);
+        }}
+        style={{
+          backgroundColor:
+            index + currentDateIndex === currentDateIndex
+              ? "#3D9F41"
+              : "#fff",
+          color: index + currentDateIndex === currentDateIndex ? "#fff" : "#000",
+          borderColor: "#3D9F41",
+          minWidth: "100px",
+          textAlign: "center",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "50px",
+        }}
+      >
+        {index + currentDateIndex === 0
+          ? "Today"
+          : index + currentDateIndex === 1
+          ? "Tomorrow"
+          : format(new Date(date), "MMMM dd")}
+      </Button>
+      <div
+        style={{
+          fontSize: "12px",
+          marginTop: "8px",
+          color: slotCounts[date] > 0 ? "#28a745" : "#dc3545",
+        }}
+      >
+        {slotCounts[date] > 0
+          ? `${slotCounts[date]} slots available`
+          : "No slots available"}
+      </div>
+    </div>
+  ))}
+ 
+</div>
+ 
         <Button
           variant="outline-secondary"
           onClick={() => handleDateNavigation("next")}
@@ -516,7 +583,7 @@ const BookAppointment = () => {
           &#8594;
         </Button>
       </div>
-
+ 
       <div className="slot-section">
         {slots && slots.length > 0 ? (
           <>
@@ -538,7 +605,7 @@ const BookAppointment = () => {
           <p className="text-center mt-4"></p>
         )}
       </div>
-
+ 
       <div className="slot-section">
         {slots && slots.length > 0 ? (
           <>
@@ -560,13 +627,12 @@ const BookAppointment = () => {
           <p className="text-center mt-4"></p>
         )}
       </div>
-
+ 
       <h2 className="text-center" style={{ fontWeight: "700" }}>
         Available Slots
       </h2>
-
+ 
       <Row className="text-center mb-3 mt-5">
-        {/* Morning Slots */}
         <Col>
           <div className="d-flex justify-content-between align-items-center">
             <FaArrowLeft
@@ -595,14 +661,12 @@ const BookAppointment = () => {
           <div>
             {slots.morning.length > 0 ? (
               <>
-                {Array.from(
-                  {
-                    length: Math.ceil(
-                      slots.morning.slice(morningIndex, morningIndex + 16)
-                        .length / 4
-                    ),
-                  } // 4 slots per row, max 8 slots
-                ).map((_, rowIndex) => (
+                {Array.from({
+                  length: Math.ceil(
+                    slots.morning.slice(morningIndex, morningIndex + 16)
+                      .length / 4
+                  ),
+                }).map((_, rowIndex) => (
                   <div
                     key={rowIndex}
                     className="d-flex justify-content-center flex-wrap"
@@ -638,8 +702,7 @@ const BookAppointment = () => {
             )}
           </div>
         </Col>
-
-        {/* Afternoon Slots */}
+ 
         <Col>
           <div className="d-flex justify-content-between align-items-center">
             <FaArrowLeft
@@ -668,14 +731,12 @@ const BookAppointment = () => {
           <div>
             {slots.afternoon.length > 0 ? (
               <>
-                {Array.from(
-                  {
-                    length: Math.ceil(
-                      slots.afternoon.slice(afternoonIndex, afternoonIndex + 16)
-                        .length / 4
-                    ),
-                  } // 4 slots per row, max 8 slots
-                ).map((_, rowIndex) => (
+                {Array.from({
+                  length: Math.ceil(
+                    slots.afternoon.slice(afternoonIndex, afternoonIndex + 16)
+                      .length / 4
+                  ),
+                }).map((_, rowIndex) => (
                   <div
                     key={rowIndex}
                     className="d-flex justify-content-center flex-wrap"
@@ -711,8 +772,7 @@ const BookAppointment = () => {
             )}
           </div>
         </Col>
-
-        {/* Evening Slots */}
+ 
         <Col>
           <div className="d-flex justify-content-between align-items-center">
             <FaArrowLeft
@@ -741,14 +801,12 @@ const BookAppointment = () => {
           <div>
             {slots.evening.length > 0 ? (
               <>
-                {Array.from(
-                  {
-                    length: Math.ceil(
-                      slots.evening.slice(eveningIndex, eveningIndex + 16)
-                        .length / 4
-                    ),
-                  } // 4 slots per row, max 8 slots
-                ).map((_, rowIndex) => (
+                {Array.from({
+                  length: Math.ceil(
+                    slots.evening.slice(eveningIndex, eveningIndex + 16)
+                      .length / 4
+                  ),
+                }).map((_, rowIndex) => (
                   <div
                     key={rowIndex}
                     className="d-flex justify-content-center flex-wrap"
@@ -785,10 +843,10 @@ const BookAppointment = () => {
           </div>
         </Col>
       </Row>
-
+ 
       {isFormVisible && (
         <Card
-          className="form-card p-4 shadow mt-4"
+          className="form-card p-4 mb-5 shadow mt-5"
           style={{
             backgroundColor: "#E8F4F8",
             borderRadius: "10px",
@@ -796,6 +854,18 @@ const BookAppointment = () => {
             margin: "0 auto",
           }}
         >
+          <FaTimes
+            onClick={handleCloseForm}
+            style={{
+              position: "absolute",
+              top: "10px",
+              right: "10px",
+              fontSize: "20px",
+              color: "#003F7D",
+              cursor: "pointer",
+            }}
+          />
+ 
           <h5
             className="text-center"
             style={{
@@ -830,34 +900,27 @@ const BookAppointment = () => {
                   )}
                 </Form.Group>
               </Col>
+ 
               <Col md={4}>
                 <Form.Group>
                   <Form.Label>Mobile</Form.Label>
-                  <Form.Control
+                  <PhoneInput
+                    placeholder="Enter mobile number"
                     value={mobile_number}
-                    onChange={(e) => {
-                      const regex = /^[0-9]*$/;
-                      if (
-                        regex.test(e.target.value) &&
-                        e.target.value.length <= 10
-                      ) {
-                        setMobile(e.target.value);
-                      }
-                    }}
-                    placeholder="Mobile"
-                    style={{
-                      borderColor:
-                        mobile_number.length === 10 ? "#3D9F41" : "green",
-                      borderRadius: "5px",
-                    }}
+                    onChange={(value) => setMobile(value)}
+                    defaultCountry="IN"
+                    className="form-control"
+                    required
                   />
-                  {(!mobile_number || mobile_number.length !== 10) && (
-                    <small className="text-success">
-                      Mobile number must be exactly 10 digits.
+                  {(!mobile_number || mobile_number.length < 10) && (
+                    <small className="text-danger">
+                      Mobile number must include a valid country code and be
+                      complete.
                     </small>
                   )}
                 </Form.Group>
               </Col>
+ 
               <Col md={4}>
                 <Form.Group>
                   <Form.Label>Age</Form.Label>

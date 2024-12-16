@@ -3354,16 +3354,6 @@
 
 // export default DoctorHome;
 
-
-
-
-
-
-
-
-
-
-
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import BaseUrl from "../../api/BaseUrl";
 import {
@@ -5598,10 +5588,274 @@ const DoctorHome = () => {
     }
   };
 
+  // const renderDocumentsData = () => {
+  //   const visibleReports = showMore
+  //     ? whatsappReport
+  //     : whatsappReport.slice(0, 6);
+
+  //   return (
+  //     <div>
+  //       {successMessage && (
+  //         <div className="alert alert-success text-center" role="alert">
+  //           {successMessage}
+  //         </div>
+  //       )}
+  //       {errorMessage && (
+  //         <div className="alert alert-danger text-center" role="alert">
+  //           {errorMessage}
+  //         </div>
+  //       )}
+  //       {fetchError && (
+  //         <div className="alert alert-danger text-center" role="alert">
+  //           {fetchError}
+  //         </div>
+  //       )}
+
+  //       <div className="d-flex justify-content-end">
+  //         <Button
+  //           className="btn btn-primary me-2"
+  //           onClick={() => toggleFormModal()}
+  //         >
+  //           Upload Documents
+  //         </Button>
+  //         <Button
+  //           className="btn btn-primary me-2"
+  //           onClick={() => handleRequestDocument(selectedAppointmentId)}
+  //         >
+  //           Request Document
+  //         </Button>
+  //         <Button
+  //           style={{
+  //             background: "#00DAF7",
+  //             color: "#000",
+  //             border: "none",
+  //             borderRadius: "5px",
+  //             padding: "10px 20px",
+  //           }}
+  //           onClick={() =>
+  //             handleRecordView(
+  //               selectedAppointment?.patient_id,
+  //               selectedAppointment?.doctor_id,
+  //               selectedAppointment?.patient_name
+  //             )
+  //           }
+  //         >
+  //           <FaSyncAlt />
+  //         </Button>
+  //       </div>
+
+  //       {documentsData.map((document) => (
+  //         <div key={document.id} className="mb-3" style={{ cursor: "pointer" }}>
+  //           <Row className="mt-3">
+  //             <Col md={2}>
+  //               <Form.Group>
+  //                 <Form.Label>
+  //                   <strong>Document Name:</strong>
+  //                 </Form.Label>
+  //                 <Form.Control
+  //                   type="text"
+  //                   value={document.document_name}
+  //                   readOnly
+  //                 />
+  //               </Form.Group>
+  //             </Col>
+  //             <Col md={2}>
+  //               <Form.Group>
+  //                 <Form.Label>
+  //                   <strong>Document Date:</strong>
+  //                 </Form.Label>
+  //                 <Form.Control
+  //                   type="text"
+  //                   value={document.document_date}
+  //                   readOnly
+  //                 />
+  //               </Form.Group>
+  //             </Col>
+  //             <Col md={2}>
+  //               <Form.Group>
+  //                 <Form.Label>
+  //                   <strong>Document Type:</strong>
+  //                 </Form.Label>
+  //                 <Form.Control
+  //                   type="text"
+  //                   value={document.document_type}
+  //                   readOnly
+  //                 />
+  //               </Form.Group>
+  //             </Col>
+  //             <Col md={2}>
+  //               <Form.Group>
+  //                 <Form.Label>
+  //                   <strong>Patient Name:</strong>
+  //                 </Form.Label>
+  //                 <Form.Control
+  //                   type="text"
+  //                   value={document.patient_name}
+  //                   readOnly
+  //                 />
+  //               </Form.Group>
+  //             </Col>
+  //             <Col md={2}>
+  //               <Form.Group>
+  //                 <Form.Label>
+  //                   <strong>Document File:</strong>
+  //                 </Form.Label>
+  //                 <Button
+  //                   variant="primary"
+  //                   onClick={() => viewDocument(document.id)}
+  //                   style={{
+  //                     backgroundColor: "#5c85d6",
+  //                     borderColor: "#5c85d6",
+  //                     borderRadius: "20px",
+  //                     padding: "8px 16px",
+  //                     transition: "background-color 0.3s, transform 0.3s",
+  //                   }}
+  //                   onMouseEnter={(e) =>
+  //                     (e.currentTarget.style.backgroundColor = "#4c75c6")
+  //                   }
+  //                   onMouseLeave={(e) =>
+  //                     (e.currentTarget.style.backgroundColor = "#5c85d6")
+  //                   }
+  //                   aria-label={`View document ${document.document_name}`}
+  //                 >
+  //                   View Document
+  //                 </Button>
+  //               </Form.Group>
+  //             </Col>
+  //             <Col md={1} className="mt-4">
+  //               <DropdownButton
+  //                 align="end"
+  //                 drop="end"
+  //                 title={<i className="bi bi-three-dots" />}
+  //                 variant="secondary"
+  //                 id={`dropdown-${document.id}`}
+  //               >
+  //                 <Dropdown.Item onClick={() => toggleFormModal(document)}>
+  //                   Modify
+  //                 </Dropdown.Item>
+  //                 <Dropdown.Item
+  //                   onClick={() => handleDeleteDocument(document.id)}
+  //                 >
+  //                   Delete
+  //                 </Dropdown.Item>
+  //               </DropdownButton>
+  //             </Col>
+  //           </Row>
+
+  //           <hr />
+  //         </div>
+  //       ))}
+
+  //       <div className="d-flex flex-wrap justify-content-start">
+  //         {visibleReports.map((report) => (
+  //           <div key={report.id} className="p-3">
+  //             <div
+  //               className="card"
+  //               style={{ width: "199px", position: "relative" }}
+  //             >
+  //               <img
+  //                 src={report.report_file}
+  //                 alt="WhatsApp Report"
+  //                 style={{
+  //                   objectFit: "cover",
+  //                   height: "200px", // Increased height
+  //                   width: "100%", // Full width
+  //                   borderRadius: "5px",
+  //                   cursor: "pointer",
+  //                 }}
+  //                 onClick={() => setSelectedImage(report.report_file)}
+  //               />
+
+  //               {/* Display Date on the Image */}
+  //               <div
+  //                 className="report-date"
+  //                 style={{
+  //                   position: "absolute",
+  //                   bottom: "0",
+  //                   left: "0",
+  //                   backgroundColor: "rgba(0, 0, 0, 0.6)",
+  //                   color: "white",
+  //                   padding: "5px",
+  //                   borderRadius: "5px",
+  //                 }}
+  //               >
+  //                 {new Intl.DateTimeFormat("en-GB").format(
+  //                   new Date(report.date || report.document_date)
+  //                 )}
+  //               </div>
+
+  //               {/* Delete Button */}
+  //               <div className="card-body text-center">
+  //                 <button
+  //                   className="btn btn-danger btn-sm"
+  //                   style={{
+  //                     position: "absolute",
+  //                     bottom: "0",
+  //                     right: "10px",
+  //                     background: "transparent",
+  //                     border: "none",
+  //                     cursor: "pointer",
+  //                     color: "red",
+  //                     fontSize: "24px",
+  //                   }}
+  //                   onClick={() => deleteRecord(report.id)}
+  //                 >
+  //                   <FaTrash />
+  //                 </button>
+  //               </div>
+  //             </div>
+  //           </div>
+  //         ))}
+  //       </div>
+
+  //       {/* Show More Button */}
+  //       {whatsappReport.length > 6 && (
+  //         <div className="text-center mt-3">
+  //           <Button
+  //             className="btn btn-primary"
+  //             onClick={() => setShowMore(!showMore)}
+  //           >
+  //             {showMore ? "Show Less" : "Show More"}
+  //           </Button>
+  //         </div>
+  //       )}
+
+  //       <Modal
+  //         show={!!selectedImage}
+  //         onHide={() => setSelectedImage(null)}
+  //         centered
+  //       >
+  //         <Modal.Body style={{ padding: 0 }}>
+  //           <img
+  //             src={selectedImage}
+  //             alt="Selected Medical Record"
+  //             style={{
+  //               width: "100%",
+  //               borderRadius: "5px",
+  //             }}
+  //           />
+  //         </Modal.Body>
+  //         <Modal.Footer>
+  //           <Button variant="secondary" onClick={() => setSelectedImage(null)}>
+  //             Close
+  //           </Button>
+  //         </Modal.Footer>
+  //       </Modal>
+  //     </div>
+  //   );
+  // };
+
+
+
+
+
   const renderDocumentsData = () => {
     const visibleReports = showMore
       ? whatsappReport
       : whatsappReport.slice(0, 6);
+    const visibleDocuments = showMore
+      ? documentsData
+      : documentsData.slice(0, 6);
 
     return (
       <div>
@@ -5654,161 +5908,132 @@ const DoctorHome = () => {
           </Button>
         </div>
 
-        {documentsData.map((document) => (
-          <div key={document.id} className="mb-3" style={{ cursor: "pointer" }}>
-            <Row className="mt-3">
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>
-                    <strong>Document Name:</strong>
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={document.document_name}
-                    readOnly
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>
-                    <strong>Document Date:</strong>
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={document.document_date}
-                    readOnly
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>
-                    <strong>Document Type:</strong>
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={document.document_type}
-                    readOnly
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>
-                    <strong>Patient Name:</strong>
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={document.patient_name}
-                    readOnly
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-            <Row className="mt-3">
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>
-                    <strong>Uploaded By:</strong>
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={document.uploaded_by}
-                    readOnly
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>
-                    <strong>Document File:</strong>
-                  </Form.Label>
-                  <Button
-                    variant="primary"
-                    onClick={() => viewDocument(document.id)}
-                    style={{
-                      backgroundColor: "#5c85d6",
-                      borderColor: "#5c85d6",
-                      borderRadius: "20px",
-                      padding: "8px 16px",
-                      transition: "background-color 0.3s, transform 0.3s",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#4c75c6")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#5c85d6")
-                    }
-                    aria-label={`View document ${document.document_name}`}
-                  >
-                    View Document
-                  </Button>
-                </Form.Group>
-              </Col>
-              <Col md={3} className="mt-4">
-                <DropdownButton
-                  align="end"
-                  drop="end"
-                  title={<i className="bi bi-three-dots" />}
-                  variant="secondary"
-                  id={`dropdown-${document.id}`}
-                >
-                  <Dropdown.Item onClick={() => toggleFormModal(document)}>
-                    Modify
-                  </Dropdown.Item>
-                  <Dropdown.Item
-                    onClick={() => handleDeleteDocument(document.id)}
-                  >
-                    Delete
-                  </Dropdown.Item>
-                </DropdownButton>
-              </Col>
-            </Row>
-            <hr />
+        {/* <h5 className = "mt-3" style={{ fontWeight: "700" }}>Uploaded by : Doctor</h5> */}
+
+        {documentsData.length > 0 ? (
+          <table className="table table-striped mt-4">
+            <thead>
+              <tr>
+                <th>Document Name</th>
+                <th>Document Date</th>
+                <th>Document Type</th>
+                <th>Patient Name</th>
+                <th>Document File</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {documentsData.map((document) => (
+                <tr key={document.id}>
+                  <td>{document.document_name}</td>
+                  <td>{document.document_date}</td>
+                  <td>{document.document_type}</td>
+                  <td>{document.patient_name}</td>
+                  <td>
+                    <Button
+                      variant="primary"
+                      onClick={() => viewDocument(document.id)}
+                      style={{
+                        backgroundColor: "#5c85d6",
+                        borderColor: "#5c85d6",
+                        borderRadius: "20px",
+                        padding: "8px 16px",
+                        transition: "background-color 0.3s, transform 0.3s",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.backgroundColor = "#4c75c6")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.backgroundColor = "#5c85d6")
+                      }
+                      aria-label={`View document ${document.document_name}`}
+                    >
+                      View Document
+                    </Button>
+                  </td>
+                  <td>
+                    <DropdownButton
+                      align="end"
+                      drop="end"
+                      title={<i className="bi bi-three-dots" />}
+                      variant="secondary"
+                      id={`dropdown-${document.id}`}
+                    >
+                      <Dropdown.Item onClick={() => toggleFormModal(document)}>
+                        Modify
+                      </Dropdown.Item>
+                      <Dropdown.Item
+                        onClick={() => handleDeleteDocument(document.id)}
+                      >
+                        Delete
+                      </Dropdown.Item>
+                    </DropdownButton>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="text-center text-danger">
+            <p>No documents available to display.</p>
           </div>
-        ))}
+        )}
 
         <div className="d-flex flex-wrap justify-content-start">
-          {visibleReports.map((report) => (
-            <div key={report.id} className="p-3">
+          {visibleDocuments.map((document) => (
+            <div key={document.id} className="p-2">
               <div
                 className="card"
-                style={{ width: "199px", position: "relative" }}
+                style={{
+                  width: "203px",
+                  position: "relative",
+                  marginBottom: "15px",
+                }}
               >
-                <img
-                  src={report.report_file}
-                  alt="WhatsApp Report"
-                  style={{
-                    objectFit: "cover",
-                    height: "200px", // Increased height
-                    width: "100%", // Full width
-                    borderRadius: "5px",
-                    cursor: "pointer"
-                  }}
-                  onClick={() =>
-                    setSelectedImage(report.report_file)
-                  }
-                />
-
-                {/* Display Date on the Image */}
                 <div
-                  className="report-date"
+                  style={{
+                    height: "200px",
+                    background: "#f3f3f3",
+                    borderRadius: "5px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  {document.document_file ? (
+                    <img
+                      src={document.document_file} // Valid image URL
+                      alt={`Uploaded by: ${document.uploaded_by}`}
+                      style={{
+                        objectFit: "cover",
+                        width: "100%",
+                        height: "90%",
+                        borderRadius: "5px",
+                        cursor: "pointer",
+                        // border: "1px solid red", // Debugging border
+                      }}
+                      onClick={() => viewDocument(document.id)}
+                    />
+                  ) : (
+                    <span>No Preview</span>
+                  )}
+                </div>
+                <div
+                  className="document-date"
                   style={{
                     position: "absolute",
                     bottom: "0",
                     left: "0",
-                    backgroundColor: "rgba(0, 0, 0, 0.6)", // Semi-transparent background
+                    backgroundColor: "rgba(0, 0, 0, 0.6)",
                     color: "white",
                     padding: "5px",
                     borderRadius: "5px",
                   }}
                 >
-                  {new Date(report.date).toLocaleDateString()}{" "}
-                  {/* Assuming 'date' field contains the date */}
+                  {new Intl.DateTimeFormat("en-GB").format(
+                    new Date(document.document_date)
+                  )}
                 </div>
-
-                {/* Delete Button */}
                 <div className="card-body text-center">
                   <button
                     className="btn btn-danger btn-sm"
@@ -5822,7 +6047,7 @@ const DoctorHome = () => {
                       color: "red",
                       fontSize: "24px",
                     }}
-                    onClick={() => deleteRecord(report.id)}
+                    onClick={() => handleDeleteDocument(document.id)}
                   >
                     <FaTrash />
                   </button>
@@ -5830,6 +6055,90 @@ const DoctorHome = () => {
               </div>
             </div>
           ))}
+        </div>
+
+        {documentsData.length > 6 && (
+          <div className="text-center mt-3">
+            <Button
+              className="btn btn-primary"
+              onClick={() => setShowMore(!showMore)}
+            >
+              {showMore ? "Show Less" : "Show More"}
+            </Button>
+          </div>
+        )}
+        <hr />
+
+        <h5 style={{ fontWeight: "700" }}>Uploaded by : Patient</h5>
+
+        <div>
+          {visibleReports.length > 0 ? (
+            <div className="d-flex flex-wrap justify-content-start">
+              {visibleReports.map((report) => (
+                <div key={report.id} className="p-2">
+                  <div
+                    className="card"
+                    style={{ width: "203px", position: "relative" }}
+                  >
+                    <img
+                      src={report.report_file}
+                      alt="WhatsApp Report"
+                      style={{
+                        objectFit: "cover",
+                        height: "200px",
+                        width: "100%",
+                        borderRadius: "5px",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => setSelectedImage(report.report_file)}
+                    />
+
+                    {/* Display Date on the Image */}
+                    <div
+                      className="report-date"
+                      style={{
+                        position: "absolute",
+                        bottom: "0",
+                        left: "0",
+                        backgroundColor: "rgba(0, 0, 0, 0.6)",
+                        color: "white",
+                        padding: "5px",
+                        borderRadius: "5px",
+                      }}
+                    >
+                      {new Intl.DateTimeFormat("en-GB").format(
+                        new Date(report.date)
+                      )}
+                    </div>
+
+                    {/* Delete Button */}
+                    <div className="card-body text-center">
+                      <button
+                        className="btn btn-danger btn-sm"
+                        style={{
+                          position: "absolute",
+                          bottom: "0",
+                          right: "10px",
+                          background: "transparent",
+                          border: "none",
+                          cursor: "pointer",
+                          color: "red",
+                          fontSize: "24px",
+                        }}
+                        onClick={() => deleteRecord(report.id)}
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center mt-4 text-danger">
+              <p>No reports available to display.</p>
+            </div>
+          )}
         </div>
 
         {/* Show More Button */}
@@ -5844,34 +6153,32 @@ const DoctorHome = () => {
           </div>
         )}
 
-<Modal
-                                  show={!!selectedImage}
-                                  onHide={() => setSelectedImage(null)}
-                                  centered
-                                >
-                                  <Modal.Body style={{ padding: 0 }}>
-                                    <img
-                                      src={selectedImage}
-                                      alt="Selected Medical Record"
-                                      style={{
-                                        width: "100%",
-                                        borderRadius: "5px",
-                                      }}
-                                    />
-                                  </Modal.Body>
-                                  <Modal.Footer>
-                                    <Button
-                                      variant="secondary"
-                                      onClick={() => setSelectedImage(null)}
-                                    >
-                                      Close
-                                    </Button>
-                                  </Modal.Footer>
-                                </Modal>
-
+        <Modal
+          show={!!selectedImage}
+          onHide={() => setSelectedImage(null)}
+          centered
+        >
+          <Modal.Body style={{ padding: 0 }}>
+            <img
+              src={selectedImage}
+              alt="Selected Medical Record"
+              style={{
+                width: "100%",
+                borderRadius: "5px",
+              }}
+            />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setSelectedImage(null)}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     );
   };
+
+  
 
   const [previewFileType, setPreviewFileType] = useState(null);
   const [previewFileUrl, setPreviewFileUrl] = useState(null);
@@ -6521,9 +6828,16 @@ const DoctorHome = () => {
           className={`mb-4 shadow-sm ${selectedAppointment && selectedAppointment.appointment_id === appointment.appointment_id ? "selected-slot" : ""}`}
           onClick={() => handleAppointmentClick(appointment, "today")}
           style={{
-            border: selectedAppointment && selectedAppointment.appointment_id === appointment.appointment_id ? "2px solid #3795BD" : "none",
+            border:
+              selectedAppointment &&
+              selectedAppointment.appointment_id === appointment.appointment_id
+                ? "2px solid #3795BD"
+                : "none",
             cursor: "pointer",
-            backgroundColor: appointment.appointment_type === "follow-up" ? "#FB8369" : "#2D9CED",
+            backgroundColor:
+              appointment.appointment_type === "follow-up"
+                ? "#FB8369"
+                : "#2D9CED",
           }}
         >
           <Card.Body>

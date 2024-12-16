@@ -393,6 +393,16 @@ const DoctorNavbar = () => {
                     >
                       Book Appointment
                     </Link>
+                    <Link
+                      className={`dropdown-item ${!areAllFieldsEnabled ? "disabled" : ""}`}
+                      to="/doctor/paymenthistory"
+                      onClick={(e) => {
+                        if (!areAllFieldsEnabled) e.preventDefault();
+                        toggleProfileDropdown();
+                      }}
+                    >
+                      Payment History
+                    </Link>
                   </>
                 )}
 

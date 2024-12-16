@@ -15,6 +15,7 @@ import {
   faReceipt,
   faTimes as faTimesSolid,
 } from "@fortawesome/free-solid-svg-icons";
+import { FaSyncAlt, FaTrash } from "react-icons/fa";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Dropdown, DropdownButton } from "react-bootstrap";
 import { format, addDays, subDays } from "date-fns";
@@ -26,16 +27,16 @@ import "../../css/ReceptionHome.css";
 import RightLogo from "../../images/pic.jpeg";
 import LeftLogo from "../../images/logon.jpeg";
 import { jwtDecode } from "jwt-decode";
- 
+
 const ClinicHome = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
- 
+
   const token = localStorage.getItem("token");
   const decodedToken = token ? jwtDecode(token) : {};
   const doctorId = decodedToken.doctor_id;
   const clinicId = decodedToken.clinic_id;
- 
+
   const [bookedAppointmentCount, setBookedAppointmentCount] = useState();
   const [totalAppointmentCount, setTotalAppointmentCount] = useState();
   const [canceledAppointmentsCount, setCanceledAppointmentsCount] = useState();
@@ -44,19 +45,20 @@ const ClinicHome = () => {
   const [walkInCount, setWalkInCount] = useState();
   const [onlineCount, setOnlineCount] = useState();
   const [followUpCount, setFollowUpCount] = useState();
- 
+
   const [todayAppointments, setTodayAppointments] = useState([]);
   const [completedAppointments, setCompletedAppointments] = useState([]);
   const [canceledAppointments, setCanceledAppointments] = useState([]);
- 
+
   const [morningSlots, setMorningSlots] = useState([]);
   const [afternoonSlots, setAfternoonSlots] = useState([]);
   const [eveningSlots, setEveningSlots] = useState([]);
- 
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [completedIndex, setCompletedIndex] = useState(0);
   const [canceledIndex, setCanceledIndex] = useState(0);
- 
+  const [whatsappReport, setWhatsappReport] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [blockFormData, setBlockFormData] = useState({
     startDate: "",
@@ -84,33 +86,33 @@ const ClinicHome = () => {
   const [documentsData, setDocumentsData] = useState(null);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
   const [selectedHeading, setSelectedHeading] = useState(null);
- 
+
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
- 
+
   const [selectedTodayAppointment, setSelectedTodayAppointment] =
     useState(null);
   const [selectedCompletedAppointment, setSelectedCompletedAppointment] =
     useState(null);
   const [selectedCanceledAppointment, setSelectedCanceledAppointment] =
     useState(null);
- 
+
   const [isPrescriptionDocs, setIsPrescriptionDocs] = useState(false);
   const [editingRecordId, setEditingRecordId] = useState(null);
   const [loading, setLoading] = useState(false);
- 
+
   const history = useHistory();
- 
+
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState("");
- 
+
   const handleShow = (message) => {
     setModalContent(message);
     setShowModal(true);
   };
- 
+
   const handleClose = () => setShowModal(false);
- 
+
   const fetchSlots = useCallback(async (doctorId, date) => {
     try {
       const response = await BaseUrl.get(
@@ -130,7 +132,7 @@ const ClinicHome = () => {
           slots.forEach((slot) => {
             const slotTime = new Date(`1970-01-01T${slot.appointment_slot}`);
             const hours = slotTime.getHours();
- 
+
             if (hours < 12) {
               morning.push(slot);
             } else if (hours >= 12 && hours < 17) {
@@ -152,7 +154,7 @@ const ClinicHome = () => {
       setErrorMessage("Error fetching slots. Please try again later.");
     }
   }, []);
- 
+
   const fetchAppointmentsData = useCallback(
     async (doctorId, clinicId, date) => {
       if (clinicId) {
@@ -170,7 +172,7 @@ const ClinicHome = () => {
           const canceledAppointments = appointments.filter(
             (app) => app.is_canceled
           );
- 
+
           setTodayAppointments(todayAppointments);
           setCompletedAppointments(completedAppointments);
           setCanceledAppointments(canceledAppointments);
@@ -192,7 +194,7 @@ const ClinicHome = () => {
     },
     []
   );
- 
+
   const fetchAppointmentCounts = async (doctorId, date) => {
     try {
       const responseCounts = await BaseUrl.get(
@@ -215,22 +217,22 @@ const ClinicHome = () => {
       console.error(error);
     }
   };
- 
+
   const [uploadedPrescription, setUploadedPrescription] = useState(null);
- 
+
   const fetchUploadedPrescriptionDocument = async (appointmentId) => {
     try {
       const formattedDate = selectedAppointmentDate
         ? new Date(selectedAppointmentDate).toISOString().split("T")[0]
         : new Date().toISOString().split("T")[0];
- 
+
       const response = await BaseUrl.get(`/patient/patientprescriptonfile/`, {
         params: {
           appointment_id: appointmentId,
           prescription_date: formattedDate,
         },
       });
- 
+
       if (response.status === 200) {
         setUploadedPrescription(response.data);
       } else {
@@ -240,12 +242,12 @@ const ClinicHome = () => {
       setUploadedPrescription(null);
       setError(
         error.response?.data?.error ||
-        error.message ||
-        "An unexpected error occurred."
+          error.message ||
+          "An unexpected error occurred."
       );
     }
   };
- 
+
   const handlePrescriptionClick = () => {
     setSelectedHeading("prescription");
     if (selectedAppointmentId && selectedAppointment.patient_id) {
@@ -256,7 +258,7 @@ const ClinicHome = () => {
         time: "",
         description: "",
       });
- 
+
       Promise.all([
         fetchPrescriptionData(
           selectedAppointment.patient_id,
@@ -276,7 +278,7 @@ const ClinicHome = () => {
         });
     }
   };
- 
+
   const fetchPrescriptionData = async (patientId, appointmentId) => {
     try {
       const response = await BaseUrl.get(
@@ -287,9 +289,9 @@ const ClinicHome = () => {
           ...prescription,
           patient_id: patientId,
         }));
- 
+
         setPrescriptionData(prescriptions);
- 
+
         const updatedFormPrescription = prescriptions.map((prescription) => ({
           medicine_name: prescription.medicine_name || "",
           comment: prescription.comment || "",
@@ -297,7 +299,7 @@ const ClinicHome = () => {
           description: prescription.description || "",
           prescription_id: prescription.id,
         }));
- 
+
         setFormPrescription(updatedFormPrescription);
       } else {
         setPrescriptionData([]);
@@ -314,14 +316,14 @@ const ClinicHome = () => {
       setErrorMessage("Failed to fetch prescription data.");
     }
   };
- 
+
   const [formPrescription, setFormPrescription] = useState({
     medicine_name: "",
     comment: "",
     time: "",
     description: "",
   });
- 
+
   const handleViewPrescription = async (documentId) => {
     try {
       if (!documentId) {
@@ -358,7 +360,7 @@ const ClinicHome = () => {
       );
     }
   };
- 
+
   const renderPrescriptionData = () => {
     const hasPrescriptions = prescriptionData && prescriptionData.length > 0;
     return (
@@ -553,7 +555,7 @@ const ClinicHome = () => {
             </Col>
           </Row>
         )}
- 
+
         <Col md={6} className="mb-5 mt-4">
           <Form.Group>
             <div style={{ display: "flex", gap: "10px" }}>
@@ -572,14 +574,14 @@ const ClinicHome = () => {
             </div>
           </Form.Group>
         </Col>
- 
+
         <input
           type="file"
           id="fileUpload"
           style={{ display: "none" }}
           onChange={handleFileUpload}
         />
- 
+
         {uploadedPrescription && uploadedPrescription.length > 0 && (
           <div className="mt-4">
             <h5>Uploaded Prescription Documents:</h5>
@@ -618,31 +620,34 @@ const ClinicHome = () => {
       </div>
     );
   };
- 
+
   const handleAddPrescription = () => {
     setPrescriptionData([
       ...prescriptionData,
       { medicine_name: "", comment: "", time: "", description: "" },
     ]);
   };
- 
+
   const handlePrescriptionFieldChange = (e, index, field) => {
     const { value } = e.target;
     const updatedPrescriptions = [...prescriptionData];
     updatedPrescriptions[index][field] = value;
     setPrescriptionData(updatedPrescriptions);
   };
- 
+
   const handlePrescriptionChange = (e) => {
     const { name, value } = e.target;
     setFormPrescription((prev) => ({ ...prev, [name]: value }));
   };
- 
+
   const handlePrescriptionSubmit = async () => {
     try {
       const hasExistingPrescriptions = prescriptionData.length > 0;
-      const latestPrescription = hasExistingPrescriptions ? prescriptionData[prescriptionData.length - 1] : formPrescription;
-      const isNewPrescription = !hasExistingPrescriptions || !latestPrescription.id;
+      const latestPrescription = hasExistingPrescriptions
+        ? prescriptionData[prescriptionData.length - 1]
+        : formPrescription;
+      const isNewPrescription =
+        !hasExistingPrescriptions || !latestPrescription.id;
       const prescriptions = [
         {
           medicine_name: latestPrescription.medicine_name || "",
@@ -650,17 +655,17 @@ const ClinicHome = () => {
           comment: latestPrescription.comment || "",
           description: latestPrescription.description || "",
           appointment_id: selectedAppointmentId,
-        }
+        },
       ];
       const endpoint = "/patient/patientpriscription/";
       const response = isNewPrescription
         ? await BaseUrl.post(endpoint, prescriptions, {
-          headers: { "Content-Type": "application/json" },
-        })
+            headers: { "Content-Type": "application/json" },
+          })
         : await BaseUrl.put(endpoint, prescriptions, {
-          headers: { "Content-Type": "application/json" },
-        });
- 
+            headers: { "Content-Type": "application/json" },
+          });
+
       if (response.status === 201 && response.data.success) {
         const successMessage =
           response.data.success || "Details have been successfully updated.";
@@ -680,7 +685,7 @@ const ClinicHome = () => {
       handleShow(errorMessage);
     }
   };
- 
+
   const handleUpdatePrescription = async (prescriptionId, index) => {
     try {
       const prescriptionDataItem = prescriptionData[index];
@@ -694,8 +699,10 @@ const ClinicHome = () => {
       updateData.append("time", prescriptionDataItem.time);
       updateData.append("comment", prescriptionDataItem.comment);
       updateData.append("description", prescriptionDataItem.description);
- 
-      const response = await BaseUrl.put(`/patient/patientpriscription/`, updateData,
+
+      const response = await BaseUrl.put(
+        `/patient/patientpriscription/`,
+        updateData,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
@@ -719,7 +726,7 @@ const ClinicHome = () => {
       handleShow(errorMessage);
     }
   };
- 
+
   const deletePrescription = async (prescriptionId) => {
     try {
       if (!prescriptionId) {
@@ -729,7 +736,7 @@ const ClinicHome = () => {
       const response = await BaseUrl.delete(`/patient/patientpriscription/`, {
         params: { prescription_id: prescriptionId },
       });
- 
+
       if (response.status === 200 || response.status === 204) {
         const successMessage = response.data.success;
         setSuccessMessage(successMessage);
@@ -748,64 +755,78 @@ const ClinicHome = () => {
       handleShow(errorMessage);
     }
   };
- 
+
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
-    const formattedDate = selectedAppointmentDate ? new Date(selectedAppointmentDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0];
-    const matchingAppointment = appointmentDetails.find((appointment) => appointment.appointment_date === formattedDate);
+    const formattedDate = selectedAppointmentDate
+      ? new Date(selectedAppointmentDate).toISOString().split("T")[0]
+      : new Date().toISOString().split("T")[0];
+    const matchingAppointment = appointmentDetails.find(
+      (appointment) => appointment.appointment_date === formattedDate
+    );
     const appointmentId = matchingAppointment.id;
     const formData = new FormData();
     formData.append("document_file", file);
     formData.append("appointment", appointmentId);
     formData.append("document_date", formattedDate);
- 
+
     try {
-        const response = await BaseUrl.post("/patient/patientprescriptonfile/", formData);
-        if (response.status === 201) {
-            const successMessage =
-                response.data.success || "Details have been successfully updated.";
-            setSuccessMessage(successMessage);
-            handleShow(successMessage);
-            await fetchUploadedPrescriptionDocument(appointmentId);
-        } else {
-            setErrorMessage("Failed to upload file.");
-            handleShow("Failed to upload Prescription files.");
-        }
-    } catch (error) {
-        const errorMessage = error.response?.data?.error || "An error occurred during file upload.";
-        setErrorMessage(errorMessage);
-        handleShow(errorMessage);
-    }
-};
- 
-const handleDeleteDocumentFile = async (documentId) => {
-  const formattedDate = selectedAppointmentDate ? new Date(selectedAppointmentDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0];
-  const matchingAppointment = appointmentDetails.find((appointment) => appointment.appointment_date === formattedDate);
-  const appointmentId = matchingAppointment.id;
-  try {
-    const response = await BaseUrl.delete(`/patient/patientprescriptonfile/`,
-      {
-        data: { document_id: documentId },
+      const response = await BaseUrl.post(
+        "/patient/patientprescriptonfile/",
+        formData
+      );
+      if (response.status === 201) {
+        const successMessage =
+          response.data.success || "Details have been successfully updated.";
+        setSuccessMessage(successMessage);
+        handleShow(successMessage);
+        await fetchUploadedPrescriptionDocument(appointmentId);
+      } else {
+        setErrorMessage("Failed to upload file.");
+        handleShow("Failed to upload Prescription files.");
       }
-    );
-    if (response.status === 200) {
-      const successMessage =
-        response.data.success || "Document has been successfully deleted.";
-      setSuccessMessage(successMessage);
-      handleShow(successMessage);
-      await fetchUploadedPrescriptionDocument(appointmentId);
-    } else {
-      setErrorMessage("Failed to delete document.");
-      handleShow("Failed to delete document.");
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error || "An error occurred during file upload.";
+      setErrorMessage(errorMessage);
+      handleShow(errorMessage);
     }
-  } catch (error) {
-    const errorMessage =
-      error.response?.data?.error || "An error occurred during document deletion.";
-    setErrorMessage(errorMessage);
-    handleShow(errorMessage);
-  }
-};
- 
+  };
+
+  const handleDeleteDocumentFile = async (documentId) => {
+    const formattedDate = selectedAppointmentDate
+      ? new Date(selectedAppointmentDate).toISOString().split("T")[0]
+      : new Date().toISOString().split("T")[0];
+    const matchingAppointment = appointmentDetails.find(
+      (appointment) => appointment.appointment_date === formattedDate
+    );
+    const appointmentId = matchingAppointment.id;
+    try {
+      const response = await BaseUrl.delete(
+        `/patient/patientprescriptonfile/`,
+        {
+          data: { document_id: documentId },
+        }
+      );
+      if (response.status === 200) {
+        const successMessage =
+          response.data.success || "Document has been successfully deleted.";
+        setSuccessMessage(successMessage);
+        handleShow(successMessage);
+        await fetchUploadedPrescriptionDocument(appointmentId);
+      } else {
+        setErrorMessage("Failed to delete document.");
+        handleShow("Failed to delete document.");
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error ||
+        "An error occurred during document deletion.";
+      setErrorMessage(errorMessage);
+      handleShow(errorMessage);
+    }
+  };
+
   const fetchPatientDetails = async (patientId, appointmentId) => {
     try {
       const response = await BaseUrl.get(
@@ -820,7 +841,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       setPatientDetails(null);
     }
   };
- 
+
   const handlePatientDetailsClick = () => {
     setSelectedHeading("patientDetails");
     if (selectedAppointment) {
@@ -838,7 +859,7 @@ const handleDeleteDocumentFile = async (documentId) => {
         });
     }
   };
- 
+
   const renderPatientDetails = () => {
     return (
       <div>
@@ -857,7 +878,7 @@ const handleDeleteDocumentFile = async (documentId) => {
             {fetchError}
           </div>
         )}
- 
+
         <Row className="mt-3">
           <Col md={3}>
             <Form.Group>
@@ -869,7 +890,7 @@ const handleDeleteDocumentFile = async (documentId) => {
                 value={patientDetails.name}
                 onChange={(e) => {
                   const inputValue = e.target.value;
-                  const validInput = inputValue.replace(/[^a-zA-Z\s]/g, '');
+                  const validInput = inputValue.replace(/[^a-zA-Z\s]/g, "");
                   setPatientDetails({ ...patientDetails, name: validInput });
                 }}
               />
@@ -885,7 +906,7 @@ const handleDeleteDocumentFile = async (documentId) => {
                 value={patientDetails.age}
                 onChange={(e) => {
                   const inputValue = e.target.value;
-                  const validInput = inputValue.replace(/[^0-9]/g, '');
+                  const validInput = inputValue.replace(/[^0-9]/g, "");
                   setPatientDetails({ ...patientDetails, age: validInput });
                 }}
               />
@@ -918,8 +939,11 @@ const handleDeleteDocumentFile = async (documentId) => {
                 value={patientDetails.mobile_number}
                 onChange={(e) => {
                   const inputValue = e.target.value;
-                  const validInput = inputValue.replace(/[^0-9]/g, '');
-                  setPatientDetails({ ...patientDetails, mobile_number: validInput });
+                  const validInput = inputValue.replace(/[^0-9]/g, "");
+                  setPatientDetails({
+                    ...patientDetails,
+                    mobile_number: validInput,
+                  });
                 }}
               />
             </Form.Group>
@@ -993,7 +1017,7 @@ const handleDeleteDocumentFile = async (documentId) => {
             </Form.Group>
           </Col>
         </Row>
- 
+
         <Button
           variant="primary"
           onClick={handleUpdatePatientDetails}
@@ -1004,7 +1028,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       </div>
     );
   };
- 
+
   const handleUpdatePatientDetails = async () => {
     try {
       const updateData = {
@@ -1029,15 +1053,15 @@ const handleDeleteDocumentFile = async (documentId) => {
       handleShow(errorMessage);
     }
   };
- 
+
   const [isNewVitals, setIsNewVitals] = useState(true);
- 
+
   const fetchVitalsData = async (appointmentId) => {
     try {
       const response = await BaseUrl.get(`/patient/vital/`, {
         params: { appointment_id: appointmentId },
       });
- 
+
       if (response.status === 200 && response.data.length > 0) {
         setVitalsData(response.data);
         setIsNewVitals(false);
@@ -1083,7 +1107,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       setIsNewVitals(true);
     }
   };
- 
+
   const handleVitalsClick = () => {
     setSelectedHeading("vitals");
     if (selectedAppointmentId) {
@@ -1092,7 +1116,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       );
     }
   };
- 
+
   const [formVitals, setFormVitals] = useState({
     height: vitalsData?.[0]?.height || "",
     weight: vitalsData?.[0]?.weight || "",
@@ -1104,7 +1128,7 @@ const handleDeleteDocumentFile = async (documentId) => {
     sugar_level: vitalsData?.[0]?.sugar_level || "",
     bmi: vitalsData?.[0]?.bmi || "",
   });
- 
+
   const renderVitalsData = () => {
     return (
       <div style={{ padding: "20px" }}>
@@ -1242,7 +1266,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       </div>
     );
   };
- 
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormVitals((prev) => {
@@ -1261,7 +1285,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       return updatedVitals;
     });
   };
- 
+
   const handleVitalsSubmit = async () => {
     const isEmpty = Object.values(formVitals).every((value) => value === "");
     if (isEmpty) {
@@ -1284,7 +1308,7 @@ const handleDeleteDocumentFile = async (documentId) => {
         height: Number(formVitals.height),
         bmi: Number(formVitals.bmi),
       };
- 
+
       const response = isNewVitals
         ? await BaseUrl.post(`/patient/vital/`, vitalRequestData)
         : await BaseUrl.put(`/patient/vital/`, vitalRequestData);
@@ -1304,10 +1328,10 @@ const handleDeleteDocumentFile = async (documentId) => {
       handleShow(errorMessage);
     }
   };
- 
+
   const [symptomsData, setSymptomsData] = useState([]);
   const [fetchError, setFetchError] = useState("");
- 
+
   const clearMessagesAfterTimeout = () => {
     setTimeout(() => {
       setSuccessMessage("");
@@ -1315,7 +1339,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       setFetchError("");
     }, 5000);
   };
- 
+
   const fetchSymptomsData = async (appointmentId) => {
     setFetchError("");
     setSuccessMessage("");
@@ -1341,7 +1365,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       setLoading(false);
     }
   };
- 
+
   const handleSymptomsClick = () => {
     setSelectedHeading("symptoms");
     if (selectedAppointmentId) {
@@ -1350,10 +1374,9 @@ const handleDeleteDocumentFile = async (documentId) => {
       );
     }
   };
- 
- 
+
   const [showAddSymptomRow, setShowAddSymptomRow] = useState(false);
- 
+
   const renderSymptomsData = () => {
     return (
       <div>
@@ -1373,11 +1396,15 @@ const handleDeleteDocumentFile = async (documentId) => {
             {fetchError}
           </div>
         )}
- 
+
         <Form inline className="mb-3">
           <Form.Group
             className="mb-0"
-            style={{ display: "flex", alignItems: "center", position: "relative" }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              position: "relative",
+            }}
           >
             <div className="mb-4 w-100">
               <div className="mb-3">
@@ -1389,7 +1416,7 @@ const handleDeleteDocumentFile = async (documentId) => {
                   Add Symptom
                 </Button>
               </div>
- 
+
               <div className="d-flex w-100">
                 <Form.Control
                   type="text"
@@ -1398,12 +1425,16 @@ const handleDeleteDocumentFile = async (documentId) => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   style={{ flex: 1, borderRadius: "0.25rem 0 0 0.25rem" }}
                 />
-                <Button variant="primary" onClick={handleSearch} style={{ flexShrink: 0, borderRadius: "0 0.25rem 0.25rem 0" }}>
+                <Button
+                  variant="primary"
+                  onClick={handleSearch}
+                  style={{ flexShrink: 0, borderRadius: "0 0.25rem 0.25rem 0" }}
+                >
                   Search
                 </Button>
               </div>
             </div>
- 
+
             {searchResults.length > 0 && (
               <div
                 ref={searchRef}
@@ -1436,7 +1467,7 @@ const handleDeleteDocumentFile = async (documentId) => {
           </Form.Group>
         </Form>
         <hr />
- 
+
         {showAddSymptomRow && (
           <div>
             <h4>Add New Symptom</h4>
@@ -1500,7 +1531,10 @@ const handleDeleteDocumentFile = async (documentId) => {
                     type="text"
                     value={newSymptom.more_options}
                     onChange={(e) =>
-                      setNewSymptom({ ...newSymptom, more_options: e.target.value })
+                      setNewSymptom({
+                        ...newSymptom,
+                        more_options: e.target.value,
+                      })
                     }
                   />
                 </Form.Group>
@@ -1519,7 +1553,7 @@ const handleDeleteDocumentFile = async (documentId) => {
             <hr />
           </div>
         )}
- 
+
         {symptomsData.map((symptom, index) => (
           <div key={symptom.id} className="mb-3">
             <Row className="mt-3">
@@ -1605,7 +1639,11 @@ const handleDeleteDocumentFile = async (documentId) => {
                   </Dropdown.Item>
                   <Dropdown.Item
                     onClick={() =>
-                      handleRemoveSymptom(symptom.symptoms, symptom.appointment, index)
+                      handleRemoveSymptom(
+                        symptom.symptoms,
+                        symptom.appointment,
+                        index
+                      )
                     }
                   >
                     Remove
@@ -1619,13 +1657,13 @@ const handleDeleteDocumentFile = async (documentId) => {
       </div>
     );
   };
- 
+
   useEffect(() => {
     if (successMessage || errorMessage || fetchError) {
       clearMessagesAfterTimeout();
     }
   }, [successMessage, errorMessage, fetchError]);
- 
+
   const handleUpdateSymptoms = async (symptomId, index) => {
     setLoading(true);
     try {
@@ -1638,9 +1676,9 @@ const handleDeleteDocumentFile = async (documentId) => {
         more_options: symptomData.more_options,
         appointment_id: selectedAppointmentId,
       };
- 
+
       const response = await BaseUrl.put(`/doctor/symptomsdetail/`, updateData);
- 
+
       if (response.status === 201) {
         const successMessage =
           response.data.success || "Details have been successfully updated.";
@@ -1659,18 +1697,18 @@ const handleDeleteDocumentFile = async (documentId) => {
       setLoading(false);
     }
   };
- 
+
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const searchRef = useRef(null);
- 
+
   const handleClickOutside = (event) => {
     setShowSlotButtons(false);
     if (searchRef.current && !searchRef.current.contains(event.target)) {
       setSearchResults([]);
     }
   };
- 
+
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -1683,7 +1721,7 @@ const handleDeleteDocumentFile = async (documentId) => {
     severity: "",
     more_options: "",
   });
- 
+
   const handleSearch = async () => {
     try {
       const response = await BaseUrl.get("/doctor/symptomssearch/", {
@@ -1703,7 +1741,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       setSuccessMessage("");
     }
   };
- 
+
   const handleSelectSearchResult = (selectedSymptom) => {
     setNewSymptom({
       symptoms_name: selectedSymptom.symptoms_name,
@@ -1716,7 +1754,7 @@ const handleDeleteDocumentFile = async (documentId) => {
     setErrorMessage("");
     setSuccessMessage("");
   };
- 
+
   const handleAddSymptom = async () => {
     setLoading(true);
     try {
@@ -1727,7 +1765,7 @@ const handleDeleteDocumentFile = async (documentId) => {
         more_options: newSymptom.more_options,
         appointment: selectedAppointmentId,
       });
- 
+
       if (response.status === 201) {
         const successMessage =
           response.data.success || "Details have been successfully updated.";
@@ -1761,19 +1799,19 @@ const handleDeleteDocumentFile = async (documentId) => {
       setLoading(false);
     }
   };
- 
+
   const handleRemoveSymptom = async (symptomsId, appointmentId, index) => {
     try {
       const updatedSymptoms = symptomsData.filter((_, i) => i !== index);
       setSymptomsData(updatedSymptoms);
- 
+
       const response = await BaseUrl.delete(`/doctor/symptomsdetail/`, {
         data: {
           symptoms_id: symptomsId,
           appointment_id: appointmentId,
         },
       });
- 
+
       if (response.status === 200) {
         const successMessage =
           response.data.success || "Details have been successfully updated.";
@@ -1791,7 +1829,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       handleShow(errorMessage);
     }
   };
- 
+
   const handleAppointmentDateClick = async (
     appointment_date,
     appointment_id,
@@ -1804,7 +1842,10 @@ const handleDeleteDocumentFile = async (documentId) => {
     } else if (displayedData === "symptoms") {
       await fetchSymptomsData(appointment_id);
     } else if (displayedData === "prescription") {
-      await fetchPrescriptionData(selectedAppointment.patient_id, appointment_id);
+      await fetchPrescriptionData(
+        selectedAppointment.patient_id,
+        appointment_id
+      );
       await fetchUploadedPrescriptionDocument(appointment_id, appointment_date);
     } else if (displayedData === "documents") {
       await handleDocumentsClick(appointment_id);
@@ -1812,15 +1853,18 @@ const handleDeleteDocumentFile = async (documentId) => {
       await fetchPatientDetails(selectedAppointment.patient_id, appointment_id);
     }
   };
- 
+
+  const [patientId, setPatientId] = useState(null);
+
   const handleDocumentsClick = async () => {
     setSelectedHeading("documents");
+
     if (selectedAppointmentId && formattedDate) {
       try {
         const formattedDate = selectedAppointmentDate
-        ? new Date(selectedAppointmentDate).toISOString().split("T")[0]
-        : new Date().toISOString().split("T")[0];
- 
+          ? new Date(selectedAppointmentDate).toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0];
+
         const response = await BaseUrl.get(
           `/patient/patientdocumentusingappointmentid/`,
           {
@@ -1830,9 +1874,14 @@ const handleDeleteDocumentFile = async (documentId) => {
             },
           }
         );
+
         if (response.status === 200 && response.data.length > 0) {
           setDocumentsData(response.data);
           setDisplayedData("documents");
+          if (response.data.length > 0) {
+            const patientName = response.data[0].patient_name;
+            await handleRecordView(patientId, patientName);
+          }
         } else {
           setDocumentsData([]);
           setDisplayedData("documents");
@@ -1851,7 +1900,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       setDisplayedData("documents");
     }
   };
- 
+
   const [showFormModal, setShowFormModal] = useState(false);
   const [formData, setFormData] = useState({
     document_name: "",
@@ -1860,9 +1909,9 @@ const handleDeleteDocumentFile = async (documentId) => {
     document_type: "",
     document_file: "",
   });
- 
+
   const [selectedFiles, setSelectedFiles] = useState([]);
- 
+
   const toggleFormModal = async (document = null) => {
     try {
       const appointmentId = selectedAppointmentId;
@@ -1907,23 +1956,23 @@ const handleDeleteDocumentFile = async (documentId) => {
       setShowFormModal(!showFormModal);
     }
   };
- 
+
   const handleFileSelect = (event) => {
     const files = Array.from(event.target.files);
     setSelectedFiles([...selectedFiles, ...files]);
   };
- 
+
   const handleAddFileClick = () => {
     document.getElementById("fileInput").click();
   };
- 
+
   const handleDeleteFile = (index) => {
     const updatedFiles = selectedFiles.filter((_, i) => i !== index);
     setSelectedFiles(updatedFiles);
   };
- 
+
   const [editingDocumentId, setEditingDocumentId] = useState(null);
- 
+
   const handleSave = async () => {
     try {
       const decodedToken = jwtDecode(token);
@@ -1931,7 +1980,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       const patientId = selectedAppointment.patient_id;
       const userType = decodedToken.user_type;
       const userId = decodedToken.clinic_id;
- 
+
       const formDataToSend = new FormData();
       formDataToSend.append("appointment", appointmentId);
       formDataToSend.append("document_name", formData.document_name);
@@ -1941,7 +1990,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       formDataToSend.append("patient_id", patientId);
       formDataToSend.append("user_type", userType);
       formDataToSend.append("user_id", userId);
- 
+
       if (selectedFiles.length > 0) {
         formDataToSend.append("document_file", selectedFiles[0]);
       }
@@ -1985,10 +2034,11 @@ const handleDeleteDocumentFile = async (documentId) => {
       handleShow(errorMessage);
     }
   };
- 
+
   const handleDeleteDocument = async (documentId) => {
     try {
-      const response = await BaseUrl.delete(`/patient/patientdocumentusingappointmentid/`,
+      const response = await BaseUrl.delete(
+        `/patient/patientdocumentusingappointmentid/`,
         {
           data: { document_id: documentId },
           headers: {
@@ -1997,7 +2047,8 @@ const handleDeleteDocumentFile = async (documentId) => {
         }
       );
       if (response.status === 204) {
-        const successMessage = response.data.success || "Documents have been successfully removed.";
+        const successMessage =
+          response.data.success || "Documents have been successfully removed.";
         setSuccessMessage(successMessage);
         handleShow(successMessage);
         handleDocumentsClick();
@@ -2011,8 +2062,119 @@ const handleDeleteDocumentFile = async (documentId) => {
       handleShow(errorMessage);
     }
   };
- 
+
+  const handleRequestDocument = async (appointmentId) => {
+    if (!appointmentId) {
+      setErrorMessage(
+        "Appointment ID is missing. Please select an appointment."
+      );
+      return;
+    }
+
+    try {
+      // Prepare form data
+      const formData = new FormData();
+      formData.append("appointment_id", appointmentId);
+
+      // Make the PUT request using BaseUrl
+      const response = await BaseUrl.put(
+        "/doctorappointment/askreport/",
+        formData
+      );
+
+      if (response.status === 200) {
+        const successMessage =
+          response.data?.success || "Request successfully sent.";
+        setSuccessMessage(successMessage);
+        setErrorMessage("");
+      } else {
+        const errorMessage = response.data?.error || "Failed to send request.";
+        setErrorMessage(errorMessage);
+        setSuccessMessage("");
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error ||
+        "An error occurred. Please try again later.";
+      setErrorMessage(errorMessage);
+      setSuccessMessage("");
+    }
+  };
+
+  const [showMore, setShowMore] = useState(false); // State to toggle "Show More"
+
+  const handleRecordView = async (patientId, patientName) => {
+    setLoading(true); // Start loading indicator
+
+    try {
+      // Decode token to get doctor_id
+      const token = localStorage.getItem("token"); // Retrieve the token from localStorage
+      const decodedToken = jwtDecode(token);
+      const doctorId = decodedToken?.doctor_id;
+
+      if (!doctorId) {
+        setErrorMessage("Doctor ID not available. Please log in again.");
+        return;
+      }
+
+      // API call
+      const response = await BaseUrl.get(`/doctorappointment/whatsappreport/`, {
+        params: {
+          patient_id: patientId,
+          doctor_id: doctorId,
+          patient_name: patientDetails.name, // Include the patient name
+        },
+      });
+
+      if (response.status === 200) {
+        const reports = response.data?.reports || [];
+        setWhatsappReport(reports); // Update state with fetched reports
+        setSuccessMessage("Medical record fetched successfully.");
+        setErrorMessage("");
+      } else {
+        setErrorMessage(
+          response.data?.error || "Failed to fetch medical record."
+        );
+        setSuccessMessage("");
+      }
+    } catch (error) {
+      setErrorMessage(error.response?.data?.error || "An error occurred.");
+      setSuccessMessage("");
+    } finally {
+      setLoading(false); // Stop loading indicator
+    }
+  };
+
+  const deleteRecord = async (id) => {
+    try {
+      const response = await BaseUrl.delete(
+        "/doctorappointment/whatsappreport/",
+        {
+          data: { id },
+        }
+      );
+
+      if (response.status === 200) {
+        alert("Record deleted successfully");
+        setWhatsappReport((prevPhotos) =>
+          prevPhotos.filter((photo) => photo.id !== id)
+        );
+      } else {
+        alert("Error deleting record");
+      }
+    } catch (error) {
+      alert("Failed to delete record");
+    }
+  };
+
   const renderDocumentsData = () => {
+    const visibleReports = showMore
+      ? whatsappReport
+      : whatsappReport.slice(0, 6);
+    const visibleDocuments = showMore
+      ? documentsData
+      : documentsData.slice(0, 6);
+
     return (
       <div>
         {successMessage && (
@@ -2030,133 +2192,314 @@ const handleDeleteDocumentFile = async (documentId) => {
             {fetchError}
           </div>
         )}
+
         <div className="d-flex justify-content-end">
-          <Button className="btn btn-primary" onClick={() => toggleFormModal()}>
+          <Button
+            className="btn btn-primary me-2"
+            onClick={() => toggleFormModal()}
+          >
             Upload Documents
           </Button>
+          <Button
+            className="btn btn-primary me-2"
+            onClick={() => handleRequestDocument(selectedAppointmentId)}
+          >
+            Request Document
+          </Button>
+          <Button
+            style={{
+              background: "#00DAF7",
+              color: "#000",
+              border: "none",
+              borderRadius: "5px",
+              padding: "10px 20px",
+            }}
+            onClick={() =>
+              handleRecordView(
+                selectedAppointment?.patient_id,
+                selectedAppointment?.doctor_id,
+                selectedAppointment?.patient_name
+              )
+            }
+          >
+            <FaSyncAlt />
+          </Button>
         </div>
-        {documentsData.map((document) => (
-          <div key={document.id} className="mb-3" style={{ cursor: "pointer" }}>
-            <Row className="mt-3">
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>
-                    <strong>Document Name:</strong>
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={document.document_name}
-                    readOnly
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>
-                    <strong>Document Date:</strong>
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={document.document_date}
-                    readOnly
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>
-                    <strong>Document Type:</strong>
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={document.document_type}
-                    readOnly
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>
-                    <strong>Patient Name:</strong>
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={document.patient_name}
-                    readOnly
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-            <Row className="mt-3">
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>
-                    <strong>Uploaded By:</strong>
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={document.uploaded_by}
-                    readOnly
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>
-                    <strong>Document File:</strong>
-                  </Form.Label>
-                  <Button
-                    variant="primary"
-                    onClick={() => viewDocument(document.id)}
-                    style={{
-                      backgroundColor: "#5c85d6",
-                      borderColor: "#5c85d6",
-                      borderRadius: "20px",
-                      padding: "8px 16px",
-                      transition: "background-color 0.3s, transform 0.3s",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#4c75c6")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#5c85d6")
-                    }
-                    aria-label={`View document ${document.document_name}`}
-                  >
-                    View Document
-                  </Button>
-                </Form.Group>
-              </Col>
-              <Col md={3} className="mt-4">
-                <DropdownButton
-                  align="end"
-                  drop="end"
-                  title={<i className="bi bi-three-dots" />}
-                  variant="secondary"
-                  id={`dropdown-${document.id}`}
+
+        {/* <h5 className = "mt-3" style={{ fontWeight: "700" }}>Uploaded by : Doctor</h5> */}
+
+        {documentsData.length > 0 ? (
+          <table className="table table-striped mt-4">
+            <thead>
+              <tr>
+                <th>Document Name</th>
+                <th>Document Date</th>
+                <th>Document Type</th>
+                <th>Patient Name</th>
+                <th>Document File</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {documentsData.map((document) => (
+                <tr key={document.id}>
+                  <td>{document.document_name}</td>
+                  <td>{document.document_date}</td>
+                  <td>{document.document_type}</td>
+                  <td>{document.patient_name}</td>
+                  <td>
+                    <Button
+                      variant="primary"
+                      onClick={() => viewDocument(document.id)}
+                      style={{
+                        backgroundColor: "#5c85d6",
+                        borderColor: "#5c85d6",
+                        borderRadius: "20px",
+                        padding: "8px 16px",
+                        transition: "background-color 0.3s, transform 0.3s",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.backgroundColor = "#4c75c6")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.backgroundColor = "#5c85d6")
+                      }
+                      aria-label={`View document ${document.document_name}`}
+                    >
+                      View Document
+                    </Button>
+                  </td>
+                  <td>
+                    <DropdownButton
+                      align="end"
+                      drop="end"
+                      title={<i className="bi bi-three-dots" />}
+                      variant="secondary"
+                      id={`dropdown-${document.id}`}
+                    >
+                      <Dropdown.Item onClick={() => toggleFormModal(document)}>
+                        Modify
+                      </Dropdown.Item>
+                      <Dropdown.Item
+                        onClick={() => handleDeleteDocument(document.id)}
+                      >
+                        Delete
+                      </Dropdown.Item>
+                    </DropdownButton>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="text-center text-danger">
+            <p>No documents available to display.</p>
+          </div>
+        )}
+
+        <div className="d-flex flex-wrap justify-content-start">
+          {visibleDocuments.map((document) => (
+            <div key={document.id} className="p-2">
+              <div
+                className="card"
+                style={{
+                  width: "203px",
+                  position: "relative",
+                  marginBottom: "15px",
+                }}
+              >
+                <div
+                  style={{
+                    height: "200px",
+                    background: "#f3f3f3",
+                    borderRadius: "5px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
                 >
-                  <Dropdown.Item onClick={() => toggleFormModal(document)}>
-                    Modify
-                  </Dropdown.Item>
-                  <Dropdown.Item
+                  {document.document_file ? (
+                    <img
+                      src={document.document_file} // Valid image URL
+                      alt={`Uploaded by: ${document.uploaded_by}`}
+                      style={{
+                        objectFit: "cover",
+                        width: "100%",
+                        height: "90%",
+                        borderRadius: "5px",
+                         cursor: "pointer",
+                        // border: "1px solid red", // Debugging border
+                      }}
+                      onClick={() => viewDocument(document.id)}
+                    />
+                  ) : (
+                    <span>No Preview</span>
+                  )}
+                </div>
+                <div
+                  className="document-date"
+                  style={{
+                    position: "absolute",
+                    bottom: "0",
+                    left: "0",
+                    backgroundColor: "rgba(0, 0, 0, 0.6)",
+                    color: "white",
+                    padding: "5px",
+                    borderRadius: "5px",
+                  }}
+                >
+                  {new Intl.DateTimeFormat("en-GB").format(
+                    new Date(document.document_date)
+                  )}
+                </div>
+                <div className="card-body text-center">
+                  <button
+                    className="btn btn-danger btn-sm"
+                    style={{
+                      position: "absolute",
+                      bottom: "0",
+                      right: "10px",
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "red",
+                      fontSize: "24px",
+                    }}
                     onClick={() => handleDeleteDocument(document.id)}
                   >
-                    Delete
-                  </Dropdown.Item>
-                </DropdownButton>
-              </Col>
-            </Row>
-            <hr />
+                    <FaTrash />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {documentsData.length > 6 && (
+          <div className="text-center mt-3">
+            <Button
+              className="btn btn-primary"
+              onClick={() => setShowMore(!showMore)}
+            >
+              {showMore ? "Show Less" : "Show More"}
+            </Button>
           </div>
-        ))}
+        )}
+        <hr />
+
+        <h5 style={{ fontWeight: "700" }}>Uploaded by : Patient</h5>
+
+        <div>
+          {visibleReports.length > 0 ? (
+            <div className="d-flex flex-wrap justify-content-start">
+              {visibleReports.map((report) => (
+                <div key={report.id} className="p-2">
+                  <div
+                    className="card"
+                    style={{ width: "203px", position: "relative" }}
+                  >
+                    <img
+                      src={report.report_file}
+                      alt="WhatsApp Report"
+                      style={{
+                        objectFit: "cover",
+                        height: "200px",
+                        width: "100%",
+                        borderRadius: "5px",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => setSelectedImage(report.report_file)}
+                    />
+
+                    {/* Display Date on the Image */}
+                    <div
+                      className="report-date"
+                      style={{
+                        position: "absolute",
+                        bottom: "0",
+                        left: "0",
+                        backgroundColor: "rgba(0, 0, 0, 0.6)",
+                        color: "white",
+                        padding: "5px",
+                        borderRadius: "5px",
+                      }}
+                    >
+                      {new Intl.DateTimeFormat("en-GB").format(
+                        new Date(report.date)
+                      )}
+                    </div>
+
+                    {/* Delete Button */}
+                    <div className="card-body text-center">
+                      <button
+                        className="btn btn-danger btn-sm"
+                        style={{
+                          position: "absolute",
+                          bottom: "0",
+                          right: "10px",
+                          background: "transparent",
+                          border: "none",
+                          cursor: "pointer",
+                          color: "red",
+                          fontSize: "24px",
+                        }}
+                        onClick={() => deleteRecord(report.id)}
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center mt-4 text-danger">
+              <p>No reports available to display.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Show More Button */}
+        {whatsappReport.length > 6 && (
+          <div className="text-center mt-3">
+            <Button
+              className="btn btn-primary"
+              onClick={() => setShowMore(!showMore)}
+            >
+              {showMore ? "Show Less" : "Show More"}
+            </Button>
+          </div>
+        )}
+
+        <Modal
+          show={!!selectedImage}
+          onHide={() => setSelectedImage(null)}
+          centered
+        >
+          <Modal.Body style={{ padding: 0 }}>
+            <img
+              src={selectedImage}
+              alt="Selected Medical Record"
+              style={{
+                width: "100%",
+                borderRadius: "5px",
+              }}
+            />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setSelectedImage(null)}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     );
   };
- 
+
   const [previewFileType, setPreviewFileType] = useState(null);
   const [previewFileUrl, setPreviewFileUrl] = useState(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
- 
+
   const viewDocument = async (documentId) => {
     try {
       if (!documentId) {
@@ -2175,7 +2518,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       setErrorMessage("Error fetching document. Please try again later.");
     }
   };
- 
+
   const renderDocumentPreviewModal = () => (
     <Modal
       show={showPreviewModal}
@@ -2214,7 +2557,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       </Modal.Footer>
     </Modal>
   );
- 
+
   const handleEndVisit = async (appointmentId) => {
     try {
       await BaseUrl.patch("/doctorappointment/completedappointment/", {
@@ -2223,7 +2566,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       setIsVisitEnded(true);
       setSuccessMessage("Visit ended successfully.");
       handleShow("Appointment visit has been successfully ended.");
- 
+
       const formattedDate = format(currentDate, "yyyy-MM-dd");
       fetchAppointmentsData(doctorId, clinicId, formattedDate);
       fetchAppointmentCounts(doctorId, formattedDate);
@@ -2232,7 +2575,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       setErrorMessage("Error ending visit: " + error.message);
     }
   };
- 
+
   const handleCancelAppointment = async (appointmentId) => {
     try {
       await BaseUrl.patch("/doctorappointment/canceledappointment/", {
@@ -2240,7 +2583,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       });
       handleShow("Appointment has been Canceled successfully.");
       setSuccessMessage("Appointment canceled successfully.");
- 
+
       const formattedDate = format(currentDate, "yyyy-MM-dd");
       fetchAppointmentsData(doctorId, clinicId, formattedDate);
       fetchAppointmentCounts(doctorId, formattedDate);
@@ -2249,7 +2592,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       setErrorMessage("Error canceling appointment: " + error.message);
     }
   };
- 
+
   const resetModalState = () => {
     setSelectedAppointment(null);
     setVitalsData([]);
@@ -2260,7 +2603,7 @@ const handleDeleteDocumentFile = async (documentId) => {
     setSelectedCompletedAppointment(null);
     setSelectedCanceledAppointment(null);
   };
- 
+
   const handleAppointmentClick = async (slotOrAppointment, section) => {
     if (
       selectedAppointment &&
@@ -2274,6 +2617,8 @@ const handleDeleteDocumentFile = async (documentId) => {
     setSelectedAppointmentId(slotOrAppointment.appointment_id);
     setSelectedHeading("patientDetails");
     try {
+      const patientId = slotOrAppointment.patient_id;
+      setPatientId(patientId);
       const patientDetailsResponse = await BaseUrl.get(`/patient/patient/`, {
         params: {
           patient_id: slotOrAppointment.patient_id,
@@ -2309,14 +2654,14 @@ const handleDeleteDocumentFile = async (documentId) => {
       setErrorMessage();
     }
   };
- 
+
   useEffect(() => {
     const formattedDate = format(currentDate, "yyyy-MM-dd");
     fetchSlots(doctorId, formattedDate);
     fetchAppointmentsData(doctorId, clinicId, formattedDate);
     fetchAppointmentCounts(doctorId, formattedDate);
   }, [doctorId, clinicId, currentDate, fetchSlots, fetchAppointmentsData]);
- 
+
   const handlePreviousDate = () => {
     const newDate = subDays(currentDate, 1);
     setCurrentDate(newDate);
@@ -2324,7 +2669,7 @@ const handleDeleteDocumentFile = async (documentId) => {
     fetchSlots(doctorId, formattedDate);
     fetchAppointmentsData(doctorId, clinicId, formattedDate);
   };
- 
+
   const handleNextDate = () => {
     const newDate = addDays(currentDate, 1);
     setCurrentDate(newDate);
@@ -2332,39 +2677,39 @@ const handleDeleteDocumentFile = async (documentId) => {
     fetchSlots(doctorId, formattedDate);
     fetchAppointmentsData(doctorId, clinicId, formattedDate);
   };
- 
+
   const handlePrevious = () => {
     setCurrentIndex((prevIndex) => Math.max(prevIndex - 1, 0));
   };
- 
+
   const handleNext = () => {
     setCurrentIndex((prevIndex) =>
       Math.min(prevIndex + 1, todayAppointments.length - 4)
     );
   };
- 
+
   const handleCompletedPrevious = () => {
     setCompletedIndex((prevIndex) => Math.max(prevIndex - 1, 0));
   };
- 
+
   const handleCompletedNext = () => {
     setCompletedIndex((prevIndex) =>
       Math.min(prevIndex + 1, completedAppointments.length - 4)
     );
   };
- 
+
   const handleCanceledPrevious = () => {
     setCanceledIndex((prevIndex) => Math.max(prevIndex - 1, 0));
   };
- 
+
   const handleCanceledNext = () => {
     setCanceledIndex((prevIndex) =>
       Math.min(prevIndex + 1, canceledAppointments.length - 4)
     );
   };
- 
+
   const handleAddSlot = () => history.push("/clinic/createslot");
- 
+
   const handleBlockSlot = async () => {
     try {
       const response = await BaseUrl.patch("/doctorappointment/slot/", {
@@ -2385,7 +2730,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       setSuccessMessage("");
     }
   };
- 
+
   const handleUnblockSlot = async () => {
     try {
       const response = await BaseUrl.patch("/doctorappointment/unblockslot/", {
@@ -2406,31 +2751,31 @@ const handleDeleteDocumentFile = async (documentId) => {
       setSuccessMessage("");
     }
   };
- 
+
   const handleToggleSlotButtons = () => {
     setShowSlotButtons((prevState) => !prevState);
   };
- 
+
   const [morningIndex, setMorningIndex] = useState(0);
   const [afternoonIndex, setAfternoonIndex] = useState(0);
   const [eveningIndex, setEveningIndex] = useState(0);
- 
+
   const slotsPerPage = 4;
- 
+
   const handleMorningPrevious = () => {
     setMorningIndex((prevIndex) => Math.max(prevIndex - 1, 0));
   };
- 
+
   const handleMorningNext = () => {
     setMorningIndex((prevIndex) =>
       Math.min(prevIndex + 1, Math.ceil(morningSlots.length / slotsPerPage) - 1)
     );
   };
- 
+
   const handleAfternoonPrevious = () => {
     setAfternoonIndex((prevIndex) => Math.max(prevIndex - 1, 0));
   };
- 
+
   const handleAfternoonNext = () => {
     setAfternoonIndex((prevIndex) =>
       Math.min(
@@ -2439,23 +2784,23 @@ const handleDeleteDocumentFile = async (documentId) => {
       )
     );
   };
- 
+
   const handleEveningPrevious = () => {
     setEveningIndex((prevIndex) => Math.max(prevIndex - 1, 0));
   };
- 
+
   const handleEveningNext = () => {
     setEveningIndex((prevIndex) =>
       Math.min(prevIndex + 1, Math.ceil(eveningSlots.length / slotsPerPage) - 1)
     );
   };
- 
+
   const renderSlotCards = (slots, index) => {
     const startIndex = index * slotsPerPage * 4;
     const endIndex = Math.min(startIndex + slotsPerPage * 4, slots.length);
     const displayedSlots = slots.slice(startIndex, endIndex);
     const rows = [];
- 
+
     for (let i = 0; i < displayedSlots.length; i += 4) {
       const slotChunk = displayedSlots.slice(i, i + 4);
       rows.push(
@@ -2533,9 +2878,7 @@ const handleDeleteDocumentFile = async (documentId) => {
     }
     return rows;
   };
- 
- 
- 
+
   const renderAppointments = () => {
     const endIndex = Math.min(currentIndex + 4, todayAppointments.length);
     const displayedAppointments = todayAppointments.slice(
@@ -2568,7 +2911,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       </Col>
     ));
   };
- 
+
   const renderCompletedAppointments = () => {
     const endIndex = Math.min(completedIndex + 4, completedAppointments.length);
     const displayedAppointments = completedAppointments.slice(
@@ -2594,7 +2937,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       </Col>
     ));
   };
- 
+
   const renderCanceledAppointments = () => {
     const endIndex = Math.min(canceledIndex + 4, canceledAppointments.length);
     const displayedAppointments = canceledAppointments.slice(
@@ -2620,7 +2963,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       </Col>
     ));
   };
- 
+
   const renderAppointmentDate = () => {
     return appointmentDetails.map((appointment, index) => (
       <Col key={appointment.id} xs={12} className="mb-2">
@@ -2651,7 +2994,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       </Col>
     ));
   };
- 
+
   const renderSelectedAppointmentDetails = () => {
     if (!selectedAppointment) return null;
     const isCompleted = selectedAppointment.is_complete;
@@ -2889,7 +3232,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       </div>
     );
   };
- 
+
   const handleConfirmAction = () => {
     if (confirmAction === "endVisit") {
       handleEndVisit(selectedAppointment.appointment_id);
@@ -2898,7 +3241,7 @@ const handleDeleteDocumentFile = async (documentId) => {
     }
     setShowConfirmModal(false);
   };
- 
+
   return (
     <Container fluid className="p-5 bg-light reception-container">
       <header className="mb-2 reception-header d-flex flex-column flex-md-row justify-content-between align-items-center text-center text-md-start">
@@ -3000,7 +3343,7 @@ const handleDeleteDocumentFile = async (documentId) => {
         </Col>
       </Row>
       <hr />
- 
+
       <style>{`
         .legend {
           display: flex;
@@ -3030,7 +3373,7 @@ const handleDeleteDocumentFile = async (documentId) => {
           overflow-y: auto;
         }
       `}</style>
- 
+
       <div className="legend">
         <div>
           <span
@@ -3061,7 +3404,7 @@ const handleDeleteDocumentFile = async (documentId) => {
           <span className="legend-text">Canceled</span>
         </div>
       </div>
- 
+
       <Row className="mt-4">
         <Col className="ms-4">
           <div className="d-flex justify-content-between align-items-center mb-2">
@@ -3164,7 +3507,7 @@ const handleDeleteDocumentFile = async (documentId) => {
         </Col>
       </Row>
       <hr />
- 
+
       <h3 className="text-center">Today's Appointments</h3>
       <div className="legend">
         <div>
@@ -3223,7 +3566,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       {selectedTodayAppointment &&
         renderSelectedAppointmentDetails(selectedTodayAppointment)}
       <hr />
- 
+
       <h3 className="text-center">Completed Appointments</h3>
       <Row className="mb-4 text-center align-items-center justify-content-center">
         {completedAppointments.length > 4 && completedIndex > 0 && (
@@ -3266,7 +3609,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       {selectedCompletedAppointment &&
         renderSelectedAppointmentDetails(selectedCompletedAppointment)}
       <hr />
- 
+
       <h3 className="text-center">Canceled Appointments</h3>
       <Row className="mb-4 text-center align-items-center justify-content-center">
         {canceledAppointments.length > 4 && canceledIndex > 0 && (
@@ -3308,7 +3651,7 @@ const handleDeleteDocumentFile = async (documentId) => {
       </Row>
       {selectedCanceledAppointment &&
         renderSelectedAppointmentDetails(selectedCanceledAppointment)}
- 
+
       <Row className="mb-4 mt-4">
         <Col md={6}>
           <Card className="mb-4 shadow-sm reception-card">
@@ -3464,7 +3807,7 @@ const handleDeleteDocumentFile = async (documentId) => {
           </Card.Body>
         </Col>
       </Row>
- 
+
       <Modal
         show={showConfirmModal}
         onHide={() => setShowConfirmModal(false)}
@@ -3494,7 +3837,7 @@ const handleDeleteDocumentFile = async (documentId) => {
           </Button>
         </Modal.Footer>
       </Modal>
- 
+
       <Modal show={showFormModal} onHide={toggleFormModal} centered>
         <Modal.Header closeButton>
           <Modal.Title>
@@ -3604,7 +3947,7 @@ const handleDeleteDocumentFile = async (documentId) => {
           </Button>
         </Modal.Footer>
       </Modal>
- 
+
       <Modal show={showModal} onHide={handleClose} centered>
         <Modal.Header closeButton>
           <Modal.Title>Action Status</Modal.Title>
@@ -3619,7 +3962,5 @@ const handleDeleteDocumentFile = async (documentId) => {
     </Container>
   );
 };
- 
+
 export default ClinicHome;
- 
- 
