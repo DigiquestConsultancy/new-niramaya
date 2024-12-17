@@ -175,6 +175,8 @@ import Transaction from './components/patient/Transaction';
 import PatientBook from './components/PatientBook';
 import ContactUs from './components/patient/ContactUs';
 import Footer from './components/MainFooter/Footer';
+import Checkout from './components/CheckOut';
+import PatientCheckout from './components/patient/CheckOut';
 
 function App() {
   const [isDoctorLoggedIn, setIsDoctorLoggedIn] = useState(false);
@@ -193,6 +195,7 @@ function App() {
       <Switch>
         {/* Routes without Navbar */}
         <Route exact path="/patientbook" component={PatientBook} />
+        <Route exact path="/components/checkout" component={Checkout} />
 
         {/* Routes with Navbar */}
         <Route>
@@ -219,6 +222,7 @@ function App() {
               <Route exact path="/patient/register" component={PatientRegister} />
               <Route exact path="/doctor/home" component={DoctorHome} />
               <Route exact path="/patient/home" component={PatientHome} />
+              <Route exact path="/patient/home/checkout" component={PatientCheckout} />
               <Route exact path="/patient/details" component={PatientDetails} />
               <Route exact path="/patient/medicalrecords" component={MedicalRecords} />
               <Route exact path="/patient/transaction" component={Transaction} />
