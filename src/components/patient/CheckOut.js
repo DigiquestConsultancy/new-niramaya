@@ -1110,6 +1110,23 @@
 
 // export default Checkout;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import React, { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
 import BaseUrl from "../../api/BaseUrl";
@@ -1120,7 +1137,6 @@ import Gpay from "../../images/gpay.jpg";
 import Phonepay from "../../images/phonepay.png";
 import Paytm from "../../images/paytm.png";
 import Upi from "../../images/UPI.png";
-import Visa from "../../images/visa.jpeg";
 import VisaCard from '../../images/visacard.png';
 import Mastercard from '../../images/mastercard.png';
 import Netbanking from "../../images/rupay.png";
@@ -1184,7 +1200,7 @@ const Checkout = () => {
         localStorage.setItem("order_id", order_id);
 
         if (payment_session_id) {
-          const cashfree = await load({ mode: "sandbox" });
+          const cashfree = await load({ mode: "production" });
           await cashfree.checkout({
             paymentSessionId: payment_session_id,
             returnUrl: "http://localhost:3000/patient/home",

@@ -3629,10 +3629,8 @@ import { FaExclamationCircle, FaCalendarAlt } from "react-icons/fa";
 import { FaCheckCircle } from "react-icons/fa";
 import BaseUrl from "../../api/BaseUrl";
 import { CheckCircle } from "react-bootstrap-icons";
-import { load } from "@cashfreepayments/cashfree-js";
 import styled from "styled-components";
 import Loader from "react-js-loader";
-import { jwtDecode } from "jwt-decode";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { format, addDays } from "date-fns";
 import DatePicker from "react-datepicker";
@@ -3743,13 +3741,8 @@ const PatientHome = () => {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  const formatDay = (dateString) => {
-    const options = { weekday: "short" };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  };
-
   const handleDateChange = (index) => {
-    const selectedDate = availableDates[startIndex + index]; // Adjusted to account for the current window
+    const selectedDate = availableDates[startIndex + index];
     setSelectedDateIndex(startIndex + index);
     fetchSlots(selectedDate);
   };
@@ -4021,62 +4014,62 @@ const PatientHome = () => {
     }
   };
 
-  const handlePayment = async ({ customer_name, customer_phone }) => {
-    setLoading(true);
-    try {
-      const patientToken = localStorage.getItem("patient_token");
-      const decodedToken = jwtDecode(patientToken);
-      const patient_id = decodedToken?.patient_id;
+  // const handlePayment = async ({ customer_name, customer_phone }) => {
+  //   setLoading(true);
+  //   try {
+  //     const patientToken = localStorage.getItem("patient_token");
+  //     const decodedToken = jwtDecode(patientToken);
+  //     const patient_id = decodedToken?.patient_id;
 
-      localStorage.setItem("selectedSlotId", selectedSlot.id);
+  //     localStorage.setItem("selectedSlotId", selectedSlot.id);
 
-      const response = await fetch(
-        "http://192.168.29.95:8001/payment/create/",
-        {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            // amount: "1000",
-            // currency: "INR",
-            amount: consultationFee,
-            currency: currency,
-            customer_name,
-            // customer_phone,
-            patient_id,
-          }),
-        }
-      );
+  //     const response = await fetch(
+  //       "http://192.168.29.95:8001/payment/create/",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           Accept: "application/json",
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           // amount: "1000",
+  //           // currency: "INR",
+  //           amount: consultationFee,
+  //           currency: currency,
+  //           customer_name,
+  //           customer_phone,
+  //           patient_id,
+  //         }),
+  //       }
+  //     );
 
-      if (response.ok) {
-        const data = await response.json();
-        const { order_id, payment_session_id } = data;
-        localStorage.setItem("order_id", order_id);
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       const { order_id, payment_session_id } = data;
+  //       localStorage.setItem("order_id", order_id);
 
-        if (payment_session_id) {
-          const cashfree = await load({ mode: "sandbox" });
-          await cashfree.checkout({
-            paymentSessionId: payment_session_id,
-            returnUrl: "http://localhost:3001/patient/home",
-          });
-          localStorage.setItem("paymentSuccess", "true");
-        } else {
-          setErrorMessage("Payment session ID missing");
-        }
-      } else {
-        const errorData = await response.json();
-        setErrorMessage(
-          `Payment initiation failed: ${errorData.message || "Unknown error"}`
-        );
-      }
-    } catch (error) {
-      setErrorMessage(`Error: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //       if (payment_session_id) {
+  //         const cashfree = await load({ mode: "production" });
+  //         await cashfree.checkout({
+  //           paymentSessionId: payment_session_id,
+  //           returnUrl: "http://localhost:3001/patient/home",
+  //         });
+  //         localStorage.setItem("paymentSuccess", "true");
+  //       } else {
+  //         setErrorMessage("Payment session ID missing");
+  //       }
+  //     } else {
+  //       const errorData = await response.json();
+  //       setErrorMessage(
+  //         `Payment initiation failed: ${errorData.message || "Unknown error"}`
+  //       );
+  //     }
+  //   } catch (error) {
+  //     setErrorMessage(`Error: ${error.message}`);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const [isPaymentConfirmed, setIsPaymentConfirmed] = useState(false);
 
