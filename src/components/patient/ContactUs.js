@@ -3,6 +3,7 @@ import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 import "../../css/ContactUs.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import FAQ from "./Faq";
+import BaseUrl from "../../api/BaseUrl";
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -27,26 +28,16 @@ const ContactUs = () => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(""); // Reset error
-
+  
     const data = {
       name: formData.name,
       mobile_number: formData.phone,
       email: formData.email,
       message: formData.message,
     };
-
+  
     try {
-      const response = await fetch(
-        "http://192.168.29.95:8001/doctor/contactus/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
-      const responseData = await response.json();
+      await BaseUrl.post("/doctor/contactus/", data);
       alert("Your message has been submitted!");
       setFormData({
         name: "",
@@ -55,11 +46,12 @@ const ContactUs = () => {
         message: "",
       });
     } catch (error) {
-      setError(error.message);
+      setError(error.response?.data?.message || error.message || "An error occurred");
     } finally {
       setIsSubmitting(false);
     }
   };
+  
 
   return (
     <div className="contact-us">
@@ -114,7 +106,7 @@ const ContactUs = () => {
       </div>
 
       <div className="container">
-        <div className="row align-items-start">
+        <div className="row form-map align-items-start">
           {/* Contact Form Section */}
           <div className="col-lg-6 col-md-12 contact-form-section">
             <form className="contact-form mt-2 mb-5" onSubmit={handleSubmit}>
@@ -178,6 +170,7 @@ const ContactUs = () => {
           <div className="col-lg-6 col-md-12 map-section">
             <div className="map-container">
               <iframe
+                title="Digiquest Consultancy Services pvt. ltd. Gorakhpur"
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3563.0667048146347!2d83.37459457611769!3d26.742247367394288!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3991450618206461%3A0x7cb9790da14c3972!2sDigiQuest%20Consultancy%20Services%20Private%20Limited!5e0!3m2!1sen!2sin!4v1732861929170!5m2!1sen!2sin"
                 width="100%"
                 height="510"

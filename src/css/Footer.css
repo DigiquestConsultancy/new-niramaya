@@ -16,12 +16,12 @@ html, body, #root {
   padding-bottom: 0px;
 }
  
-footer {
+.footer {
   background-color: #343a40;
   color: white;
+  bottom: 0px;
   padding: 10px 0;
-  position: relative;
-  bottom: 0;
+  /* position: absolute; */
   width: 100%;
   text-align: center;
 }

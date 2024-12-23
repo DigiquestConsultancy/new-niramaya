@@ -7,7 +7,6 @@ import { faFacebook, faTwitter, faInstagram, faLinkedin } from '@fortawesome/fre
 const Footer = () => {
   return (
     <footer className="footer bg-dark text-white py-1">
-      <Container>
         <Row className="footer-row">
           <Col md={3}>
             <h4>Contact Us</h4>
@@ -55,7 +54,6 @@ const Footer = () => {
             <p>&copy; 2024 Niramaya Homeopathy Clinic. All rights reserved.</p>
           </Col>
         </Row>
-      </Container>
     </footer>
   );
 };

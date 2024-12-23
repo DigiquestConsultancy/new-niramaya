@@ -158,7 +158,6 @@
 import React, { useEffect, useState } from "react";
 import { Table, Container, Spinner } from "react-bootstrap";
 import styled from "styled-components";
-import { jwtDecode } from "jwt-decode";
 import BaseUrl from "../../api/BaseUrl";
 
 const TableWrapper = styled.div`
@@ -201,8 +200,7 @@ const Transaction = () => {
     useEffect(() => {
         const fetchTransactions = async () => {
             try {
-                const decodedToken = jwtDecode(patientToken);
-                const patientId = decodedToken?.patient_id;
+                const patientId = localStorage.getItem("savedPatientId");
                 const response = await BaseUrl.get(`/payment/paymenthistory/?patient_id=${patientId}`);
                 if (response.status === 200) {
                     setTransactions(response.data);

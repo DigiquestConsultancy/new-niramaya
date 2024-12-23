@@ -3,10 +3,9 @@ import BaseUrl from "../../api/BaseUrl";
 import { Link, useHistory } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../css/AuthForms.css";
-import { FaEye, FaEyeSlash, FaArrowLeft, FaThumbsUp } from "react-icons/fa";
-import  doct from '../../images/logindoc.png'
- 
- 
+import { FaEye, FaEyeSlash, FaArrowLeft } from "react-icons/fa";
+import doct from "../../images/logindoc.png";
+
 const PatientLogin = ({ setIsPatientLoggedIn }) => {
   const [countryCode, setCountryCode] = useState("91");
   const [mobileNumber, setMobileNumber] = useState("");
@@ -25,13 +24,13 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
   const inputRefs = useRef([]);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
-  const [newPasswordVisible, setNewPasswordVisible] = useState(false);
-  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
- 
+  // const [newPasswordVisible, setNewPasswordVisible] = useState(false);
+  // const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+
   const startTimer = () => {
     setIsResendDisabled(true);
     setTimer(60);
- 
+
     const countdown = setInterval(() => {
       setTimer((prevTimer) => {
         if (prevTimer <= 1) {
@@ -43,13 +42,13 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
       });
     }, 1000);
   };
- 
+
   useEffect(() => {
     if (showVerification) {
       startTimer();
     }
   }, [showVerification]);
- 
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -84,6 +83,9 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
         });
         if (response.status === 200) {
           const data = response.data;
+          const refreshToken = data.refresh;
+          console.log(refreshToken);
+          localStorage.setItem("refresh", refreshToken);
           const token = data.access;
           localStorage.setItem("patient_token", token);
           localStorage.setItem("mobile_number", mobileNumber);
@@ -94,17 +96,17 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
       }
     } catch (error) {
       const errorMessage = error.response?.data?.error;
- 
+
       setMessage({ type: "error", text: errorMessage });
     }
   };
- 
+
   const handleResendOTP = async () => {
     try {
       const response = await BaseUrl.get(
         `/patient/login/?mobile_number=${mobileNumber}`
       );
- 
+
       if (response.status === 200 && response.data.success) {
         setMessage({ type: "success", text: response.data.success });
         setOtp(["", "", "", "", "", ""]);
@@ -119,11 +121,11 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
       });
     }
   };
- 
+
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
     const enteredOtp = otp.join("");
- 
+
     if (forgotPassword) {
       // Forgot password flow
       try {
@@ -131,7 +133,7 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
           mobile_number: mobileNumber,
           otp: enteredOtp,
         });
- 
+
         if (response.status === 201) {
           if (response.data.success) {
             setMessage({ type: "success", text: response.data.success });
@@ -154,7 +156,7 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
           mobile_number: mobileNumber,
           otp: enteredOtp,
         });
- 
+
         if (response.status === 201) {
           if (response.data.success) {
             const token = response.data.access;
@@ -175,21 +177,21 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
       }
     }
   };
- 
+
   const handleResetPassword = async (e) => {
     e.preventDefault();
- 
+
     try {
       const response = await BaseUrl.post("/patient/forget/", {
         mobile_number: mobileNumber,
         new_password: newPassword,
         confirm_password: confirmPassword,
       });
- 
+
       if (response.status === 200 || response.status === 201) {
         if (response.data.success) {
           setMessage({ type: "success", text: response.data.success });
- 
+
           setTimeout(() => {
             setShowNewPasswordFields(false);
             setForgotPassword(false);
@@ -211,43 +213,43 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
       });
     }
   };
- 
+
   const handleChangeOtp = (index, value) => {
     if (!isNaN(value) && value !== " ") {
       const newOtp = [...otp];
       newOtp[index] = value;
       setOtp(newOtp);
- 
+
       if (value.length === 1 && index < otp.length - 1) {
         inputRefs.current[index + 1].focus();
       }
     }
   };
- 
+
   const handleOtpKeyDown = (index, event) => {
     if (event.key === "Backspace") {
       const newOtp = [...otp];
       newOtp[index] = "";
       setOtp(newOtp);
- 
+
       if (index > 0) {
         inputRefs.current[index - 1].focus();
       }
     }
   };
- 
+
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
- 
-  const toggleNewPasswordVisibility = () => {
-    setNewPasswordVisible(!newPasswordVisible);
-  };
- 
-  const toggleConfirmPasswordVisibility = () => {
-    setConfirmPasswordVisible(!confirmPasswordVisible);
-  };
- 
+
+  // const toggleNewPasswordVisibility = () => {
+  //   setNewPasswordVisible(!newPasswordVisible);
+  // };
+
+  // const toggleConfirmPasswordVisibility = () => {
+  //   setConfirmPasswordVisible(!confirmPasswordVisible);
+  // };
+
   const toggleAuthMode = (isRegister) => {
     if (isRegister) {
       history.push("/patient/register");
@@ -255,79 +257,77 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
       history.push("/patient/login");
     }
   };
- 
-  const handleTabSwitch = (tab) => {
-    setActiveTab(tab);
-    setShowVerification(false);
-  };
- 
+
+  // const handleTabSwitch = (tab) => {
+  //   setActiveTab(tab);
+  //   setShowVerification(false);
+  // };
+
   return (
     <div className="container-fluid p-0">
-  {/* Tabs for Login and Register */}
-  <div
-  style={{
-    backgroundColor: "white",
-    padding: "15px 0",
-    borderBottom: "1px solid #ddd",
-    zIndex: 2,
-  }}
->
-  <div
-    className="d-flex justify-content-center align-items-center"
-    style={{
-      fontSize: "30px",
-      fontWeight: "bold",
-    }}
-  >
-   
-    <span
-      onClick={() => {
-        setForgotPassword(false);
-        setShowVerification(false);
-        setShowNewPasswordFields(false);
-        toggleAuthMode(false);
-        setActiveTab("login");
-      }}
-      style={{
-        color: activeTab === "login" ? "orange" : "#007bff",
-        cursor: "pointer",
-        marginRight: "10px",
-        textDecoration: activeTab === "login" ? "underline" : "none",
-      }}
-    >
-      Login
-    </span>
- 
-    <span
-      style={{
-        color: "#000",
-        margin: "0 10px",
-      }}
-    >
-      |
-    </span>
- 
- 
-    <span
-      onClick={() => {
-        setForgotPassword(false);
-        setShowVerification(false);
-        setShowNewPasswordFields(false);
-        toggleAuthMode(true);
-        setActiveTab("register");
-      }}
-      style={{
-        color: activeTab === "register" ? "orange" : "#007bff",
-        cursor: "pointer",
-        marginLeft: "10px",
-        textDecoration: activeTab === "register" ? "underline" : "none",
-      }}
-    >
-      Register
-    </span>
-  </div>
-</div>
- 
+      {/* Tabs for Login and Register */}
+      <div
+        style={{
+          backgroundColor: "white",
+          padding: "15px 0",
+          borderBottom: "1px solid #ddd",
+          zIndex: 2,
+        }}
+      >
+        <div
+          className="d-flex justify-content-center align-items-center"
+          style={{
+            fontSize: "30px",
+            fontWeight: "bold",
+          }}
+        >
+          <span
+            onClick={() => {
+              setForgotPassword(false);
+              setShowVerification(false);
+              setShowNewPasswordFields(false);
+              toggleAuthMode(false);
+              setActiveTab("login");
+            }}
+            style={{
+              color: activeTab === "login" ? "orange" : "#007bff",
+              cursor: "pointer",
+              marginRight: "10px",
+              textDecoration: activeTab === "login" ? "underline" : "none",
+            }}
+          >
+            Login
+          </span>
+
+          <span
+            style={{
+              color: "#000",
+              margin: "0 10px",
+            }}
+          >
+            |
+          </span>
+
+          <span
+            onClick={() => {
+              setForgotPassword(false);
+              setShowVerification(false);
+              setShowNewPasswordFields(false);
+              toggleAuthMode(true);
+              setActiveTab("register");
+            }}
+            style={{
+              color: activeTab === "register" ? "orange" : "#007bff",
+              cursor: "pointer",
+              marginLeft: "10px",
+              textDecoration: activeTab === "register" ? "underline" : "none",
+            }}
+          >
+            Register
+          </span>
+        </div>
+      </div>
+
       {/* Main Container */}
       <div
         className="container-fluid preg-box d-flex justify-content-center align-items-center"
@@ -350,124 +350,133 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
             zIndex: -1,
           }}
         ></div>
- 
+
         <div className="row w-100 d-flex justify-content-lg-end">
           <div className="col-md-12 col-lg-6 d-flex justify-content-center justify-content-lg-end align-items-center form-container">
             {/* Login Form */}
-            {!showVerification && !forgotPassword && !showNewPasswordFields && activeTab === "login" && (
-              <form className="login-form mb-4 mt-2" onSubmit={handleLogin}>
-                <div className="doctor-login-link">
-                  <p className="text-link">
-                    Are you a Doctor? <Link to="/doctor/login">Login here</Link>
-                  </p>
-                </div>
-                <h2 className="text-dark mb-4">Patient Login</h2>
-                <div className="mb-3">
-                  <label
-                    htmlFor="mobileNumber"
-                    className="form-label"
-                    style={{ fontSize: "large" }}
-                  >
-                    Mobile Number
-                  </label>
-                  <div className="input-group">
-                    <select
-                      className="form-select"
-                      style={{ maxWidth: "120px" }}
-                      value={countryCode}
-                      onChange={(e) => setCountryCode(e.target.value)}
-                    >
-                      <option value="91">+91 (India)</option>
-                      <option value="1">+1 (USA)</option>
-                      <option value="44">+44 (UK)</option>
-                    </select>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Enter mobile number"
-                      value={mobileNumber}
-                      onChange={(e) => setMobileNumber(e.target.value)}
-                      required
-                      onInput={(e) =>
-                        (e.target.value = e.target.value.replace(/[^0-9]/g, ""))
-                      }
-                    />
+            {!showVerification &&
+              !forgotPassword &&
+              !showNewPasswordFields &&
+              activeTab === "login" && (
+                <form className="login-form mb-4 mt-2" onSubmit={handleLogin}>
+                  <div className="doctor-login-link">
+                    <p className="text-link">
+                      Are you a Doctor?{" "}
+                      <Link to="/doctor/login">Login here</Link>
+                    </p>
                   </div>
-                </div>
- 
-                {!loginWithOtp && (
+                  <h2 className="text-dark mb-4">Patient Login</h2>
                   <div className="mb-3">
                     <label
-                      htmlFor="password"
+                      htmlFor="mobileNumber"
                       className="form-label"
                       style={{ fontSize: "large" }}
                     >
-                      Password
+                      Mobile Number
                     </label>
                     <div className="input-group">
-                      <input
-                        type={passwordVisible ? "text" : "password"}
-                        className="form-control"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required={!loginWithOtp}
-                      />
-                      <span
-                        className="input-group-text"
-                        onClick={togglePasswordVisibility}
-                        style={{ cursor: "pointer" }}
+                      <select
+                        className="form-select"
+                        style={{ maxWidth: "120px" }}
+                        value={countryCode}
+                        onChange={(e) => setCountryCode(e.target.value)}
                       >
-                        {passwordVisible ? <FaEyeSlash /> : <FaEye />}
-                      </span>
+                        <option value="91">+91 (India)</option>
+                        <option value="1">+1 (USA)</option>
+                        <option value="44">+44 (UK)</option>
+                      </select>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Enter mobile number"
+                        value={mobileNumber}
+                        onChange={(e) => setMobileNumber(e.target.value)}
+                        required
+                        onInput={(e) =>
+                          (e.target.value = e.target.value.replace(
+                            /[^0-9]/g,
+                            ""
+                          ))
+                        }
+                      />
                     </div>
                   </div>
-                )}
- 
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                  <div className="form-check">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      value={loginWithOtp}
-                      id="Check"
-                      onChange={(e) => setLoginWithOtp(e.target.checked)}
-                    />
-                    <label className="form-check-label" htmlFor="Check">
-                      Login with OTP instead of Password
-                    </label>
+
+                  {!loginWithOtp && (
+                    <div className="mb-3">
+                      <label
+                        htmlFor="password"
+                        className="form-label"
+                        style={{ fontSize: "large" }}
+                      >
+                        Password
+                      </label>
+                      <div className="input-group">
+                        <input
+                          type={passwordVisible ? "text" : "password"}
+                          className="form-control"
+                          placeholder="Password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required={!loginWithOtp}
+                        />
+                        <span
+                          className="input-group-text"
+                          onClick={togglePasswordVisibility}
+                          style={{ cursor: "pointer" }}
+                        >
+                          {passwordVisible ? <FaEyeSlash /> : <FaEye />}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="d-flex justify-content-between align-items-center mb-4">
+                    <div className="form-check">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        value={loginWithOtp}
+                        id="Check"
+                        onChange={(e) => setLoginWithOtp(e.target.checked)}
+                      />
+                      <label className="form-check-label" htmlFor="Check">
+                        Login with OTP instead of Password
+                      </label>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="btn btn-link p-0"
+                      onClick={() => setForgotPassword(true)}
+                    >
+                      <b>Forgot Password?</b>
+                    </button>
                   </div>
- 
-                  <button
-                    type="button"
-                    className="btn btn-link p-0"
-                    onClick={() => setForgotPassword(true)}
-                  >
-                    <b>Forgot Password?</b>
+
+                  <button type="submit" className="btn btn-primary w-55 mb-3">
+                    {loginWithOtp ? "SEND OTP" : "LOGIN"}
                   </button>
-                </div>
- 
-                <button type="submit" className="btn btn-primary w-55 mb-3">
-                  {loginWithOtp ? "SEND OTP" : "LOGIN"}
-                </button>
- 
-                {message.text && (
-                  <p
-                    style={{ color: message.type === "error" ? "red" : "green" }}
-                  >
-                    {message.text}
-                  </p>
-                )}
-              </form>
-            )}
- 
+
+                  {message.text && (
+                    <p
+                      style={{
+                        color: message.type === "error" ? "red" : "green",
+                      }}
+                    >
+                      {message.text}
+                    </p>
+                  )}
+                </form>
+              )}
+
             {/* Forgot Password Form */}
             {forgotPassword && !showVerification && !showNewPasswordFields && (
               <form className=" mb-4 mt-2" onSubmit={handleLogin}>
                 <h2 className="text-dark mb-4">Forgot Password</h2>
                 <p>
-                  Enter your mobile number and we'll send you a 6-digit OTP to reset
-                  your password.
+                  Enter your mobile number and we'll send you a 6-digit OTP to
+                  reset your password.
                 </p>
                 <div className="mb-3">
                   <label
@@ -514,14 +523,16 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
                 </button>
                 {message.text && (
                   <p
-                    style={{ color: message.type === "error" ? "red" : "green" }}
+                    style={{
+                      color: message.type === "error" ? "red" : "green",
+                    }}
                   >
                     {message.text}
                   </p>
                 )}
               </form>
             )}
- 
+
             {/* OTP Verification Form */}
             {showVerification && (
               <form className="otp-form" onSubmit={handleVerifyOTP}>
@@ -544,20 +555,20 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
                     //     (e.target.value = e.target.value.replace(/[^0-9]/g, ""))
                     //   }
                     // />
-                   
+
                     <input
-                    key={index}
-                    type="text"
-                    maxLength="1"
-                    className="form-control otp-input"
-                    value={digit}
-                    onChange={(e) => handleChangeOtp(index, e.target.value)}
-                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                    onInput={(e) =>
-                      (e.target.value = e.target.value.replace(/[^0-9]/g, ""))
-                    } // Only numbers allowed
-                    ref={(el) => (inputRefs.current[index] = el)}
-                  />
+                      key={index}
+                      type="text"
+                      maxLength="1"
+                      className="form-control otp-input"
+                      value={digit}
+                      onChange={(e) => handleChangeOtp(index, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                      onInput={(e) =>
+                        (e.target.value = e.target.value.replace(/[^0-9]/g, ""))
+                      } // Only numbers allowed
+                      ref={(el) => (inputRefs.current[index] = el)}
+                    />
                   ))}
                 </div>
                 <div className="d-flex justify-content-between">
@@ -574,23 +585,25 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
                   </button>
                 </div>
                 <div className="mt-3 d-flex justify-content-center align-items-center">
-                <p style={{ fontSize: "large" }}>
-                  <span style={{ color: "black" }}>
-                    OTP has been sent, Reset OTP will be sent after{" "}
-                  </span>
-                  <span style={{ color: "red" }}>{timer}sec</span>
-                </p>
-              </div>
+                  <p style={{ fontSize: "large" }}>
+                    <span style={{ color: "black" }}>
+                      OTP has been sent, Reset OTP will be sent after{" "}
+                    </span>
+                    <span style={{ color: "red" }}>{timer}sec</span>
+                  </p>
+                </div>
                 {message.text && (
                   <p
-                    style={{ color: message.type === "error" ? "red" : "green" }}
+                    style={{
+                      color: message.type === "error" ? "red" : "green",
+                    }}
                   >
                     {message.text}
                   </p>
                 )}
               </form>
             )}
- 
+
             {/* Reset Password Form */}
             {showNewPasswordFields && (
               <form
@@ -629,7 +642,9 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
                 </button>
                 {message.text && (
                   <p
-                    style={{ color: message.type === "error" ? "red" : "green" }}
+                    style={{
+                      color: message.type === "error" ? "red" : "green",
+                    }}
                   >
                     {message.text}
                   </p>
@@ -641,7 +656,6 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
       </div>
     </div>
   );
- 
 };
- 
+
 export default PatientLogin;
