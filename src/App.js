@@ -173,6 +173,10 @@ import Footer from "./components/MainFooter/Footer";
 import PatientBook from "./components/PatientBook";
 import ContactUs from "./components/patient/ContactUs";
 import Checkout from "./components/patient/CheckOut";
+import CheckOutBook from "./components/patient/CheckOutBook";
+import TermsConditions from "./components/conditions/TermsConditions";
+import PrivacyPolicy from "./components/conditions/PrivacyPolicy";
+import RefundPolicy from "./components/conditions/RefundPolicy";
 
 function App() {
   const [userType, setUserType] = useState(null);
@@ -295,6 +299,7 @@ function App() {
             path="/patient/bookappointment"
             component={BookAppointment}
           />
+          <Route exact path="/patient/checkoutbook" component={CheckOutBook} />
           <Route exact path="/clinic/home" component={ClinicHome} />{" "}
           {/* Add ClinicHome Route */}
           <Route exact path="/clinic/details" component={MyClinicDetails} />
@@ -333,8 +338,12 @@ function App() {
           />
           <Route exact path="/" component={CardContainer} />
           <Route exact path="/patientbook" component={PatientBook} />
+
+          <Route exact path="/conditions/tearmandconditions" component={TermsConditions} />
+          <Route exact path="/conditions/privacypolicy" component={PrivacyPolicy} />
+          <Route exact path="/conditions/refundpolicy" component={RefundPolicy} />
         </Switch>
-        {/* <Footer/> */}
+        <Footer/>
       </div>
     </BrowserRouter>
   );

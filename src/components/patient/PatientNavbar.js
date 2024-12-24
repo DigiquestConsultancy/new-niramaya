@@ -558,7 +558,7 @@
 
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import Company from "../../images/logo.jpeg";
+import Company from "../../images/logo.jpg";
 import "../../css/Navbar.css";
 import ProfileIcon from "../profile/ProfileIcon";
 import BaseUrl from "../../api/BaseUrl";

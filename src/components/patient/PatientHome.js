@@ -5470,7 +5470,7 @@ const PatientHome = () => {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const [selectedDoctor] = useState({ doctor: 2 });
+  const [selectedDoctor] = useState({ doctor: 4 });
   const [errorMessage, setErrorMessage] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [savedPatientId, setPatientId] = useState(null);
@@ -5702,7 +5702,7 @@ const PatientHome = () => {
         params: { mobile_number: mobile_number },
       });
   
-      if (response && response.data && response.data.length > 0) {
+      if (response && response.data && response.data.length > 0 || response.status ===200) {
         const patient = response.data[0];
         setName(patient.name || "");
         setMobile(patient.mobile_number || "");
@@ -6778,7 +6778,6 @@ const PatientHome = () => {
               </div>
               <div className="col-md-4 form-group">
                 <label style={{ fontWeight: "bold" }}>Date of Birth</label>{" "}
-                <span className="text-danger">*</span>
                 <input
                   type="date"
                   className="form-control"
@@ -6891,7 +6890,6 @@ const PatientHome = () => {
                   </div>
                   <div className="col-md-4 form-group">
                     <label style={{ fontWeight: "bold" }}>Date of Birth</label>{" "}
-                    <span className="text-danger">*</span>
                     <input
                       type="date"
                       className="form-control"

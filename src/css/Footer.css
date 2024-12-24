@@ -1,27 +1,88 @@
-html, body, #root {
-  height: 100%;
-  margin: 0;
+/* Ensure footer sticks to the bottom */
+body {
   display: flex;
   flex-direction: column;
+  min-height: 100vh; /* Full viewport height */
+  margin: 0; /* Reset default body margin */
 }
  
-.App {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
- 
-.page-content {
-  flex: 1;
-  padding-bottom: 0px;
+main {
+  flex: 1; /* Pushes footer to the bottom */
 }
  
 .footer {
-  background-color: #343a40;
+  background-color: #333;
   color: white;
-  bottom: 0px;
-  padding: 10px 0;
-  /* position: absolute; */
-  width: 100%;
+  padding: 2rem 0;
+}
+ 
+.footer-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+ 
+.footer h4 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+ 
+.footer p, .footer ul, .footer a {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+ 
+.footer-link {
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+ 
+.footer-link:hover {
+  color: #7cff55; /* Add hover effect */
+}
+ 
+.social-icons a {
+  color: white;
+  margin-right: 10px;
+  transition: color 0.3s ease;
+}
+ 
+.social-icons a:hover {
+  color: #f06292;
+}
+ 
+.text-center {
   text-align: center;
 }
+ 
+ul.list-unstyled {
+  padding-left: 0;
+}
+ 
+ul.list-unstyled li {
+  margin-bottom: 0.5rem;
+}
+ 
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .footer h4 {
+    font-size: 1.25rem;
+  }
+  .footer p, .footer a {
+    font-size: 0.9rem;
+  }
+  .footer-link {
+    margin-bottom: 10px;
+  }
+  .social-icons a {
+    margin-right: 15px;
+  }
+  .s-icons {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+  .so-icons {
+    margin: 0 15px !important;
+  }
+}
+ 

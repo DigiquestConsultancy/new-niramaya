@@ -650,12 +650,12 @@
 
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import Company from "../../images/logo.jpeg";
+import Company from "../../images/logo.jpg";
 import ProfileIcon from "../profile/ProfileIcon";
 import { jwtDecode } from "jwt-decode";
 import BaseUrl from "../../api/BaseUrl";
 
-const DoctorNavbar = ({onLogout}) => {
+const DoctorNavbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [hospitalDropdownOpen, setHospitalDropdownOpen] = useState(false);
   const [appointmentsDropdownOpen, setAppointmentsDropdownOpen] = useState(false);
@@ -664,19 +664,53 @@ const DoctorNavbar = ({onLogout}) => {
   const [isActive, setIsActive] = useState(false);
   const [navbarOpen, setNavbarOpen] = useState(false);
 
-  const handleLogout = async () => {
-    const refreshToken = localStorage.getItem("refresh");
-    try {
-      const response = await BaseUrl.post("/doctor/logout/", {
-        refresh: refreshToken,
-      });
+  // const handleLogout = async () => {
+  //   const refreshToken = localStorage.getItem("refresh");
+  //   try {
+  //     const response = await BaseUrl.post("/doctor/logout/", {
+  //       refresh: refreshToken,
+  //     });
   
-      if (response.data && response.data.success === "Logged out successfully.") {
-        window.location.href = "/";
-        localStorage.clear(); 
-        onLogout(); 
-      }
+  //     if (response.data && response.data.success === "Logged out successfully.") {
+  //       window.location.href = "/";
+  //       localStorage.clear(); 
+  //       onLogout(); 
+  //     }
+  //   } catch (error) {
+  //   }
+  // };
+
+  // const handleLogout = async () => {
+  //   const refreshToken = localStorage.getItem("refresh");
+  //   try {
+  //     const response = await BaseUrl.post("/doctor/logout/", {
+  //       refresh: refreshToken,
+  //     });
+  //     if (response.status === 200 || response.status === 201 && response.data.success === "Logged out successfully.") {
+  //       window.location.href = "/";
+  //       localStorage.clear(); 
+  //       onLogout(); 
+  //     }
+  //   } catch (error) {
+  //   }
+  // };
+
+  const handleLogout = async() => {
+    try {
+      const refreshToken = localStorage.getItem("refresh");
+      const response = await BaseUrl.post("/doctor/logout/", { refresh: refreshToken });
+  
+      if (response.status === 200 || response.status === 201) {
+          try {
+            localStorage.clear();
+          } catch (storageError) {
+            console.error("Error clearing localStorage:", storageError);
+          }
+          window.location.href = "/";
+        }
+      
     } catch (error) {
+      console.error("Logout error:", error);
     }
   };
   
