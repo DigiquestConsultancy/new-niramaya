@@ -205,9 +205,9 @@
 //       setSlots(slotsData);
 //     } catch (error) {
 //       setSlots([]);
-//     } finally {
-//       setLoading(false);
-//     }
+    // } finally {
+    //   setLoading(false);
+    // }
 //   };
 
 //   const fetchSlotCounts = async () => {
@@ -6208,7 +6208,7 @@ const PatientHome = () => {
         </LoaderWrapper>
       )}
 
-      <header className=" mt-4 patient-header text-center">
+      <header className=" mt-2 mb-4 patient-header text-center">
         <h1 style={{ color: "#185C65", fontWeight: "bold", fontSize: "32px" }}>
           Welcome to Niramaya Homeopathy
         </h1>

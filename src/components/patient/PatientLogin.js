@@ -70,6 +70,8 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
         );
         if (response.status === 200) {
           if (response.data.success) {
+            const refreshToken = response.data.refresh;
+            localStorage.setItem("refresh", refreshToken);
             setShowVerification(true);
             setMessage({ type: "success", text: response.data.success });
           } else if (response.data.error) {
@@ -84,7 +86,6 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
         if (response.status === 200) {
           const data = response.data;
           const refreshToken = data.refresh;
-          console.log(refreshToken);
           localStorage.setItem("refresh", refreshToken);
           const token = data.access;
           localStorage.setItem("patient_token", token);
@@ -108,6 +109,8 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
       );
 
       if (response.status === 200 && response.data.success) {
+        const refreshToken = response.data.refresh;
+        localStorage.setItem("refresh", refreshToken);
         setMessage({ type: "success", text: response.data.success });
         setOtp(["", "", "", "", "", ""]);
         startTimer();
@@ -159,6 +162,8 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
 
         if (response.status === 201) {
           if (response.data.success) {
+            const refreshToken = response.data.refresh;
+            localStorage.setItem("refresh", refreshToken);
             const token = response.data.access;
             localStorage.setItem("patient_token", token);
             localStorage.setItem("mobile_number", mobileNumber);

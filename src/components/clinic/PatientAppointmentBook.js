@@ -5,6 +5,8 @@
 // import { format, addDays } from "date-fns";
 // import "react-datepicker/dist/react-datepicker.css";
 // import styled from "styled-components";
+// import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
+// import "react-phone-number-input/style.css";
 
 // const LoaderWrapper = styled.div`
 //   display: flex;
@@ -141,10 +143,10 @@
 //     }
 
 //     // Validate Date of Birth
-//     if (!patientDetails.date_of_birth) {
-//       errors.date_of_birth = "Date of Birth is required.";
-//       isValid = false;
-//     }
+//     // if (!patientDetails.date_of_birth) {
+//     //   errors.date_of_birth = "Date of Birth is required.";
+//     //   isValid = false;
+//     // }
 
 //     setFormErrors(errors);
 //     return isValid;
@@ -152,6 +154,7 @@
 
 //   const handleSaveDetails = async (e) => {
 //     e.preventDefault();
+
 //     if (!validateForm()) {
 //       return;
 //     }
@@ -164,34 +167,37 @@
 //     formData.append("age", patientDetails.age);
 //     formData.append("gender", patientDetails.gender);
 //     formData.append("blood_group", patientDetails.blood_group);
+
 //     if (patientDetails.profile_pic) {
 //       formData.append("profile_pic", patientDetails.profile_pic);
 //     }
 
 //     try {
-//       setLoading(true); // Start loading
-//       const response = await BaseUrl.post("/patient/patient/", formData, {});
+//       setLoading(true);
+
+//       const response = await BaseUrl.post("/patient/patient/", formData);
 
 //       if (response.status === 201) {
 //         setSuccessMessage(response.data.success);
-//         setErrorMessage("");
+//         setErrorMessage(""); // Clear previous error message, if any
 //         setPatientId(response.data.data.id);
-//       } else if (
-//         response.status === 400 &&
-//         response.data.error ===
-//           "Patient with this mobile number already exists."
-//       ) {
-//         setErrorMessage(response.data.error);
+//       } else if (response.status === 400) {
+//         setErrorMessage(response.data.error || "Validation failed.");
+//         setSuccessMessage(""); // Clear success message if any
 //       } else {
-//         setErrorMessage("Failed to save patient details");
+//         // Generic error handling
+//         setErrorMessage("Failed to save patient details.");
+//         setSuccessMessage(""); // Clear success message if any
 //       }
 //     } catch (error) {
+//       // Handle network or server errors
 //       setErrorMessage(
 //         error.response?.data?.error ||
 //           "An error occurred while saving patient details."
 //       );
+//       setSuccessMessage(""); // Clear success message if any
 //     } finally {
-//       setLoading(false); // Stop loading
+//       setLoading(false); // Stop loading spinner or visual indicator
 //     }
 //   };
 
@@ -328,7 +334,6 @@
 //         setErrorMessage("Failed to confirm appointment. Please try again.");
 //       }
 //     } catch (error) {
-//       console.error("Error confirming booking:", error.response?.data);
 //       setErrorMessage("Failed to confirm appointment. Please try again.");
 //     } finally {
 //       setLoading(false);
@@ -419,7 +424,6 @@
 //         setErrorMessage("Failed to fetch patient details");
 //       }
 //     } catch (error) {
-//       console.error("Error fetching patient details:", error);
 //       setErrorMessage("An error occurred while fetching patient details.");
 //     } finally {
 //       setLoading(false);
@@ -563,9 +567,16 @@
 //                   id="name"
 //                   name="name"
 //                   value={patientDetails.name}
-//                   onChange={handleInputChange}
+//                   onChange={(e) => {
+//                     const value = e.target.value;
+//                     // Regex to allow only letters and spaces
+//                     if (/^[a-zA-Z\s]*$/.test(value) || value === "") {
+//                       handleInputChange(e); // Call the handler to update state
+//                     }
+//                   }}
 //                   required
 //                 />
+
 //                 {formErrors.name && (
 //                   <div className="text-danger">{formErrors.name}</div>
 //                 )}
@@ -588,9 +599,16 @@
 //                   id="mobile_number"
 //                   name="mobile_number"
 //                   value={patientDetails.mobile_number}
-//                   onChange={handleInputChange}
+//                   onChange={(e) => {
+//                     const value = e.target.value;
+//                     // Regex to allow only numbers
+//                     if (/^\d*$/.test(value)) {
+//                       handleInputChange(e); // Call the handler to update state
+//                     }
+//                   }}
 //                   required
 //                 />
+
 //                 {formErrors.mobile_number && (
 //                   <div className="text-danger">{formErrors.mobile_number}</div>
 //                 )}
@@ -605,7 +623,7 @@
 //                     display: "block",
 //                   }}
 //                 >
-//                   Date of Birth<span className="text-danger">*</span>
+//                   Date of Birth
 //                 </label>
 //                 <input
 //                   type="date"
@@ -615,7 +633,6 @@
 //                   value={patientDetails.date_of_birth}
 //                   onChange={handleInputChange}
 //                   max={today}
-//                   required
 //                 />
 //                 {formErrors.date_of_birth && (
 //                   <div className="text-danger">{formErrors.date_of_birth}</div>
@@ -854,6 +871,8 @@ import { Modal, Button } from "react-bootstrap";
 import { format, addDays } from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
 import styled from "styled-components";
+import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 const LoaderWrapper = styled.div`
   display: flex;
@@ -893,15 +912,6 @@ const PatientAppointmentBook = () => {
     blood_group: "",
     gender: "",
     address: "",
-  });
-
-  const [formErrors, setFormErrors] = useState({
-    name: "",
-    mobile_number: "",
-    age: "",
-    address: "",
-    gender: "",
-    date_of_birth: "",
   });
 
   useEffect(() => {
@@ -948,76 +958,44 @@ const PatientAppointmentBook = () => {
     });
   };
 
-  const validateForm = () => {
-    let isValid = true;
-    const errors = {
-      name: "",
-      mobile_number: "",
-      age: "",
-      address: "",
-      gender: "",
-      date_of_birth: "",
-    };
+  const renderInputField = (name, label, value, options) => {
+    const {
+      type = "text",
+      placeholder = "",
+      required = false,
+      max = null,
+      pattern = null,
+      error = null,
+    } = options;
 
-    // Validate Name
-    if (!/^[A-Za-z\s]+$/.test(patientDetails.name)) {
-      errors.name = "Name must contain only alphabets and spaces.";
-      isValid = false;
-    }
-
-    // Validate Mobile Number
-    if (!/^\d{10}$/.test(patientDetails.mobile_number)) {
-      errors.mobile_number = "Mobile number must be a 10-digit number.";
-      isValid = false;
-    }
-
-    // Validate Age
-    if (!/^\d+$/.test(patientDetails.age) || Number(patientDetails.age) <= 0) {
-      errors.age = "Age must be a positive number.";
-      isValid = false;
-    }
-
-    // Validate Address
-    if (!patientDetails.address.trim()) {
-      errors.address = "Address is required.";
-      isValid = false;
-    }
-
-    // Validate Gender
-    if (!patientDetails.gender) {
-      errors.gender = "Gender is required.";
-      isValid = false;
-    }
-
-    // Validate Date of Birth
-    // if (!patientDetails.date_of_birth) {
-    //   errors.date_of_birth = "Date of Birth is required.";
-    //   isValid = false;
-    // }
-
-    setFormErrors(errors);
-    return isValid;
+    return (
+      <div className="col-md-3">
+        <label htmlFor={name} className="form-label fw-bold">
+          {label}
+          {required && <span className="text-danger">*</span>}
+        </label>
+        <input
+          type={type}
+          className="form-control"
+          id={name}
+          name={name}
+          value={value}
+          onChange={handleInputChange}
+          placeholder={placeholder}
+          max={max}
+          pattern={pattern}
+          required={required}
+        />
+      </div>
+    );
   };
 
   const handleSaveDetails = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("mobile_number", patientDetails.mobile_number);
-    formData.append("name", patientDetails.name);
-    formData.append("address", patientDetails.address);
-    formData.append("date_of_birth", patientDetails.date_of_birth);
-    formData.append("age", patientDetails.age);
-    formData.append("gender", patientDetails.gender);
-    formData.append("blood_group", patientDetails.blood_group);
-
-    if (patientDetails.profile_pic) {
-      formData.append("profile_pic", patientDetails.profile_pic);
-    }
+    const formData = {
+      ...patientDetails,
+      mobile_number: patientDetails.mobile_number, // Ensure this includes the country code
+    };
 
     try {
       setLoading(true);
@@ -1030,21 +1008,16 @@ const PatientAppointmentBook = () => {
         setPatientId(response.data.data.id);
       } else if (response.status === 400) {
         setErrorMessage(response.data.error || "Validation failed.");
-        setSuccessMessage(""); // Clear success message if any
       } else {
-        // Generic error handling
         setErrorMessage("Failed to save patient details.");
-        setSuccessMessage(""); // Clear success message if any
       }
     } catch (error) {
-      // Handle network or server errors
       setErrorMessage(
         error.response?.data?.error ||
           "An error occurred while saving patient details."
       );
-      setSuccessMessage(""); // Clear success message if any
     } finally {
-      setLoading(false); // Stop loading spinner or visual indicator
+      setLoading(false);
     }
   };
 
@@ -1416,18 +1389,14 @@ const PatientAppointmentBook = () => {
                   value={patientDetails.name}
                   onChange={(e) => {
                     const value = e.target.value;
-                    // Regex to allow only letters and spaces
-                    if (/^[a-zA-Z\s]*$/.test(value) || value === "") {
-                      handleInputChange(e); // Call the handler to update state
+                    if (/^[a-zA-Z\s]*$/.test(value)) {
+                      handleInputChange(e);
                     }
                   }}
                   required
                 />
-
-                {formErrors.name && (
-                  <div className="text-danger">{formErrors.name}</div>
-                )}
               </div>
+
               <div className="col-md-3">
                 <label
                   htmlFor="mobile_number"
@@ -1440,26 +1409,22 @@ const PatientAppointmentBook = () => {
                 >
                   Mobile Number<span className="text-danger">*</span>
                 </label>
-                <input
-                  type="text"
-                  className="form-control"
+                <PhoneInput
                   id="mobile_number"
                   name="mobile_number"
+                  placeholder="Enter mobile number"
+                  defaultCountry="IN"
                   value={patientDetails.mobile_number}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Regex to allow only numbers
-                    if (/^\d*$/.test(value)) {
-                      handleInputChange(e); // Call the handler to update state
-                    }
-                  }}
+                  onChange={(value) =>
+                    setPatientDetails((prevDetails) => ({
+                      ...prevDetails,
+                      mobile_number: value,
+                    }))
+                  }
                   required
                 />
-
-                {formErrors.mobile_number && (
-                  <div className="text-danger">{formErrors.mobile_number}</div>
-                )}
               </div>
+
               <div className="col-md-3">
                 <label
                   htmlFor="date_of_birth"
@@ -1470,7 +1435,7 @@ const PatientAppointmentBook = () => {
                     display: "block",
                   }}
                 >
-                  Date of Birth
+                  Date of Birth<span className="text-danger">*</span>
                 </label>
                 <input
                   type="date"
@@ -1480,11 +1445,10 @@ const PatientAppointmentBook = () => {
                   value={patientDetails.date_of_birth}
                   onChange={handleInputChange}
                   max={today}
+                  required
                 />
-                {formErrors.date_of_birth && (
-                  <div className="text-danger">{formErrors.date_of_birth}</div>
-                )}
               </div>
+
               <div className="col-md-3">
                 <label
                   htmlFor="age"
@@ -1503,12 +1467,17 @@ const PatientAppointmentBook = () => {
                   id="age"
                   name="age"
                   value={patientDetails.age}
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (
+                      value === "" ||
+                      (Number(value) > 0 && /^[0-9]+$/.test(value))
+                    ) {
+                      handleInputChange(e);
+                    }
+                  }}
                   required
                 />
-                {formErrors.age && (
-                  <div className="text-danger">{formErrors.age}</div>
-                )}
               </div>
             </div>
 
@@ -1534,6 +1503,7 @@ const PatientAppointmentBook = () => {
                   onChange={handleInputChange}
                 />
               </div>
+
               <div className="col-md-3">
                 <label
                   htmlFor="gender"
@@ -1559,9 +1529,6 @@ const PatientAppointmentBook = () => {
                   <option value="female">Female</option>
                   <option value="others">Others</option>
                 </select>
-                {formErrors.gender && (
-                  <div className="text-danger">{formErrors.gender}</div>
-                )}
               </div>
 
               <div className="col-md-3">
@@ -1585,13 +1552,11 @@ const PatientAppointmentBook = () => {
                   rows="1"
                   required
                 ></textarea>
-                {formErrors.address && (
-                  <div className="text-danger">{formErrors.address}</div>
-                )}
               </div>
+
               <div className="col-md-3">
                 <label
-                  className="mr-2"
+                  className="form-label"
                   style={{
                     fontWeight: "bold",
                     textAlign: "left",
@@ -1617,6 +1582,7 @@ const PatientAppointmentBook = () => {
               </div>
             </div>
           </form>
+
           <div className="mt-4">
             <h3
               style={{ textAlign: "center", margin: "32px", fontWeight: "600" }}

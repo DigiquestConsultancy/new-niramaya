@@ -142,6 +142,7 @@ import PatientLogin from "./components/patient/PatientLogin";
 import DoctorRegister from "./components/doctor/DoctorRegister";
 import PatientRegister from "./components/patient/PatientRegister";
 import DoctorHome from "./components/doctor/DoctorHome";
+import DoctorPayment from "./components/doctor/PaymentHistory"
 import PatientHome from "./components/patient/PatientHome";
 import PatientDetails from "./components/patient/PatientDetails";
 import DoctorDetails from "./components/doctor/DoctorDetails";
@@ -193,29 +194,6 @@ function App() {
     setUserType(type);
   };
 
-  // const handleLogout = () => {
-  //   localStorage.removeItem('userType');
-  //   setUserType(null);
-  // };
-
-  // const getNavbar = () => {
-  //   if (userType === 'doctor') {
-  //     return <DoctorNavbar isLoggedIn={!!userType} onLogout={handleLogout} />;
-  //   } else if (userType === 'patient') {
-  //     return <PatientNavbar isLoggedIn={!!userType} onLogout={handleLogout} />;
-  //   }
-  //   return <CustomNavbar />;
-  // };
-
-  // const getNavbar = () => {
-  //   if (userType === 'doctor') {
-  //     return <DoctorNavbar isLoggedIn={!!userType} />;
-  //   } else if (userType === 'patient') {
-  //     return <PatientNavbar isLoggedIn={!!userType} />;
-  //   }
-  //   return <CustomNavbar />;
-  // };
-
   const getNavbar = () => {
     if (["doctor", "clinic", "reception"].includes(userType)) {
       return <DoctorNavbar isLoggedIn={!!userType} />;
@@ -227,9 +205,10 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="App">
+      <div className="app-container">
         {getNavbar()}
 
+        <main className="app-content">
         <Switch>
           <Route exact path="/finddoctor" component={FindDoctor} />
           <Route exact path="/consult" component={Consult} />
@@ -240,6 +219,7 @@ function App() {
           </Route>
           <Route exact path="/doctor/register" component={DoctorRegister} />
           <Route exact path="/doctor/home" component={DoctorHome} />
+          <Route exact path="/doctor/paymenthistory" component={DoctorPayment} />
           <Route
             exact
             path="/doctor/bookedappointment"
@@ -343,6 +323,7 @@ function App() {
           <Route exact path="/conditions/privacypolicy" component={PrivacyPolicy} />
           <Route exact path="/conditions/refundpolicy" component={RefundPolicy} />
         </Switch>
+        </main>
         <Footer/>
       </div>
     </BrowserRouter>

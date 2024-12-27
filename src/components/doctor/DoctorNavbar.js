@@ -644,11 +644,7 @@
 
 
 
-
-
-
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import Company from "../../images/logo.jpg";
 import ProfileIcon from "../profile/ProfileIcon";
@@ -658,62 +654,34 @@ import BaseUrl from "../../api/BaseUrl";
 const DoctorNavbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [hospitalDropdownOpen, setHospitalDropdownOpen] = useState(false);
-  const [appointmentsDropdownOpen, setAppointmentsDropdownOpen] = useState(false);
+  const [appointmentsDropdownOpen, setAppointmentsDropdownOpen] =
+    useState(false);
   const [userType, setUserType] = useState(null);
   const [isVerified, setIsVerified] = useState(false);
   const [isActive, setIsActive] = useState(false);
   const [navbarOpen, setNavbarOpen] = useState(false);
+  const profileDropdownRef = useRef(null);
 
-  // const handleLogout = async () => {
-  //   const refreshToken = localStorage.getItem("refresh");
-  //   try {
-  //     const response = await BaseUrl.post("/doctor/logout/", {
-  //       refresh: refreshToken,
-  //     });
-  
-  //     if (response.data && response.data.success === "Logged out successfully.") {
-  //       window.location.href = "/";
-  //       localStorage.clear(); 
-  //       onLogout(); 
-  //     }
-  //   } catch (error) {
-  //   }
-  // };
-
-  // const handleLogout = async () => {
-  //   const refreshToken = localStorage.getItem("refresh");
-  //   try {
-  //     const response = await BaseUrl.post("/doctor/logout/", {
-  //       refresh: refreshToken,
-  //     });
-  //     if (response.status === 200 || response.status === 201 && response.data.success === "Logged out successfully.") {
-  //       window.location.href = "/";
-  //       localStorage.clear(); 
-  //       onLogout(); 
-  //     }
-  //   } catch (error) {
-  //   }
-  // };
-
-  const handleLogout = async() => {
+  const handleLogout = async () => {
     try {
       const refreshToken = localStorage.getItem("refresh");
-      const response = await BaseUrl.post("/doctor/logout/", { refresh: refreshToken });
-  
+      const response = await BaseUrl.post("/doctor/logout/", {
+        refresh: refreshToken,
+      });
+
       if (response.status === 200 || response.status === 201) {
-          try {
-            localStorage.clear();
-          } catch (storageError) {
-            console.error("Error clearing localStorage:", storageError);
-          }
-          window.location.href = "/";
+        try {
+          localStorage.clear();
+        } catch (storageError) {
+          console.error("Error clearing localStorage:", storageError);
         }
-      
+        window.location.href = "/doctor/login";
+      }
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
-  
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -744,13 +712,33 @@ const DoctorNavbar = () => {
     setNavbarOpen(false);
   };
 
+  const closeProfileDropdown = () => {
+    setDropdownOpen(false);
+  };
+
+  const handleClickOutside = (event) => {
+    if (
+      profileDropdownRef.current &&
+      !profileDropdownRef.current.contains(event.target)
+    ) {
+      closeProfileDropdown();
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav className="navbar navbar-expand-lg">
       <div className="container-fluid">
         <Link className="navbar-brand" to="/">
           <img src={Company} alt="Company Logo" height="40" />
         </Link>
-
         <button
           className="navbar-toggler"
           type="button"
@@ -763,7 +751,6 @@ const DoctorNavbar = () => {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-
         <div
           className={`collapse navbar-collapse ${navbarOpen ? "show" : ""}`}
           id="navbarNav"
@@ -1023,7 +1010,7 @@ const DoctorNavbar = () => {
           </ul>
 
           <ul className="navbar-nav ml-auto d-none d-lg-flex">
-            <li className="nav-item">
+            <li className="nav-item" ref={profileDropdownRef}>
               <button className="btn nav-link" onClick={toggleProfileDropdown}>
                 <ProfileIcon />
               </button>
@@ -1140,10 +1127,7 @@ const DoctorNavbar = () => {
                     >
                       Booked Appointment
                     </Link>
-                    <Link
-                      className={`dropdown-item`}
-                      onClick={handleLogout}
-                    >
+                    <Link className={`dropdown-item`} onClick={handleLogout}>
                       Logout
                     </Link>
                   </>
@@ -1179,10 +1163,7 @@ const DoctorNavbar = () => {
                     >
                       Booked Appointment
                     </Link>
-                    <Link
-                      className={`dropdown-item`}
-                      onClick={handleLogout}
-                    >
+                    <Link className={`dropdown-item`} onClick={handleLogout}>
                       Logout
                     </Link>
                   </>
@@ -1191,7 +1172,7 @@ const DoctorNavbar = () => {
             </li>
           </ul>
 
-          <ul className="navbar-nav d-lg-none">
+          <ul className="navbar-nav d-lg-none text-center">
             {userType === "doctor" && (
               <>
                 <li className="nav-item">
@@ -1258,10 +1239,7 @@ const DoctorNavbar = () => {
                   </Link>
                 </li>
                 <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    onClick={handleLogout}
-                  >
+                  <Link className="nav-link" onClick={handleLogout}>
                     Logout
                   </Link>
                 </li>
@@ -1307,10 +1285,7 @@ const DoctorNavbar = () => {
                   </Link>
                 </li>
                 <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    onClick={handleLogout}
-                  >
+                  <Link className="nav-link" onClick={handleLogout}>
                     Logout
                   </Link>
                 </li>
@@ -1356,10 +1331,7 @@ const DoctorNavbar = () => {
                   </Link>
                 </li>
                 <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    onClick={handleLogout}
-                  >
+                  <Link className="nav-link" onClick={handleLogout}>
                     Logout
                   </Link>
                 </li>

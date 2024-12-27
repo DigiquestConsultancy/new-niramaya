@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from "react";
 import BaseUrl from "../../api/BaseUrl";
 import { jwtDecode } from "jwt-decode";
 import Select from "react-select";
 import { components } from "react-select";
 import styled from "styled-components";
+import Loader from "react-js-loader";
 import { FaTrash } from "react-icons/fa";
 import { Table, Button, Modal } from "react-bootstrap";
 
@@ -12,9 +14,15 @@ const LoaderWrapper = styled.div`
   justify-content: center;
   align-items: center;
   height: 100vh;
+  background-color: rgba(255, 255, 255, 0.7);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 9999;
 `;
 
-const LoaderImage = styled.img`
+const LoaderImage = styled.div`
   width: 400px;
 `;
 
@@ -244,16 +252,14 @@ const DoctorDetails = () => {
   // Loader control for address and OPD
   const [loadingAddress, setLoadingAddress] = useState(false);
   const [loadingOpd, setLoadingOpd] = useState(false);
-  const [loadingTimings, setLoadingTimings] = useState(false); // New state for loading timings
+  const [loadingTimings, setLoadingTimings] = useState(false); 
 
   const fetchDoctorDetails = async () => {
     setSuccessMessage("");
     setErrorMessage("");
     try {
+      setLoading(true);
       const mobile_number = localStorage.getItem("mobile_number");
-      if (!mobile_number)
-        throw new Error("Mobile number not found in local storage");
-
       const response = await BaseUrl.get(
         `/doctor/doctordetail/?mobile_number=${mobile_number}`
       );
@@ -279,11 +285,15 @@ const DoctorDetails = () => {
     } catch (error) {
       console.error(error);
     }
+    finally {
+      setLoading(false);
+    }
   };
 
   const handleViewDocument = async (e) => {
     e.preventDefault();
     try {
+      setLoading(true);
       const token = localStorage.getItem("token");
       if (!token) {
         alert("No token found. Please login again.");
@@ -308,12 +318,16 @@ const DoctorDetails = () => {
     } catch (error) {
       alert("Unable to fetch document.");
     }
+    finally {
+      setLoading(false);
+    }
   };
 
   const fetchQualifications = async () => {
     setSuccessMessage("");
     setErrorMessage("");
     try {
+      setLoading(true);
       const token = localStorage.getItem("token");
       if (!token) throw new Error("Token not found in local storage");
 
@@ -343,6 +357,9 @@ const DoctorDetails = () => {
         error.response?.data?.error || "Error fetching qualifications."
       );
     }
+    finally {
+      setLoading(false);
+    }
   };
 
   const fetchAddressDetails = async () => {
@@ -350,6 +367,7 @@ const DoctorDetails = () => {
     if (!isPersonalComplete) return;
 
     try {
+      setLoading(true);
       const token = localStorage.getItem("token");
       const decodedToken = jwtDecode(token);
       const doctor_id = decodedToken.doctor_id;
@@ -368,13 +386,14 @@ const DoctorDetails = () => {
     } catch (error) {
       console.error(error);
     } finally {
-      setLoadingAddress(false); // Stop loader after fetching address
+      setLoading(false);
     }
   };
 
   const fetchOpdDetails = async () => {
     setLoadingOpd(true); // Start loader for fetching OPD details
     try {
+      setLoading(true);
       const token = localStorage.getItem("token");
       const decodedToken = jwtDecode(token);
       const doctor_id = decodedToken.doctor_id;
@@ -409,7 +428,7 @@ fetchOpdTimings(opdIds[0]);
     } catch (error) {
       setErrorMessage("Failed to fetch OPD details.");
     } finally {
-      setLoadingOpd(false); // Stop loader after fetching OPD details
+      setLoading(false);
     }
   };
 
@@ -419,6 +438,7 @@ fetchOpdTimings(opdIds[0]);
     setErrorMessage("");
 
     try {
+      setLoading(true);
       const response = await BaseUrl.get(`/doctor/timeopd/?opd_id=${opdId}`);
       const timings = response.data.map((timing) => ({
         start_time: timing.start_time,
@@ -433,7 +453,7 @@ fetchOpdTimings(opdIds[0]);
     } catch (error) {
       setErrorMessage("Failed to fetch OPD timings.");
     } finally {
-      setLoadingTimings(false); // Stop loader after fetching timings
+      setLoading(false);
     }
   };
 
@@ -444,7 +464,7 @@ fetchOpdTimings(opdIds[0]);
     } else if (tab === "opd" && isPersonalComplete && isAddressComplete) {
       setActiveTab("opd");
       fetchOpdDetails();
-      fetchOpdTimings();
+      // fetchOpdTimings();
     } else if (tab === "personal") {
       setActiveTab("personal");
       fetchDoctorDetails();
@@ -593,6 +613,7 @@ fetchOpdTimings(opdIds[0]);
     }
 
     try {
+      setLoading(true);
       const token = localStorage.getItem("token");
       const decodedToken = jwtDecode(token);
       const doctor_id = decodedToken.doctor_id;
@@ -663,7 +684,7 @@ fetchOpdTimings(opdIds[0]);
         setShowModal(true);
       }
     } finally {
-      setLoadingPersonal(false);
+      setLoading(false);
     }
 
     setTimeout(() => {
@@ -675,6 +696,7 @@ fetchOpdTimings(opdIds[0]);
     setSuccessMessage("");
     setErrorMessage("");
     try {
+      setLoading(true);
       const qualificationsToUpdate = qualifications.map((qual) => ({
         id: qual.value,
         is_selected: formData.qualification.includes(qual.value),
@@ -696,6 +718,9 @@ fetchOpdTimings(opdIds[0]);
       );
       setSuccessMessage("");
     }
+    finally {
+      setLoading(false);
+    }
   };
   const handleAddressSubmit = async (e) => {
     setLoadingAddress(true);
@@ -703,6 +728,7 @@ fetchOpdTimings(opdIds[0]);
     setErrorMessage("");
     e.preventDefault();
     try {
+      setLoading(true);
       const token = localStorage.getItem("token");
       const decodedToken = jwtDecode(token);
       const doctor_id = decodedToken.doctor_id;
@@ -761,7 +787,7 @@ fetchOpdTimings(opdIds[0]);
         setShowModal(true);
       }
     } finally {
-      setLoadingAddress(false);
+      setLoading(false);
     }
 
     setTimeout(() => {
@@ -794,6 +820,7 @@ fetchOpdTimings(opdIds[0]);
     }
 
     try {
+      setLoading(true);
       const token = localStorage.getItem("token");
       const decodedToken = jwtDecode(token);
       const doctor_id = decodedToken.doctor_id;
@@ -842,7 +869,7 @@ fetchOpdTimings(opdIds[0]);
       setModalType("error");
       setShowModal(true);
     } finally {
-      setLoadingOpd(false);
+      setLoading(false);
     }
   };
 
@@ -877,17 +904,10 @@ fetchOpdTimings(opdIds[0]);
     }
 
     try {
+      setLoading(true);
       const token = localStorage.getItem("token");
       const decodedToken = jwtDecode(token);
       const doctor_id = decodedToken.doctor_id;
-
-      // if (!doctor_id || !opdId) {
-      //   setErrorMessage("Doctor ID or OPD ID is missing.");
-      //   setModalType("error");
-      //   setShowModal(true);
-      //   setLoadingTimings(false);
-      //   return;
-      // }
 
       const promises = opdData.opd_timings.map(async (timing, index) => {
         const formData = new FormData();
@@ -922,13 +942,54 @@ fetchOpdTimings(opdIds[0]);
         setShowModal(true);
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.error || "");
+      setErrorMessage(error.response?.data?.error);
       setModalType("error");
       setShowModal(true);
     } finally {
-      setLoadingTimings(false);
+      setLoading(false);
     }
   };
+
+
+  // //Success msg are displaying
+  // //Success msg are displaying
+
+  // const handleSaveTimings = async () => {
+  //   setLoadingTimings(true);
+  
+  //   try {
+  //     const promises = opdData.opd_timings.map((timing) => {
+  //       const formData = new FormData();
+  //       formData.append("opd_id", opdId);
+  //       formData.append("start_time", timing.start_time);
+  //       formData.append("end_time", timing.end_time);
+  
+  //       if (timing.time_id) {
+  //         formData.append("time_id", timing.time_id);
+  //         return BaseUrl.put(`/doctor/timeopd/?opd_id=${opdId}`, formData);
+  //       } else {
+  //         return BaseUrl.post(`/doctor/timeopd/`, formData);
+  //       }
+  //     });
+  //     await fetchOpdTimings(opdId);
+  //     const responses = await Promise.all(promises);
+  
+  //     responses.forEach((response) => {
+  //       setSuccessMessage(response.data.success); 
+  //     });
+      
+  //     setShowModal(true);
+  //     setModalType("success");
+      
+  //   } catch (error) {
+  //     console.error(error.response?.data?.error || "An error occurred.");
+  //     setShowModal(true);
+  //     setModalType("error");
+  //     setErrorMessage("Failed to save OPD timings. Please try again.");
+  //   } finally {
+  //     setLoadingTimings(false);
+  //   }
+  // };  
 
   const handleOpdTimingChange = (index, field, value) => {
     const updatedTimings = opdData.opd_timings.map((timing, i) =>
@@ -964,14 +1025,15 @@ fetchOpdTimings(opdIds[0]);
     setErrorMessage("");
 
     try {
+      setLoading(true);
       const response = await BaseUrl.delete(
         `/doctor/timeopd/?time_id=${timingToDelete}`
       );
 
-      if (response.status === 200) {
-        setSuccessMessage(response.data.success);
-        setModalType("success");
-        setShowModal(true);
+      if (response.status === 200 || response.status === 204) {
+        // setSuccessMessage(response.data.success);
+        // setModalType("success");
+        // setShowModal(true);
         await fetchOpdTimings(opdId);
       } else if (response.data.error) {
         setErrorMessage(response.data.error);
@@ -1018,12 +1080,17 @@ fetchOpdTimings(opdIds[0]);
     >
       <h2>Personal Details</h2>
 
-      {loadingPersonal && (
+      {loading && (
         <LoaderWrapper>
-          <LoaderImage
-            src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif"
-            alt="Loading..."
-          />
+          <LoaderImage>
+            <Loader
+              type="spinner-circle"
+              bgColor="#0091A5"
+              color="#0091A5"
+              title="Loading..."
+              size={100}
+            />
+          </LoaderImage>
         </LoaderWrapper>
       )}
 
@@ -1044,7 +1111,6 @@ fetchOpdTimings(opdIds[0]);
                 </button>
               </div>
               <div className="modal-body">
-                {/* Display success message in green and error message in red */}
                 <p style={{ color: modalType === "success" ? "green" : "red" }}>
                   {modalMessage}
                 </p>
@@ -1303,12 +1369,17 @@ fetchOpdTimings(opdIds[0]);
     >
       <h2>Address Details</h2>
 
-      {loadingAddress && (
+      {loading && (
         <LoaderWrapper>
-          <LoaderImage
-            src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif"
-            alt="Loading..."
-          />
+          <LoaderImage>
+            <Loader
+              type="spinner-circle"
+              bgColor="#0091A5"
+              color="#0091A5"
+              title="Loading..."
+              size={100}
+            />
+          </LoaderImage>
         </LoaderWrapper>
       )}
 
@@ -1452,12 +1523,17 @@ fetchOpdTimings(opdIds[0]);
       onSubmit={handleOpdSubmit}
     >
       <h2>OPD Details</h2>
-      {loadingOpd && (
+      {loading && (
         <LoaderWrapper>
-          <LoaderImage
-            src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif"
-            alt="Loading..."
-          />
+          <LoaderImage>
+            <Loader
+              type="spinner-circle"
+              bgColor="#0091A5"
+              color="#0091A5"
+              title="Loading..."
+              size={100}
+            />
+          </LoaderImage>
         </LoaderWrapper>
       )}
 
@@ -1739,25 +1815,27 @@ fetchOpdTimings(opdIds[0]);
     </form>
   );
 
-  if (loading) {
-    return (
-      <LoaderWrapper>
-        <LoaderImage
-          src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif"
-          alt="Loading..."
-        />
-      </LoaderWrapper>
-    );
-  }
-
   return (
     <div
       style={{
-        backgroundColor: "#D7EAF0", // Apply background color to entire UI
-        minHeight: "200vh", // Make sure the background color covers the whole screen
+        backgroundColor: "#D7EAF0", 
+        minHeight: "200vh", 
         fontFamily: "sans-serif",
       }}
     >
+      {loading && (
+        <LoaderWrapper>
+          <LoaderImage>
+            <Loader
+              type="spinner-circle"
+              bgColor="#0091A5"
+              color="#0091A5"
+              title="Loading..."
+              size={100}
+            />
+          </LoaderImage>
+        </LoaderWrapper>
+      )}
       <div
         className="container mt-5"
         style={{ backgroundColor: "#D7EAF0", fontFamily: "sans-serif" }}

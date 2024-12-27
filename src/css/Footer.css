@@ -1,17 +1,17 @@
-/* Ensure footer sticks to the bottom */
+
 body {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Full viewport height */
-  margin: 0; /* Reset default body margin */
+  min-height: 100vh;
+  margin: 0; 
 }
  
 main {
-  flex: 1; /* Pushes footer to the bottom */
+  flex: 1; 
 }
  
 .footer {
-  background-color: #333;
+  background-color: #0e3a47;
   color: white;
   padding: 2rem 0;
 }
@@ -36,21 +36,13 @@ main {
   text-decoration: none;
   transition: color 0.3s ease;
 }
- 
-.footer-link:hover {
-  color: #7cff55; /* Add hover effect */
-}
- 
+
 .social-icons a {
   color: white;
   margin-right: 10px;
   transition: color 0.3s ease;
 }
- 
-.social-icons a:hover {
-  color: #f06292;
-}
- 
+
 .text-center {
   text-align: center;
 }
@@ -61,9 +53,9 @@ ul.list-unstyled {
  
 ul.list-unstyled li {
   margin-bottom: 0.5rem;
+  text-decoration: none;
 }
  
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .footer h4 {
     font-size: 1.25rem;

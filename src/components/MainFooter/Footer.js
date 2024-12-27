@@ -12,17 +12,17 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="footer bg-dark text-white py-1">
+    <footer className="footer text-white pt-4">
       <Container>
         <Row className="footer-row">
           <Col md={3}>
             <h4>Contact Us</h4>
-            <p>Niramaya Homeopathy Clinic</p>
-            <p>
-              Address: 0230B, Bilandpur, Civil Lines 2, Gorakhpur, UP, India
-            </p>
-            <p>Email: niramayaforyou@gmail.com</p>
-            <p>Phone: +919236185711</p>
+            <ul className="list-unstyled">
+              <li>Niramaya Homeopathy Clinic</li>
+              <li>Address: 0230B, Bilandpur, Civil Lines 2, Gorakhpur, UP, India</li>
+              <li>Email: niramayaforyou@gmail.com</li>
+              <li>Phone: +919236185711</li>
+            </ul>
           </Col>
           <Col md={3}>
             <h4>Quick Links</h4>
@@ -32,7 +32,7 @@ const Footer = () => {
                   to="/conditions/tearmandconditions"
                   className="text-white"
                 >
-                  Tearm and condition
+                  Terms & Conditions
                 </Link>
               </li>
               <li>
@@ -57,7 +57,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link to="/patient/slots" className="text-white">
-                  Track Your Booked Appointment
+                  See Your Booked Appointment
                 </Link>
               </li>
               <li>
@@ -74,7 +74,7 @@ const Footer = () => {
                 href="https://www.facebook.com/profile.php?id=61555739800256"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: "#3b5998", margin: "0 10px" }}
+                style={{ color: "#00aced", margin: "0 10px" }}
               >
                 <FontAwesomeIcon icon={faFacebook} size="2x" />
               </a>

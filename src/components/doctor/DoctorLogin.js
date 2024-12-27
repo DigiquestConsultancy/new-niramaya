@@ -821,6 +821,12 @@
 
 // export default DoctorLogin;
 
+
+
+
+
+
+
 import React, { useState, useRef, useEffect } from "react";
 import BaseUrl from "../../api/BaseUrl";
 import { Link, useHistory } from "react-router-dom";
@@ -1013,7 +1019,8 @@ const DoctorLogin = ({ setIsDoctorLoggedIn }) => {
           if (isValidToken(token)) {
             localStorage.setItem("token", token);
             localStorage.setItem("user_type", userType);
-
+            const refreshToken = response.data.refresh;
+            localStorage.setItem("refresh", refreshToken);
             setIsDoctorLoggedIn(true);
             setMessage({
               type: "success",

@@ -272,7 +272,7 @@ const Transaction = () => {
                                         <td>{transaction.amount.toFixed(2)}</td>
                                         <td>{paymentDate}</td>
                                         <td>{paymentTime}</td>
-                                        <td>{transaction.payment_method}</td>
+                                        <td>{transaction.payment_group}</td>
                                         <td
                                             style={{
                                                 color:

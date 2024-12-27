@@ -1468,6 +1468,7 @@ const Checkout = () => {
           await cashfree.checkout({
             paymentSessionId: payment_session_id,
             returnUrl: "https://onlinehospital.in/patient/home",
+            // returnUrl: "http://192.168.29.95/patient/home",
           });
           localStorage.setItem("paymentSuccess", "true");
         } else {

@@ -20,7 +20,7 @@ const CustomNavbar = () => {
     };
  
     return (
-        <Navbar bg="dark" variant="dark" expand="lg">
+        <Navbar expand="lg">
             <Container>
                 <Navbar.Brand as={Link} to="/">
                     <img src={Company} alt="Company Logo" height="40" />
@@ -29,7 +29,7 @@ const CustomNavbar = () => {
                     <Nav.Link
                         as={Link}
                         to={handleLoginSignUpRedirect()}
-                        className="btn custom-link"
+                        className="btn custom-link text-white"
                         style={{ paddingRight: '30px' }}
                     >
                         Login/SignUp
