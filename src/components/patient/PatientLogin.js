@@ -5,6 +5,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../../css/AuthForms.css";
 import { FaEye, FaEyeSlash, FaArrowLeft } from "react-icons/fa";
 import doct from "../../images/logindoc.png";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 const PatientLogin = ({ setIsPatientLoggedIn }) => {
   const [countryCode, setCountryCode] = useState("91");
@@ -24,8 +26,6 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
   const inputRefs = useRef([]);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
-  // const [newPasswordVisible, setNewPasswordVisible] = useState(false);
-  // const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
   const startTimer = () => {
     setIsResendDisabled(true);
@@ -365,13 +365,13 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
               activeTab === "login" && (
                 <form className="login-form mb-4 mt-2" onSubmit={handleLogin}>
                   <div className="doctor-login-link">
-                    <p className="text-link">
+                    <p style={{fontSize: '15px'}} className="text-link">
                       Are you a Doctor?{" "}
                       <Link to="/doctor/login">Login here</Link>
                     </p>
                   </div>
                   <h2 className="text-dark mb-4">Patient Login</h2>
-                  <div className="mb-3">
+                  {/* <div className="mb-3">
                     <label
                       htmlFor="mobileNumber"
                       className="form-label"
@@ -405,6 +405,25 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
                         }
                       />
                     </div>
+                  </div> */}
+
+                  <div className="mb-3">
+                    <label
+                      htmlFor="mobileNumber"
+                      className="form-label"
+                      style={{ fontSize: "large" }}
+                    >
+                      Mobile Number
+                    </label>
+                    <PhoneInput
+                      id="mobile_number"
+                      name="mobile_number"
+                      placeholder="Enter mobile number"
+                      defaultCountry="IN" // Set default country
+                      value={mobileNumber} // Bind to mobileNumber state
+                      onChange={setMobileNumber} // Update state on change
+                      required
+                    />
                   </div>
 
                   {!loginWithOtp && (
@@ -483,7 +502,7 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
                   Enter your mobile number and we'll send you a 6-digit OTP to
                   reset your password.
                 </p>
-                <div className="mb-3">
+                {/* <div className="mb-3">
                   <label
                     htmlFor="mobileNumber"
                     className="form-label"
@@ -514,7 +533,27 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
                       }
                     />
                   </div>
+                </div> */}
+
+                <div className="mb-3">
+                  <label
+                    htmlFor="mobileNumber"
+                    className="form-label"
+                    style={{ fontSize: "large" }}
+                  >
+                    Mobile Number
+                  </label>
+                  <PhoneInput
+                    id="mobile_number"
+                    name="mobile_number"
+                    placeholder="Enter mobile number"
+                    defaultCountry="IN" // Set default country
+                    value={mobileNumber} // Bind to mobileNumber state
+                    onChange={setMobileNumber} // Update state on change
+                    required
+                  />
                 </div>
+
                 <button type="submit" className="btn btn-primary w-45 mb-3">
                   SEND OTP
                 </button>

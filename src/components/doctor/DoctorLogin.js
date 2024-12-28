@@ -821,12 +821,6 @@
 
 // export default DoctorLogin;
 
-
-
-
-
-
-
 import React, { useState, useRef, useEffect } from "react";
 import BaseUrl from "../../api/BaseUrl";
 import { Link, useHistory } from "react-router-dom";
@@ -834,6 +828,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { FaEye, FaEyeSlash, FaArrowLeft } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 import doct from "../../images/logindoc.png";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 const DoctorLogin = ({ setIsDoctorLoggedIn }) => {
   const [countryCode, setCountryCode] = useState("91");
@@ -1310,7 +1306,7 @@ const DoctorLogin = ({ setIsDoctorLoggedIn }) => {
               !showNewPasswordFields ? (
               <form className="login-form log mb-4 mt-2" onSubmit={handleLogin}>
                 <div className="doctor-login-link">
-                  <p className="text-link">
+                  <p style={{ fontSize: "15px" }} className="text-link">
                     Are you a Patient?{" "}
                     <Link to="/patient/login">Login here</Link>
                   </p>
@@ -1348,6 +1344,25 @@ const DoctorLogin = ({ setIsDoctorLoggedIn }) => {
                     />
                   </div>
                 </div>
+
+                {/* <div className="mb-3">
+                  <label
+                    htmlFor="mobileNumber"
+                    className="form-label"
+                    style={{ fontSize: "large" }}
+                  >
+                    Mobile Number
+                  </label>
+                  <PhoneInput
+                    id="mobile_number"
+                    name="mobile_number"
+                    placeholder="Enter mobile number"
+                    defaultCountry="IN" // Set default country
+                    value={mobileNumber} // Bind to mobileNumber state
+                    onChange={setMobileNumber} // Update state on change
+                    required
+                  />
+                </div> */}
 
                 {!loginWithOtp && (
                   <div className="mb-3">
@@ -1459,6 +1474,26 @@ const DoctorLogin = ({ setIsDoctorLoggedIn }) => {
                     />
                   </div>
                 </div>
+
+                {/* <div className="mb-3">
+                  <label
+                    htmlFor="mobileNumber"
+                    className="form-label"
+                    style={{ fontSize: "large" }}
+                  >
+                    Mobile Number
+                  </label>
+                  <PhoneInput
+                    id="mobile_number"
+                    name="mobile_number"
+                    placeholder="Enter mobile number"
+                    defaultCountry="IN" // Set default country
+                    value={mobileNumber} // Bind to mobileNumber state
+                    onChange={setMobileNumber} // Update state on change
+                    required
+                  />
+                </div> */}
+
                 <button type="submit" className="btn btn-primary w-25 mb-3">
                   SEND OTP
                 </button>

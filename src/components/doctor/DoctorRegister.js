@@ -5,7 +5,9 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../../css/AuthForms.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import doct from "../../images/logindoc.png";
- 
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+
 const DoctorRegister = () => {
   const [countryCode, setCountryCode] = useState("91");
   const [mobileNumber, setMobileNumber] = useState("");
@@ -18,11 +20,11 @@ const DoctorRegister = () => {
   const [timer, setTimer] = useState(60);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
   const [passwordVisible, setPasswordVisible] = useState(false);
- 
+
   const startTimer = () => {
     setIsResendDisabled(true);
     setTimer(60);
- 
+
     const countdown = setInterval(() => {
       setTimer((prevTimer) => {
         if (prevTimer <= 1) {
@@ -34,20 +36,20 @@ const DoctorRegister = () => {
       });
     }, 1000);
   };
- 
+
   useEffect(() => {
     if (showVerification) {
       startTimer();
     }
   }, [showVerification]);
- 
+
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
       const response = await BaseUrl.get(
         `/doctor/register/?mobile_number=${mobileNumber}&password=${password}`
       );
- 
+
       if (response.status === 200 && response.data.success) {
         setMessage({ type: "success", text: response.data.success });
         setShowVerification(true);
@@ -61,7 +63,7 @@ const DoctorRegister = () => {
       });
     }
   };
- 
+
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
     try {
@@ -71,14 +73,14 @@ const DoctorRegister = () => {
         otp: enteredOtp,
         password,
       });
- 
+
       if (response.status === 200 || response.status === 201) {
         if (response.data.success) {
           setMessage({ type: "success", text: response.data.success });
- 
+
           const token = response.data.access;
           localStorage.setItem("token", token);
- 
+
           setTimeout(() => {
             history.push("/doctor/login");
           }, 2000);
@@ -93,7 +95,7 @@ const DoctorRegister = () => {
       });
     }
   };
- 
+
   const handleResendOTP = async () => {
     try {
       const response = await BaseUrl.get(
@@ -115,31 +117,31 @@ const DoctorRegister = () => {
       });
     }
   };
- 
+
   const handleChangeOtp = (index, value) => {
     if (!isNaN(value) && value !== " ") {
       const newOtp = [...otp];
       newOtp[index] = value;
       setOtp(newOtp);
- 
+
       if (value.length === 1 && index < otp.length - 1) {
         inputRefs.current[index + 1].focus();
       }
     }
   };
- 
+
   const handleOtpKeyDown = (index, event) => {
     if (event.key === "Backspace") {
       const newOtp = [...otp];
       newOtp[index] = "";
       setOtp(newOtp);
- 
+
       if (index > 0) {
         inputRefs.current[index - 1].focus();
       }
     }
   };
- 
+
   const toggleAuthMode = (isRegister) => {
     if (isRegister) {
       history.push("/doctor/register");
@@ -147,11 +149,11 @@ const DoctorRegister = () => {
       history.push("/doctor/login");
     }
   };
- 
+
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
- 
+
   return (
     <div className="container-fluid p-0">
       {/* Tabs */}
@@ -201,15 +203,13 @@ const DoctorRegister = () => {
           </span>
         </div>
       </div>
- 
+
       {/* Main Container */}
       <div
         className="container-fluid d-flex justify-content-center align-items-center preg-box"
         style={{
           backgroundColor: "transparent",
           marginTop: "0px", // Matches Patient Register distance
-         
-       
         }}
       >
         {/* Background Image */}
@@ -227,19 +227,19 @@ const DoctorRegister = () => {
             zIndex: -1,
           }}
         ></div>
- 
+
         <div className="row w-100 d-flex justify-content-lg-end">
           <div className="col-md-12 col-lg-6 d-flex justify-content-end align-items-center form-container">
             {!showVerification ? (
               <form className="login-form mb-4 mt-2" onSubmit={handleRegister}>
                 <div className="doctor-login-link">
-                  <p className="text-link">
+                  <p style={{ fontSize: "15px" }} className="text-link">
                     Are you a Patient?{" "}
                     <Link to="/patient/register">Register here</Link>
                   </p>
                 </div>
                 <h2 className="text-dark mb-4">Doctor Register</h2>
-                <div className="mb-3">
+                {/* <div className="mb-3">
                   <label
                     htmlFor="mobileNumber"
                     className="form-label"
@@ -270,7 +270,27 @@ const DoctorRegister = () => {
                       }
                     />
                   </div>
+                </div> */}
+
+                <div className="mb-3">
+                  <label
+                    htmlFor="mobileNumber"
+                    className="form-label"
+                    style={{ fontSize: "large" }}
+                  >
+                    Mobile Number
+                  </label>
+                  <PhoneInput
+                    id="mobile_number"
+                    name="mobile_number"
+                    placeholder="Enter mobile number"
+                    defaultCountry="IN" // Set default country
+                    value={mobileNumber} // Bind to mobileNumber state
+                    onChange={setMobileNumber} // Update state on change
+                    required
+                  />
                 </div>
+
                 <div className="mb-3">
                   <label
                     htmlFor="password"
@@ -382,5 +402,5 @@ const DoctorRegister = () => {
     </div>
   );
 };
- 
+
 export default DoctorRegister;

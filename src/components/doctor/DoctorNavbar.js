@@ -1089,7 +1089,7 @@ const DoctorNavbar = () => {
                       Payment History
                     </Link>
                     <Link
-                      className={`dropdown-item ${!areAllFieldsEnabled ? "disabled" : ""}`}
+                      className="dropdown-item"
                       onClick={handleLogout}
                     >
                       Logout

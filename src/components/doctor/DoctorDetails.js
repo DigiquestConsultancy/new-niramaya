@@ -873,97 +873,48 @@ fetchOpdTimings(opdIds[0]);
     }
   };
 
-  const handleSaveTimings = async () => {
-    setLoadingTimings(true);
-
-    const timingErrors = opdData.opd_timings.map((timing, index) => {
-      const timingError = {};
-      if (!timing.start_time) {
-        timingError.start_time = "Start time is required.";
-      }
-      if (!timing.end_time) {
-        timingError.end_time = "End time is required.";
-      }
-      if (
-        timing.start_time &&
-        timing.end_time &&
-        timing.start_time >= timing.end_time
-      ) {
-        timingError.end_time = "End time must be after start time.";
-      }
-      return timingError;
-    });
-
-    if (timingErrors.some((error) => Object.keys(error).length > 0)) {
-      setFormErrors((prevErrors) => ({
-        ...prevErrors,
-        opd_timings: timingErrors,
-      }));
-      setLoadingTimings(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("token");
-      const decodedToken = jwtDecode(token);
-      const doctor_id = decodedToken.doctor_id;
-
-      const promises = opdData.opd_timings.map(async (timing, index) => {
-        const formData = new FormData();
-        formData.append("opd_id", opdId);
-        formData.append("start_time", timing.start_time);
-        formData.append("end_time", timing.end_time);
-
-        if (timing.time_id) {
-          formData.append("time_id", timing.time_id);
-          return BaseUrl.put(`/doctor/timeopd/?opd_id=${opdId}`, formData);
-        } else {
-          return BaseUrl.post(`/doctor/timeopd/`, formData);
-        }
-      });
-
-      const responses = await Promise.all(promises);
-
-      const allSuccess = responses.every((response) => {
-        return response.status === 201 || response.status === 200;
-      });
-
-      if (allSuccess) {
-        setSuccessMessage("Timings saved successfully.");
-        setModalType("success");
-        setShowModal(true);
-        setIsOpdComplete(true);
-        setProgress(100);
-
-        fetchOpdTimings(opdId);
-      } else {
-        setModalType("error");
-        setShowModal(true);
-      }
-    } catch (error) {
-      setErrorMessage(error.response?.data?.error);
-      setModalType("error");
-      setShowModal(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-  // //Success msg are displaying
-  // //Success msg are displaying
-
   // const handleSaveTimings = async () => {
   //   setLoadingTimings(true);
-  
+
+  //   const timingErrors = opdData.opd_timings.map((timing, index) => {
+  //     const timingError = {};
+  //     if (!timing.start_time) {
+  //       timingError.start_time = "Start time is required.";
+  //     }
+  //     if (!timing.end_time) {
+  //       timingError.end_time = "End time is required.";
+  //     }
+  //     if (
+  //       timing.start_time &&
+  //       timing.end_time &&
+  //       timing.start_time >= timing.end_time
+  //     ) {
+  //       timingError.end_time = "End time must be after start time.";
+  //     }
+  //     return timingError;
+  //   });
+
+  //   if (timingErrors.some((error) => Object.keys(error).length > 0)) {
+  //     setFormErrors((prevErrors) => ({
+  //       ...prevErrors,
+  //       opd_timings: timingErrors,
+  //     }));
+  //     setLoadingTimings(false);
+  //     return;
+  //   }
+
   //   try {
-  //     const promises = opdData.opd_timings.map((timing) => {
+  //     setLoading(true);
+  //     const token = localStorage.getItem("token");
+  //     const decodedToken = jwtDecode(token);
+  //     const doctor_id = decodedToken.doctor_id;
+
+  //     const promises = opdData.opd_timings.map(async (timing, index) => {
   //       const formData = new FormData();
   //       formData.append("opd_id", opdId);
   //       formData.append("start_time", timing.start_time);
   //       formData.append("end_time", timing.end_time);
-  
+
   //       if (timing.time_id) {
   //         formData.append("time_id", timing.time_id);
   //         return BaseUrl.put(`/doctor/timeopd/?opd_id=${opdId}`, formData);
@@ -971,25 +922,74 @@ fetchOpdTimings(opdIds[0]);
   //         return BaseUrl.post(`/doctor/timeopd/`, formData);
   //       }
   //     });
-  //     await fetchOpdTimings(opdId);
+
   //     const responses = await Promise.all(promises);
-  
-  //     responses.forEach((response) => {
-  //       setSuccessMessage(response.data.success); 
+
+  //     const allSuccess = responses.every((response) => {
+  //       return response.status === 201 || response.status === 200;
   //     });
-      
-  //     setShowModal(true);
-  //     setModalType("success");
-      
+
+  //     if (allSuccess) {
+  //       setSuccessMessage("Timings saved successfully.");
+  //       setModalType("success");
+  //       setShowModal(true);
+  //       setIsOpdComplete(true);
+  //       setProgress(100);
+
+  //       fetchOpdTimings(opdId);
+  //     } else {
+  //       setModalType("error");
+  //       setShowModal(true);
+  //     }
   //   } catch (error) {
-  //     console.error(error.response?.data?.error || "An error occurred.");
-  //     setShowModal(true);
+  //     setErrorMessage(error.response?.data?.error);
   //     setModalType("error");
-  //     setErrorMessage("Failed to save OPD timings. Please try again.");
+  //     setShowModal(true);
   //   } finally {
-  //     setLoadingTimings(false);
+  //     setLoading(false);
   //   }
-  // };  
+  // };
+
+
+  //Success msg are displaying
+  //Success msg are displaying
+
+  const handleSaveTimings = async () => {
+    setLoadingTimings(true);
+  
+    try {
+      const promises = opdData.opd_timings.map((timing) => {
+        const formData = new FormData();
+        formData.append("opd_id", opdId);
+        formData.append("start_time", timing.start_time);
+        formData.append("end_time", timing.end_time);
+  
+        if (timing.time_id) {
+          formData.append("time_id", timing.time_id);
+          return BaseUrl.put(`/doctor/timeopd/?opd_id=${opdId}`, formData);
+        } else {
+          return BaseUrl.post(`/doctor/timeopd/`, formData);
+        }
+      });
+      await fetchOpdTimings(opdId);
+      const responses = await Promise.all(promises);
+  
+      responses.forEach((response) => {
+        setSuccessMessage(response.data.success); 
+      });
+      
+      setShowModal(true);
+      setModalType("success");
+      
+    } catch (error) {
+      console.error(error.response?.data?.error || "An error occurred.");
+      setShowModal(true);
+      setModalType("error");
+      setErrorMessage("Failed to save OPD timings. Please try again.");
+    } finally {
+      setLoadingTimings(false);
+    }
+  };  
 
   const handleOpdTimingChange = (index, field, value) => {
     const updatedTimings = opdData.opd_timings.map((timing, i) =>
