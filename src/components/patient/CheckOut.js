@@ -1464,11 +1464,11 @@ const Checkout = () => {
         localStorage.setItem("order_id", order_id);
   
         if (payment_session_id) {
-          const cashfree = await load({ mode: "production" });
+          const cashfree = await load({ mode: "sandbox" });
           await cashfree.checkout({
             paymentSessionId: payment_session_id,
-            returnUrl: "https://onlinehospital.in/patient/home",
-            // returnUrl: "http://192.168.29.95/patient/home",
+            // returnUrl: "https://onlinehospital.in/patient/home",
+            returnUrl: "http://localhost:3000/patient/home",
           });
           localStorage.setItem("paymentSuccess", "true");
         } else {

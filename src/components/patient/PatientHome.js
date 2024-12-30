@@ -5470,7 +5470,7 @@ const PatientHome = () => {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const [selectedDoctor] = useState({ doctor: 4 });
+  const [selectedDoctor] = useState({ doctor: 2 });
   const [errorMessage, setErrorMessage] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [savedPatientId, setPatientId] = useState(null);
@@ -6429,7 +6429,7 @@ const PatientHome = () => {
                             }}
                             onMouseEnter={(e) =>
                               slot.is_selected &&
-                              setHoverMessage("This slot is currently in use")
+                              setHoverMessage("This slot is in use/Booked")
                             }
                             onMouseLeave={(e) => setHoverMessage("")}
                           >
@@ -6545,7 +6545,7 @@ const PatientHome = () => {
                             }}
                             onMouseEnter={(e) =>
                               slot.is_selected &&
-                              setHoverMessage("This slot is currently in use")
+                              setHoverMessage("This slot is in use/Booked")
                             }
                             onMouseLeave={(e) => setHoverMessage("")}
                           >
@@ -6659,7 +6659,7 @@ const PatientHome = () => {
                             }}
                             onMouseEnter={(e) =>
                               slot.is_selected &&
-                              setHoverMessage("This slot is currently in use")
+                              setHoverMessage("This slot is in use/Booked")
                             }
                             onMouseLeave={(e) => setHoverMessage("")}
                           >

@@ -236,7 +236,7 @@ const PatientRegister = () => {
                   </p>
                 </div>
                 <h2 className="text-dark mb-4">Patient Register</h2>
-                {/* <div className="mb-3">
+                <div className="mb-3">
                 <label
                   htmlFor="mobileNumber"
                   className="form-label"
@@ -267,9 +267,9 @@ const PatientRegister = () => {
                     }
                   />
                 </div>
-              </div> */}
+              </div>
 
-                <div className="mb-3">
+                {/* <div className="mb-3">
                   <label
                     htmlFor="mobileNumber"
                     className="form-label"
@@ -286,7 +286,7 @@ const PatientRegister = () => {
                     onChange={setMobileNumber} // Update state on change
                     required
                   />
-                </div>
+                </div> */}
 
                 <div className="mb-3">
                   <label
