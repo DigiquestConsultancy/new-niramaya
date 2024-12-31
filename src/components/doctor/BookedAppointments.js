@@ -3832,10 +3832,8 @@
 
 
 
-
-
 import React, { useState, useEffect } from "react";
-import "../../css/ClinicBookedAppointment.css"; 
+import "../../css/ClinicBookedAppointment.css";
 import {
   Modal,
   Button,
@@ -3929,7 +3927,7 @@ const DoctorBookedAppointment = () => {
     document_type: "",
     document_file: "",
   });
-  const [timeSlots, setTimeSlots] = useState([]); 
+  const [timeSlots, setTimeSlots] = useState([]);
   const [medicalRecords, setMedicalRecords] = useState([]);
   const [whatsappReport, setWhatsappReport] = useState([]);
   const [showMedicalRecords, setShowMedicalRecords] = useState(false);
@@ -3937,7 +3935,7 @@ const DoctorBookedAppointment = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
   const [showSymptomsForm, setShowSymptomsForm] = useState(false);
-  const [appointmentData, setAppointmentData] = useState(null); 
+  const [appointmentData, setAppointmentData] = useState(null);
   const [searchSymptom, setSearchSymptom] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
@@ -4102,7 +4100,7 @@ const DoctorBookedAppointment = () => {
 
       setFormData({
         document_name: "",
-        patient_name: "", 
+        patient_name: "",
         document_date: "",
         document_type: "",
         document_file: "",
@@ -4270,7 +4268,8 @@ const DoctorBookedAppointment = () => {
   const handlePreview = async (documentId) => {
     setLoading(true);
     try {
-      const response = await BaseUrl.get( `/patient/patientprescriptonfileView/`,
+      const response = await BaseUrl.get(
+        `/patient/patientprescriptonfileView/`,
         {
           params: { document_id: documentId },
           responseType: "blob",
@@ -4315,7 +4314,8 @@ const DoctorBookedAppointment = () => {
   const fetchAppointments = async (doctorId) => {
     setLoading(true);
     try {
-      const response = await BaseUrl.get(`/doctorappointment/getslot/?doctor_id=${doctorId}`
+      const response = await BaseUrl.get(
+        `/doctorappointment/getslot/?doctor_id=${doctorId}`
       );
 
       const fetchedAppointments = response.data.map((appointment) => ({
@@ -4367,7 +4367,7 @@ const DoctorBookedAppointment = () => {
     ]);
     setSelectedSymptoms([]);
     setPrescriptionDocuments([]);
-    setMedicalRecords([]); 
+    setMedicalRecords([]);
 
     if (expandedAppointmentId === appointment_id) {
       setExpandedAppointmentId(null);
@@ -4429,7 +4429,7 @@ const DoctorBookedAppointment = () => {
             prescriptionDocPromise,
             symptomsPromise,
             fetchDocumentIds(appointment_id),
-            fetchMedicalRecords(appointment_id), 
+            fetchMedicalRecords(appointment_id),
           ]);
 
           const patientResponse = results[0];
@@ -4537,7 +4537,7 @@ const DoctorBookedAppointment = () => {
     const { name, value } = e.target;
     setRecordDetails((prevDetails) => {
       const updatedDetails = { ...prevDetails, [name]: value };
-      const heightInMeters = parseFloat(updatedDetails.height) / 100; 
+      const heightInMeters = parseFloat(updatedDetails.height) / 100;
       const weight = parseFloat(updatedDetails.weight);
       if (heightInMeters && weight) {
         updatedDetails.bmi = (
@@ -4545,7 +4545,7 @@ const DoctorBookedAppointment = () => {
           (heightInMeters * heightInMeters)
         ).toFixed(2);
       } else {
-        updatedDetails.bmi = ""; 
+        updatedDetails.bmi = "";
       }
 
       return updatedDetails;
@@ -4574,7 +4574,7 @@ const DoctorBookedAppointment = () => {
         `/patient/patientprescriptonfile/`,
         {
           data: {
-            document_id: docId, 
+            document_id: docId,
           },
         }
       );
@@ -4606,7 +4606,7 @@ const DoctorBookedAppointment = () => {
             patient_id: doc.patient,
             document_id: doc.id,
           },
-          responseType: "blob", 
+          responseType: "blob",
         }
       );
       setSuccessMessage(response.data.success);
@@ -4652,7 +4652,7 @@ const DoctorBookedAppointment = () => {
         },
         responseType: "blob",
       });
-      const blob = new Blob([response.data], { type: "application/pdf" }); 
+      const blob = new Blob([response.data], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -4710,6 +4710,7 @@ const DoctorBookedAppointment = () => {
       setLoading(false);
     }
   };
+
 
   const handleCancelAppointment = async (appointment_id) => {
     try {
@@ -4783,7 +4784,7 @@ const DoctorBookedAppointment = () => {
     try {
       const response = await BaseUrl.get("/patient/patientpriscription/", {
         params: {
-          appointment_id: appointment_id, 
+          appointment_id: appointment_id,
           patient_id: patient_id,
         },
       });
@@ -5319,7 +5320,7 @@ const DoctorBookedAppointment = () => {
       if (i === index) {
         let updatedTime;
         if (e.target.checked) {
-          updatedTime = [...prescription.time, timeSlot]; 
+          updatedTime = [...prescription.time, timeSlot];
         } else {
           updatedTime = prescription.time.filter((time) => time !== timeSlot);
         }
@@ -5360,8 +5361,9 @@ const DoctorBookedAppointment = () => {
           response.data,
         ]);
         setShowPrescriptionDocsForm(false);
-        const updatedDocuments = await fetchPrescriptionDocuments(appointment_id);
-        setPrescriptionDocuments(updatedDocuments); 
+        const updatedDocuments =
+          await fetchPrescriptionDocuments(appointment_id);
+        setPrescriptionDocuments(updatedDocuments);
         await fetchMedicalRecords(appointment_id);
         await fetchAppointments(doctorId);
       } else {
@@ -5398,8 +5400,8 @@ const DoctorBookedAppointment = () => {
         resetToDefault();
       }
     }, 500);
-    return () => clearTimeout(delayDebounceFn); 
-  }, [searchParams.booked_by]); 
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchParams.booked_by]);
 
   const handleSearch = async () => {
     try {
@@ -5418,7 +5420,11 @@ const DoctorBookedAppointment = () => {
         mobile_number: appointment.mobile_number,
         patient_id: appointment.patient_id,
         is_patient: appointment.is_patient,
-        status: appointment.is_canceled ? "Canceled" : appointment.is_complete ? "Completed" : "Upcoming",
+        status: appointment.is_canceled
+          ? "Canceled"
+          : appointment.is_complete
+            ? "Completed"
+            : "Upcoming",
       }));
       setAppointments(fetchedAppointments);
       setErrorMessage("");
@@ -5432,7 +5438,10 @@ const DoctorBookedAppointment = () => {
     try {
       const formData = new FormData();
       formData.append("appointment_id", appointmentId);
-      const response = await BaseUrl.put( "/doctorappointment/askreport/", formData );
+      const response = await BaseUrl.put(
+        "/doctorappointment/askreport/",
+        formData
+      );
       if (response.status === 200) {
         const successMessage = response.data?.success;
         setSuccessMessage(successMessage);
@@ -5443,8 +5452,7 @@ const DoctorBookedAppointment = () => {
         setSuccessMessage("");
       }
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.error;
+      const errorMessage = error.response?.data?.error;
       setErrorMessage(errorMessage);
       setSuccessMessage("");
     }
@@ -5457,7 +5465,7 @@ const DoctorBookedAppointment = () => {
         params: {
           patient_id: patientId,
           doctor_id: doctorId,
-          patient_name: formDetails.name 
+          patient_name: formDetails.name,
         },
       });
       if (response.status === 200) {
@@ -5473,13 +5481,14 @@ const DoctorBookedAppointment = () => {
       setErrorMessage(error.response?.data?.error);
       setSuccessMessage("");
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
   const deleteRecord = async (id) => {
     try {
-      const response = await BaseUrl.delete("/doctorappointment/whatsappreport/",
+      const response = await BaseUrl.delete(
+        "/doctorappointment/whatsappreport/",
         {
           data: { id },
         }
@@ -5545,7 +5554,8 @@ const DoctorBookedAppointment = () => {
             <h5
               className="card-title mb-4"
               style={{
-                color: "#003366", 
+                color: "#003366",
+                textAlign: "center",
                 fontFamily: "Sans-Serif",
               }}
             >
@@ -5554,8 +5564,8 @@ const DoctorBookedAppointment = () => {
 
             <Form
               onSubmit={(e) => {
-                e.preventDefault(); 
-                handleSearch(); 
+                e.preventDefault();
+                handleSearch();
               }}
             >
               <Form.Group
@@ -5647,10 +5657,10 @@ const DoctorBookedAppointment = () => {
             className="card-title mb-4"
             style={{
               color: "#ffffff",
-              fontFamily: "Sans-Serif", 
-              display: "flex", 
-              alignItems: "center", 
-              gap: "50px", 
+              fontFamily: "Sans-Serif",
+              display: "flex",
+              alignItems: "center",
+              gap: "50px",
             }}
           >
             Booked Appointments
@@ -5658,7 +5668,7 @@ const DoctorBookedAppointment = () => {
               style={{
                 color: "#ffffff",
                 fontSize: "14px",
-                marginLeft: "8px", 
+                marginLeft: "8px",
               }}
             >
               <span
@@ -5668,7 +5678,7 @@ const DoctorBookedAppointment = () => {
                   height: "12px",
                   backgroundColor: " #f5c6cb",
                   borderRadius: "50%",
-                  marginRight: "8px", 
+                  marginRight: "8px",
                 }}
               ></span>
               (Booked By Patient)
@@ -5680,8 +5690,8 @@ const DoctorBookedAppointment = () => {
               <tr>
                 <th
                   style={{
-                    background: "#D7EAF0", 
-                    color: "#003366", 
+                    background: "#D7EAF0",
+                    color: "#003366",
                   }}
                 >
                   Date
@@ -5689,7 +5699,7 @@ const DoctorBookedAppointment = () => {
                 <th
                   style={{
                     background: "#D7EAF0",
-                    color: "#003366", 
+                    color: "#003366",
                   }}
                 >
                   Time Slot
@@ -5705,7 +5715,7 @@ const DoctorBookedAppointment = () => {
                 <th
                   style={{
                     background: "#D7EAF0",
-                    color: "#003366", 
+                    color: "#003366",
                   }}
                 >
                   Booked By
@@ -5713,7 +5723,7 @@ const DoctorBookedAppointment = () => {
                 <th
                   style={{
                     background: "#D7EAF0",
-                    color: "#003366", 
+                    color: "#003366",
                   }}
                 >
                   Status
@@ -5721,7 +5731,7 @@ const DoctorBookedAppointment = () => {
                 <th
                   style={{
                     background: "#D7EAF0",
-                    color: "#003366", 
+                    color: "#003366",
                   }}
                 >
                   Mobile Number
@@ -5729,7 +5739,7 @@ const DoctorBookedAppointment = () => {
                 <th
                   style={{
                     background: "#D7EAF0",
-                    color: "#003366", 
+                    color: "#003366",
                   }}
                 >
                   Actions
@@ -5785,8 +5795,8 @@ const DoctorBookedAppointment = () => {
                               style={{
                                 display: "flex",
                                 alignItems: "center",
-                                justifyContent: "flex-start", 
-                                padding: "10px 20px", 
+                                justifyContent: "flex-start",
+                                padding: "10px 20px",
                               }}
                             >
                               <h5
@@ -5796,7 +5806,7 @@ const DoctorBookedAppointment = () => {
                                   color: "#ffffff",
                                   fontFamily: "Sans-Serif",
                                   lineHeight: "46.88px",
-                                  margin: "0px", 
+                                  margin: "0px",
                                   textAlign: "left",
                                 }}
                               >
@@ -5804,13 +5814,13 @@ const DoctorBookedAppointment = () => {
                               </h5>
                               <Button
                                 style={{
-                                  marginLeft: "20px", 
-                                  backgroundColor: "#0166CB", 
-                                  color: "#ffffff", 
-                                  border: "none", 
-                                  borderRadius: "5px", 
-                                  padding: "10px 20px", 
-                                  cursor: "pointer", 
+                                  marginLeft: "20px",
+                                  backgroundColor: "#0166CB",
+                                  color: "#ffffff",
+                                  border: "none",
+                                  borderRadius: "5px",
+                                  padding: "10px 20px",
+                                  cursor: "pointer",
                                 }}
                                 onClick={handlePrint}
                               >
@@ -5820,15 +5830,15 @@ const DoctorBookedAppointment = () => {
 
                             <Button
                               style={{
-                                position: "absolute", 
-                                top: "10px", 
-                                right: "10px", 
-                                backgroundColor: "#0166CB", 
+                                position: "absolute",
+                                top: "10px",
+                                right: "10px",
+                                backgroundColor: "#0166CB",
                                 color: "#ffffff",
-                                border: "none", 
-                                borderRadius: "5px", 
-                                padding: "10px 20px", 
-                                cursor: "pointer", 
+                                border: "none",
+                                borderRadius: "5px",
+                                padding: "10px 20px",
+                                cursor: "pointer",
                               }}
                               onClick={handleUpdate}
                             >
@@ -5844,13 +5854,13 @@ const DoctorBookedAppointment = () => {
                                   >
                                     <Form.Label
                                       style={{
-                                        color: "#003366", 
-                                        fontFamily: "Sans-Serif", 
-                                        fontSize: "25px", 
-                                        fontWeight: 600, 
-                                        lineHeight: "29.3px", 
-                                        textAlign: "left", 
-                                        width: "100%", 
+                                        color: "#003366",
+                                        fontFamily: "Sans-Serif",
+                                        fontSize: "25px",
+                                        fontWeight: 600,
+                                        lineHeight: "29.3px",
+                                        textAlign: "left",
+                                        width: "100%",
                                       }}
                                     >
                                       Name
@@ -5862,7 +5872,7 @@ const DoctorBookedAppointment = () => {
                                       value={formDetails.name || ""}
                                       onChange={handleInputChange}
                                       style={{
-                                        textAlign: "left", 
+                                        textAlign: "left",
                                       }}
                                     />
                                   </Form.Group>
@@ -5874,12 +5884,12 @@ const DoctorBookedAppointment = () => {
                                   >
                                     <Form.Label
                                       style={{
-                                        color: "#003366", 
-                                        fontFamily: "Sans-Serif", 
-                                        fontSize: "25px", 
-                                        fontWeight: 600, 
-                                        lineHeight: "29.3px", 
-                                        textAlign: "left", 
+                                        color: "#003366",
+                                        fontFamily: "Sans-Serif",
+                                        fontSize: "25px",
+                                        fontWeight: 600,
+                                        lineHeight: "29.3px",
+                                        textAlign: "left",
                                         width: "100%",
                                       }}
                                     >
@@ -5892,11 +5902,13 @@ const DoctorBookedAppointment = () => {
                                       value={formDetails.mobile_number || ""}
                                       onChange={handleInputChange}
                                       style={{
-                                        textAlign: "left", 
+                                        textAlign: "left",
                                       }}
+                                      disabled
                                     />
                                   </Form.Group>
                                 </Col>
+
                                 <Col sm={6} md={4}>
                                   <Form.Group
                                     controlId="formAge"
@@ -5904,13 +5916,13 @@ const DoctorBookedAppointment = () => {
                                   >
                                     <Form.Label
                                       style={{
-                                        color: "#003366", 
-                                        fontFamily: "Sans-Serif", 
-                                        fontSize: "25px", 
+                                        color: "#003366",
+                                        fontFamily: "Sans-Serif",
+                                        fontSize: "25px",
                                         fontWeight: 600,
-                                        lineHeight: "29.3px", 
+                                        lineHeight: "29.3px",
                                         textAlign: "left",
-                                        width: "100%", 
+                                        width: "100%",
                                       }}
                                     >
                                       Age
@@ -5922,7 +5934,7 @@ const DoctorBookedAppointment = () => {
                                       value={formDetails.age || ""}
                                       onChange={handleInputChange}
                                       style={{
-                                        textAlign: "left", 
+                                        textAlign: "left",
                                       }}
                                     />
                                   </Form.Group>
@@ -5968,13 +5980,13 @@ const DoctorBookedAppointment = () => {
                                   >
                                     <Form.Label
                                       style={{
-                                        color: "#003366", 
+                                        color: "#003366",
                                         fontFamily: "Sans-Serif",
-                                        fontSize: "25px", 
-                                        fontWeight: 600, 
-                                        lineHeight: "29.3px", 
-                                        textAlign: "left", 
-                                        width: "100%", 
+                                        fontSize: "25px",
+                                        fontWeight: 600,
+                                        lineHeight: "29.3px",
+                                        textAlign: "left",
+                                        width: "100%",
                                       }}
                                     >
                                       Address
@@ -5986,7 +5998,7 @@ const DoctorBookedAppointment = () => {
                                       value={formDetails.address || ""}
                                       onChange={handleInputChange}
                                       style={{
-                                        textAlign: "left", 
+                                        textAlign: "left",
                                       }}
                                     />
                                   </Form.Group>
@@ -5996,12 +6008,12 @@ const DoctorBookedAppointment = () => {
                               <div className="d-flex justify-content-center gap-2">
                                 <Button
                                   style={{
-                                    backgroundColor: "#0166CB", 
-                                    color: "#FFFFFF", 
+                                    backgroundColor: "#0166CB",
+                                    color: "#FFFFFF",
                                     border: "none",
-                                    borderRadius: "5px", 
-                                    padding: "10px 20px", 
-                                    cursor: "pointer", 
+                                    borderRadius: "5px",
+                                    padding: "10px 20px",
+                                    cursor: "pointer",
                                   }}
                                   onClick={() =>
                                     handleDelete(appointment.appointment_id)
@@ -6013,8 +6025,8 @@ const DoctorBookedAppointment = () => {
                                 <Button
                                   style={{
                                     backgroundColor: "#0166CB",
-                                    color: "#FFFFFF", 
-                                    border: "none", 
+                                    color: "#FFFFFF",
+                                    border: "none",
                                     borderRadius: "5px",
                                     padding: "10px 20px",
                                     cursor: "pointer",
@@ -6288,7 +6300,7 @@ const DoctorBookedAppointment = () => {
                                 style={{
                                   display: "flex",
                                   alignItems: "center",
-                                  justifyContent: "flex-start", 
+                                  justifyContent: "flex-start",
                                   padding: "10px 20px",
                                 }}
                               >
@@ -6297,10 +6309,10 @@ const DoctorBookedAppointment = () => {
                                     fontWeight: "600",
                                     fontSize: "40px",
                                     color: "#ffffff",
-                                    fontFamily: "Sans-Serif", 
+                                    fontFamily: "Sans-Serif",
                                     lineHeight: "46.88px",
-                                    margin: "0px", 
-                                    textAlign: "left", 
+                                    margin: "0px",
+                                    textAlign: "left",
                                   }}
                                 >
                                   Patient Vitals
@@ -6309,15 +6321,15 @@ const DoctorBookedAppointment = () => {
 
                               <Button
                                 style={{
-                                  position: "absolute", 
-                                  top: "10px", 
-                                  right: "10px", 
-                                  backgroundColor: "#0166CB", 
-                                  color: "#ffffff", 
-                                  border: "none", 
-                                  borderRadius: "5px", 
-                                  padding: "10px 20px", 
-                                  cursor: "pointer", 
+                                  position: "absolute",
+                                  top: "10px",
+                                  right: "10px",
+                                  backgroundColor: "#0166CB",
+                                  color: "#ffffff",
+                                  border: "none",
+                                  borderRadius: "5px",
+                                  padding: "10px 20px",
+                                  cursor: "pointer",
                                 }}
                                 onClick={handleVitalUpdate}
                               >
@@ -6337,7 +6349,7 @@ const DoctorBookedAppointment = () => {
                                       style={{
                                         fontFamily: "sans-serif",
                                         backgroundColor: "#D7EAF0",
-                                        color: "#003366", 
+                                        color: "#003366",
                                       }}
                                     >
                                       Blood Pressure
@@ -6346,7 +6358,7 @@ const DoctorBookedAppointment = () => {
                                       style={{
                                         fontFamily: "sans-serif",
                                         backgroundColor: "#D7EAF0",
-                                        color: "#003366", 
+                                        color: "#003366",
                                       }}
                                     >
                                       Oxygen Level
@@ -6355,7 +6367,7 @@ const DoctorBookedAppointment = () => {
                                       style={{
                                         fontFamily: "sans-serif",
                                         backgroundColor: "#D7EAF0",
-                                        color: "#003366", 
+                                        color: "#003366",
                                       }}
                                     >
                                       Body Temp.
@@ -6373,7 +6385,7 @@ const DoctorBookedAppointment = () => {
                                       style={{
                                         fontFamily: "sans-serif",
                                         backgroundColor: "#D7EAF0",
-                                        color: "#003366", 
+                                        color: "#003366",
                                       }}
                                     >
                                       Pulse Rate
@@ -6391,7 +6403,7 @@ const DoctorBookedAppointment = () => {
                                       style={{
                                         fontFamily: "sans-serif",
                                         backgroundColor: "#D7EAF0",
-                                        color: "#003366", 
+                                        color: "#003366",
                                       }}
                                     >
                                       Height (cm)
@@ -6400,7 +6412,7 @@ const DoctorBookedAppointment = () => {
                                       style={{
                                         fontFamily: "sans-serif",
                                         backgroundColor: "#D7EAF0",
-                                        color: "#003366", 
+                                        color: "#003366",
                                       }}
                                     >
                                       Weight (kg)
@@ -6409,7 +6421,7 @@ const DoctorBookedAppointment = () => {
                                       style={{
                                         fontFamily: "sans-serif",
                                         backgroundColor: "#D7EAF0",
-                                        color: "#003366", 
+                                        color: "#003366",
                                       }}
                                     >
                                       BMI
@@ -6496,7 +6508,7 @@ const DoctorBookedAppointment = () => {
                                         type="text"
                                         name="bmi"
                                         value={recordDetails.bmi || ""}
-                                        readOnly 
+                                        readOnly
                                         style={{ padding: "5px" }}
                                       />
                                     </td>
@@ -6506,7 +6518,7 @@ const DoctorBookedAppointment = () => {
 
                               <div
                                 style={{
-                                  display: "flex", 
+                                  display: "flex",
                                   justifyContent: "center",
                                   alignItems: "center",
                                 }}
@@ -6516,7 +6528,7 @@ const DoctorBookedAppointment = () => {
                                   onClick={handleVitalSubmit}
                                   className="me-2"
                                   style={{
-                                    background: "#0166CB", 
+                                    background: "#0166CB",
                                     border: "none",
                                   }}
                                 >
@@ -6583,15 +6595,15 @@ const DoctorBookedAppointment = () => {
                                   <Button
                                     variant="outline-primary"
                                     style={{
-                                      position: "absolute", 
-                                      top: "10px", 
-                                      right: "10px", 
+                                      position: "absolute",
+                                      top: "10px",
+                                      right: "10px",
                                       background: "#0166CB",
                                       color: "#ffffff",
                                       border: "none",
                                       borderRadius: "5px",
                                       padding: "10px 20px",
-                                      cursor: "pointer", 
+                                      cursor: "pointer",
                                     }}
                                     onClick={() => {
                                       setIsPrescriptionDocs(true);
@@ -6960,16 +6972,16 @@ const DoctorBookedAppointment = () => {
                             <Card.Body>
                               <h5
                                 style={{
-                                  fontFamily: "Sans-Serif", 
-                                  fontSize: "40px", 
-                                  fontWeight: 600, 
+                                  fontFamily: "Sans-Serif",
+                                  fontSize: "40px",
+                                  fontWeight: 600,
                                   lineHeight: "46.88px",
                                   textAlign: "left",
-                                  width: "225px", 
-                                  height: "46px", 
+                                  width: "225px",
+                                  height: "46px",
                                   gap: "0px",
-                                  opacity: 1, 
-                                  color: "#ffffff", 
+                                  opacity: 1,
+                                  color: "#ffffff",
                                 }}
                               >
                                 Document
@@ -6978,14 +6990,14 @@ const DoctorBookedAppointment = () => {
                               <Button
                                 variant="outline-primary"
                                 style={{
-                                  position: "absolute", 
-                                  top: "10px", 
+                                  position: "absolute",
+                                  top: "10px",
                                   right: "10px",
-                                  background: "#0166CB", 
-                                  color: "#ffffff", 
+                                  background: "#0166CB",
+                                  color: "#ffffff",
                                   border: "none",
-                                  borderRadius: "5px", 
-                                  padding: "10px 20px", 
+                                  borderRadius: "5px",
+                                  padding: "10px 20px",
                                 }}
                                 onClick={() => {
                                   setIsPrescriptionDocs(true);
@@ -7378,7 +7390,7 @@ const DoctorBookedAppointment = () => {
                                       display: "flex",
                                       flexWrap: "wrap",
                                       gap: "20px",
-                                      justifyContent: "left", 
+                                      justifyContent: "left",
                                     }}
                                   >
                                     {photosToShow.map((record, index) => (
@@ -7389,23 +7401,23 @@ const DoctorBookedAppointment = () => {
                                           borderRadius: "8px",
                                           padding: "10px",
                                           textAlign: "center",
-                                          width: "280px", 
-                                          height: "350px", 
+                                          width: "280px",
+                                          height: "350px",
                                           boxShadow:
                                             "0 2px 4px rgba(0, 0, 0, 0.1)",
-                                          position: "relative", 
+                                          position: "relative",
                                         }}
                                       >
                                         <img
                                           src={record.report_file}
                                           alt="Medical Record"
                                           style={{
-                                            width: "100%", 
-                                            height: "280px", 
+                                            width: "100%",
+                                            height: "280px",
                                             borderRadius: "5px",
                                             objectFit: "cover",
                                             marginBottom: "10px",
-                                            cursor: "pointer", 
+                                            cursor: "pointer",
                                           }}
                                           onClick={() =>
                                             setSelectedImage(record.report_file)
@@ -7424,17 +7436,17 @@ const DoctorBookedAppointment = () => {
                                         <button
                                           style={{
                                             position: "absolute",
-                                            bottom: "10px", 
-                                            right: "10px", 
+                                            bottom: "10px",
+                                            right: "10px",
                                             background: "transparent",
                                             border: "none",
                                             cursor: "pointer",
                                             color: "red",
-                                            fontSize: "24px", 
+                                            fontSize: "24px",
                                           }}
                                           onClick={() =>
                                             deleteRecord(record.id)
-                                          } 
+                                          }
                                         >
                                           <FaTrash />
                                         </button>
@@ -7557,10 +7569,10 @@ const DoctorBookedAppointment = () => {
               src={previewFileUrl}
               alt="Document Preview"
               style={{
-                maxWidth: "100%", 
+                maxWidth: "100%",
                 maxHeight: "500px",
                 display: "block",
-                margin: "0 auto", 
+                margin: "0 auto",
               }}
             />
           ) : previewFileType.includes("pdf") ? (
@@ -7569,7 +7581,7 @@ const DoctorBookedAppointment = () => {
               title="Document Preview"
               style={{
                 width: "100%",
-                height: "500px", 
+                height: "500px",
                 border: "none",
               }}
             ></iframe>

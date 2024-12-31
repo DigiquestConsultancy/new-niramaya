@@ -239,7 +239,7 @@ const DoctorRegister = () => {
                   </p>
                 </div>
                 <h2 className="text-dark mb-4">Doctor Register</h2>
-                {/* <div className="mb-3">
+                <div className="mb-3">
                   <label
                     htmlFor="mobileNumber"
                     className="form-label"
@@ -270,9 +270,9 @@ const DoctorRegister = () => {
                       }
                     />
                   </div>
-                </div> */}
+                </div>
 
-                <div className="mb-3">
+                {/* <div className="mb-3">
                   <label
                     htmlFor="mobileNumber"
                     className="form-label"
@@ -289,7 +289,7 @@ const DoctorRegister = () => {
                     onChange={setMobileNumber} // Update state on change
                     required
                   />
-                </div>
+                </div> */}
 
                 <div className="mb-3">
                   <label

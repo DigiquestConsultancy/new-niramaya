@@ -1015,28 +1015,26 @@
 
 
 
-
-
 import React, { useState, useEffect, useRef } from "react";
 import { Button, Row, Col, Card, Form, Modal, Alert } from "react-bootstrap";
 import { load } from "@cashfreepayments/cashfree-js";
 import clinicVisitImage from "../../images/a-53-512.webp";
 import onlineConsultationImage from "../../images/2562653-200.png";
 import BaseUrl from "../../api/BaseUrl";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaArrowRight, FaTimes } from "react-icons/fa";
 import { format, addDays } from "date-fns";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
-import "../../css/Patient.css";
-import Checkout from "./CheckOutBook";
+import "../../css/patient.css";
+import Checkout from "../checkout/checkout";
 
 const BookAppointment = () => {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const formRef = useRef(null);
 
-  const history = useHistory();
+  const navigate = useNavigate();
   const [appointmentType, setAppointmentType] = useState("clinic");
   const [availableDates, setAvailableDates] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -1057,7 +1055,9 @@ const BookAppointment = () => {
   const slotsPerPage = 4;
   const [selectedCountry, setSelectedCountry] = useState("India");
   const [consultancyFee, setConsultancyFee] = useState("₹800");
-  
+
+  const [hoverMessage, setHoverMessage] = useState("");
+
   const countries = [
     { name: "India", fee: "₹800" },
     { name: "Bangladesh", fee: "₹800" },
@@ -1276,13 +1276,29 @@ const BookAppointment = () => {
           });
           setIsFormVisible(false);
         } else {
+          // Retry update in case fetch fails
+          await BaseUrl.put("/payment/updateappointment", {
+            appointment_id: slot.id,
+          });
           throw new Error("Failed to fetch updated slots");
         }
       } else {
+        // Retry update in case the initial update fails
+        await BaseUrl.put("/payment/updateappointment", {
+          appointment_id: slot.id,
+        });
         throw new Error("Failed to update the appointment");
       }
     } catch (error) {
+      // Handle errors and ensure update is retried
       console.error(error);
+      try {
+        await BaseUrl.put("/payment/updateappointment", {
+          appointment_id: slot.id,
+        });
+      } catch (retryError) {
+        console.error("Retry update failed:", retryError);
+      }
     }
   };
 
@@ -1338,88 +1354,86 @@ const BookAppointment = () => {
     setShowModal(true);
   };
 
-  
-
   const handleSubmit = async () => {
     try {
-        setLoading(true);
-        setErrorMessage("");
+      setLoading(true);
+      setErrorMessage("");
 
-        // Extract country code and local number from mobile_number
-        const mobileString = mobile_number.toString();
-        const extractedMobileNumber = mobileString.slice(-10); // Last 10 digits
-        const countryCode = mobileString.slice(0, -10); // Country code
+      // Extract country code and local number from mobile_number
+      const mobileString = mobile_number.toString();
+      const extractedMobileNumber = mobileString.slice(-10); // Last 10 digits
+      const countryCode = mobileString.slice(0, -10); // Country code
 
-        // Store the country code and mobile number in localStorage
-        localStorage.setItem("countryCode", countryCode);
-        localStorage.setItem("mobileNumber", extractedMobileNumber);
+      // Store the country code and mobile number in localStorage
+      localStorage.setItem("countryCode", countryCode);
+      localStorage.setItem("mobileNumber", extractedMobileNumber);
 
-        // Ensure selected country matches the country code
-        const matchedCountry = countries.find((c) =>
-            mobileString.startsWith(c.code)
-        );
-        if (matchedCountry) {
-            setSelectedCountry(matchedCountry.name);
-            setConsultancyFee(matchedCountry.fee);
+      // Ensure selected country matches the country code
+      const matchedCountry = countries.find((c) =>
+        mobileString.startsWith(c.code)
+      );
+      if (matchedCountry) {
+        setSelectedCountry(matchedCountry.name);
+        setConsultancyFee(matchedCountry.fee);
 
-            // Store matched country details in localStorage
-            localStorage.setItem("selectedCountry", matchedCountry.name);
-            localStorage.setItem("consultancyFee", matchedCountry.fee);
-        }
+        // Store matched country details in localStorage
+        localStorage.setItem("selectedCountry", matchedCountry.name);
+        localStorage.setItem("consultancyFee", matchedCountry.fee);
+      }
 
-        // Create the patient
-        const patientResponse = await BaseUrl.post("/patient/patient/", {
-            name,
-            mobile_number,
-            age,
-            blood_group: bloodGroup,
-            gender,
-            address,
-            email,
-            doctor_id: doctorId,
-        });
+      // Create the patient
+      const patientResponse = await BaseUrl.post("/patient/patient/", {
+        name,
+        mobile_number,
+        age,
+        blood_group: bloodGroup,
+        gender,
+        address,
+        email,
+        doctor_id: doctorId,
+      });
 
-        // Extract patient details from the response
-        const patientDetails = patientResponse.data?.data;
-        const fetchedPatientId = patientDetails?.id;
-        const fetchedName = patientDetails?.name; // Correctly extract name
-        const fetchedMobileNumber = patientDetails?.mobile_number; // Correctly extract mobile number
+      // Extract patient details from the response
+      const patientDetails = patientResponse.data?.data;
+      const fetchedPatientId = patientDetails?.id;
+      const fetchedName = patientDetails?.name; // Correctly extract name
+      const fetchedMobileNumber = patientDetails?.mobile_number; // Correctly extract mobile number
 
-        // Store patient details in localStorage
-        localStorage.setItem("patientId", fetchedPatientId);
-        localStorage.setItem("patientName", fetchedName); // Save name correctly
-        localStorage.setItem("patientMobileNumber", fetchedMobileNumber); // Save mobile_number correctly
-        localStorage.setItem("patientAge", age);
-        localStorage.setItem("patientBloodGroup", bloodGroup);
-        localStorage.setItem("patientGender", gender);
-        localStorage.setItem("patientAddress", address);
-        localStorage.setItem("patientEmail", email);
+      // Store patient details in localStorage
+      localStorage.setItem("patientId", fetchedPatientId);
+      localStorage.setItem("patientName", fetchedName); // Save name correctly
+      localStorage.setItem("patientMobileNumber", fetchedMobileNumber); // Save mobile_number correctly
+      localStorage.setItem("patientAge", age);
+      localStorage.setItem("patientBloodGroup", bloodGroup);
+      localStorage.setItem("patientGender", gender);
+      localStorage.setItem("patientAddress", address);
+      localStorage.setItem("patientEmail", email);
 
-        // Store selected slot ID
-        localStorage.setItem("selectedSlotId", selectedSlot.id);
+      // Store selected slot ID
+      localStorage.setItem("selectedSlotId", selectedSlot.id);
 
-        // Fetch the consultation fee with consultation_type
-        const consultationType = appointmentType === "clinic" ? "walk-in" : "online";
+      // Fetch the consultation fee with consultation_type
+      const consultationType =
+        appointmentType === "clinic" ? "walk-in" : "online";
 
-        const feeResponse = await BaseUrl.get(
-            `/patient/fee/?country_code=${countryCode}&consultation_type=${consultationType}`
-        );
-        const { consultation_fee: amount, currency } = feeResponse.data;
+      const feeResponse = await BaseUrl.get(
+        `/patient/fee/?country_code=${countryCode}&consultation_type=${consultationType}`
+      );
+      const { consultation_fee: amount, currency } = feeResponse.data;
 
-        // Store the fee and currency in localStorage
-        localStorage.setItem("consultationFee", amount);
-        localStorage.setItem("currency", currency);
+      // Store the fee and currency in localStorage
+      localStorage.setItem("consultationFee", amount);
+      localStorage.setItem("currency", currency);
 
-        // Navigate to the Checkout route
-        history.push("/patient/checkoutbook");
+      // Navigate to the Checkout route
+      navigate("/components/checkout");
     } catch (error) {
-        console.error("Error during form submission:", error); // Log the error for debugging
-        setErrorMessage("Error processing request. Please try again.");
+      console.error("Error during form submission:", error); // Log the error for debugging
+      setErrorMessage("Error processing request. Please try again.");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-};
-
+  };
 
   const triggerPaymentGateway = async (paymentSessionId) => {
     try {
@@ -1681,7 +1695,7 @@ const BookAppointment = () => {
         }}
       >
         <Button
-          variant="outline-secondary"
+          variant="outline-secondary mb-4"
           onClick={() => handleDateNavigation("prev")}
           style={{ marginRight: "10px", cursor: "pointer" }}
           disabled={currentDateIndex === 0}
@@ -1762,7 +1776,7 @@ const BookAppointment = () => {
         </div>
 
         <Button
-          variant="outline-secondary"
+          variant="outline-secondary mb-4"
           onClick={() => handleDateNavigation("next")}
           style={{ marginLeft: "10px", cursor: "pointer" }}
           disabled={currentDateIndex + 5 >= availableDates.length}
@@ -1829,9 +1843,7 @@ const BookAppointment = () => {
                 visibility: morningIndex > 0 ? "visible" : "hidden",
               }}
             />
-            <h4 style={{ color: "#003F7D", marginBottom: "1rem" }}>
-              Morning 
-            </h4>
+            <h4 style={{ color: "#003F7D", marginBottom: "1rem" }}>Morning</h4>
             <FaArrowRight
               onClick={() =>
                 handleNext(setMorningIndex, morningIndex, slots.morning)
@@ -1863,24 +1875,72 @@ const BookAppointment = () => {
                         morningIndex + rowIndex * 4,
                         morningIndex + (rowIndex + 1) * 4
                       )
-                      .map((slot) => (
-                        <Button
-                          key={slot.id}
-                          variant="outline-primary"
-                          className="slot-button mx-2 my-2"
-                          onClick={() => handleSlotClick(slot)}
-                          style={{
-                            backgroundColor:
-                              selectedSlot?.id === slot.id
-                                ? "#B8E8B1"
-                                : "#FFFFFF",
-                            color: "#000000",
-                            borderColor: "#3D9F41",
-                          }}
-                        >
-                          {formatTime(slot.appointment_slot)}
-                        </Button>
-                      ))}
+                      .map((slot) => {
+                        const currentTime = new Date();
+                        const slotTime = new Date();
+                        const [hours, minutes] =
+                          slot.appointment_slot.split(":");
+                        slotTime.setHours(hours);
+                        slotTime.setMinutes(minutes);
+
+                        const isDisabled =
+                          slot.is_selected || currentTime >= slotTime;
+                        const buttonStyle = {
+                          backgroundColor: slot.is_selected
+                            ? "gray"
+                            : currentTime >= slotTime
+                            ? "#d2a679"
+                            : selectedSlot?.id === slot.id
+                            ? "#B8E8B1"
+                            : "#FFFFFF",
+                          color: isDisabled ? "#FFFFFF" : "#000000",
+                          borderColor: "#3D9F41",
+                          cursor: isDisabled ? "not-allowed" : "pointer",
+                          opacity: isDisabled ? 0.7 : 1,
+                        };
+
+                        return (
+                          <div
+                            key={slot.id}
+                            onMouseEnter={() =>
+                              slot.is_selected &&
+                              setHoverMessage("This slot is in use/Booked")
+                            }
+                            onMouseLeave={() => setHoverMessage("")}
+                            style={{ position: "relative" }}
+                          >
+                            <Button
+                              className="slot-button mx-2 my-2"
+                              style={buttonStyle}
+                              onClick={() =>
+                                !isDisabled && handleSlotClick(slot)
+                              }
+                              disabled={isDisabled}
+                            >
+                              {formatTime(slot.appointment_slot)}
+                            </Button>
+                            {slot.is_selected && hoverMessage && (
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  top: "-35px",
+                                  left: "50%",
+                                  transform: "translateX(-50%)",
+                                  backgroundColor: "rgba(0, 0, 0, 0.8)",
+                                  color: "#fff",
+                                  padding: "5px 10px",
+                                  borderRadius: "4px",
+                                  fontSize: "0.75rem",
+                                  whiteSpace: "nowrap",
+                                  zIndex: 10,
+                                }}
+                              >
+                                {hoverMessage}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                   </div>
                 ))}
               </>
@@ -1900,7 +1960,7 @@ const BookAppointment = () => {
               }}
             />
             <h4 style={{ color: "#003F7D", marginBottom: "1rem" }}>
-              Afternoon 
+              Afternoon
             </h4>
             <FaArrowRight
               onClick={() =>
@@ -1933,24 +1993,72 @@ const BookAppointment = () => {
                         afternoonIndex + rowIndex * 4,
                         afternoonIndex + (rowIndex + 1) * 4
                       )
-                      .map((slot) => (
-                        <Button
-                          key={slot.id}
-                          variant="outline-primary"
-                          className="slot-button mx-2 my-2"
-                          onClick={() => handleSlotClick(slot)}
-                          style={{
-                            backgroundColor:
-                              selectedSlot?.id === slot.id
-                                ? "#B8E8B1"
-                                : "#FFFFFF",
-                            color: "#000000",
-                            borderColor: "#3D9F41",
-                          }}
-                        >
-                          {formatTime(slot.appointment_slot)}
-                        </Button>
-                      ))}
+                      .map((slot) => {
+                        const currentTime = new Date();
+                        const slotTime = new Date();
+                        const [hours, minutes] =
+                          slot.appointment_slot.split(":");
+                        slotTime.setHours(hours);
+                        slotTime.setMinutes(minutes);
+
+                        const isDisabled =
+                          slot.is_selected || currentTime >= slotTime;
+                        const buttonStyle = {
+                          backgroundColor: slot.is_selected
+                            ? "gray"
+                            : currentTime >= slotTime
+                            ? "#d2a679"
+                            : selectedSlot?.id === slot.id
+                            ? "#B8E8B1"
+                            : "#FFFFFF",
+                          color: isDisabled ? "#FFFFFF" : "#000000",
+                          borderColor: "#3D9F41",
+                          cursor: isDisabled ? "not-allowed" : "pointer",
+                          opacity: isDisabled ? 0.7 : 1,
+                        };
+
+                        return (
+                          <div
+                            key={slot.id}
+                            onMouseEnter={() =>
+                              slot.is_selected &&
+                              setHoverMessage("This slot is in use/Booked")
+                            }
+                            onMouseLeave={() => setHoverMessage("")}
+                            style={{ position: "relative" }}
+                          >
+                            <Button
+                              className="slot-button mx-2 my-2"
+                              style={buttonStyle}
+                              onClick={() =>
+                                !isDisabled && handleSlotClick(slot)
+                              }
+                              disabled={isDisabled}
+                            >
+                              {formatTime(slot.appointment_slot)}
+                            </Button>
+                            {slot.is_selected && hoverMessage && (
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  top: "-35px",
+                                  left: "50%",
+                                  transform: "translateX(-50%)",
+                                  backgroundColor: "rgba(0, 0, 0, 0.8)",
+                                  color: "#fff",
+                                  padding: "5px 10px",
+                                  borderRadius: "4px",
+                                  fontSize: "0.75rem",
+                                  whiteSpace: "nowrap",
+                                  zIndex: 10,
+                                }}
+                              >
+                                {hoverMessage}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                   </div>
                 ))}
               </>
@@ -1969,9 +2077,7 @@ const BookAppointment = () => {
                 visibility: eveningIndex > 0 ? "visible" : "hidden",
               }}
             />
-            <h4 style={{ color: "#003F7D", marginBottom: "1rem" }}>
-              Evening 
-            </h4>
+            <h4 style={{ color: "#003F7D", marginBottom: "1rem" }}>Evening</h4>
             <FaArrowRight
               onClick={() =>
                 handleNext(setEveningIndex, eveningIndex, slots.evening)
@@ -2003,24 +2109,72 @@ const BookAppointment = () => {
                         eveningIndex + rowIndex * 4,
                         eveningIndex + (rowIndex + 1) * 4
                       )
-                      .map((slot) => (
-                        <Button
-                          key={slot.id}
-                          variant="outline-primary"
-                          className="slot-button mx-2 my-2"
-                          onClick={() => handleSlotClick(slot)}
-                          style={{
-                            backgroundColor:
-                              selectedSlot?.id === slot.id
-                                ? "#B8E8B1"
-                                : "#FFFFFF",
-                            color: "#000000",
-                            borderColor: "#3D9F41",
-                          }}
-                        >
-                          {formatTime(slot.appointment_slot)}
-                        </Button>
-                      ))}
+                      .map((slot) => {
+                        const currentTime = new Date();
+                        const slotTime = new Date();
+                        const [hours, minutes] =
+                          slot.appointment_slot.split(":");
+                        slotTime.setHours(hours);
+                        slotTime.setMinutes(minutes);
+
+                        const isDisabled =
+                          slot.is_selected || currentTime >= slotTime;
+                        const buttonStyle = {
+                          backgroundColor: slot.is_selected
+                            ? "gray"
+                            : currentTime >= slotTime
+                            ? "#d2a679"
+                            : selectedSlot?.id === slot.id
+                            ? "#B8E8B1"
+                            : "#FFFFFF",
+                          color: isDisabled ? "#FFFFFF" : "#000000",
+                          borderColor: "#3D9F41",
+                          cursor: isDisabled ? "not-allowed" : "pointer",
+                          opacity: isDisabled ? 0.7 : 1,
+                        };
+
+                        return (
+                          <div
+                            key={slot.id}
+                            onMouseEnter={() =>
+                              slot.is_selected &&
+                              setHoverMessage("This slot is in use/Booked")
+                            }
+                            onMouseLeave={() => setHoverMessage("")}
+                            style={{ position: "relative" }}
+                          >
+                            <Button
+                              className="slot-button mx-2 my-2"
+                              style={buttonStyle}
+                              onClick={() =>
+                                !isDisabled && handleSlotClick(slot)
+                              }
+                              disabled={isDisabled}
+                            >
+                              {formatTime(slot.appointment_slot)}
+                            </Button>
+                            {slot.is_selected && hoverMessage && (
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  top: "-35px",
+                                  left: "50%",
+                                  transform: "translateX(-50%)",
+                                  backgroundColor: "rgba(0, 0, 0, 0.8)",
+                                  color: "#fff",
+                                  padding: "5px 10px",
+                                  borderRadius: "4px",
+                                  fontSize: "0.75rem",
+                                  whiteSpace: "nowrap",
+                                  zIndex: 10,
+                                }}
+                              >
+                                {hoverMessage}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                   </div>
                 ))}
               </>
@@ -2103,8 +2257,8 @@ const BookAppointment = () => {
                           value.startsWith(c.code)
                         );
                         if (matchedCountry) {
-                          setSelectedCountry(matchedCountry.name); 
-                          setConsultancyFee(matchedCountry.fee); 
+                          setSelectedCountry(matchedCountry.name);
+                          setConsultancyFee(matchedCountry.fee);
                         }
                       }
                     }}
