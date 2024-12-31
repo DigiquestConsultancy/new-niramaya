@@ -205,9 +205,9 @@
 //       setSlots(slotsData);
 //     } catch (error) {
 //       setSlots([]);
-    // } finally {
-    //   setLoading(false);
-    // }
+// } finally {
+//   setLoading(false);
+// }
 //   };
 
 //   const fetchSlotCounts = async () => {
@@ -343,28 +343,28 @@
 //           age,
 //         };
 
-    // try {
-    //   const response = await BaseUrl.post("/patient/patient/", patientDetails);
-    //   if (response.status === 201) {
-    //     const savedPatientId = response.data.data.id;
-    //     setPatientId(savedPatientId);
-    //     localStorage.setItem("savedPatientId", savedPatientId);
-    //     setErrorMessage("");
-    //     await handlePayment({
-    //       customer_name: patientDetails.name,
-    //       customer_phone: patientDetails.mobile_number,
-    //     });
-    //   } else {
-    //     setErrorMessage(response.data.error);
-    //   }
-    // } catch (error) {
-    //   setErrorMessage(
-    //     error.response?.data?.error ||
-    //       "An error occurred while saving patient details."
-    //   );
-    // } finally {
-    //   setLoading(false);
-    // }
+// try {
+//   const response = await BaseUrl.post("/patient/patient/", patientDetails);
+//   if (response.status === 201) {
+//     const savedPatientId = response.data.data.id;
+//     setPatientId(savedPatientId);
+//     localStorage.setItem("savedPatientId", savedPatientId);
+//     setErrorMessage("");
+//     await handlePayment({
+//       customer_name: patientDetails.name,
+//       customer_phone: patientDetails.mobile_number,
+//     });
+//   } else {
+//     setErrorMessage(response.data.error);
+//   }
+// } catch (error) {
+//   setErrorMessage(
+//     error.response?.data?.error ||
+//       "An error occurred while saving patient details."
+//   );
+// } finally {
+//   setLoading(false);
+// }
 //   };
 
 //   const handleSaveDetails = async (details) => {
@@ -3596,16 +3596,6 @@
 
 // export default PatientHome;
 
-
-
-
-
-
-
-
-
-
-
 // import React, { useState, useEffect, useRef } from "react";
 // import {
 //   Container,
@@ -3886,21 +3876,21 @@
 //     setLoading(true);
 //     setSelectedSlot(slot);
 //     setSameAsAppointment(false);
-  
+
 //     try {
 //       const putResponse = await BaseUrl.put("/payment/updateappointment", {
 //         appointment_id: slot.id,
 //       });
-  
+
 //       if (putResponse.status === 200) {
-//         localStorage.setItem("selectedSlotId", slot.id); 
-//         localStorage.setItem("consultationType", consultationType); 
+//         localStorage.setItem("selectedSlotId", slot.id);
+//         localStorage.setItem("consultationType", consultationType);
 //       }
 //       const mobile_number = localStorage.getItem("mobile_number");
 //       const response = await BaseUrl.get("/patient/details/", {
 //         params: { mobile_number: mobile_number },
 //       });
-  
+
 //       if (response && response.data && response.data.length > 0) {
 //         const patient = response.data[0];
 //         setName(patient.name || "");
@@ -3918,7 +3908,6 @@
 //     }
 //     setIsModalOpen(true);
 //   };
-  
 
 //   const handleAltNameChange = (e) => {
 //     setAltName(e.target.value.replace(/[^A-Za-z\s]/g, ""));
@@ -4094,13 +4083,13 @@
 //       const consultationType = localStorage.getItem("consultationType");
 //       const orderId = localStorage.getItem("order_id");
 //       const savedPatientId = localStorage.getItem("savedPatientId");
-  
+
 //       // Check payment status
 //       const paymentStatusResponse = await BaseUrl.get(`/payment/get/`, {
 //         params: { order_id: orderId },
 //       });
 //       const paymentStatusData = paymentStatusResponse.data;
-  
+
 //       if (paymentStatusData.status === "SUCCESS") {
 //         try {
 //           // Book appointment API call
@@ -4111,7 +4100,7 @@
 //             appointment_slot: slotId,
 //             consultation_type: consultationType,
 //           });
-  
+
 //           if (postResponse && postResponse.data) {
 //             setSuccessMessage(postResponse.data.success);
 //             setShowSuccessPopup(true);
@@ -4145,8 +4134,6 @@
 //       localStorage.removeItem("order_id");
 //     }
 //   };
-  
-  
 
 //   useEffect(() => {
 //     const paymentStatus = localStorage.getItem("paymentSuccess");
@@ -5392,21 +5379,6 @@
 
 // export default PatientHome;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import React, { useState, useEffect, useRef } from "react";
 import {
   Container,
@@ -5523,8 +5495,7 @@ const PatientHome = () => {
           appointment_id: selectedSlot.id,
           is_selected: false,
         });
-      } catch (error) {
-      }
+      } catch (error) {}
     }
   };
 
@@ -5687,22 +5658,25 @@ const PatientHome = () => {
     setLoading(true);
     setSelectedSlot(slot);
     setSameAsAppointment(false);
-  
+
     try {
       const putResponse = await BaseUrl.put("/payment/updateappointment", {
         appointment_id: slot.id,
       });
-  
+
       if (putResponse.status === 200) {
-        localStorage.setItem("selectedSlotId", slot.id); 
-        localStorage.setItem("consultationType", consultationType); 
+        localStorage.setItem("selectedSlotId", slot.id);
+        localStorage.setItem("consultationType", consultationType);
       }
       const mobile_number = localStorage.getItem("mobile_number");
       const response = await BaseUrl.get("/patient/details/", {
         params: { mobile_number: mobile_number },
       });
-  
-      if (response && response.data && response.data.length > 0 || response.status ===200) {
+
+      if (
+        (response && response.data && response.data.length > 0) ||
+        response.status === 200
+      ) {
         const patient = response.data[0];
         setName(patient.name || "");
         setMobile(patient.mobile_number || "");
@@ -5719,7 +5693,6 @@ const PatientHome = () => {
     }
     setIsModalOpen(true);
   };
-  
 
   const handleAltNameChange = (e) => {
     setAltName(e.target.value.replace(/[^A-Za-z\s]/g, ""));
@@ -5755,10 +5728,11 @@ const PatientHome = () => {
 
   const handleSubmit = async () => {
     setLoading(true);
-  
-    const mandatoryFieldsFilled = name && mobile && dob && age && gender && address;
+
+    const mandatoryFieldsFilled =
+      name && mobile && dob && age && gender && address;
     const isEmailMandatory = consultationType === "online";
-  
+
     if (!mandatoryFieldsFilled || (isEmailMandatory && !email)) {
       setErrorMessage(
         isEmailMandatory
@@ -5769,7 +5743,7 @@ const PatientHome = () => {
       setLoading(false);
       return;
     }
-  
+
     const patientDetails = sameAsAppointment
       ? {
           name: altName,
@@ -5791,7 +5765,7 @@ const PatientHome = () => {
           email,
           age,
         };
-  
+
     try {
       const response = await BaseUrl.post("/patient/patient/", patientDetails);
       if (response.status === 201) {
@@ -5799,19 +5773,20 @@ const PatientHome = () => {
         localStorage.setItem("savedPatientId", id);
         localStorage.setItem("savedPatientName", name);
         localStorage.setItem("savedPatientMobile", mobile_number);
-  
+
         history.push("/patient/home/checkout");
       } else {
         setErrorMessage(response.data.error);
       }
     } catch (error) {
       setErrorMessage(
-        error.response?.data?.error || "An error occurred while saving patient details."
+        error.response?.data?.error ||
+          "An error occurred while saving patient details."
       );
     } finally {
       setLoading(false);
     }
-  };  
+  };
 
   const [isPaymentConfirmed, setIsPaymentConfirmed] = useState(false);
 
@@ -5835,24 +5810,27 @@ const PatientHome = () => {
       const consultationType = localStorage.getItem("consultationType");
       const orderId = localStorage.getItem("order_id");
       const savedPatientId = localStorage.getItem("savedPatientId");
-  
+
       // Check payment status
       const paymentStatusResponse = await BaseUrl.get(`/payment/get/`, {
         params: { order_id: orderId },
       });
       const paymentStatusData = paymentStatusResponse.data;
-  
+
       if (paymentStatusData.status === "SUCCESS") {
         try {
           // Book appointment API call
-          const postResponse = await BaseUrl.post("/patientappointment/bookslot/", {
-            patient: savedPatientId,
-            doctor: selectedDoctor.doctor,
-            appointment_status: "upcoming",
-            appointment_slot: slotId,
-            consultation_type: consultationType,
-          });
-  
+          const postResponse = await BaseUrl.post(
+            "/patientappointment/bookslot/",
+            {
+              patient: savedPatientId,
+              doctor: selectedDoctor.doctor,
+              appointment_status: "upcoming",
+              appointment_slot: slotId,
+              consultation_type: consultationType,
+            }
+          );
+
           if (postResponse && postResponse.data) {
             setSuccessMessage(postResponse.data.success);
             setShowSuccessPopup(true);
@@ -5886,8 +5864,6 @@ const PatientHome = () => {
       localStorage.removeItem("order_id");
     }
   };
-  
-  
 
   useEffect(() => {
     const paymentStatus = localStorage.getItem("paymentSuccess");
@@ -6037,8 +6013,7 @@ const PatientHome = () => {
         setConsultationFee(feeData.consultation_fee);
         setCurrency(feeData.currency);
       }
-    } catch (error) {
-    }
+    } catch (error) {}
     setShowSlotSelection(true);
     fetchSlots(availableDates[0]);
     fetchSlotCounts();
@@ -6420,66 +6395,84 @@ const PatientHome = () => {
                           morningSlotIndex,
                           morningSlotIndex + SLOTS_PER_BATCH
                         )
-                        .map((slot) => (
-                          <div
-                            style={{
-                              position: "relative",
-                              display: "inline-block",
-                              margin: "5px",
-                            }}
-                            onMouseEnter={(e) =>
-                              slot.is_selected &&
-                              setHoverMessage("This slot is in use/Booked")
-                            }
-                            onMouseLeave={(e) => setHoverMessage("")}
-                          >
-                            <Button
+                        .map((slot) => {
+                          const currentTime = new Date();
+                          const slotTime = new Date();
+                          const [hours, minutes] =
+                            slot.appointment_slot.split(":");
+                          slotTime.setHours(hours);
+                          slotTime.setMinutes(minutes);
+
+                          const isPastSlot = currentTime >= slotTime;
+
+                          return (
+                            <div
                               key={slot.id}
-                              variant="outline-primary"
-                              className="appointment-slots-button mb-2"
-                              onClick={() => handleSlotClick(slot)}
-                              disabled={slot.is_selected}
                               style={{
-                                padding: "10px",
-                                textAlign: "center",
-                                fontSize: "0.8rem",
-                                width: "80px",
-                                height: "50px",
-                                backgroundColor: slot.is_selected
-                                  ? "#cccccc"
-                                  : "#ffffff",
-                                color: slot.is_selected ? "#666666" : "#000000",
-                                border: slot.is_selected
-                                  ? "1px solid #999999"
-                                  : "1px solid #0091A5",
-                                cursor: slot.is_selected
-                                  ? "not-allowed"
-                                  : "pointer",
+                                position: "relative",
+                                display: "inline-block",
+                                margin: "5px",
                               }}
+                              onMouseEnter={(e) =>
+                                slot.is_selected &&
+                                setHoverMessage("This slot is in use/Booked")
+                              }
+                              onMouseLeave={(e) => setHoverMessage("")}
                             >
-                              {formatTime(slot.appointment_slot)}
-                            </Button>
-                            {slot.is_selected && hoverMessage && (
-                              <div
+                              <Button
+                                variant="outline-primary"
+                                className="appointment-slots-button mb-2"
+                                onClick={() => handleSlotClick(slot)}
+                                disabled={slot.is_selected || isPastSlot}
                                 style={{
-                                  position: "absolute",
-                                  top: "-35px",
-                                  left: "50%",
-                                  transform: "translateX(-50%)",
-                                  backgroundColor: "rgba(0, 0, 0, 0.8)",
-                                  color: "#fff",
-                                  padding: "5px 10px",
-                                  borderRadius: "4px",
-                                  fontSize: "0.75rem",
-                                  whiteSpace: "nowrap",
-                                  zIndex: 10,
+                                  padding: "10px",
+                                  textAlign: "center",
+                                  fontSize: "0.8rem",
+                                  width: "80px",
+                                  height: "50px",
+                                  backgroundColor: slot.is_selected
+                                    ? "#cccccc"
+                                    : isPastSlot
+                                      ? "#d2a679" // Brown color for past slots
+                                      : "#ffffff",
+                                  color:
+                                    slot.is_selected || isPastSlot
+                                      ? "#666666"
+                                      : "#000000",
+                                  border:
+                                    slot.is_selected || isPastSlot
+                                      ? "1px solid #999999"
+                                      : "1px solid #0091A5",
+                                  cursor:
+                                    slot.is_selected || isPastSlot
+                                      ? "not-allowed"
+                                      : "pointer",
                                 }}
                               >
-                                {hoverMessage}
-                              </div>
-                            )}
-                          </div>
-                        ))
+                                {formatTime(slot.appointment_slot)}
+                              </Button>
+                              {slot.is_selected && hoverMessage && (
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    top: "-35px",
+                                    left: "50%",
+                                    transform: "translateX(-50%)",
+                                    backgroundColor: "rgba(0, 0, 0, 0.8)",
+                                    color: "#fff",
+                                    padding: "5px 10px",
+                                    borderRadius: "4px",
+                                    fontSize: "0.75rem",
+                                    whiteSpace: "nowrap",
+                                    zIndex: 10,
+                                  }}
+                                >
+                                  {hoverMessage}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
                     ) : (
                       <p className="appointment-slot-section-message text-danger">
                         No slots available for morning
@@ -6536,66 +6529,88 @@ const PatientHome = () => {
                           afternoonSlotIndex,
                           afternoonSlotIndex + SLOTS_PER_BATCH
                         )
-                        .map((slot) => (
-                          <div
-                            style={{
-                              position: "relative",
-                              display: "inline-block",
-                              margin: "5px",
-                            }}
-                            onMouseEnter={(e) =>
-                              slot.is_selected &&
-                              setHoverMessage("This slot is in use/Booked")
-                            }
-                            onMouseLeave={(e) => setHoverMessage("")}
-                          >
-                            <Button
+                        .map((slot) => {
+                          const currentTime = new Date();
+                          const slotTime = new Date();
+                          const [hours, minutes] =
+                            slot.appointment_slot.split(":");
+                          slotTime.setHours(hours);
+                          slotTime.setMinutes(minutes);
+
+                          const isPastSlot = currentTime >= slotTime;
+
+                          return (
+                            <div
                               key={slot.id}
-                              variant="outline-primary"
-                              className="appointment-slots-button mb-2"
-                              onClick={() => handleSlotClick(slot)}
-                              disabled={slot.is_selected}
                               style={{
-                                padding: "10px",
-                                textAlign: "center",
-                                fontSize: "0.8rem",
-                                width: "80px",
-                                height: "50px",
-                                backgroundColor: slot.is_selected
-                                  ? "#cccccc"
-                                  : "#ffffff",
-                                color: slot.is_selected ? "#666666" : "#000000",
-                                border: slot.is_selected
-                                  ? "1px solid #999999"
-                                  : "1px solid #0091A5",
-                                cursor: slot.is_selected
-                                  ? "not-allowed"
-                                  : "pointer",
+                                position: "relative",
+                                display: "inline-block",
+                                margin: "5px",
                               }}
+                              onMouseEnter={(e) =>
+                                slot.is_selected &&
+                                setHoverMessage("This slot is in use/Booked")
+                              }
+                              onMouseLeave={(e) => setHoverMessage("")}
                             >
-                              {formatTime(slot.appointment_slot)}
-                            </Button>
-                            {slot.is_selected && hoverMessage && (
-                              <div
+                              <Button
+                                variant="outline-primary"
+                                className="appointment-slots-button mb-2"
+                                onClick={() =>
+                                  !isPastSlot &&
+                                  !slot.is_selected &&
+                                  handleSlotClick(slot)
+                                }
+                                disabled={slot.is_selected || isPastSlot}
                                 style={{
-                                  position: "absolute",
-                                  top: "-35px",
-                                  left: "50%",
-                                  transform: "translateX(-50%)",
-                                  backgroundColor: "rgba(0, 0, 0, 0.8)",
-                                  color: "#fff",
-                                  padding: "5px 10px",
-                                  borderRadius: "4px",
-                                  fontSize: "0.75rem",
-                                  whiteSpace: "nowrap",
-                                  zIndex: 10,
+                                  padding: "10px",
+                                  textAlign: "center",
+                                  fontSize: "0.8rem",
+                                  width: "80px",
+                                  height: "50px",
+                                  backgroundColor: slot.is_selected
+                                    ? "#cccccc"
+                                    : isPastSlot
+                                      ? "#d2a679" // Brown for past slots
+                                      : "#ffffff",
+                                  color:
+                                    slot.is_selected || isPastSlot
+                                      ? "#666666"
+                                      : "#000000",
+                                  border:
+                                    slot.is_selected || isPastSlot
+                                      ? "1px solid #999999"
+                                      : "1px solid #0091A5",
+                                  cursor:
+                                    slot.is_selected || isPastSlot
+                                      ? "not-allowed"
+                                      : "pointer",
                                 }}
                               >
-                                {hoverMessage}
-                              </div>
-                            )}
-                          </div>
-                        ))
+                                {formatTime(slot.appointment_slot)}
+                              </Button>
+                              {slot.is_selected && hoverMessage && (
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    top: "-35px",
+                                    left: "50%",
+                                    transform: "translateX(-50%)",
+                                    backgroundColor: "rgba(0, 0, 0, 0.8)",
+                                    color: "#fff",
+                                    padding: "5px 10px",
+                                    borderRadius: "4px",
+                                    fontSize: "0.75rem",
+                                    whiteSpace: "nowrap",
+                                    zIndex: 10,
+                                  }}
+                                >
+                                  {hoverMessage}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
                     ) : (
                       <p className="appointment-slot-section-message text-danger">
                         No slots available for afternoon
@@ -6650,66 +6665,88 @@ const PatientHome = () => {
                           eveningSlotIndex,
                           eveningSlotIndex + SLOTS_PER_BATCH
                         )
-                        .map((slot) => (
-                          <div
-                            style={{
-                              position: "relative",
-                              display: "inline-block",
-                              margin: "5px",
-                            }}
-                            onMouseEnter={(e) =>
-                              slot.is_selected &&
-                              setHoverMessage("This slot is in use/Booked")
-                            }
-                            onMouseLeave={(e) => setHoverMessage("")}
-                          >
-                            <Button
+                        .map((slot) => {
+                          const currentTime = new Date();
+                          const slotTime = new Date();
+                          const [hours, minutes] =
+                            slot.appointment_slot.split(":");
+                          slotTime.setHours(hours);
+                          slotTime.setMinutes(minutes);
+
+                          const isPastSlot = currentTime >= slotTime;
+
+                          return (
+                            <div
                               key={slot.id}
-                              variant="outline-primary"
-                              className="appointment-slots-button mb-2"
-                              onClick={() => handleSlotClick(slot)}
-                              disabled={slot.is_selected}
                               style={{
-                                padding: "10px",
-                                textAlign: "center",
-                                fontSize: "0.8rem",
-                                width: "80px",
-                                height: "50px",
-                                backgroundColor: slot.is_selected
-                                  ? "#cccccc"
-                                  : "#ffffff",
-                                color: slot.is_selected ? "#666666" : "#000000",
-                                border: slot.is_selected
-                                  ? "1px solid #999999"
-                                  : "1px solid #0091A5",
-                                cursor: slot.is_selected
-                                  ? "not-allowed"
-                                  : "pointer",
+                                position: "relative",
+                                display: "inline-block",
+                                margin: "5px",
                               }}
+                              onMouseEnter={(e) =>
+                                slot.is_selected &&
+                                setHoverMessage("This slot is in use/Booked")
+                              }
+                              onMouseLeave={(e) => setHoverMessage("")}
                             >
-                              {formatTime(slot.appointment_slot)}
-                            </Button>
-                            {slot.is_selected && hoverMessage && (
-                              <div
+                              <Button
+                                variant="outline-primary"
+                                className="appointment-slots-button mb-2"
+                                onClick={() =>
+                                  !isPastSlot &&
+                                  !slot.is_selected &&
+                                  handleSlotClick(slot)
+                                }
+                                disabled={slot.is_selected || isPastSlot}
                                 style={{
-                                  position: "absolute",
-                                  top: "-35px",
-                                  left: "50%",
-                                  transform: "translateX(-50%)",
-                                  backgroundColor: "rgba(0, 0, 0, 0.8)",
-                                  color: "#fff",
-                                  padding: "5px 10px",
-                                  borderRadius: "4px",
-                                  fontSize: "0.75rem",
-                                  whiteSpace: "nowrap",
-                                  zIndex: 10,
+                                  padding: "10px",
+                                  textAlign: "center",
+                                  fontSize: "0.8rem",
+                                  width: "80px",
+                                  height: "50px",
+                                  backgroundColor: slot.is_selected
+                                    ? "#cccccc" // Gray for selected slots
+                                    : isPastSlot
+                                      ? "#d2a679" // Brown for past slots
+                                      : "#ffffff",
+                                  color:
+                                    slot.is_selected || isPastSlot
+                                      ? "#666666"
+                                      : "#000000",
+                                  border:
+                                    slot.is_selected || isPastSlot
+                                      ? "1px solid #999999"
+                                      : "1px solid #0091A5",
+                                  cursor:
+                                    slot.is_selected || isPastSlot
+                                      ? "not-allowed"
+                                      : "pointer",
                                 }}
                               >
-                                {hoverMessage}
-                              </div>
-                            )}
-                          </div>
-                        ))
+                                {formatTime(slot.appointment_slot)}
+                              </Button>
+                              {slot.is_selected && hoverMessage && (
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    top: "-35px",
+                                    left: "50%",
+                                    transform: "translateX(-50%)",
+                                    backgroundColor: "rgba(0, 0, 0, 0.8)",
+                                    color: "#fff",
+                                    padding: "5px 10px",
+                                    borderRadius: "4px",
+                                    fontSize: "0.75rem",
+                                    whiteSpace: "nowrap",
+                                    zIndex: 10,
+                                  }}
+                                >
+                                  {hoverMessage}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
                     ) : (
                       <p className="appointment-slot-section-message text-danger">
                         No slots available for evening

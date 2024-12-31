@@ -406,8 +406,8 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
                       />
                     </div>
                   </div>
-{/* 
-                  <div className="mb-3">
+
+                  {/* <div className="mb-3">
                     <label
                       htmlFor="mobileNumber"
                       className="form-label"
