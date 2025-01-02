@@ -73,10 +73,10 @@ const PatientDetails = () => {
       const patientDetails = response.data[0];
 
       if (patientDetails.success) {
-        setIsExistingUser(false); // First-time user, POST API will be used
+        setIsExistingUser(false);
       } else {
-        setIsExistingUser(true); // User details exist, PUT API will be used
-        localStorage.setItem("patient_id", patientDetails.id); // Store patient ID in local storage
+        setIsExistingUser(true); 
+        localStorage.setItem("patient_id", patientDetails.id); 
 
         setFormData({
           name: patientDetails.name,
@@ -98,32 +98,6 @@ const PatientDetails = () => {
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    const namePattern = /^[a-zA-Z\s]*$/;
-
-    if (!formData.name) {
-      newErrors.name = "Name is required";
-    } else if (!namePattern.test(formData.name)) {
-      newErrors.name = "Name cannot contain special characters or numbers";
-    }
-
-    if (!formData.gender) {
-      newErrors.gender = "Gender is required";
-    }
-
-    if (!formData.date_of_birth) {
-      newErrors.date_of_birth = "Date of Birth is required";
-    }
-
-    if (!formData.address) {
-      newErrors.address = "Address is required";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -134,11 +108,6 @@ const PatientDetails = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
     const formDataToSubmit = new FormData();
     for (const key in formData) {
       formDataToSubmit.append(key, formData[key]);
@@ -151,24 +120,21 @@ const PatientDetails = () => {
 
       let response;
       if (isExistingUser) {
-        // Update details if they exist
         response = await BaseUrl.put(
           `/patient/details/?mobile_number=${mobile_number}`,
           formDataToSubmit
         );
       } else {
-        // Create new details if they don't exist
         response = await BaseUrl.post(
           `/patient/details/?mobile_number=${mobile_number}`,
           formDataToSubmit
         );
-        setIsExistingUser(true); // Switch to update mode after successful POST
+        setIsExistingUser(true); 
       }
 
       if (response.status === 200) {
         setSuccessMessage(response.data.success);
         setErrorMessage("");
-        // Fetch updated details after successful submission
         fetchPatientDetails();
       }
     } catch (error) {
@@ -217,12 +183,13 @@ const PatientDetails = () => {
             <div className="col-md-4">
               <label>Mobile No</label> <span className="text-danger">*</span>{" "}
               <input
-                type="number"
+                type="text"
                 className="form-control"
                 name="mobile_number"
                 value={formData.mobile_number}
                 disabled
                 onChange={handleChange}
+                required
               />
             </div>
             <div className="col-md-4">
@@ -233,10 +200,8 @@ const PatientDetails = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
+                required
               />
-              {errors.name && (
-                <span className="text-danger">{errors.name}</span>
-              )}
             </div>
             <div className="col-md-4">
               <label>Gender</label> <span className="text-danger">*</span>{" "}
@@ -245,15 +210,13 @@ const PatientDetails = () => {
                 name="gender"
                 value={formData.gender}
                 onChange={handleChange}
+                required
               >
                 <option value="">Select Gender</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
                 <option value="other">Others</option>
               </select>
-              {errors.gender && (
-                <span className="text-danger">{errors.gender}</span>
-              )}
             </div>
           </div>
 
@@ -268,10 +231,8 @@ const PatientDetails = () => {
                 max={today}
                 value={formData.date_of_birth}
                 onChange={handleChange}
+                required
               />
-              {errors.date_of_birth && (
-                <span className="text-danger">{errors.date_of_birth}</span>
-              )}
             </div>
             <div className="col-md-4">
               <label>Blood Group</label>
@@ -291,6 +252,7 @@ const PatientDetails = () => {
                 name="age"
                 value={formData.age}
                 onChange={handleChange}
+                required
               />
             </div>
           </div>
@@ -304,10 +266,8 @@ const PatientDetails = () => {
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
+                required
               />
-              {errors.address && (
-                <span className="text-danger">{errors.address}</span>
-              )}
             </div>
           </div>
           <button

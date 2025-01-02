@@ -371,7 +371,7 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
                     </p>
                   </div>
                   <h2 className="text-dark mb-4">Patient Login</h2>
-                  <div className="mb-3">
+                  {/* <div className="mb-3">
                     <label
                       htmlFor="mobileNumber"
                       className="form-label"
@@ -405,9 +405,9 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
                         }
                       />
                     </div>
-                  </div>
+                  </div> */}
 
-                  {/* <div className="mb-3">
+                  <div className="mb-3">
                     <label
                       htmlFor="mobileNumber"
                       className="form-label"
@@ -424,7 +424,7 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
                       onChange={setMobileNumber} // Update state on change
                       required
                     />
-                  </div> */}
+                  </div>
 
                   {!loginWithOtp && (
                     <div className="mb-3">
@@ -502,7 +502,7 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
                   Enter your mobile number and we'll send you a 6-digit OTP to
                   reset your password.
                 </p>
-                <div className="mb-3">
+                {/* <div className="mb-3">
                   <label
                     htmlFor="mobileNumber"
                     className="form-label"
@@ -533,9 +533,9 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
                       }
                     />
                   </div>
-                </div>
+                </div> */}
 
-                {/* <div className="mb-3">
+                <div className="mb-3">
                   <label
                     htmlFor="mobileNumber"
                     className="form-label"
@@ -552,7 +552,7 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
                     onChange={setMobileNumber} // Update state on change
                     required
                   />
-                </div> */}
+                </div>
 
                 <button type="submit" className="btn btn-primary w-45 mb-3">
                   SEND OTP

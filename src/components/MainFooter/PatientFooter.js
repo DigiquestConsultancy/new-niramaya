@@ -4,9 +4,9 @@ import "../../css/Footer.css"; // Import Navbar.css for custom styles
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFacebook,
-  faTwitter,
   faInstagram,
   faLinkedin,
+  faYoutube 
 } from "@fortawesome/free-brands-svg-icons";
 import { Link } from "react-router-dom";
 
@@ -71,7 +71,7 @@ const Footer = () => {
             <h4>Follow Us</h4>
             <div className="social-icons">
               <a
-                href="https://www.facebook.com/profile.php?id=61555739800256"
+                href="https://www.facebook.com/digiquestconsultancy/"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: "#00aced", margin: "0 10px" }}
@@ -79,12 +79,12 @@ const Footer = () => {
                 <FontAwesomeIcon icon={faFacebook} size="2x" />
               </a>
               <a
-                href="https://www.twitter.com"
+                href="https://www.youtube.com/@DCSHealthcare"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: "#00aced", margin: "0 10px" }}
               >
-                <FontAwesomeIcon icon={faTwitter} size="2x" />
+                <FontAwesomeIcon icon={faYoutube } size="2x" />
               </a>
               <a
                 href="https://www.instagram.com/digiquest_consultancy_services/"

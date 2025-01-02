@@ -4,7 +4,9 @@ import { jwtDecode } from "jwt-decode";
 import { Modal, Button, Form } from "react-bootstrap";
 import styled from "styled-components";
 import Loader from "react-js-loader";
- 
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+
 const LoaderWrapper = styled.div`
   display: flex;
   justify-content: center;
@@ -256,12 +258,10 @@ const AddReception = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
- 
-    // Validate form data
-    const formErrors = validateForm(); // Calls validateForm to populate errors
+    const formErrors = validateForm(); 
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
-      setLoading(false); // Stop loader if there are validation errors
+      setLoading(false); 
       return;
     }
  
@@ -298,7 +298,7 @@ const AddReception = () => {
     if (!formData.gender) formErrors.gender = "Gender is required";
     if (!formData.qualification)
       formErrors.qualification = "Qualification is required";
-    if (!formData.address) formErrors.address = "Address is required"; // Ensure address is required
+    if (!formData.address) formErrors.address = "Address is required"; 
     if (!formData.age) formErrors.age = "Age is required";
     return formErrors;
   };
@@ -341,13 +341,14 @@ const AddReception = () => {
               Mobile Number:
             </label>
             <div className="col-sm-8">
-              <input
-                type="number"
-                placeholder="Please Enter Mobile Number"
-                className="form-control"
-                id="mobileNumber"
+            <PhoneInput
+                id="mobile_number"
+                name="mobile_number"
+                placeholder="Enter mobile number"
+                defaultCountry="IN" 
                 value={mobileNumber}
-                onChange={(e) => setMobileNumber(e.target.value)}
+                onChange={setMobileNumber} 
+                required
               />
             </div>
             <div className="col-sm-1">
@@ -517,7 +518,6 @@ const AddReception = () => {
             <Modal.Title>OTP Verification</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {/* Display the success or error message within the OTP modal */}
             {message && (
               <p
                 className={

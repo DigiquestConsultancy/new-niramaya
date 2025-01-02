@@ -1294,7 +1294,7 @@ fetchOpdTimings(opdIds[0]);
           <label>Mobile No</label>
           <span className="text-danger">*</span>
           <input
-            type="number"
+            type="text"
             className={`form-control ${formErrors.mobile_number ? "is-invalid" : ""}`}
             name="mobile_number"
             value={formData.mobile_number}

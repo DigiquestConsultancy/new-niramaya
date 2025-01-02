@@ -56,7 +56,7 @@
 //                 </Link>
 //               </li>
 //               <li>
-//                 <Link to="/doctor/managereception" className="text-white">   
+//                 <Link to="/doctor/managereception" className="text-white">
 //                   Manage Reception
 //                 </Link>
 //               </li>
@@ -130,24 +130,20 @@
 
 
 
-
 import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import "../../css/Footer.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFacebook,
-  faTwitter,
+  faYoutube,
   faInstagram,
   faLinkedin,
 } from "@fortawesome/free-brands-svg-icons";
 import { Link } from "react-router-dom";
 
 const DoctorFooter = () => {
-  // Fetch the usertype from local storage
   const userType = localStorage.getItem("user_type");
-
-  // Define footer content based on user type
   const getFooterContent = () => {
     switch (userType) {
       case "doctor":
@@ -239,7 +235,10 @@ const DoctorFooter = () => {
             <h4>Quick Links</h4>
             <ul className="list-unstyled">
               <li>
-                <Link to="/conditions/tearmandconditions" className="text-white">
+                <Link
+                  to="/conditions/tearmandconditions"
+                  className="text-white"
+                >
                   Terms & Conditions
                 </Link>
               </li>
@@ -263,7 +262,7 @@ const DoctorFooter = () => {
             <h4>Follow Us</h4>
             <div className="social-icons">
               <a
-                href="https://www.facebook.com/profile.php?id=61555739800256"
+                href="https://www.facebook.com/digiquestconsultancy/"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: "#00aced", margin: "0 10px" }}
@@ -271,12 +270,12 @@ const DoctorFooter = () => {
                 <FontAwesomeIcon icon={faFacebook} size="2x" />
               </a>
               <a
-                href="https://www.twitter.com"
+                href="https://www.youtube.com/@DCSHealthcare"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: "#00aced", margin: "0 10px" }}
               >
-                <FontAwesomeIcon icon={faTwitter} size="2x" />
+                <FontAwesomeIcon icon={faYoutube} size="2x" />
               </a>
               <a
                 href="https://www.instagram.com/digiquest_consultancy_services/"

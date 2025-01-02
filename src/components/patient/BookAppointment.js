@@ -1014,27 +1014,26 @@
 
 
 
-
 import React, { useState, useEffect, useRef } from "react";
 import { Button, Row, Col, Card, Form, Modal, Alert } from "react-bootstrap";
 import { load } from "@cashfreepayments/cashfree-js";
 import clinicVisitImage from "../../images/a-53-512.webp";
 import onlineConsultationImage from "../../images/2562653-200.png";
 import BaseUrl from "../../api/BaseUrl";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useHistory } from "react-router-dom";
 import { FaArrowLeft, FaArrowRight, FaTimes } from "react-icons/fa";
 import { format, addDays } from "date-fns";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
-import "../../css/patient.css";
-import Checkout from "../checkout/checkout";
+import "../../css/Patient.css";
+import Checkout from "./CheckOutBook";
 
 const BookAppointment = () => {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const formRef = useRef(null);
 
-  const navigate = useNavigate();
+  const history = useHistory();
   const [appointmentType, setAppointmentType] = useState("clinic");
   const [availableDates, setAvailableDates] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -1426,7 +1425,7 @@ const BookAppointment = () => {
       localStorage.setItem("currency", currency);
 
       // Navigate to the Checkout route
-      navigate("/components/checkout");
+      history.push("/components/checkout");
     } catch (error) {
       console.error("Error during form submission:", error); // Log the error for debugging
       setErrorMessage("Error processing request. Please try again.");

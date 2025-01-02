@@ -1312,7 +1312,7 @@ const DoctorLogin = ({ setIsDoctorLoggedIn }) => {
                   </p>
                 </div>
                 <h2 className="text-dark mb-4">Doctor Login</h2>
-                <div className="text-dark mb-3">
+                {/* <div className="text-dark mb-3">
                   <label
                     htmlFor="mobileNumber"
                     className="form-label"
@@ -1343,9 +1343,9 @@ const DoctorLogin = ({ setIsDoctorLoggedIn }) => {
                       }
                     />
                   </div>
-                </div>
+                </div> */}
 
-                {/* <div className="mb-3">
+                <div className="mb-3">
                   <label
                     htmlFor="mobileNumber"
                     className="form-label"
@@ -1362,7 +1362,7 @@ const DoctorLogin = ({ setIsDoctorLoggedIn }) => {
                     onChange={setMobileNumber} // Update state on change
                     required
                   />
-                </div> */}
+                </div>
 
                 {!loginWithOtp && (
                   <div className="mb-3">
@@ -1440,7 +1440,7 @@ const DoctorLogin = ({ setIsDoctorLoggedIn }) => {
                   Enter your mobile number and we'll send you a 6-digit OTP to
                   reset your password
                 </p>
-                <div className="mb-3">
+                {/* <div className="mb-3">
                   <b>
                     <label
                       htmlFor="mobileNumber"
@@ -1473,9 +1473,9 @@ const DoctorLogin = ({ setIsDoctorLoggedIn }) => {
                       }
                     />
                   </div>
-                </div>
+                </div> */}
 
-                {/* <div className="mb-3">
+                <div className="mb-3">
                   <label
                     htmlFor="mobileNumber"
                     className="form-label"
@@ -1492,7 +1492,7 @@ const DoctorLogin = ({ setIsDoctorLoggedIn }) => {
                     onChange={setMobileNumber} // Update state on change
                     required
                   />
-                </div> */}
+                </div>
 
                 <button type="submit" className="btn btn-primary w-25 mb-3">
                   SEND OTP

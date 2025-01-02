@@ -4,7 +4,9 @@ import { jwtDecode } from "jwt-decode";
 import { Modal, Button, Form } from "react-bootstrap";
 import styled from "styled-components";
 import Loader from "react-js-loader";
- 
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+
 const LoaderWrapper = styled.div`
   display: flex;
   justify-content: center;
@@ -17,11 +19,11 @@ const LoaderWrapper = styled.div`
   left: 0;
   z-index: 9999;
 `;
- 
+
 const LoaderImage = styled.div`
   width: 400px;
 `;
- 
+
 const ProfilePicCircle = styled.div`
   width: 150px;
   height: 150px;
@@ -36,7 +38,7 @@ const ProfilePicCircle = styled.div`
   margin-bottom: 10px;
   position: relative;
 `;
- 
+
 const ProfilePicPreview = styled.img`
   width: 150px;
   height: 150px;
@@ -44,7 +46,7 @@ const ProfilePicPreview = styled.img`
   object-fit: cover;
   margin-left: 20px;
 `;
- 
+
 const AddClinic = () => {
   const [mobileNumber, setMobileNumber] = useState("");
   const [verificationStatus, setVerificationStatus] = useState("");
@@ -58,7 +60,7 @@ const AddClinic = () => {
   const inputRefs = useRef([]);
   const [loading, setLoading] = useState(false);
   const [profilePicPreview, setProfilePicPreview] = useState("");
- 
+
   const [formData, setFormData] = useState({
     name: "",
     gender: "",
@@ -72,7 +74,7 @@ const AddClinic = () => {
   });
   const [doctorId, setDoctorId] = useState("");
   const [errors, setErrors] = useState({});
- 
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -84,7 +86,7 @@ const AddClinic = () => {
       }
     }
   }, []);
- 
+
   const handleVerify = async () => {
     setMessage("");
     setLoading(true);
@@ -110,19 +112,19 @@ const AddClinic = () => {
       setLoading(false);
     }
   };
- 
+
   const handleOtpChange = (index, value) => {
     if (!/^\d*$/.test(value)) return;
- 
+
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
- 
+
     if (value.length === 1 && index < 5) {
       inputRefs.current[index + 1].focus();
     }
   };
- 
+
   const handleVerifyOtp = async () => {
     setMessage("");
     setLoading(true);
@@ -154,7 +156,7 @@ const AddClinic = () => {
       setLoading(false);
     }
   };
- 
+
   const handleResendOtp = async () => {
     setMessage("");
     setLoading(true);
@@ -176,11 +178,11 @@ const AddClinic = () => {
       // setShowMessageModal(true);
     }
   };
- 
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
- 
+
     let newErrors = { ...errors };
     switch (name) {
       case "name":
@@ -224,7 +226,7 @@ const AddClinic = () => {
     }
     setErrors(newErrors);
   };
- 
+
   const handleProfilePicChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -236,22 +238,22 @@ const AddClinic = () => {
       reader.readAsDataURL(file);
     }
   };
- 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
- 
+
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
       if (key !== "profile_pic") {
         data.append(key, formData[key]);
       }
     });
- 
+
     if (formData.profile_pic instanceof File) {
       data.append("profile_pic", formData.profile_pic);
     }
- 
+
     try {
       const response = await BaseUrl.post("/clinic/details/", data, {
         headers: {
@@ -272,7 +274,7 @@ const AddClinic = () => {
       setShowMessageModal(true);
     }
   };
- 
+
   return (
     <div
       style={{
@@ -292,7 +294,7 @@ const AddClinic = () => {
         <h2 style={{ color: "#0174BE" }} className="mb-5 text-center">
           Add Clinic
         </h2>
- 
+
         {loading && (
           <LoaderWrapper>
             <LoaderImage>
@@ -306,20 +308,21 @@ const AddClinic = () => {
             </LoaderImage>
           </LoaderWrapper>
         )}
- 
+
         {!showDetailsForm && (
           <div className="form-group row">
             <label htmlFor="mobileNumber" className="col-sm-2 col-form-label">
               Mobile Number:
             </label>
             <div className="col-sm-8">
-              <input
-                type="number"
-                placeholder="Please Enter Mobile Number"
-                className="form-control"
-                id="mobileNumber"
-                value={mobileNumber}
-                onChange={(e) => setMobileNumber(e.target.value)}
+              <PhoneInput
+                id="mobile_number"
+                name="mobile_number"
+                placeholder="Enter mobile number"
+                defaultCountry="IN" 
+                value={mobileNumber} 
+                onChange={setMobileNumber}
+                required
               />
             </div>
             <div className="col-sm-1">
@@ -333,7 +336,7 @@ const AddClinic = () => {
             </div>
           </div>
         )}
- 
+
         {showDetailsForm && (
           <Form
             onSubmit={handleSubmit}
@@ -362,13 +365,13 @@ const AddClinic = () => {
                 />
               )}
             </div>
- 
+
             <div className="row">
               <Form.Group controlId="formMobileNumber" className="col-md-4">
                 <Form.Label>Mobile Number</Form.Label>
                 <span className="text-danger">*</span>
                 <Form.Control
-                  type="number"
+                  type="text"
                   name="mobile_number"
                   value={formData.mobile_number}
                   required
@@ -491,7 +494,7 @@ const AddClinic = () => {
             </Button>
           </Form>
         )}
- 
+
         <Modal
           show={showOtpModal}
           onHide={() => setShowOtpModal(false)}
@@ -511,7 +514,7 @@ const AddClinic = () => {
                 {message}
               </p>
             )}
- 
+
             <div className="otp-container d-flex justify-content-between mb-3">
               {otp.map((digit, index) => (
                 <input
@@ -548,7 +551,7 @@ const AddClinic = () => {
             </div>
           </Modal.Body>
         </Modal>
- 
+
         <Modal
           show={showMessageModal}
           onHide={() => setShowMessageModal(false)}
@@ -581,5 +584,5 @@ const AddClinic = () => {
     </div>
   );
 };
- 
+
 export default AddClinic;
