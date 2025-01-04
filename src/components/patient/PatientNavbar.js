@@ -200,6 +200,13 @@ import "../../css/Navbar.css";
 import ProfileIcon from "../profile/ProfileIcon";
 import BaseUrl from "../../api/BaseUrl";
 
+import { ImProfile } from "react-icons/im";
+import { FaHome } from "react-icons/fa";
+import { MdFileDownloadDone } from "react-icons/md";
+import { GiNotebook } from "react-icons/gi";
+import { MdOutlineLogout } from "react-icons/md";
+import { FcMoneyTransfer } from "react-icons/fc";
+
 const PatientNavbar = ({ isLoggedIn, onLogout }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -282,7 +289,7 @@ const PatientNavbar = ({ isLoggedIn, onLogout }) => {
                 }
                 to="/patient/home"
               >
-                <b>Home</b>
+                 Home
               </NavLink>
             </li>
             <li className="nav-item mr-3">
@@ -292,7 +299,7 @@ const PatientNavbar = ({ isLoggedIn, onLogout }) => {
                 }
                 to="/patient/details"
               >
-                <b>My Details</b>
+                My Details
               </NavLink>
             </li>
             <li className="nav-item mr-3">
@@ -302,7 +309,7 @@ const PatientNavbar = ({ isLoggedIn, onLogout }) => {
                 }
                 to="/patient/slots"
               >
-                <b>My Appointments</b>
+                 My Appointments
               </NavLink>
             </li>
             <li className="nav-item mr-3">
@@ -312,7 +319,7 @@ const PatientNavbar = ({ isLoggedIn, onLogout }) => {
                 }
                 to="/patient/bookappointment"
               >
-                <b>Book Appointments</b>
+                Book Appointments
               </NavLink>
             </li>
             <li className="nav-item mr-3">
@@ -322,7 +329,7 @@ const PatientNavbar = ({ isLoggedIn, onLogout }) => {
                 }
                 to="/patient/contactus"
               >
-                <b>Contact Us</b>
+                Contact Us
               </NavLink>
             </li>
           </ul>
@@ -335,7 +342,7 @@ const PatientNavbar = ({ isLoggedIn, onLogout }) => {
                 to="/patient/home"
                 onClick={closeMobileMenu}
               >
-                Home
+                <FaHome /> Home
               </NavLink>
             </li>
             <li className="nav-item">
@@ -344,7 +351,7 @@ const PatientNavbar = ({ isLoggedIn, onLogout }) => {
                 to="/patient/details"
                 onClick={closeMobileMenu}
               >
-                My Details
+                <ImProfile /> My Details
               </NavLink>
             </li>
             <li className="nav-item">
@@ -353,7 +360,7 @@ const PatientNavbar = ({ isLoggedIn, onLogout }) => {
                 to="/patient/slots"
                 onClick={closeMobileMenu}
               >
-                My Appointments
+                <MdFileDownloadDone /> My Appointments
               </NavLink>
             </li>
             <li className="nav-item">
@@ -362,7 +369,7 @@ const PatientNavbar = ({ isLoggedIn, onLogout }) => {
                 to="/patient/bookappointment"
                 onClick={closeMobileMenu}
               >
-                Book Appointments
+                <GiNotebook /> Book Appointments
               </NavLink>
             </li>
             {isLoggedIn && (
@@ -374,7 +381,7 @@ const PatientNavbar = ({ isLoggedIn, onLogout }) => {
                     handleLogout();
                   }}
                 >
-                  Logout
+                  <MdOutlineLogout /> Logout
                 </Link>
               </li>
             )}
@@ -407,28 +414,28 @@ const PatientNavbar = ({ isLoggedIn, onLogout }) => {
                     to="/patient/details"
                     onClick={toggleDropdown}
                   >
-                    My Details
+                    <ImProfile /> My Details
                   </Link>
                   <Link
                     className="dropdown-item"
                     to="/patient/slots"
                     onClick={toggleDropdown}
                   >
-                    My Appointments
+                    <MdFileDownloadDone /> My Appointments
                   </Link>
                   <Link
                     className="dropdown-item"
                     to="/patient/bookappointment"
                     onClick={toggleDropdown}
                   >
-                    Book Appointments
+                    <GiNotebook /> Book Appointments
                   </Link>
                   <Link
                     className="dropdown-item"
                     to="/patient/transaction"
                     onClick={toggleDropdown}
                   >
-                    Patient Transaction
+                    <FcMoneyTransfer /> Patient Transaction
                   </Link>
                   <Link
                     className="dropdown-item"
@@ -437,7 +444,7 @@ const PatientNavbar = ({ isLoggedIn, onLogout }) => {
                       handleLogout();
                     }}
                   >
-                    Logout
+                    <MdOutlineLogout /> Logout
                   </Link>
                 </div>
               </li>

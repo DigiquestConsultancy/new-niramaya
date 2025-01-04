@@ -1,0 +1,202 @@
+/* 
+
+.restricted-page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(
+      rgba(0, 0, 0, 0.6),
+      rgba(0, 0, 0, 0.6)
+    ), 
+    url("../images/doctorbg.jpg") no-repeat center center/cover;
+  backdrop-filter: blur(8px);
+}
+
+.restricted-content {
+  background: linear-gradient(145deg, #ffffff, #f0f0f0); 
+  box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.2), -10px -10px 30px rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  padding: 50px;
+  max-width: 400px;
+  text-align: center;
+  animation: fadeIn 1s ease-in-out; 
+}
+
+.heading {
+  font-family: 'Poppins', sans-serif;
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 20px;
+  background: linear-gradient(90deg, #007bff, #28a745);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.message {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.login-links p {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.login-button {
+  display: inline-block;
+  margin: 10px 5px;
+  padding: 12px 25px;
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+  color: #fff;
+  border-radius: 30px;
+  text-decoration: none;
+  box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.login-button:hover {
+  transform: scale(1.1); 
+  box-shadow: 0 10px 25px rgba(0, 123, 255, 0.5);
+}
+
+.login-button.doctor-login {
+  background: linear-gradient(90deg, #28a745, #34d058);
+}
+
+.login-button.doctor-login:hover {
+  box-shadow: 0 10px 25px rgba(40, 167, 69, 0.5);
+}
+
+.login-button.patient-login {
+  background: linear-gradient(90deg, #dc3545, #f94e6d);
+}
+
+.login-button.patient-login:hover {
+  box-shadow: 0 10px 25px rgba(220, 53, 69, 0.5);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+} */
+
+
+
+
+
+
+
+
+.restricted-page {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(
+        rgba(0, 0, 0, 0.6),
+        rgba(0, 0, 0, 0.6)
+      ), 
+      url("../images/doctorbg.jpg") no-repeat center center/cover;
+    backdrop-filter: blur(8px);
+  }
+  
+  .restricted-content {
+    background: linear-gradient(145deg, #ffffff, #f0f0f0); 
+    box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.2), -10px -10px 30px rgba(255, 255, 255, 0.6);
+    border-radius: 20px;
+    padding: 50px;
+    max-width: 400px;
+    text-align: center;
+    animation: fadeIn 1s ease-in-out; 
+  }
+  
+  .heading {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+    background: linear-gradient(90deg, #007bff, #28a745);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .message {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 30px;
+  }
+  
+  .login-links p {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 10px;
+  }
+  
+  .login-button {
+    display: inline-block;
+    margin: 10px 5px;
+    padding: 12px 25px;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    color: #fff;
+    border-radius: 30px;
+    text-decoration: none;
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  
+  .login-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 10px 25px rgba(0, 123, 255, 0.5);
+    text-decoration: none;
+  }
+  
+  .login-button.doctor-login {
+    background: linear-gradient(90deg, #28a745, #34d058);
+  }
+  
+  .login-button.doctor-login:hover {
+    box-shadow: 0 10px 25px rgba(40, 167, 69, 0.5);
+  }
+  
+  .login-button.patient-login {
+    background: linear-gradient(90deg, #dc3545, #f94e6d);
+  }
+  
+  .login-button.patient-login:hover {
+    box-shadow: 0 10px 25px rgba(220, 53, 69, 0.5);
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  

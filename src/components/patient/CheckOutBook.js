@@ -277,7 +277,7 @@ const Checkout = () => {
 
   const fetchSlots = async (selectedDate, appointmentType) => {
     try {
-      const endpoint = `/doctorappointment/blankslot/?doctor_id=4&slot_date=${selectedDate}&consultation_type=${appointmentType}`;
+      const endpoint = `/doctorappointment/blankslot/?doctor_id=1&slot_date=${selectedDate}&consultation_type=${appointmentType}`;
       const slotsResponse = await BaseUrl.get(endpoint);
       const fetchedSlots = slotsResponse.data;
       const { morningSlots, afternoonSlots, eveningSlots } =

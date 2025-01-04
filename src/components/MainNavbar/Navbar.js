@@ -21,7 +21,7 @@ const CustomNavbar = () => {
  
     return (
         <Navbar expand="lg">
-            <Container>
+            <Container className='sticky-top'>
                 <Navbar.Brand as={Link} to="/">
                     <img src={Company} alt="Company Logo" height="40" />
                 </Navbar.Brand>

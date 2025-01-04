@@ -1092,7 +1092,7 @@ const BookAppointment = () => {
     evening: [],
   });
 
-  const doctorId = 4;
+  const doctorId = 8;
 
   useEffect(() => {
     loadAvailableDates();
@@ -1178,7 +1178,7 @@ const BookAppointment = () => {
   const fetchAvailableSlotsCount = async (selectedDates) => {
     try {
       const datesQuery = selectedDates.map((date) => `dates=${date}`).join("&");
-      const endpoint = `/clinic/countavailableslots/?doctor_id=4&${datesQuery}`;
+      const endpoint = `/clinic/countavailableslots/?doctor_id=8&${datesQuery}`;
       const countResponse = await BaseUrl.get(endpoint);
       const availableCounts = countResponse.data;
       const newSlotCounts = {};
@@ -1191,7 +1191,7 @@ const BookAppointment = () => {
         ...newSlotCounts,
       }));
       for (let date of selectedDates) {
-        await BaseUrl.get(`/clinic/availableslots/?doctor_id=4&date=${date}`);
+        await BaseUrl.get(`/clinic/availableslots/?doctor_id=8&date=${date}`);
       }
     } catch (error) {
       console.error(error);
@@ -1200,7 +1200,7 @@ const BookAppointment = () => {
 
   const fetchSlots = async (selectedDate, appointmentType) => {
     try {
-      const endpoint = `/doctorappointment/blankslot/?doctor_id=4&slot_date=${selectedDate}&consultation_type=${appointmentType}`;
+      const endpoint = `/doctorappointment/blankslot/?doctor_id=8&slot_date=${selectedDate}&consultation_type=${appointmentType}`;
       const slotsResponse = await BaseUrl.get(endpoint);
       const fetchedSlots = slotsResponse.data;
       const { morningSlots, afternoonSlots, eveningSlots } =
@@ -1254,7 +1254,7 @@ const BookAppointment = () => {
 
       if (updateResponse.status === 200) {
         const fetchResponse = await BaseUrl.get(
-          `/doctorappointment/blankslot/?doctor_id=4&slot_date=${selectedDate}&consultation_type=${type}`
+          `/doctorappointment/blankslot/?doctor_id=8&slot_date=${selectedDate}&consultation_type=${type}`
         );
 
         if (fetchResponse.status === 200) {
