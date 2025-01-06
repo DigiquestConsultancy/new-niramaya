@@ -3486,7 +3486,7 @@ const PatientHome = () => {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const [selectedDoctor] = useState({ doctor: 8 });
+  const [selectedDoctor] = useState({ doctor: 10 });
   const [errorMessage, setErrorMessage] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [savedPatientId, setPatientId] = useState(null);
@@ -4449,7 +4449,9 @@ const PatientHome = () => {
                           slotTime.setHours(hours);
                           slotTime.setMinutes(minutes);
 
-                          const isPastSlot = currentTime >= slotTime;
+                          // const isPastSlot = currentTime >= slotTime;
+                          const isSameDate = new Date(slot.appointment_date).toDateString() === currentTime.toDateString();
+                          const isPastSlot = isSameDate && currentTime >= slotTime;
 
                           return (
                             <div
@@ -4583,7 +4585,9 @@ const PatientHome = () => {
                           slotTime.setHours(hours);
                           slotTime.setMinutes(minutes);
 
-                          const isPastSlot = currentTime >= slotTime;
+                          // const isPastSlot = currentTime >= slotTime;
+                          const isSameDate = new Date(slot.appointment_date).toDateString() === currentTime.toDateString();
+                          const isPastSlot = isSameDate && currentTime >= slotTime;
 
                           return (
                             <div
@@ -4719,7 +4723,9 @@ const PatientHome = () => {
                           slotTime.setHours(hours);
                           slotTime.setMinutes(minutes);
 
-                          const isPastSlot = currentTime >= slotTime;
+                          // const isPastSlot = currentTime >= slotTime;
+                          const isSameDate = new Date(slot.appointment_date).toDateString() === currentTime.toDateString();
+                          const isPastSlot = isSameDate && currentTime >= slotTime;
 
                           return (
                             <div

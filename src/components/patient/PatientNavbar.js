@@ -282,7 +282,7 @@ const PatientNavbar = ({ isLoggedIn, onLogout }) => {
         >
           {/* Desktop Navbar Links */}
           <ul className="navbar-nav mr-auto d-none d-lg-flex">
-            <li className="nav-item mr-3">
+            <li className="nav-item mr-3 font-weight-bold">
               <NavLink
                 className={({ isActive }) =>
                   `nav-link ${isActive ? "active-link" : ""}`
@@ -292,7 +292,7 @@ const PatientNavbar = ({ isLoggedIn, onLogout }) => {
                  Home
               </NavLink>
             </li>
-            <li className="nav-item mr-3">
+            <li className="nav-item mr-3 font-weight-bold">
               <NavLink
                 className={({ isActive }) =>
                   `nav-link ${isActive ? "active-link" : ""}`
@@ -302,7 +302,7 @@ const PatientNavbar = ({ isLoggedIn, onLogout }) => {
                 My Details
               </NavLink>
             </li>
-            <li className="nav-item mr-3">
+            <li className="nav-item mr-3 font-weight-bold">
               <NavLink
                 className={({ isActive }) =>
                   `nav-link ${isActive ? "active-link" : ""}`
@@ -312,7 +312,7 @@ const PatientNavbar = ({ isLoggedIn, onLogout }) => {
                  My Appointments
               </NavLink>
             </li>
-            <li className="nav-item mr-3">
+            <li className="nav-item mr-3 font-weight-bold">
               <NavLink
                 className={({ isActive }) =>
                   `nav-link ${isActive ? "active-link" : ""}`
@@ -322,7 +322,7 @@ const PatientNavbar = ({ isLoggedIn, onLogout }) => {
                 Book Appointments
               </NavLink>
             </li>
-            <li className="nav-item mr-3">
+            <li className="nav-item mr-3 font-weight-bold">
               <NavLink
                 className={({ isActive }) =>
                   `nav-link ${isActive ? "active-link" : ""}`

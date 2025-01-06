@@ -14,7 +14,7 @@
 
 .button-panel {
   width: 35%;
-  padding: 20px;
+  /* padding: 20px; */
   border-right: 1px solid #ddd;
   display: flex;
   flex-direction: column;
@@ -24,6 +24,16 @@
 
 .upload-button {
   background: linear-gradient(90deg, #30abbb, #4bc0cf);
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  width: 45%;
+}
+.save-button {
+  background: linear-gradient(90deg, #e4423d, #a12828);
   color: white;
   padding: 10px 15px;
   border: none;
