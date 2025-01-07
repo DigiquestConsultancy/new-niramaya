@@ -1,5 +1,5 @@
 // import React, { useState, useEffect } from "react";
-// import "../../css/ClinicBookedAppointment.css"; // Import your CSS file
+// import "../../css/ClinicBookedAppointment.css";
 // import {
 //   Modal,
 //   Button,
@@ -26,6 +26,7 @@
 // import { jwtDecode } from "jwt-decode";
 // import styled from "styled-components";
 // import Loader from "react-js-loader";
+// import { FaSyncAlt } from "react-icons/fa";
 
 // const LoaderWrapper = styled.div`
 //   display: flex;
@@ -64,6 +65,7 @@
 //     { medicine_name: "", time: [], comment: "", description: "" },
 //   ]);
 //   const [showRecordForm, setShowRecordForm] = useState(false);
+//   const [requestDocForm, setRequestDocForm] = useState(false);
 //   const [loading, setLoading] = useState(false);
 //   const [recordDetails, setRecordDetails] = useState({
 //     mobile_number: "",
@@ -91,14 +93,15 @@
 //     document_type: "",
 //     document_file: "",
 //   });
-//   const [timeSlots, setTimeSlots] = useState([]); // Define timeSlots here
+//   const [timeSlots, setTimeSlots] = useState([]);
 //   const [medicalRecords, setMedicalRecords] = useState([]);
+//   const [whatsappReport, setWhatsappReport] = useState([]);
 //   const [showMedicalRecords, setShowMedicalRecords] = useState(false);
 //   const [editingRecordId, setEditingRecordId] = useState(null);
 //   const [successMessage, setSuccessMessage] = useState("");
 //   const [mobileNumber, setMobileNumber] = useState("");
 //   const [showSymptomsForm, setShowSymptomsForm] = useState(false);
-//   const [appointmentData, setAppointmentData] = useState(null); // Store the API response data
+//   const [appointmentData, setAppointmentData] = useState(null);
 //   const [searchSymptom, setSearchSymptom] = useState("");
 //   const [searchResults, setSearchResults] = useState([]);
 //   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
@@ -108,15 +111,15 @@
 //   const [showPrescriptionDocsForm, setShowPrescriptionDocsForm] =
 //     useState(false);
 //   const [documentIds, setDocumentIds] = useState([]);
-
+//   const [showMore, setShowMore] = useState(false);
+//   const photosToShow = showMore ? whatsappReport : whatsappReport.slice(0, 6);
+//   const [selectedImage, setSelectedImage] = useState(null);
 //   const [showToast, setShowToast] = useState(false);
 //   const [toastMessage, setToastMessage] = useState("");
-//   const [toastVariant, setToastVariant] = useState("success"); // 'success' or 'danger'
+//   const [toastVariant, setToastVariant] = useState("success");
 
 //   useEffect(() => {
 //     const token = localStorage.getItem("patient_token");
-//     if (!token) return;
-
 //     try {
 //       const decodedToken = jwtDecode(token);
 //       const mobile_number = decodedToken.mobile_number;
@@ -128,17 +131,12 @@
 //       }));
 
 //       fetchMedicalRecords(mobile_number);
-//     } catch (error) {
-//       console.error("Error decoding token:", error);
-//     }
+//     } catch (error) {}
 //   }, []);
 
 //   const fetchMedicalRecords = async (appointment_id) => {
-//     if (!appointment_id) return;
 //     try {
 //       const token = localStorage.getItem("token");
-//       if (!token) return;
-
 //       const decodedToken = jwtDecode(token);
 //       const userId = decodedToken.doctor_id;
 //       const userType = decodedToken.user_type;
@@ -158,7 +156,6 @@
 //       }
 //       setShowMedicalRecords(true);
 //     } catch (error) {
-//       console.error("Error fetching medical records:", error);
 //       setMedicalRecords([]);
 //     }
 //   };
@@ -183,7 +180,6 @@
 //       setSuccessMessage(response.data.success);
 //       link.click();
 //     } catch (error) {
-//       console.error("Error downloading file:", error);
 //       setErrorMessage(error.response?.data?.error);
 //     } finally {
 //       setLoading(false);
@@ -199,7 +195,6 @@
 //       const token = localStorage.getItem("token");
 //       decodedToken = jwtDecode(token);
 //     } catch (error) {
-//       console.error("Error decoding token:", error);
 //       return;
 //     }
 
@@ -209,11 +204,6 @@
 //     if (!showFormModal) {
 //       try {
 //         const appointmentId = expandedAppointmentId;
-//         if (!appointmentId) {
-//           console.error("No appointment ID found");
-//           return;
-//         }
-
 //         const documentResponse = await BaseUrl.get(`/patient/patientname/`, {
 //           params: {
 //             appointment_id: appointmentId,
@@ -229,14 +219,11 @@
 //             document_date: documentData.document_date || "",
 //             document_type: documentData.document_type || "",
 //             document_file: documentData.document_file || "",
-//             patient_name: documentData.name || "", // Ensure the name is correctly set
+//             patient_name: documentData.name || "",
 //           }));
 //         } else {
-//           console.error("Failed to fetch document data");
 //         }
-//       } catch (error) {
-//         console.error("Error fetching document data:", error);
-//       }
+//       } catch (error) {}
 //     } else {
 //       if (
 //         formData.document_name &&
@@ -270,18 +257,16 @@
 //             await fetchAppointments(doctorId);
 //             setSuccessMessage("Document file uploaded successfully");
 //           } else {
-//             console.error("Failed to upload document");
 //             setErrorMessage("Failed to upload document file");
 //           }
 //         } catch (postError) {
-//           console.error("Error uploading document:", postError);
 //           setErrorMessage("Error uploading document file");
 //         }
 //       }
 
 //       setFormData({
 //         document_name: "",
-//         patient_name: "", // Reset patient name after submission
+//         patient_name: "",
 //         document_date: "",
 //         document_type: "",
 //         document_file: "",
@@ -301,7 +286,6 @@
 //       const token = localStorage.getItem("token");
 //       decodedToken = jwtDecode(token);
 //     } catch (error) {
-//       console.error("Error decoding token:", error);
 //       return;
 //     }
 
@@ -323,7 +307,6 @@
 //     try {
 //       let response;
 //       if (editingRecordId) {
-//         // Include document_id in the payload for PATCH request
 //         formDataToSend.append("document_id", editingRecordId);
 
 //         response = await BaseUrl.patch(
@@ -342,7 +325,6 @@
 //       setShowFormModal(false);
 //       await fetchMedicalRecords(expandedAppointmentId);
 //     } catch (error) {
-//       console.error("Error saving document:", error);
 //       setErrorMessage(error.response?.data?.error);
 //     } finally {
 //       setLoading(false);
@@ -384,20 +366,11 @@
 //           },
 //         }
 //       );
-
-//       // Set success message
 //       setSuccessMessage(response.data.success);
-
-//       // Refetch records and appointments
 //       await fetchMedicalRecords(expandedAppointmentId);
 //       await fetchAppointments(doctorId);
 //     } catch (error) {
-//       console.error("Error deleting record:", error);
-
-//       // Set error message
-//       setErrorMessage(
-//         error.response?.data?.error || "Failed to delete the record."
-//       );
+//       setErrorMessage(error.response?.data?.error);
 //     } finally {
 //       setLoading(false);
 //     }
@@ -425,15 +398,12 @@
 //         },
 //         responseType: "blob",
 //       });
-
 //       const fileType = response.data.type;
 //       const url = URL.createObjectURL(response.data);
-
 //       setPreviewFileType(fileType);
 //       setPreviewFileUrl(url);
 //       setShowPreviewModal(true);
 //     } catch (error) {
-//       console.error("Error viewing file:", error);
 //       setShowToast(true);
 //       setToastMessage("Failed to preview file.");
 //       setToastVariant("danger");
@@ -454,7 +424,6 @@
 //         setPrescriptionDocuments(prescriptionData);
 //         setExpandedPrescriptionId(prescriptionId);
 //       } catch (error) {
-//         console.error("Error viewing prescription:", error);
 //         setShowToast(true);
 //         setToastMessage("Failed to view prescription.");
 //         setToastVariant("danger");
@@ -478,7 +447,6 @@
 //       setPreviewFileUrl(url);
 //       setShowPreviewModal(true);
 //     } catch (error) {
-//       console.error("Error previewing document:", error);
 //       setShowToast(true);
 //       setToastMessage("Failed to preview document.");
 //       setToastVariant("danger");
@@ -503,9 +471,7 @@
 //         const doctor_id = decodedToken.doctor_id;
 //         setDoctorId(doctor_id);
 //         await fetchAppointments(doctor_id);
-//       } catch (error) {
-//         console.error("Error decoding token or fetching appointments:", error);
-//       }
+//       } catch (error) {}
 //     };
 
 //     getDoctorIdFromToken();
@@ -539,7 +505,6 @@
 //         setSelectedPatientId(fetchedAppointments[0].patient_id);
 //       }
 //     } catch (error) {
-//       console.error("Error fetching appointments:", error);
 //       setShowToast(true);
 //       setToastMessage("Failed to fetch appointments.");
 //       setToastVariant("danger");
@@ -549,7 +514,6 @@
 //   };
 
 //   const toggleForm = async (appointment_id, details) => {
-//     // Clear all state before fetching new data
 //     setFormDetails({});
 //     setRecordDetails({
 //       mobile_number: "",
@@ -557,10 +521,6 @@
 //       weight: "",
 //       height: "",
 //       bmi: "",
-//       sugar_level: "",
-//       oxygen_level: "",
-//       symptoms: "",
-//       symptoms_comment: "",
 //       sugar_level: "",
 //       oxygen_level: "",
 //       symptoms: "",
@@ -573,17 +533,17 @@
 //     ]);
 //     setSelectedSymptoms([]);
 //     setPrescriptionDocuments([]);
-//     setMedicalRecords([]); // Clear medical records
+//     setMedicalRecords([]);
 
 //     if (expandedAppointmentId === appointment_id) {
-//       setExpandedAppointmentId(null); // Close the expanded section
+//       setExpandedAppointmentId(null);
 //       setShowPrescriptionForm(false);
 //       setShowRecordForm(false);
+//       setRequestDocForm(false);
 //       setShowVitalForm(false);
 //       setShowMedicalRecords(false);
 //       setShowSymptomsForm(false);
 //     } else {
-//       // Set the newly selected appointment
 //       setExpandedAppointmentId(appointment_id);
 
 //       setFormDetails({
@@ -594,10 +554,10 @@
 //         address: details.address || "",
 //       });
 
-//       // ** Show forms immediately **
 //       setShowVitalForm(true);
 //       setShowPrescriptionForm(true);
 //       setShowRecordForm(true);
+//       setRequestDocForm(true);
 //       setShowSymptomsForm(true);
 //       setShowMedicalRecords(true);
 
@@ -634,25 +594,23 @@
 //             prescriptionPromise,
 //             prescriptionDocPromise,
 //             symptomsPromise,
-//             fetchDocumentIds(appointment_id), // fetch document ids
-//             fetchMedicalRecords(appointment_id), // fetch medical records
+//             fetchDocumentIds(appointment_id),
+//             fetchMedicalRecords(appointment_id),
 //           ]);
 
 //           const patientResponse = results[0];
+//           let patientName = "";
 //           if (
 //             patientResponse.status === "fulfilled" &&
 //             patientResponse.value.status === 200
 //           ) {
 //             const patientDetails = patientResponse.value.data;
+//             patientName = patientDetails.name;
 //             setFormDetails((prevDetails) => ({
 //               ...prevDetails,
 //               ...patientDetails,
 //             }));
 //           } else {
-//             console.error(
-//               "Failed to fetch patient details:",
-//               patientResponse.reason
-//             );
 //           }
 
 //           const checkupResponse = results[1];
@@ -666,10 +624,6 @@
 //               ...checkupDetails,
 //             }));
 //           } else {
-//             console.error(
-//               "Failed to fetch checkup details:",
-//               checkupResponse.reason
-//             );
 //           }
 
 //           const prescriptionResponse = results[2];
@@ -679,10 +633,6 @@
 //           ) {
 //             setPrescriptions(prescriptionResponse.value.data);
 //           } else {
-//             console.error(
-//               "Failed to fetch prescriptions:",
-//               prescriptionResponse.reason
-//             );
 //           }
 
 //           const prescriptionDocResponse = results[3];
@@ -692,10 +642,6 @@
 //           ) {
 //             setPrescriptionDocuments(prescriptionDocResponse.value.data);
 //           } else {
-//             console.error(
-//               "Failed to fetch prescription documents:",
-//               prescriptionDocResponse.reason
-//             );
 //           }
 
 //           const symptomsResponse = results[4];
@@ -705,13 +651,32 @@
 //           ) {
 //             setSelectedSymptoms(symptomsResponse.value.data);
 //           } else {
-//             console.error("Failed to fetch symptoms:", symptomsResponse.reason);
+//           }
+//           if (patientName) {
+//             const medicalRecordsPromise = BaseUrl.get(
+//               `/doctorappointment/whatsappreport/`,
+//               {
+//                 params: {
+//                   patient_id: details.patient_id,
+//                   doctor_id: doctorId,
+//                   patient_name: patientName,
+//                 },
+//               }
+//             );
+//             const resultdoc = await Promise.allSettled([medicalRecordsPromise]);
+//             const medicalRecordsResponse = resultdoc[0];
+//             if (
+//               medicalRecordsResponse.status === "fulfilled" &&
+//               medicalRecordsResponse.value.status === 200
+//             ) {
+//               setWhatsappReport(medicalRecordsResponse.value.data.reports);
+//             } else {
+//             }
+//           } else {
 //           }
 //         };
-
 //         await fetchDataForPatient();
 //       } catch (error) {
-//         console.error("Error fetching patient data:", error);
 //       } finally {
 //         setLoading(false);
 //       }
@@ -723,17 +688,13 @@
 //       const response = await BaseUrl.get(`/patient/patientpriscription/`, {
 //         params: { appointment_id: appointmentId },
 //       });
-
 //       if (response.status === 200) {
-//         const fetchedPrescriptions = response.data; // Assuming the response contains the prescription data
-//         setPrescriptions(fetchedPrescriptions); // Update the state with the fetched prescriptions
-//         console.log("Prescriptions fetched successfully", fetchedPrescriptions);
+//         const fetchedPrescriptions = response.data;
+//         setPrescriptions(fetchedPrescriptions);
 //       } else {
-//         console.error("Failed to fetch prescriptions");
 //         setErrorMessage("Failed to fetch prescriptions");
 //       }
 //     } catch (error) {
-//       console.error("Error fetching prescriptions:", error);
 //       setErrorMessage(error.response?.data?.error);
 //     }
 //   };
@@ -742,17 +703,15 @@
 //     const { name, value } = e.target;
 //     setRecordDetails((prevDetails) => {
 //       const updatedDetails = { ...prevDetails, [name]: value };
-
-//       const heightInMeters = parseFloat(updatedDetails.height) / 100; // Convert cm to meters
+//       const heightInMeters = parseFloat(updatedDetails.height) / 100;
 //       const weight = parseFloat(updatedDetails.weight);
-
 //       if (heightInMeters && weight) {
 //         updatedDetails.bmi = (
 //           weight /
 //           (heightInMeters * heightInMeters)
-//         ).toFixed(2); // Calculate BMI
+//         ).toFixed(2);
 //       } else {
-//         updatedDetails.bmi = ""; // Reset BMI if height or weight is missing
+//         updatedDetails.bmi = "";
 //       }
 
 //       return updatedDetails;
@@ -762,53 +721,41 @@
 //   const fetchPrescriptionDocuments = async (appointment_id) => {
 //     try {
 //       const response = await BaseUrl.get(`/patient/patientprescriptonfile/`, {
-//         params: { appointment_id: appointment_id }, // Pass the appointment ID in the request params
+//         params: { appointment_id: appointment_id },
 //       });
-
 //       if (response.status === 200) {
-//         const prescriptionDocuments = response.data; // Assuming the response contains the document data
-//         console.log(
-//           "Prescription documents fetched successfully",
-//           prescriptionDocuments
-//         );
-//         return prescriptionDocuments; // Return the fetched documents
+//         const prescriptionDocuments = response.data;
+//         return prescriptionDocuments;
 //       } else {
-//         console.error("Failed to fetch prescription documents");
 //         throw new Error("Failed to fetch prescription documents");
 //       }
 //     } catch (error) {
-//       console.error("Error fetching prescription documents:", error);
-//       throw error; // Rethrow the error for further handling if needed
+//       throw error;
 //     }
 //   };
 
 //   const handleDeletePrescriptionDoc = async (docId) => {
 //     try {
-//       // Call the DELETE API to remove the document
 //       const response = await BaseUrl.delete(
 //         `/patient/patientprescriptonfile/`,
 //         {
 //           data: {
-//             document_id: docId, // Ensure this matches the expected field in your backend
+//             document_id: docId,
 //           },
 //         }
 //       );
-
 //       if (response.status === 200) {
 //         const successMessage =
 //           response.data.success || "Prescription document deleted successfully";
 //         setSuccessMessage(successMessage);
-
 //         setPrescriptionDocuments((prevDocuments) => {
-//           return prevDocuments.filter((doc) => doc.id !== docId); // Use the correct id here
+//           return prevDocuments.filter((doc) => doc.id !== docId);
 //         });
-
 //         await fetchAppointments(doctorId);
 //       } else {
 //         throw new Error("Failed to delete prescription document");
 //       }
 //     } catch (error) {
-//       console.error("Error deleting prescription document:", error);
 //       setErrorMessage(
 //         error.response?.data?.error || "An error occurred. Please try again."
 //       );
@@ -825,13 +772,10 @@
 //             patient_id: doc.patient,
 //             document_id: doc.id,
 //           },
-//           responseType: "blob", // Ensure it's downloading as a blob
+//           responseType: "blob",
 //         }
 //       );
-
-//       // Use backend message if available, otherwise provide a default
 //       setSuccessMessage(response.data.success);
-
 //       const url = URL.createObjectURL(response.data);
 //       const link = document.createElement("a");
 //       link.href = url;
@@ -840,48 +784,28 @@
 //       }`;
 //       link.click();
 //     } catch (error) {
-//       console.error("Error downloading prescription document:", error);
-
-//       // Use backend error message if available, otherwise provide a default
 //       setErrorMessage(error.response?.data?.error);
 //     } finally {
-//       // Set loading to false once all operations are complete
 //       setLoading(false);
 //     }
 //   };
 
 //   const handlePrint = async (appointment_id) => {
 //     try {
-//       if (!appointment_id) {
-//         console.error("No appointment ID selected");
-//         setErrorMessage("No appointment ID selected");
-//         return;
-//       }
-
-//       // Make the GET request to fetch appointment data
 //       const response = await BaseUrl.get(`/patient/printrepport/`, {
 //         params: {
-//           appointment_id: expandedAppointmentId, // Use the dynamically passed appointment_id
+//           appointment_id: expandedAppointmentId,
 //         },
-//         responseType: "blob", // Assuming the response might be in PDF/blob format
+//         responseType: "blob",
 //       });
-
-//       // Create a blob from the response data
 //       const blob = new Blob([response.data], { type: "application/pdf" });
 //       const url = window.URL.createObjectURL(blob);
-
-//       // Open the PDF in a new browser tab
 //       const newWindow = window.open(url);
 //       if (newWindow) {
-//         newWindow.focus(); // Focus on the new window (tab)
+//         newWindow.focus();
 //       }
-
-//       // Set the success message from the backend response or a default
 //       setSuccessMessage(response.data.success);
 //     } catch (error) {
-//       console.error("Error fetching appointment details:", error);
-
-//       // Set the error message from the backend response or a default
 //       setErrorMessage(error.response?.data?.error);
 //     }
 //   };
@@ -890,23 +814,19 @@
 //     try {
 //       const response = await BaseUrl.get(`/patient/printrepport/`, {
 //         params: {
-//           appointment_id: expandedAppointmentId, // Dynamically pass the appointment_id
+//           appointment_id: expandedAppointmentId,
 //         },
-//         responseType: "blob", // Assuming the response is a PDF or blob
+//         responseType: "blob",
 //       });
-
-//       // Create a blob from the response and download it
-//       const blob = new Blob([response.data], { type: "application/pdf" }); // Adjust type if needed
+//       const blob = new Blob([response.data], { type: "application/pdf" });
 //       const url = window.URL.createObjectURL(blob);
 //       const link = document.createElement("a");
 //       link.href = url;
-//       link.setAttribute("download", "AppointmentRecord.pdf"); // Set file name
+//       link.setAttribute("download", "AppointmentRecord.pdf");
 //       document.body.appendChild(link);
 //       link.click();
 //       link.remove();
-//     } catch (error) {
-//       console.error("Error downloading the file:", error);
-//     }
+//     } catch (error) {}
 //   };
 
 //   const handleUpdate = async () => {
@@ -915,36 +835,23 @@
 //       const selectedAppointment = appointments.find(
 //         (appointment) => appointment.appointment_id === expandedAppointmentId
 //       );
-
 //       if (!selectedAppointment) {
 //         setErrorMessage("Selected appointment not found");
-//         console.error("Selected appointment not found");
 //         return;
 //       }
-
 //       const payload = {
 //         appointment_id: selectedAppointment.appointment_id,
 //         patient_id: selectedAppointment.patient_id,
 //         ...formDetails,
 //       };
-
 //       const response = await BaseUrl.put(`/patient/patient/`, payload);
-
 //       if (response.status === 201) {
 //         await fetchAppointments(doctorId);
-
-//         // Set the success message from backend response or a default message
 //         setSuccessMessage(response.data.success);
 //       } else {
-//         console.error("Failed to update appointment details");
-
-//         // Set the error message from backend response or a default message
 //         setErrorMessage(response.data?.message);
 //       }
 //     } catch (error) {
-//       console.error("Error updating appointment details:", error);
-
-//       // Use the backend error message if available, or a fallback message
 //       setErrorMessage(error.response?.data?.error);
 //     } finally {
 //       setLoading(false);
@@ -953,22 +860,17 @@
 
 //   const handleDelete = async (appointment_id) => {
 //     setLoading(true);
-
 //     try {
 //       const response = await BaseUrl.delete(`/doctorappointment/getslot/`, {
 //         data: { appointment_id },
 //       });
-
 //       if (response.status === 200) {
 //         await fetchAppointments(doctorId);
-
 //         setSuccessMessage(response.data.success);
 //       } else {
 //         throw new Error(response.data?.message);
 //       }
 //     } catch (error) {
-//       console.error("Error deleting appointment:", error);
-
 //       setErrorMessage(error.response?.data?.error);
 //     } finally {
 //       setLoading(false);
@@ -980,19 +882,13 @@
 //       const response = await BaseUrl.patch(`/doctorappointment/getslot/`, {
 //         appointment_id,
 //       });
-
 //       if (response.status === 200) {
 //         await fetchAppointments(doctorId);
-
 //         setSuccessMessage(response.data.success);
 //       } else {
-//         console.error("Failed to cancel appointment");
-
 //         setErrorMessage(response.data?.message);
 //       }
 //     } catch (error) {
-//       console.error("Error canceling appointment:", error);
-
 //       setErrorMessage(error.response?.data?.error);
 //     }
 //   };
@@ -1015,45 +911,31 @@
 //   const removePrescriptionRow = async (index) => {
 //     setLoading(true);
 //     const prescriptionToDelete = prescriptions[index];
-
-//     // Check if the prescription doesn't have an ID (i.e., it hasn't been submitted to the backend)
 //     if (!prescriptionToDelete.id) {
-//       console.log("Removing unsaved prescription from frontend");
-
-//       // Remove the prescription row from the state without making an API call
 //       const updatedPrescriptions = prescriptions.filter((_, i) => i !== index);
 //       setPrescriptions(updatedPrescriptions);
-//       return; // Exit here since there's no need to call the backend
+//       return;
 //     }
-
 //     try {
 //       const prescription_id = prescriptionToDelete.id;
 
 //       const response = await BaseUrl.delete(`/patient/patientpriscription/`, {
 //         params: { prescription_id },
 //       });
-
 //       if (response.status === 200 || response.status === 204) {
-//         // Remove the prescription from the UI
 //         const updatedPrescriptions = prescriptions.filter(
 //           (_, i) => i !== index
 //         );
 //         setPrescriptions(updatedPrescriptions);
-
 //         setSuccessMessage(
 //           response.data.success || "Prescription removed successfully"
 //         );
 //       } else {
-//         console.error("Failed to remove prescription");
-
 //         setErrorMessage(
 //           response.data?.message || "Failed to remove prescription"
 //         );
 //       }
 //     } catch (error) {
-//       console.error("Error removing prescription:", error);
-
-//       // Use backend error message if available, otherwise provide a default message
 //       setErrorMessage(
 //         error.response?.data?.error || "Error removing prescription"
 //       );
@@ -1065,24 +947,18 @@
 //   const fetchPrescriptions = async (appointment_id, patient_id) => {
 //     setLoading(true);
 //     try {
-//       // Make the GET API call to fetch prescriptions for the given appointment and patient
 //       const response = await BaseUrl.get("/patient/patientpriscription/", {
 //         params: {
-//           appointment_id: appointment_id, // Pass the appointment ID
-//           patient_id: patient_id, // Pass the patient ID
+//           appointment_id: appointment_id,
+//           patient_id: patient_id,
 //         },
 //       });
-
 //       if (response.status === 200) {
-//         const fetchedPrescriptions = response.data; // Assuming the API returns an array of prescriptions
-
-//         // Update the state with the fetched prescriptions
-//         setPrescriptions(fetchedPrescriptions); // Set the fetched prescriptions to state
+//         const fetchedPrescriptions = response.data;
+//         setPrescriptions(fetchedPrescriptions);
 //       } else {
-//         console.error("Failed to fetch prescriptions");
 //       }
 //     } catch (error) {
-//       console.error("Error fetching prescriptions:", error);
 //     } finally {
 //       setLoading(false);
 //     }
@@ -1094,56 +970,35 @@
 //       const selectedAppointment = appointments.find(
 //         (appointment) => appointment.appointment_id === expandedAppointmentId
 //       );
-
 //       if (!selectedAppointment) {
-//         console.error("No selected appointment found");
 //         setErrorMessage("No selected appointment found");
 //         return;
 //       }
-
 //       const patient_id = selectedAppointment.patient_id;
 //       const appointment_id = selectedAppointment.appointment_id;
-
-//       // Get the specific prescription for the current index
 //       const prescription = prescriptions[index];
-
-//       // Prepare the payload for the individual prescription
 //       const payload = {
 //         ...prescription,
 //         patient_id: patient_id,
 //         appointment_id: appointment_id,
 //       };
-
-//       // Make the POST API call to submit the individual prescription
 //       const response = await BaseUrl.post("/patient/patientpriscription/", [
 //         payload,
 //       ]);
-
 //       if (response.status === 201) {
-//         // Use backend message if available, otherwise provide a default message
 //         setSuccessMessage(response.data.success);
-
-//         // Optionally clear this specific prescription row
 //         const updatedPrescriptions = prescriptions.map((prescription, i) =>
 //           i === index
 //             ? { medicine_name: "", time: "", comment: "", description: "" }
 //             : prescription
 //         );
 //         setPrescriptions(updatedPrescriptions);
-
-//         // Fetch the latest prescriptions after successful submission
-//         await fetchPrescriptions(appointment_id, patient_id); // Fetch updated prescriptions
+//         await fetchPrescriptions(appointment_id, patient_id);
 //         await fetchDocumentIds(appointment_id);
 //       } else {
-//         console.error("Failed to submit prescription");
-
-//         // Use backend message if available, otherwise provide a default message
 //         setErrorMessage(response.data?.message);
 //       }
 //     } catch (error) {
-//       console.error("Error submitting prescription:", error);
-
-//       // Use backend error message if available, otherwise provide a default message
 //       setErrorMessage(error.response?.data?.error);
 //     } finally {
 //       setLoading(false);
@@ -1156,52 +1011,33 @@
 //       const selectedAppointment = appointments.find(
 //         (appointment) => appointment.appointment_id === expandedAppointmentId
 //       );
-
 //       if (!selectedAppointment) {
-//         console.error("No selected appointment found");
 //         setErrorMessage("No selected appointment found");
 //         return;
 //       }
-
 //       const patient_id = selectedAppointment.patient_id;
 //       const appointment_id = selectedAppointment.appointment_id;
-
-//       // Get the specific prescription for the current index
 //       const prescription = prescriptions[index];
-
-//       // Prepare the payload for updating the prescription
 //       const payload = {
-//         prescription_id: prescription.id, // Required for update
-//         patient_id: patient_id, // Required for update
-//         appointment_id: appointment_id, // Optional based on backend requirements
-//         medicine_name: prescription.medicine_name, // Fields to be updated
+//         prescription_id: prescription.id,
+//         patient_id: patient_id,
+//         appointment_id: appointment_id,
+//         medicine_name: prescription.medicine_name,
 //         time: prescription.time,
 //         comment: prescription.comment,
 //         description: prescription.description,
 //       };
-
-//       // Make the PUT API call to update the prescription
 //       const response = await BaseUrl.put(
 //         "/patient/patientpriscription/",
 //         payload
-//       ); // No prescription_id in URL
-
+//       );
 //       if (response.status === 200) {
-//         // Use the backend message if available, otherwise provide a default message
 //         setSuccessMessage(response.data.success);
-
-//         // Fetch the updated prescriptions after updating
 //         await fetchPrescriptions(appointment_id, patient_id);
 //       } else {
-//         console.error("Failed to update prescription");
-
-//         // Use the backend message if available, otherwise provide a default message
 //         setErrorMessage(response.data?.message);
 //       }
 //     } catch (error) {
-//       console.error("Error updating prescription:", error);
-
-//       // Use the backend error message if available, otherwise provide a default message
 //       setErrorMessage(error.response?.data?.error);
 //     } finally {
 //       setLoading(false);
@@ -1218,45 +1054,36 @@
 //           },
 //         }
 //       );
-
 //       if (response.status === 200) {
 //         const ids = response.data.map((doc) => doc.id);
 //         setDocumentIds(ids);
 //       } else {
-//         console.error("Failed to fetch document IDs");
 //       }
-//     } catch (error) {
-//       console.error("Error fetching document IDs:", error);
-//     }
+//     } catch (error) {}
 //   };
 
 //   const toggleVitalForm = async (appointment_id) => {
 //     setShowVitalForm(!showVitalForm);
 //     setShowPrescriptionForm(false);
 //     setExpandedAppointmentId(appointment_id);
-
 //     if (!showVitalForm) {
 //       try {
 //         const selectedAppointment = appointments.find(
 //           (appointment) => appointment.appointment_id === appointment_id
 //         );
-
 //         if (selectedAppointment) {
 //           const appointment_date = selectedAppointment.appointment_date;
-
 //           const fetchDataResponse = await BaseUrl.get(`/patient/vital/`, {
 //             params: {
 //               appointment_id: appointment_id,
 //               appointment_date: appointment_date,
 //             },
 //           });
-
 //           if (
 //             fetchDataResponse.status === 200 &&
 //             fetchDataResponse.data.length > 0
 //           ) {
 //             const fetchedData = fetchDataResponse.data[0];
-
 //             setRecordDetails({
 //               appointment_id: appointment_id,
 //               blood_pressure: fetchedData.blood_pressure || "",
@@ -1269,14 +1096,10 @@
 //               appointment_date: appointment_date,
 //             });
 //           } else {
-//             console.error("No vitals data found");
 //           }
 //         } else {
-//           console.error("No selected appointment found");
 //         }
-//       } catch (error) {
-//         console.error("Error fetching vitals data:", error);
-//       }
+//       } catch (error) {}
 //     } else {
 //       setRecordDetails({
 //         appointment_id: "",
@@ -1297,20 +1120,11 @@
 //   const handleVitalSubmit = async () => {
 //     setLoading(true);
 //     try {
-//       // Find the selected appointment based on the expanded appointment ID
 //       const selectedAppointment = appointments.find(
 //         (appointment) => appointment.appointment_id === expandedAppointmentId
 //       );
-
-//       if (!selectedAppointment) {
-//         console.error("No selected appointment found");
-//         return;
-//       }
-
 //       const patient_id = selectedAppointment.patient_id;
 //       const appointment_date = selectedAppointment.appointment_date;
-
-//       // Make the POST API call to submit vitals
 //       const postResponse = await BaseUrl.post("/patient/vital/", {
 //         patient_id: patient_id,
 //         appointment_id: expandedAppointmentId,
@@ -1325,11 +1139,10 @@
 //         heart_rate: recordDetails.heart_rate,
 //         body_temperature: recordDetails.body_temperature,
 //       });
-
 //       if (postResponse.status === 201) {
 //         setErrorMessage("");
-//         await fetchAppointments(doctorId); // Fetch updated appointments
-//         await fetchMedicalRecords(expandedAppointmentId); // Fetch updated medical records
+//         await fetchAppointments(doctorId);
+//         await fetchMedicalRecords(expandedAppointmentId);
 //         setRecordDetails({
 //           patient_id: "",
 //           blood_pressure: "",
@@ -1350,7 +1163,6 @@
 //         setErrorMessage("Failed to submit vitals");
 //       }
 //     } catch (postError) {
-//       console.error("Error submitting vitals:", postError);
 //       setErrorMessage("Error submitting vitals");
 //       setShowToast(true);
 //       setToastMessage("Error submitting vitals.");
@@ -1363,21 +1175,11 @@
 //   const handleVitalUpdate = async () => {
 //     setLoading(true);
 //     try {
-//       // Find the selected appointment based on the expanded appointment ID
 //       const selectedAppointment = appointments.find(
 //         (appointment) => appointment.appointment_id === expandedAppointmentId
 //       );
-
-//       if (!selectedAppointment) {
-//         console.error("No selected appointment found");
-//         setErrorMessage("No selected appointment found");
-//         return;
-//       }
-
 //       const patient_id = selectedAppointment.patient_id;
 //       const appointment_id = selectedAppointment.appointment_id;
-
-//       // Prepare the payload for updating the vitals
 //       const payload = {
 //         blood_pressure: recordDetails.blood_pressure,
 //         oxygen_level: recordDetails.oxygen_level,
@@ -1389,25 +1191,15 @@
 //         bmi: recordDetails.bmi,
 //         height: recordDetails.height,
 //         patient_id: patient_id,
-//         appointment_id: appointment_id, // Include appointment_id in payload
+//         appointment_id: appointment_id,
 //       };
-
-//       // Make the PUT API call to update the vitals
 //       const response = await BaseUrl.put(`/patient/vital/`, payload);
-
 //       if (response.status === 200) {
-//         // Use the backend message if available, otherwise provide a default message
 //         setSuccessMessage(response.data.success);
 //       } else {
-//         console.error("Failed to update vitals");
-
-//         // Use backend message if available, otherwise provide a default message
 //         setErrorMessage(response.data?.message);
 //       }
 //     } catch (error) {
-//       console.error("Error updating vitals:", error);
-
-//       // Use backend error message if available, otherwise provide a default message
 //       setErrorMessage(error.response?.data?.error);
 //     } finally {
 //       setLoading(false);
@@ -1435,23 +1227,18 @@
 //   const handleSymptomSearch = async (e) => {
 //     const value = e.target.value;
 //     setSearchSymptom(value);
-
 //     if (value) {
 //       try {
 //         const response = await BaseUrl.get(`/doctor/symptomssearch/`, {
 //           params: { name: value },
 //         });
-
 //         const symptomsFromApi = response.data;
-
 //         if (symptomsFromApi.length > 0) {
 //           setSearchResults(symptomsFromApi);
 //         } else {
 //           setSearchResults([]);
 //         }
-//       } catch (error) {
-//         console.error("Error fetching symptoms:", error);
-//       }
+//       } catch (error) {}
 //     } else {
 //       setSearchResults([]);
 //     }
@@ -1478,13 +1265,11 @@
 //   const toggleSymptomsForm = async (appointment_id) => {
 //     setShowSymptomsForm(!showSymptomsForm);
 //     setExpandedAppointmentId(appointment_id);
-
 //     if (!showSymptomsForm) {
 //       try {
 //         const selectedAppointment = appointments.find(
 //           (appointment) => appointment.appointment_id === appointment_id
 //         );
-
 //         if (selectedAppointment) {
 //           const response = await BaseUrl.get(
 //             `/patient/patientsymptoms/?appointment_id=${appointment_id}`
@@ -1492,13 +1277,10 @@
 //           if (response.status === 200) {
 //             setSelectedSymptoms(response.data.symptoms || []);
 //           } else {
-//             console.error("Failed to fetch symptoms");
 //           }
 //         } else {
-//           console.error("No selected appointment found");
 //         }
 //       } catch (error) {
-//         console.error("Error fetching symptoms:", error);
 //         setErrorMessage("Failed to fetch symptoms.");
 //       }
 //     } else {
@@ -1520,7 +1302,7 @@
 //         since: "",
 //         more_options: "",
 //       },
-//       ...prevSymptoms, // Prepend the new symptom to the start of the array
+//       ...prevSymptoms,
 //     ]);
 //     setSearchSymptom("");
 //     setSearchResults([]);
@@ -1528,35 +1310,20 @@
 
 //   const handleRemoveSymptom = async (symptom) => {
 //     setLoading(true);
-//     // Check if the symptom has not been saved yet (i.e., no `id`)
 //     if (!symptom.id) {
-//       console.log("Unsaved symptom, removing from frontend state:", symptom);
-
-//       // Remove the unsaved row directly from the state without making an API call
 //       setSelectedSymptoms((prevSymptoms) =>
 //         prevSymptoms.filter((s) => s !== symptom)
 //       );
-
-//       // Early exit for unsaved symptoms, no need to proceed with API call
 //       return;
 //     }
-
 //     try {
-//       // Make an API call to delete the saved symptom
 //       const response = await BaseUrl.delete(`/doctor/symptomsdetail/`, {
 //         data: {
-//           appointment_id: expandedAppointmentId, // Send the current expanded appointment ID
-//           symptoms_id: symptom.symptoms, // Send the unique ID of the symptom to delete
+//           appointment_id: expandedAppointmentId,
+//           symptoms_id: symptom.symptoms,
 //         },
 //       });
-
 //       if (response.status === 200) {
-//         console.log(
-//           "Saved symptom deleted from backend and frontend:",
-//           symptom
-//         );
-
-//         // Remove the saved symptom from the state
 //         setSelectedSymptoms((prevSymptoms) =>
 //           prevSymptoms.filter((s) => s.id !== symptom.id)
 //         );
@@ -1564,13 +1331,11 @@
 //       } else {
 //         const errorMessage =
 //           response.data?.message || "Failed to delete symptom";
-//         console.error(errorMessage, symptom);
 //         setErrorMessage(errorMessage);
 //       }
 //     } catch (error) {
 //       const errorMessage =
 //         error.response?.data?.message || "An error occurred.";
-//       console.error("Error deleting symptom:", error.response?.data?.error);
 //       setErrorMessage(errorMessage);
 //     } finally {
 //       setLoading(false);
@@ -1583,17 +1348,9 @@
 //       const selectedAppointment = appointments.find(
 //         (appointment) => appointment.appointment_id === expandedAppointmentId
 //       );
-
-//       if (!selectedAppointment) {
-//         console.error("No selected appointment found");
-//         return;
-//       }
-
 //       const appointment_id = expandedAppointmentId;
 //       const appointment_date = selectedAppointment.appointment_date;
-
-//       let successCount = 0; // Counter to track the number of successful saves
-
+//       let successCount = 0;
 //       for (let i = 0; i < selectedSymptoms.length; i++) {
 //         const symptom = selectedSymptoms[i];
 //         const symptomPayload = {
@@ -1617,20 +1374,15 @@
 //           );
 
 //           if (response.status === 200 || response.status === 201) {
-//             successCount++; // Increment success counter
+//             successCount++;
 //             const successMessage = response.data.success;
-//             console.log(successMessage); // Log the success message
-
-//             // Store the returned id in the symptom object for future updates
 //             selectedSymptoms[i].id = response.data.data.id;
 //           } else {
 //             const errorMessage =
 //               response.data?.message || "Failed to save symptom";
-//             console.error(errorMessage, symptom);
 //           }
 //         } catch (error) {
 //           const errorMessage = error.response?.data?.error;
-//           console.error("Error saving symptom:", errorMessage);
 //         }
 //       }
 
@@ -1641,11 +1393,9 @@
 //       } else {
 //         setErrorMessage("No symptoms details were saved");
 //       }
-
-//       await fetchAppointments(doctorId); // Fetch updated appointments
-//       await fetchMedicalRecords(expandedAppointmentId); // Fetch updated medical records
+//       await fetchAppointments(doctorId);
+//       await fetchMedicalRecords(expandedAppointmentId);
 //     } catch (error) {
-//       console.error("Error saving symptoms:", error);
 //       setErrorMessage("An error occurred while saving symptoms");
 //     } finally {
 //       setLoading(false);
@@ -1658,26 +1408,17 @@
 //       const selectedAppointment = appointments.find(
 //         (appointment) => appointment.appointment_id === expandedAppointmentId
 //       );
-
-//       if (!selectedAppointment) {
-//         console.error("No selected appointment found");
-//         return;
-//       }
-
 //       const appointment_id = expandedAppointmentId;
-
-//       let successCount = 0; // Counter to track the number of successful updates
-
+//       let successCount = 0;
 //       for (const symptom of selectedSymptoms) {
 //         const symptomPayload = {
-//           symptoms_id: symptom.id, // Use the stored id from the POST response
+//           symptoms_id: symptom.id,
 //           symptoms_name: symptom.symptoms_name,
 //           appointment_id: appointment_id,
 //           since: symptom.since,
 //           severity: symptom.severity,
 //           more_options: symptom.more_options,
 //         };
-
 //         try {
 //           const response = await BaseUrl.put(
 //             "/doctor/symptomsdetail/",
@@ -1688,19 +1429,15 @@
 //               },
 //             }
 //           );
-
 //           if (response.status === 200 || response.status === 201) {
-//             successCount++; // Increment success counter
+//             successCount++;
 //             const successMessage = response.data.success;
-//             console.log(successMessage);
 //           } else {
 //             const errorMessage =
 //               response.data?.message || "Failed to update symptom";
-//             console.error(errorMessage, symptom);
 //           }
 //         } catch (error) {
 //           const errorMessage = error.response?.data?.error;
-//           console.error("Error updating symptom:", errorMessage);
 //         }
 //       }
 
@@ -1709,45 +1446,34 @@
 //       } else {
 //         setErrorMessage("No symptoms were updated");
 //       }
-
-//       await fetchAppointments(doctorId); // Fetch updated appointments
-//       await fetchMedicalRecords(expandedAppointmentId); // Fetch updated medical records
+//       await fetchAppointments(doctorId);
+//       await fetchMedicalRecords(expandedAppointmentId);
 //     } catch (error) {
-//       console.error("Error updating symptoms:", error);
 //     } finally {
 //       setLoading(false);
 //     }
 //   };
 
-//   // Add this function to handle input changes in forms
 //   const handleInputChange = (e) => {
 //     const { name, value } = e.target;
-
-//     // Validation for the 'name' field to accept only alphabetic characters and spaces
 //     if (name === "name" && /[^a-zA-Z\s]/.test(value)) {
-//       return; // Ignore the event if invalid characters are typed
+//       return;
 //     }
-
-//     // Enhanced validation for the 'mobile_number' field
 //     if (name === "mobile_number") {
-//       // Allow only numeric input and limit to 10 digits
-//       const newValue = value.replace(/[^\d]/g, "").substring(0, 10); // Remove non-digits and limit length
+//       const newValue = value.replace(/[^\d]/g, "").substring(0, 10);
 //       setFormDetails((prevDetails) => ({
 //         ...prevDetails,
 //         [name]: newValue,
 //       }));
-//       return; // Prevent default processing and further propagation of the input event
+//       return;
 //     }
-
-//     // Validation for the 'age' field to accept only numeric input and limit to 150
 //     if (name === "age") {
 //       const numericValue = parseInt(value, 10);
 //       if (/[^0-9]/.test(value) || numericValue > 150) {
-//         return; // Ignore the event if non-numeric characters are entered or age exceeds 150
+//         return;
 //       }
 //     }
 
-//     // Update the form details for all other inputs
 //     setFormDetails((prevDetails) => ({
 //       ...prevDetails,
 //       [name]: value,
@@ -1759,9 +1485,9 @@
 //       if (i === index) {
 //         let updatedTime;
 //         if (e.target.checked) {
-//           updatedTime = [...prescription.time, timeSlot]; // Add the selected time slot
+//           updatedTime = [...prescription.time, timeSlot];
 //         } else {
-//           updatedTime = prescription.time.filter((time) => time !== timeSlot); // Remove the deselected time slot
+//           updatedTime = prescription.time.filter((time) => time !== timeSlot);
 //         }
 //         return { ...prescription, time: updatedTime };
 //       }
@@ -1771,28 +1497,15 @@
 //   };
 
 //   const handlePrescriptionDocs = async (appointment_id) => {
-//     if (!selectedFile) {
-//       console.error("No file selected for upload");
-//       return;
-//     }
-
 //     try {
 //       const selectedAppointment = appointments.find(
 //         (appointment) => appointment.appointment_id === appointment_id
 //       );
-
-//       if (!selectedAppointment) {
-//         console.error("Appointment not found");
-//         throw new Error("Appointment not found");
-//       }
-
 //       const appointment_date = selectedAppointment.appointment_date;
-
 //       const formData = new FormData();
 //       formData.append("document_file", selectedFile);
 //       formData.append("document_date", appointment_date);
 //       formData.append("appointment", appointment_id);
-
 //       const response = await BaseUrl.post(
 //         `/patient/patientprescriptonfile/`,
 //         formData,
@@ -1804,38 +1517,31 @@
 //       );
 
 //       if (response.status === 200 || response.status === 201) {
-//         // Retrieve the success message from the response if available
 //         const successMessage =
 //           response.data.success ||
 //           "Prescription document uploaded successfully";
 //         setSuccessMessage(successMessage);
-
-//         // Add the newly uploaded document to the state
 //         setPrescriptionDocuments((prevDocuments) => [
 //           ...prevDocuments,
 //           response.data,
 //         ]);
 //         setShowPrescriptionDocsForm(false);
-
-//         // Optionally, re-fetch documents or other data as a backup
 //         const updatedDocuments =
 //           await fetchPrescriptionDocuments(appointment_id);
-//         setPrescriptionDocuments(updatedDocuments); // Update with the full list
+//         setPrescriptionDocuments(updatedDocuments);
 //         await fetchMedicalRecords(appointment_id);
 //         await fetchAppointments(doctorId);
 //       } else {
 //         const errorMessage =
 //           response.data.error || "Failed to upload prescription document";
-//         console.error(errorMessage);
 //         setErrorMessage(errorMessage);
 //       }
 //     } catch (error) {
-//       console.error("Error uploading prescription document:", error);
 //       setErrorMessage(
 //         error.response?.data?.error || "Error uploading prescription document"
 //       );
 //     } finally {
-//       setSelectedFile(null); // Reset file selection
+//       setSelectedFile(null);
 //     }
 //   };
 //   const handleSearchChange = (e) => {
@@ -1845,32 +1551,22 @@
 //       ...prevParams,
 //       [name]: value,
 //     }));
-
-//     // Automatically trigger search after each change
 //     handleSearch();
 //   };
 
-//   // Function to reset the page to default content
 //   const resetToDefault = () => {
 //     setIsSearching(false);
-//     // Logic to restore the default page content
-//     // Set the default content back to what it was originally
 //   };
-
-//   // Debounced search function
 //   useEffect(() => {
 //     const delayDebounceFn = setTimeout(() => {
 //       if (searchParams.booked_by) {
-//         // Trigger search only if there is a search value
 //         handleSearch();
 //       } else {
-//         // If input is empty, reset to the default content
 //         resetToDefault();
 //       }
-//     }, 500); // 500ms debounce
-
-//     return () => clearTimeout(delayDebounceFn); // Cleanup the timeout
-//   }, [searchParams.booked_by]); // Only run the effect when searchParams.booked_by changes
+//     }, 500);
+//     return () => clearTimeout(delayDebounceFn);
+//   }, [searchParams.booked_by]);
 
 //   const handleSearch = async () => {
 //     try {
@@ -1880,7 +1576,6 @@
 //           query: searchParams.booked_by,
 //         },
 //       });
-
 //       const fetchedAppointments = response.data.map((appointment) => ({
 //         appointment_id: appointment.appointment_id,
 //         appointment_date: appointment.appointment_date,
@@ -1896,13 +1591,84 @@
 //             ? "Completed"
 //             : "Upcoming",
 //       }));
-
 //       setAppointments(fetchedAppointments);
-//       setErrorMessage(""); // Clear error message if appointments are found
+//       setErrorMessage("");
 //     } catch (error) {
-//       console.error("Error searching appointments:", error);
 //       setErrorMessage("No appointments found");
-//       setAppointments([]); // Clear appointments list if an error occurs
+//       setAppointments([]);
+//     }
+//   };
+
+//   const handleRequestDocument = async (appointmentId) => {
+//     try {
+//       const formData = new FormData();
+//       formData.append("appointment_id", appointmentId);
+//       const response = await BaseUrl.put(
+//         "/doctorappointment/askreport/",
+//         formData
+//       );
+//       if (response.status === 200) {
+//         const successMessage = response.data?.success;
+//         setSuccessMessage(successMessage);
+//         setErrorMessage("");
+//       } else {
+//         const errorMessage = response.data?.error;
+//         setErrorMessage(errorMessage);
+//         setSuccessMessage("");
+//       }
+//     } catch (error) {
+//       const errorMessage = error.response?.data?.error;
+//       setErrorMessage(errorMessage);
+//       setSuccessMessage("");
+//     }
+//   };
+
+//   const handleRecordView = async (patientId) => {
+//     setLoading(true);
+//     try {
+//       const response = await BaseUrl.get(`/doctorappointment/whatsappreport/`, {
+//         params: {
+//           patient_id: patientId,
+//           doctor_id: doctorId,
+//           patient_name: formDetails.name,
+//         },
+//       });
+//       if (response.status === 200) {
+//         const reports = response.data?.reports || [];
+//         setWhatsappReport(reports);
+//         setSuccessMessage("Medical record fetched successfully.");
+//         setErrorMessage("");
+//       } else {
+//         setErrorMessage(response.data?.error);
+//         setSuccessMessage("");
+//       }
+//     } catch (error) {
+//       setErrorMessage(error.response?.data?.error);
+//       setSuccessMessage("");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const deleteRecord = async (id) => {
+//     try {
+//       const response = await BaseUrl.delete(
+//         "/doctorappointment/whatsappreport/",
+//         {
+//           data: { id },
+//         }
+//       );
+
+//       if (response.status === 200) {
+//         alert("Record deleted successfully");
+//         setWhatsappReport((prevPhotos) =>
+//           prevPhotos.filter((photo) => photo.id !== id)
+//         );
+//       } else {
+//         alert("Error deleting record");
+//       }
+//     } catch (error) {
+//       alert("Failed to delete record");
 //     }
 //   };
 
@@ -1953,8 +1719,9 @@
 //             <h5
 //               className="card-title mb-4"
 //               style={{
-//                 color: "#003366", // Text color
-//                 fontFamily: "Sans-Serif", // Font family
+//                 color: "#003366",
+//                 textAlign: "center",
+//                 fontFamily: "Sans-Serif",
 //               }}
 //             >
 //               Search Appointments
@@ -1962,8 +1729,8 @@
 
 //             <Form
 //               onSubmit={(e) => {
-//                 e.preventDefault(); // Prevent page reload on Enter
-//                 handleSearch(); // Execute the search
+//                 e.preventDefault();
+//                 handleSearch();
 //               }}
 //             >
 //               <Form.Group
@@ -2034,7 +1801,6 @@
 //           background: "#0091A5",
 //         }}
 //       >
-//         {/* Success/Error Modal */}
 //         <Modal
 //           show={!!errorMessage || !!successMessage}
 //           onHide={handleCloseMessageModal}
@@ -2055,11 +1821,11 @@
 //           <h5
 //             className="card-title mb-4"
 //             style={{
-//               color: "#ffffff", // Text color
-//               fontFamily: "Sans-Serif", // Font family
-//               display: "flex", // Align items horizontally
-//               alignItems: "center", // Center vertically
-//               gap: "50px", // Spacing between text and legend symbol
+//               color: "#ffffff",
+//               fontFamily: "Sans-Serif",
+//               display: "flex",
+//               alignItems: "center",
+//               gap: "50px",
 //             }}
 //           >
 //             Booked Appointments
@@ -2067,7 +1833,7 @@
 //               style={{
 //                 color: "#ffffff",
 //                 fontSize: "14px",
-//                 marginLeft: "8px", // Space between title and label text
+//                 marginLeft: "8px",
 //               }}
 //             >
 //               <span
@@ -2075,9 +1841,9 @@
 //                   display: "inline-block",
 //                   width: "12px",
 //                   height: "12px",
-//                   backgroundColor: " #f5c6cb", // Legend color
-//                   borderRadius: "50%", // Make it circular
-//                   marginRight: "8px", // Space between icon and text
+//                   backgroundColor: " #f5c6cb",
+//                   borderRadius: "50%",
+//                   marginRight: "8px",
 //                 }}
 //               ></span>
 //               (Booked By Patient)
@@ -2089,8 +1855,8 @@
 //               <tr>
 //                 <th
 //                   style={{
-//                     background: "#D7EAF0", // Background color
-//                     color: "#003366", // Text color
+//                     background: "#D7EAF0",
+//                     color: "#003366",
 //                   }}
 //                 >
 //                   Date
@@ -2098,7 +1864,7 @@
 //                 <th
 //                   style={{
 //                     background: "#D7EAF0",
-//                     color: "#003366", // Text color
+//                     color: "#003366",
 //                   }}
 //                 >
 //                   Time Slot
@@ -2106,7 +1872,7 @@
 //                 <th
 //                   style={{
 //                     background: "#D7EAF0",
-//                     color: "#003366", // Text color
+//                     color: "#003366",
 //                   }}
 //                 >
 //                   Doctor
@@ -2114,7 +1880,7 @@
 //                 <th
 //                   style={{
 //                     background: "#D7EAF0",
-//                     color: "#003366", // Text color
+//                     color: "#003366",
 //                   }}
 //                 >
 //                   Booked By
@@ -2122,7 +1888,7 @@
 //                 <th
 //                   style={{
 //                     background: "#D7EAF0",
-//                     color: "#003366", // Text color
+//                     color: "#003366",
 //                   }}
 //                 >
 //                   Status
@@ -2130,7 +1896,7 @@
 //                 <th
 //                   style={{
 //                     background: "#D7EAF0",
-//                     color: "#003366", // Text color
+//                     color: "#003366",
 //                   }}
 //                 >
 //                   Mobile Number
@@ -2138,7 +1904,7 @@
 //                 <th
 //                   style={{
 //                     background: "#D7EAF0",
-//                     color: "#003366", // Text color
+//                     color: "#003366",
 //                   }}
 //                 >
 //                   Actions
@@ -2187,16 +1953,15 @@
 //                         >
 //                           <Card.Body
 //                             style={{
-//                               position: "relative", // Allows absolute positioning within the Card
+//                               position: "relative",
 //                             }}
 //                           >
-//                             {/* Container for Heading and Print Button */}
 //                             <div
 //                               style={{
 //                                 display: "flex",
 //                                 alignItems: "center",
-//                                 justifyContent: "flex-start", // Aligns items to the left
-//                                 padding: "10px 20px", // Adds padding around the content
+//                                 justifyContent: "flex-start",
+//                                 padding: "10px 20px",
 //                               }}
 //                             >
 //                               <h5
@@ -2206,7 +1971,7 @@
 //                                   color: "#ffffff",
 //                                   fontFamily: "Sans-Serif",
 //                                   lineHeight: "46.88px",
-//                                   margin: "0px", // Removes margin to keep elements close
+//                                   margin: "0px",
 //                                   textAlign: "left",
 //                                 }}
 //                               >
@@ -2214,13 +1979,13 @@
 //                               </h5>
 //                               <Button
 //                                 style={{
-//                                   marginLeft: "20px", // Space from heading
-//                                   backgroundColor: "#0166CB", // Button color
-//                                   color: "#ffffff", // Text color
-//                                   border: "none", // No border
-//                                   borderRadius: "5px", // Rounded corners
-//                                   padding: "10px 20px", // Padding
-//                                   cursor: "pointer", // Pointer cursor on hover
+//                                   marginLeft: "20px",
+//                                   backgroundColor: "#0166CB",
+//                                   color: "#ffffff",
+//                                   border: "none",
+//                                   borderRadius: "5px",
+//                                   padding: "10px 20px",
+//                                   cursor: "pointer",
 //                                 }}
 //                                 onClick={handlePrint}
 //                               >
@@ -2228,18 +1993,17 @@
 //                               </Button>
 //                             </div>
 
-//                             {/* Update Button in Top Right Corner */}
 //                             <Button
 //                               style={{
-//                                 position: "absolute", // Absolute positioning within the card
-//                                 top: "10px", // Distance from the top of the Card
-//                                 right: "10px", // Distance from the right of the Card
-//                                 backgroundColor: "#0166CB", // Bootstrap primary color
-//                                 color: "#ffffff", // Text color
-//                                 border: "none", // No border
-//                                 borderRadius: "5px", // Rounded corners
-//                                 padding: "10px 20px", // Padding
-//                                 cursor: "pointer", // Pointer cursor on hover
+//                                 position: "absolute",
+//                                 top: "10px",
+//                                 right: "10px",
+//                                 backgroundColor: "#0166CB",
+//                                 color: "#ffffff",
+//                                 border: "none",
+//                                 borderRadius: "5px",
+//                                 padding: "10px 20px",
+//                                 cursor: "pointer",
 //                               }}
 //                               onClick={handleUpdate}
 //                             >
@@ -2248,7 +2012,6 @@
 
 //                             <Form>
 //                               <Row className="mb-3">
-//                                 {/* Adjust column sizes for better spacing */}
 //                                 <Col sm={6} md={4}>
 //                                   <Form.Group
 //                                     controlId="formName"
@@ -2256,13 +2019,13 @@
 //                                   >
 //                                     <Form.Label
 //                                       style={{
-//                                         color: "#003366", // Text color
-//                                         fontFamily: "Sans-Serif", // Font family
-//                                         fontSize: "25px", // Font size
-//                                         fontWeight: 600, // Font weight
-//                                         lineHeight: "29.3px", // Line height
-//                                         textAlign: "left", // Left align the label
-//                                         width: "100%", // Make sure label takes full width
+//                                         color: "#003366",
+//                                         fontFamily: "Sans-Serif",
+//                                         fontSize: "25px",
+//                                         fontWeight: 600,
+//                                         lineHeight: "29.3px",
+//                                         textAlign: "left",
+//                                         width: "100%",
 //                                       }}
 //                                     >
 //                                       Name
@@ -2274,7 +2037,7 @@
 //                                       value={formDetails.name || ""}
 //                                       onChange={handleInputChange}
 //                                       style={{
-//                                         textAlign: "left", // Ensure the input text is left-aligned
+//                                         textAlign: "left",
 //                                       }}
 //                                     />
 //                                   </Form.Group>
@@ -2286,13 +2049,13 @@
 //                                   >
 //                                     <Form.Label
 //                                       style={{
-//                                         color: "#003366", // Text color (adjust to the desired color)
-//                                         fontFamily: "Sans-Serif", // Font family
-//                                         fontSize: "25px", // Font size
-//                                         fontWeight: 600, // Font weight
-//                                         lineHeight: "29.3px", // Line height
-//                                         textAlign: "left", // Left align the label
-//                                         width: "100%", // Ensure label takes full width
+//                                         color: "#003366",
+//                                         fontFamily: "Sans-Serif",
+//                                         fontSize: "25px",
+//                                         fontWeight: 600,
+//                                         lineHeight: "29.3px",
+//                                         textAlign: "left",
+//                                         width: "100%",
 //                                       }}
 //                                     >
 //                                       Mobile Number
@@ -2304,11 +2067,13 @@
 //                                       value={formDetails.mobile_number || ""}
 //                                       onChange={handleInputChange}
 //                                       style={{
-//                                         textAlign: "left", // Ensure input text is left-aligned
+//                                         textAlign: "left",
 //                                       }}
+//                                       disabled
 //                                     />
 //                                   </Form.Group>
 //                                 </Col>
+
 //                                 <Col sm={6} md={4}>
 //                                   <Form.Group
 //                                     controlId="formAge"
@@ -2316,13 +2081,13 @@
 //                                   >
 //                                     <Form.Label
 //                                       style={{
-//                                         color: "#003366", // Text color (adjusted to match the previous examples)
-//                                         fontFamily: "Sans-Serif", // Font family
-//                                         fontSize: "25px", // Font size
-//                                         fontWeight: 600, // Font weight for boldness
-//                                         lineHeight: "29.3px", // Line height for proper spacing
-//                                         textAlign: "left", // Align text to the left
-//                                         width: "100%", // Ensure the label takes full width
+//                                         color: "#003366",
+//                                         fontFamily: "Sans-Serif",
+//                                         fontSize: "25px",
+//                                         fontWeight: 600,
+//                                         lineHeight: "29.3px",
+//                                         textAlign: "left",
+//                                         width: "100%",
 //                                       }}
 //                                     >
 //                                       Age
@@ -2334,7 +2099,7 @@
 //                                       value={formDetails.age || ""}
 //                                       onChange={handleInputChange}
 //                                       style={{
-//                                         textAlign: "left", // Ensure the input text is left-aligned
+//                                         textAlign: "left",
 //                                       }}
 //                                     />
 //                                   </Form.Group>
@@ -2380,13 +2145,13 @@
 //                                   >
 //                                     <Form.Label
 //                                       style={{
-//                                         color: "#003366", // Text color (adjusted to match other fields)
-//                                         fontFamily: "Sans-Serif", // Font family
-//                                         fontSize: "25px", // Font size
-//                                         fontWeight: 600, // Bold font weight
-//                                         lineHeight: "29.3px", // Line height for proper spacing
-//                                         textAlign: "left", // Align text to the left
-//                                         width: "100%", // Ensure the label takes full width
+//                                         color: "#003366",
+//                                         fontFamily: "Sans-Serif",
+//                                         fontSize: "25px",
+//                                         fontWeight: 600,
+//                                         lineHeight: "29.3px",
+//                                         textAlign: "left",
+//                                         width: "100%",
 //                                       }}
 //                                     >
 //                                       Address
@@ -2398,28 +2163,22 @@
 //                                       value={formDetails.address || ""}
 //                                       onChange={handleInputChange}
 //                                       style={{
-//                                         textAlign: "left", // Ensure the input text is left-aligned
+//                                         textAlign: "left",
 //                                       }}
 //                                     />
 //                                   </Form.Group>
 //                                 </Col>
 //                               </Row>
-//                               {/* Center buttons */}
+
 //                               <div className="d-flex justify-content-center gap-2">
-//                                 {/* <Button
-//                                   variant="primary"
-//                                   onClick={handleUpdate}
-//                                 >
-//                                   Update
-//                                 </Button> */}
 //                                 <Button
 //                                   style={{
-//                                     backgroundColor: "#0166CB", // Setting the background color to the same blue
-//                                     color: "#FFFFFF", // White text for readability
-//                                     border: "none", // Removing default border
-//                                     borderRadius: "5px", // Rounded corners for a smooth look
-//                                     padding: "10px 20px", // Adequate padding for content spacing
-//                                     cursor: "pointer", // Cursor changes to pointer on hover to indicate clickable area
+//                                     backgroundColor: "#0166CB",
+//                                     color: "#FFFFFF",
+//                                     border: "none",
+//                                     borderRadius: "5px",
+//                                     padding: "10px 20px",
+//                                     cursor: "pointer",
 //                                   }}
 //                                   onClick={() =>
 //                                     handleDelete(appointment.appointment_id)
@@ -2430,12 +2189,12 @@
 
 //                                 <Button
 //                                   style={{
-//                                     backgroundColor: "#0166CB", // Setting the background color
-//                                     color: "#FFFFFF", // Ensuring text color is white for readability
-//                                     border: "none", // No border for a cleaner look
-//                                     borderRadius: "5px", // Rounded corners for aesthetics
-//                                     padding: "10px 20px", // Padding for better text spacing
-//                                     cursor: "pointer", // Cursor change on hover to indicate it's clickable
+//                                     backgroundColor: "#0166CB",
+//                                     color: "#FFFFFF",
+//                                     border: "none",
+//                                     borderRadius: "5px",
+//                                     padding: "10px 20px",
+//                                     cursor: "pointer",
 //                                   }}
 //                                   onClick={() =>
 //                                     handleCancelAppointment(
@@ -2446,15 +2205,7 @@
 //                                   Cancel Appointment
 //                                 </Button>
 //                               </div>
-//                               <div className="d-flex justify-content-end mt-4">
-//                                 {/* <Button
-//                                   variant="outline-secondary"
-//                                   className="me-2"
-//                                   onClick={handlePrint}
-//                                 >
-//                                   Print
-//                                 </Button> */}
-//                               </div>
+//                               <div className="d-flex justify-content-end mt-4"></div>
 //                             </Form>
 //                           </Card.Body>
 //                         </Card>
@@ -2475,7 +2226,6 @@
 //                             }}
 //                           >
 //                             <Card.Body style={{ position: "relative" }}>
-//                               {/* Container for Heading, Search Bar, and Update Button */}
 //                               <div
 //                                 className="symptoms-header"
 //                                 style={{
@@ -2708,52 +2458,49 @@
 //                           >
 //                             <Card.Body
 //                               style={{
-//                                 position: "relative", // Allows absolute positioning within the Card
+//                                 position: "relative",
 //                               }}
 //                             >
-//                               {/* Flexbox container for heading and alignment */}
 //                               <div
 //                                 style={{
 //                                   display: "flex",
 //                                   alignItems: "center",
-//                                   justifyContent: "flex-start", // Align items to the left
-//                                   padding: "10px 20px", // Adds padding around the content
+//                                   justifyContent: "flex-start",
+//                                   padding: "10px 20px",
 //                                 }}
 //                               >
 //                                 <h5
 //                                   style={{
 //                                     fontWeight: "600",
-//                                     fontSize: "40px", // Matches font size of "Symptoms" heading
+//                                     fontSize: "40px",
 //                                     color: "#ffffff",
-//                                     fontFamily: "Sans-Serif", // Matches font family
-//                                     lineHeight: "46.88px", // Matches line height
-//                                     margin: "0px", // Removes margin to keep elements close
-//                                     textAlign: "left", // Align heading to the left
+//                                     fontFamily: "Sans-Serif",
+//                                     lineHeight: "46.88px",
+//                                     margin: "0px",
+//                                     textAlign: "left",
 //                                   }}
 //                                 >
 //                                   Patient Vitals
 //                                 </h5>
 //                               </div>
 
-//                               {/* Update button in top right corner */}
 //                               <Button
 //                                 style={{
-//                                   position: "absolute", // Absolute positioning within the card
-//                                   top: "10px", // Distance from the top of the Card
-//                                   right: "10px", // Distance from the right of the Card
-//                                   backgroundColor: "#0166CB", // Bootstrap primary color
-//                                   color: "#ffffff", // Text color
-//                                   border: "none", // No border
-//                                   borderRadius: "5px", // Rounded corners
-//                                   padding: "10px 20px", // Padding
-//                                   cursor: "pointer", // Pointer cursor on hover
+//                                   position: "absolute",
+//                                   top: "10px",
+//                                   right: "10px",
+//                                   backgroundColor: "#0166CB",
+//                                   color: "#ffffff",
+//                                   border: "none",
+//                                   borderRadius: "5px",
+//                                   padding: "10px 20px",
+//                                   cursor: "pointer",
 //                                 }}
 //                                 onClick={handleVitalUpdate}
 //                               >
 //                                 Update Vitals
 //                               </Button>
 
-//                               {/* Table for Vitals */}
 //                               <Table
 //                                 bordered
 //                                 hover
@@ -2767,7 +2514,7 @@
 //                                       style={{
 //                                         fontFamily: "sans-serif",
 //                                         backgroundColor: "#D7EAF0",
-//                                         color: "#003366", // Applying text color
+//                                         color: "#003366",
 //                                       }}
 //                                     >
 //                                       Blood Pressure
@@ -2776,7 +2523,7 @@
 //                                       style={{
 //                                         fontFamily: "sans-serif",
 //                                         backgroundColor: "#D7EAF0",
-//                                         color: "#003366", // Applying text color
+//                                         color: "#003366",
 //                                       }}
 //                                     >
 //                                       Oxygen Level
@@ -2785,7 +2532,7 @@
 //                                       style={{
 //                                         fontFamily: "sans-serif",
 //                                         backgroundColor: "#D7EAF0",
-//                                         color: "#003366", // Applying text color
+//                                         color: "#003366",
 //                                       }}
 //                                     >
 //                                       Body Temp.
@@ -2794,7 +2541,7 @@
 //                                       style={{
 //                                         fontFamily: "sans-serif",
 //                                         backgroundColor: "#D7EAF0",
-//                                         color: "#003366", // Applying text color
+//                                         color: "#003366",
 //                                       }}
 //                                     >
 //                                       Heart Rate
@@ -2803,7 +2550,7 @@
 //                                       style={{
 //                                         fontFamily: "sans-serif",
 //                                         backgroundColor: "#D7EAF0",
-//                                         color: "#003366", // Applying text color
+//                                         color: "#003366",
 //                                       }}
 //                                     >
 //                                       Pulse Rate
@@ -2812,7 +2559,7 @@
 //                                       style={{
 //                                         fontFamily: "sans-serif",
 //                                         backgroundColor: "#D7EAF0",
-//                                         color: "#003366", // Applying text color
+//                                         color: "#003366",
 //                                       }}
 //                                     >
 //                                       Sugar Level
@@ -2821,7 +2568,7 @@
 //                                       style={{
 //                                         fontFamily: "sans-serif",
 //                                         backgroundColor: "#D7EAF0",
-//                                         color: "#003366", // Applying text color
+//                                         color: "#003366",
 //                                       }}
 //                                     >
 //                                       Height (cm)
@@ -2830,7 +2577,7 @@
 //                                       style={{
 //                                         fontFamily: "sans-serif",
 //                                         backgroundColor: "#D7EAF0",
-//                                         color: "#003366", // Applying text color
+//                                         color: "#003366",
 //                                       }}
 //                                     >
 //                                       Weight (kg)
@@ -2839,7 +2586,7 @@
 //                                       style={{
 //                                         fontFamily: "sans-serif",
 //                                         backgroundColor: "#D7EAF0",
-//                                         color: "#003366", // Applying text color
+//                                         color: "#003366",
 //                                       }}
 //                                     >
 //                                       BMI
@@ -2926,7 +2673,7 @@
 //                                         type="text"
 //                                         name="bmi"
 //                                         value={recordDetails.bmi || ""}
-//                                         readOnly // BMI is calculated automatically
+//                                         readOnly
 //                                         style={{ padding: "5px" }}
 //                                       />
 //                                     </td>
@@ -2934,12 +2681,11 @@
 //                                 </tbody>
 //                               </Table>
 
-//                               {/* Action buttons */}
 //                               <div
 //                                 style={{
-//                                   display: "flex", // Flexbox layout
-//                                   justifyContent: "center", // Center horizontally
-//                                   alignItems: "center", // Center vertically (optional)
+//                                   display: "flex",
+//                                   justifyContent: "center",
+//                                   alignItems: "center",
 //                                 }}
 //                               >
 //                                 <Button
@@ -2947,8 +2693,8 @@
 //                                   onClick={handleVitalSubmit}
 //                                   className="me-2"
 //                                   style={{
-//                                     background: "#0166CB", // Set the background color to #0166CB
-//                                     border: "none", // Optional: Remove any border if needed
+//                                     background: "#0166CB",
+//                                     border: "none",
 //                                   }}
 //                                 >
 //                                   Submit
@@ -2973,7 +2719,6 @@
 //                             }}
 //                           >
 //                             <Card.Body style={{ position: "relative" }}>
-//                               {/* Container for Heading, Add Prescription, and Upload Prescription Buttons */}
 //                               <div
 //                                 className="prescription-header"
 //                                 style={{
@@ -3015,15 +2760,15 @@
 //                                   <Button
 //                                     variant="outline-primary"
 //                                     style={{
-//                                       position: "absolute", // Position the button absolutely
-//                                       top: "10px", // Distance from the top of the Card
-//                                       right: "10px", // Distance from the right side of the Card
+//                                       position: "absolute",
+//                                       top: "10px",
+//                                       right: "10px",
 //                                       background: "#0166CB",
 //                                       color: "#ffffff",
 //                                       border: "none",
 //                                       borderRadius: "5px",
 //                                       padding: "10px 20px",
-//                                       cursor: "pointer", // Pointer cursor for interactivity
+//                                       cursor: "pointer",
 //                                     }}
 //                                     onClick={() => {
 //                                       setIsPrescriptionDocs(true);
@@ -3035,7 +2780,6 @@
 //                                 </div>
 //                               </div>
 
-//                               {/* Prescription Form */}
 //                               <Form>
 //                                 {prescriptions.map((prescription, index) => (
 //                                   <Row className="mb-3" key={index}>
@@ -3238,9 +2982,6 @@
 //                                   </Row>
 //                                 ))}
 //                               </Form>
-
-//                               {/* Prescription Documents Section and Modal */}
-//                               {/* Add your Table and Modal code here */}
 //                             </Card.Body>
 //                           </Card>
 //                           <Table
@@ -3394,20 +3135,18 @@
 //                             }}
 //                           >
 //                             <Card.Body>
-//                               {/* Bold and larger font for heading */}
 //                               <h5
 //                                 style={{
-//                                   fontFamily: "Sans-Serif", // Set the font family
-//                                   fontSize: "40px", // Set the font size
-//                                   fontWeight: 600, // Set the font weight
-//                                   lineHeight: "46.88px", // Set the line height
-//                                   textAlign: "left", // Align text to the left
-//                                   width: "225px", // Set the width
-//                                   height: "46px", // Set the height
-//                                   gap: "0px", // Gap property
-//                                   opacity: 1, // Ensure full visibility
-//                                   // background: '#FFFFFF',     // Set background color to white
-//                                   color: "#ffffff", // Set the text color for contrast
+//                                   fontFamily: "Sans-Serif",
+//                                   fontSize: "40px",
+//                                   fontWeight: 600,
+//                                   lineHeight: "46.88px",
+//                                   textAlign: "left",
+//                                   width: "225px",
+//                                   height: "46px",
+//                                   gap: "0px",
+//                                   opacity: 1,
+//                                   color: "#ffffff",
 //                                 }}
 //                               >
 //                                 Document
@@ -3416,14 +3155,14 @@
 //                               <Button
 //                                 variant="outline-primary"
 //                                 style={{
-//                                   position: "absolute", // Absolute positioning inside the card
-//                                   top: "10px", // Distance from the top of the card
-//                                   right: "10px", // Distance from the right of the card
-//                                   background: "#0166CB", // Background color
-//                                   color: "#ffffff", // Text color
-//                                   border: "none", // Remove the border
-//                                   borderRadius: "5px", // Rounded corners
-//                                   padding: "10px 20px", // Padding for size
+//                                   position: "absolute",
+//                                   top: "10px",
+//                                   right: "10px",
+//                                   background: "#0166CB",
+//                                   color: "#ffffff",
+//                                   border: "none",
+//                                   borderRadius: "5px",
+//                                   padding: "10px 20px",
 //                                 }}
 //                                 onClick={() => {
 //                                   setIsPrescriptionDocs(true);
@@ -3734,6 +3473,224 @@
 //                         </td>
 //                       </tr>
 //                     )}
+
+//                   {requestDocForm &&
+//                     expandedAppointmentId === appointment.appointment_id && (
+//                       <tr>
+//                         <td colSpan="7">
+//                           <Card
+//                             className="shadow-sm mt-3"
+//                             style={{
+//                               borderRadius: "15px",
+//                               border: " #0091A5",
+//                               background: "#0091A5",
+//                             }}
+//                           >
+//                             <Card.Body>
+//                               <h5
+//                                 style={{
+//                                   fontFamily: "Sans-Serif",
+//                                   fontSize: "40px",
+//                                   fontWeight: 600,
+//                                   lineHeight: "46.88px",
+//                                   textAlign: "left",
+//                                   height: "46px",
+//                                   gap: "0px",
+//                                   opacity: 1,
+//                                   color: "#ffffff",
+//                                 }}
+//                               >
+//                                 Medical Record
+//                               </h5>
+
+//                               <div
+//                                 style={{
+//                                   position: "absolute",
+//                                   top: "10px",
+//                                   right: "10px",
+//                                   display: "flex",
+//                                   gap: "10px",
+//                                 }}
+//                               >
+//                                 <Button
+//                                   style={{
+//                                     background: "#0166CB",
+//                                     color: "#ffffff",
+//                                     border: "none",
+//                                     borderRadius: "5px",
+//                                     padding: "10px 20px",
+//                                   }}
+//                                   onClick={() =>
+//                                     handleRequestDocument(
+//                                       appointment.appointment_id
+//                                     )
+//                                   }
+//                                 >
+//                                   Request Document
+//                                 </Button>
+//                                 <Button
+//                                   style={{
+//                                     background: "#00DAF7",
+//                                     color: "#000",
+//                                     border: "none",
+//                                     borderRadius: "5px",
+//                                     padding: "10px 20px",
+//                                   }}
+//                                   onClick={() =>
+//                                     handleRecordView(
+//                                       appointment.patient_id,
+//                                       appointment.doctor_id
+//                                     )
+//                                   }
+//                                 >
+//                                   <FaSyncAlt />
+//                                 </Button>
+//                               </div>
+
+//                               <div>
+//                                 <div>
+//                                   <div
+//                                     className="mt-5 mb-4 ms-2"
+//                                     style={{
+//                                       display: "flex",
+//                                       flexWrap: "wrap",
+//                                       gap: "20px",
+//                                       justifyContent: "left",
+//                                     }}
+//                                   >
+//                                     {photosToShow.map((record, index) => (
+//                                       <div
+//                                         key={index}
+//                                         style={{
+//                                           background: "#ffffff",
+//                                           borderRadius: "8px",
+//                                           padding: "10px",
+//                                           textAlign: "center",
+//                                           width: "280px",
+//                                           height: "350px",
+//                                           boxShadow:
+//                                             "0 2px 4px rgba(0, 0, 0, 0.1)",
+//                                           position: "relative",
+//                                         }}
+//                                       >
+//                                         <img
+//                                           src={record.report_file}
+//                                           alt="Medical Record"
+//                                           style={{
+//                                             width: "100%",
+//                                             height: "280px",
+//                                             borderRadius: "5px",
+//                                             objectFit: "cover",
+//                                             marginBottom: "10px",
+//                                             cursor: "pointer",
+//                                           }}
+//                                           onClick={() =>
+//                                             setSelectedImage(record.report_file)
+//                                           }
+//                                         />
+//                                         <p
+//                                           style={{
+//                                             fontSize: "20px",
+//                                             color: "#000",
+//                                             margin: 0,
+//                                             textAlign: "left",
+//                                           }}
+//                                         >
+//                                           {new Date(record.date).toDateString()}
+//                                         </p>
+//                                         <button
+//                                           style={{
+//                                             position: "absolute",
+//                                             bottom: "10px",
+//                                             right: "10px",
+//                                             background: "transparent",
+//                                             border: "none",
+//                                             cursor: "pointer",
+//                                             color: "red",
+//                                             fontSize: "24px",
+//                                           }}
+//                                           onClick={() =>
+//                                             deleteRecord(record.id)
+//                                           }
+//                                         >
+//                                           <FaTrash />
+//                                         </button>
+//                                       </div>
+//                                     ))}
+//                                   </div>
+
+//                                   {whatsappReport.length > 6 && (
+//                                     <Button
+//                                       style={{
+//                                         background: "#00DAF7",
+//                                         color: "#000",
+//                                         border: "none",
+//                                         borderRadius: "5px",
+//                                         padding: "10px 20px",
+//                                         marginTop: "20px",
+//                                         display: "block",
+//                                         marginLeft: "auto",
+//                                         marginRight: "auto",
+//                                       }}
+//                                       onClick={() => setShowMore(!showMore)}
+//                                     >
+//                                       {showMore ? "Show Less" : "Show More"}
+//                                     </Button>
+//                                   )}
+//                                 </div>
+
+//                                 <Modal
+//                                   show={!!selectedImage}
+//                                   onHide={() => setSelectedImage(null)}
+//                                   centered
+//                                 >
+//                                   <Modal.Body style={{ padding: 0 }}>
+//                                     <img
+//                                       src={selectedImage}
+//                                       alt="Selected Medical Record"
+//                                       style={{
+//                                         width: "100%",
+//                                         borderRadius: "5px",
+//                                       }}
+//                                     />
+//                                   </Modal.Body>
+//                                   <Modal.Footer>
+//                                     <Button
+//                                       variant="secondary"
+//                                       onClick={() => setSelectedImage(null)}
+//                                     >
+//                                       Close
+//                                     </Button>
+//                                   </Modal.Footer>
+//                                 </Modal>
+//                               </div>
+
+//                               <Modal
+//                                 show={!!errorMessage || !!successMessage}
+//                                 onHide={handleCloseMessageModal}
+//                               >
+//                                 <Modal.Header closeButton>
+//                                   <Modal.Title>
+//                                     {errorMessage ? "Error" : "Success"}
+//                                   </Modal.Title>
+//                                 </Modal.Header>
+//                                 <Modal.Body>
+//                                   <p>{errorMessage || successMessage}</p>
+//                                 </Modal.Body>
+//                                 <Modal.Footer>
+//                                   <Button
+//                                     variant="primary"
+//                                     onClick={handleCloseMessageModal}
+//                                   >
+//                                     Close
+//                                   </Button>
+//                                 </Modal.Footer>
+//                               </Modal>
+//                             </Card.Body>
+//                           </Card>
+//                         </td>
+//                       </tr>
+//                     )}
 //                 </React.Fragment>
 //               ))}
 //             </tbody>
@@ -3767,7 +3724,6 @@
 //         </Modal.Footer>
 //       </Modal>
 
-//       {/* Preview Modal */}
 //       <Modal show={showPreviewModal} onHide={handleClosePreviewModal} size="lg">
 //         <Modal.Header closeButton>
 //           <Modal.Title>Preview Document</Modal.Title>
@@ -3778,10 +3734,10 @@
 //               src={previewFileUrl}
 //               alt="Document Preview"
 //               style={{
-//                 maxWidth: "100%", // Fit image within the modal width
-//                 maxHeight: "500px", // Ensure the image doesn't exceed the modal height
+//                 maxWidth: "100%",
+//                 maxHeight: "500px",
 //                 display: "block",
-//                 margin: "0 auto", // Center the image
+//                 margin: "0 auto",
 //               }}
 //             />
 //           ) : previewFileType.includes("pdf") ? (
@@ -3790,7 +3746,7 @@
 //               title="Document Preview"
 //               style={{
 //                 width: "100%",
-//                 height: "500px", // Set a fixed height for PDF preview
+//                 height: "500px",
 //                 border: "none",
 //               }}
 //             ></iframe>
@@ -3821,16 +3777,6 @@
 // };
 
 // export default DoctorBookedAppointment;
-
-
-
-
-
-
-
-
-
-
 
 import React, { useState, useEffect } from "react";
 import "../../css/ClinicBookedAppointment.css";
@@ -3940,6 +3886,7 @@ const DoctorBookedAppointment = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
   const [uploadedPrescription, setUploadedPrescription] = useState(null);
+  const [showPatientDetails, setShowPatientDetails] = useState(false);
 
   const [isPrescriptionDocs, setIsPrescriptionDocs] = useState(false);
   const [showPrescriptionDocsForm, setShowPrescriptionDocsForm] =
@@ -3950,6 +3897,8 @@ const DoctorBookedAppointment = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [isDetailsVisible, setIsDetailsVisible] = useState(false);
+
   const [toastVariant, setToastVariant] = useState("success");
 
   useEffect(() => {
@@ -4710,7 +4659,6 @@ const DoctorBookedAppointment = () => {
       setLoading(false);
     }
   };
-
 
   const handleCancelAppointment = async (appointment_id) => {
     try {
@@ -5507,6 +5455,10 @@ const DoctorBookedAppointment = () => {
     }
   };
 
+  const toggleDetailsVisibility = () => {
+    setIsDetailsVisible(!isDetailsVisible);
+  };
+
   return (
     <Container fluid>
       {errorMessage && (
@@ -5548,6 +5500,7 @@ const DoctorBookedAppointment = () => {
             borderRadius: "15px",
             border: " #0091A5",
             background: "#0091A5",
+            padding: "70px",
           }}
         >
           <Card.Body>
@@ -5791,30 +5744,58 @@ const DoctorBookedAppointment = () => {
                               position: "relative",
                             }}
                           >
+                            {/* Section Header */}
                             <div
                               style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "flex-start",
+                                display: "flex", // Flexbox for horizontal alignment
+                                alignItems: "center", // Vertically align items in the center
+                                justifyContent: "space-between", // Space out items
                                 padding: "10px 20px",
                               }}
                             >
-                              <h5
+                              {/* Left Section: Heading and Show Details Button */}
+                              <div
                                 style={{
-                                  fontWeight: "600",
-                                  fontSize: "40px",
-                                  color: "#ffffff",
-                                  fontFamily: "Sans-Serif",
-                                  lineHeight: "46.88px",
-                                  margin: "0px",
-                                  textAlign: "left",
+                                  display: "flex",
+                                  alignItems: "center",
                                 }}
                               >
-                                Patient Details
-                              </h5>
+                                <h5
+                                  style={{
+                                    fontWeight: "600",
+                                    fontSize: "40px",
+                                    color: "#ffffff",
+                                    fontFamily: "Sans-Serif",
+                                    lineHeight: "46.88px",
+                                    margin: "0px",
+                                    textAlign: "left",
+                                  }}
+                                >
+                                  Patient Details
+                                </h5>
+                                <Button
+                                  style={{
+                                    marginLeft: "20px", // Space between heading and button
+                                    backgroundColor: "#0166CB",
+                                    color: "#ffffff",
+                                    border: "none",
+                                    borderRadius: "5px",
+                                    padding: "10px 20px",
+                                    cursor: "pointer",
+                                  }}
+                                  onClick={() =>
+                                    setShowPatientDetails((prev) => !prev)
+                                  } // Toggle visibility
+                                >
+                                  {showPatientDetails
+                                    ? "Hide Details"
+                                    : "Show Details"}
+                                </Button>
+                              </div>
+
+                              {/* Right Section: Print Button */}
                               <Button
                                 style={{
-                                  marginLeft: "20px",
                                   backgroundColor: "#0166CB",
                                   color: "#ffffff",
                                   border: "none",
@@ -5828,226 +5809,227 @@ const DoctorBookedAppointment = () => {
                               </Button>
                             </div>
 
-                            <Button
-                              style={{
-                                position: "absolute",
-                                top: "10px",
-                                right: "10px",
-                                backgroundColor: "#0166CB",
-                                color: "#ffffff",
-                                border: "none",
-                                borderRadius: "5px",
-                                padding: "10px 20px",
-                                cursor: "pointer",
-                              }}
-                              onClick={handleUpdate}
-                            >
-                              Update
-                            </Button>
-
-                            <Form>
-                              <Row className="mb-3">
-                                <Col sm={6} md={4}>
-                                  <Form.Group
-                                    controlId="formName"
-                                    className="mb-3"
-                                  >
-                                    <Form.Label
+                            {/* Toggle Content */}
+                            {showPatientDetails && (
+                              <>
+                                {/* Patient Details Form */}
+                                <Form>
+                                  <Row className="mb-3">
+                                    <Col sm={6} md={4}>
+                                      <Form.Group
+                                        controlId="formName"
+                                        className="mb-3"
+                                      >
+                                        <Form.Label
+                                          style={{
+                                            color: "#003366",
+                                            fontFamily: "Sans-Serif",
+                                            fontSize: "25px",
+                                            fontWeight: 600,
+                                            lineHeight: "29.3px",
+                                            textAlign: "left",
+                                            width: "100%",
+                                          }}
+                                        >
+                                          Name
+                                        </Form.Label>
+                                        <Form.Control
+                                          type="text"
+                                          name="name"
+                                          value={formDetails.name || ""}
+                                          onChange={handleInputChange}
+                                          style={{
+                                            textAlign: "left",
+                                          }}
+                                        />
+                                      </Form.Group>
+                                    </Col>
+                                    <Col sm={6} md={4}>
+                                      <Form.Group
+                                        controlId="formMobileNumber"
+                                        className="mb-3"
+                                      >
+                                        <Form.Label
+                                          style={{
+                                            color: "#003366",
+                                            fontFamily: "Sans-Serif",
+                                            fontSize: "25px",
+                                            fontWeight: 600,
+                                            lineHeight: "29.3px",
+                                            textAlign: "left",
+                                            width: "100%",
+                                          }}
+                                        >
+                                          Mobile Number
+                                        </Form.Label>
+                                        <Form.Control
+                                          type="text"
+                                          name="mobile_number"
+                                          value={
+                                            formDetails.mobile_number || ""
+                                          }
+                                          onChange={handleInputChange}
+                                          style={{
+                                            textAlign: "left",
+                                          }}
+                                          disabled
+                                        />
+                                      </Form.Group>
+                                    </Col>
+                                    <Col sm={6} md={4}>
+                                      <Form.Group
+                                        controlId="formAge"
+                                        className="mb-3"
+                                      >
+                                        <Form.Label
+                                          style={{
+                                            color: "#003366",
+                                            fontFamily: "Sans-Serif",
+                                            fontSize: "25px",
+                                            fontWeight: 600,
+                                            lineHeight: "29.3px",
+                                            textAlign: "left",
+                                            width: "100%",
+                                          }}
+                                        >
+                                          Age
+                                        </Form.Label>
+                                        <Form.Control
+                                          type="text"
+                                          name="age"
+                                          value={formDetails.age || ""}
+                                          onChange={handleInputChange}
+                                          style={{
+                                            textAlign: "left",
+                                          }}
+                                        />
+                                      </Form.Group>
+                                    </Col>
+                                    <Col sm={6} md={4}>
+                                      <Form.Group
+                                        controlId="formGender"
+                                        className="mb-3"
+                                      >
+                                        <Form.Label
+                                          style={{
+                                            color: "#003366",
+                                            fontFamily: "Sans-Serif",
+                                            fontSize: "25px",
+                                            fontWeight: 600,
+                                            lineHeight: "29.3px",
+                                            textAlign: "left",
+                                            width: "100%",
+                                          }}
+                                        >
+                                          Gender
+                                        </Form.Label>
+                                        <Form.Select
+                                          name="gender"
+                                          value={formDetails.gender || ""}
+                                          onChange={handleInputChange}
+                                          style={{
+                                            textAlign: "left",
+                                          }}
+                                        >
+                                          <option value="">
+                                            Select Gender
+                                          </option>
+                                          <option value="male">Male</option>
+                                          <option value="female">Female</option>
+                                          <option value="others">Others</option>
+                                        </Form.Select>
+                                      </Form.Group>
+                                    </Col>
+                                    <Col sm={6} md={4}>
+                                      <Form.Group
+                                        controlId="formAddress"
+                                        className="mb-3"
+                                      >
+                                        <Form.Label
+                                          style={{
+                                            color: "#003366",
+                                            fontFamily: "Sans-Serif",
+                                            fontSize: "25px",
+                                            fontWeight: 600,
+                                            lineHeight: "29.3px",
+                                            textAlign: "left",
+                                            width: "100%",
+                                          }}
+                                        >
+                                          Address
+                                        </Form.Label>
+                                        <Form.Control
+                                          type="text"
+                                          name="address"
+                                          value={formDetails.address || ""}
+                                          onChange={handleInputChange}
+                                          style={{
+                                            textAlign: "left",
+                                          }}
+                                        />
+                                      </Form.Group>
+                                    </Col>
+                                  </Row>
+                                  <div className="d-flex justify-content-center gap-2">
+                                    <Button
                                       style={{
-                                        color: "#003366",
-                                        fontFamily: "Sans-Serif",
-                                        fontSize: "25px",
-                                        fontWeight: 600,
-                                        lineHeight: "29.3px",
-                                        textAlign: "left",
-                                        width: "100%",
+                                        backgroundColor: "#0166CB",
+                                        color: "#FFFFFF",
+                                        border: "none",
+                                        borderRadius: "5px",
+                                        padding: "10px 20px",
+                                        cursor: "pointer",
                                       }}
+                                      onClick={() =>
+                                        handleDelete(appointment.appointment_id)
+                                      }
                                     >
-                                      Name
-                                    </Form.Label>
+                                      Delete
+                                    </Button>
 
-                                    <Form.Control
-                                      type="text"
-                                      name="name"
-                                      value={formDetails.name || ""}
-                                      onChange={handleInputChange}
+                                    <Button
                                       style={{
-                                        textAlign: "left",
+                                        backgroundColor: "#0166CB",
+                                        color: "#FFFFFF",
+                                        border: "none",
+                                        borderRadius: "5px",
+                                        padding: "10px 20px",
+                                        cursor: "pointer",
                                       }}
-                                    />
-                                  </Form.Group>
-                                </Col>
-                                <Col sm={6} md={4}>
-                                  <Form.Group
-                                    controlId="formMobileNumber"
-                                    className="mb-3"
-                                  >
-                                    <Form.Label
-                                      style={{
-                                        color: "#003366",
-                                        fontFamily: "Sans-Serif",
-                                        fontSize: "25px",
-                                        fontWeight: 600,
-                                        lineHeight: "29.3px",
-                                        textAlign: "left",
-                                        width: "100%",
-                                      }}
+                                      onClick={() =>
+                                        handleCancelAppointment(
+                                          appointment.appointment_id
+                                        )
+                                      }
                                     >
-                                      Mobile Number
-                                    </Form.Label>
-
-                                    <Form.Control
-                                      type="text"
-                                      name="mobile_number"
-                                      value={formDetails.mobile_number || ""}
-                                      onChange={handleInputChange}
+                                      Cancel Appointment
+                                    </Button>
+                                    <Button
                                       style={{
-                                        textAlign: "left",
+                                        // position: "absolute",
+                                        // top: "10px",
+                                        // centered: "15px",
+                                        backgroundColor: "#0166CB",
+                                        color: "#ffffff",
+                                        border: "none",
+                                        borderRadius: "5px",
+                                        padding: "10px 20px",
+                                        cursor: "pointer",
                                       }}
-                                      disabled
-                                    />
-                                  </Form.Group>
-                                </Col>
-
-                                <Col sm={6} md={4}>
-                                  <Form.Group
-                                    controlId="formAge"
-                                    className="mb-3"
-                                  >
-                                    <Form.Label
-                                      style={{
-                                        color: "#003366",
-                                        fontFamily: "Sans-Serif",
-                                        fontSize: "25px",
-                                        fontWeight: 600,
-                                        lineHeight: "29.3px",
-                                        textAlign: "left",
-                                        width: "100%",
-                                      }}
+                                      onClick={handleUpdate}
                                     >
-                                      Age
-                                    </Form.Label>
-
-                                    <Form.Control
-                                      type="text"
-                                      name="age"
-                                      value={formDetails.age || ""}
-                                      onChange={handleInputChange}
-                                      style={{
-                                        textAlign: "left",
-                                      }}
-                                    />
-                                  </Form.Group>
-                                </Col>
-                                <Col sm={6} md={4}>
-                                  <Form.Group
-                                    controlId="formGender"
-                                    className="mb-3"
-                                  >
-                                    <Form.Label
-                                      style={{
-                                        color: "#003366",
-                                        fontFamily: "Sans-Serif",
-                                        fontSize: "25px",
-                                        fontWeight: 600,
-                                        lineHeight: "29.3px",
-                                        textAlign: "left",
-                                        width: "100%",
-                                      }}
-                                    >
-                                      Gender
-                                    </Form.Label>
-
-                                    <Form.Select
-                                      name="gender"
-                                      value={formDetails.gender || ""}
-                                      onChange={handleInputChange}
-                                      style={{
-                                        textAlign: "left",
-                                      }}
-                                    >
-                                      <option value="">Select Gender</option>
-                                      <option value="male">Male</option>
-                                      <option value="female">Female</option>
-                                      <option value="others">Others</option>
-                                    </Form.Select>
-                                  </Form.Group>
-                                </Col>
-                                <Col sm={6} md={4}>
-                                  <Form.Group
-                                    controlId="formAddress"
-                                    className="mb-3"
-                                  >
-                                    <Form.Label
-                                      style={{
-                                        color: "#003366",
-                                        fontFamily: "Sans-Serif",
-                                        fontSize: "25px",
-                                        fontWeight: 600,
-                                        lineHeight: "29.3px",
-                                        textAlign: "left",
-                                        width: "100%",
-                                      }}
-                                    >
-                                      Address
-                                    </Form.Label>
-
-                                    <Form.Control
-                                      type="text"
-                                      name="address"
-                                      value={formDetails.address || ""}
-                                      onChange={handleInputChange}
-                                      style={{
-                                        textAlign: "left",
-                                      }}
-                                    />
-                                  </Form.Group>
-                                </Col>
-                              </Row>
-
-                              <div className="d-flex justify-content-center gap-2">
-                                <Button
-                                  style={{
-                                    backgroundColor: "#0166CB",
-                                    color: "#FFFFFF",
-                                    border: "none",
-                                    borderRadius: "5px",
-                                    padding: "10px 20px",
-                                    cursor: "pointer",
-                                  }}
-                                  onClick={() =>
-                                    handleDelete(appointment.appointment_id)
-                                  }
-                                >
-                                  Delete
-                                </Button>
-
-                                <Button
-                                  style={{
-                                    backgroundColor: "#0166CB",
-                                    color: "#FFFFFF",
-                                    border: "none",
-                                    borderRadius: "5px",
-                                    padding: "10px 20px",
-                                    cursor: "pointer",
-                                  }}
-                                  onClick={() =>
-                                    handleCancelAppointment(
-                                      appointment.appointment_id
-                                    )
-                                  }
-                                >
-                                  Cancel Appointment
-                                </Button>
-                              </div>
-                              <div className="d-flex justify-content-end mt-4"></div>
-                            </Form>
+                                      Update
+                                    </Button>
+                                  </div>
+                                  <div className="d-flex justify-content-end mt-4"></div>
+                                </Form>
+                              </>
+                            )}
                           </Card.Body>
                         </Card>
                       </td>
                     </tr>
                   )}
-
                   {showSymptomsForm &&
                     expandedAppointmentId === appointment.appointment_id && (
                       <tr>
@@ -6576,43 +6558,42 @@ const DoctorBookedAppointment = () => {
                                 >
                                   Prescription
                                 </h5>
+                                <div className="upload-prescription-wrapper">
+                                  <Button
+                                    style={{
+                                      position: "absolute",
+                                      top: "10px",
+                                      right: "10px",
+                                      background: "#00DAF7",
+                                      color: "#003366",
+                                      border: "none",
+                                      borderRadius: "5px",
+                                      padding: "10px 20px",
+                                      cursor: "pointer",
+                                    }}
+                                    onClick={addPrescriptionRow}
+                                  >
+                                    Add Prescription
+                                  </Button>
+                                </div>
                                 <Button
                                   variant="success"
                                   className="ms-3"
-                                  onClick={addPrescriptionRow}
+                                  onClick={() => {
+                                    setIsPrescriptionDocs(true);
+                                    setShowPrescriptionDocsForm(true);
+                                  }}
                                   style={{
-                                    backgroundColor: "#00DAF7",
-                                    color: "#003366",
+                                    backgroundColor: "#0166CB",
+                                    color: "#ffffff",
                                     border: "none",
                                     borderRadius: "5px",
                                     padding: "10px 20px",
                                     cursor: "pointer",
                                   }}
                                 >
-                                  Add Prescription
+                                  Upload Prescription
                                 </Button>
-                                <div className="upload-prescription-wrapper">
-                                  <Button
-                                    variant="outline-primary"
-                                    style={{
-                                      position: "absolute",
-                                      top: "10px",
-                                      right: "10px",
-                                      background: "#0166CB",
-                                      color: "#ffffff",
-                                      border: "none",
-                                      borderRadius: "5px",
-                                      padding: "10px 20px",
-                                      cursor: "pointer",
-                                    }}
-                                    onClick={() => {
-                                      setIsPrescriptionDocs(true);
-                                      setShowPrescriptionDocsForm(true);
-                                    }}
-                                  >
-                                    Upload Prescription
-                                  </Button>
-                                </div>
                               </div>
 
                               <Form>

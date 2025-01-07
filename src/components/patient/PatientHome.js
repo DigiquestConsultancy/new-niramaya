@@ -3486,7 +3486,7 @@ const PatientHome = () => {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const [selectedDoctor] = useState({ doctor: 10 });
+  const [selectedDoctor] = useState({ doctor: 13 });
   const [errorMessage, setErrorMessage] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [savedPatientId, setPatientId] = useState(null);
@@ -4435,7 +4435,7 @@ const PatientHome = () => {
                     className="d-flex flex-wrap justify-content-center appointment-slot-buttons-container"
                     style={{ width: "100%" }}
                   >
-                    {morningSlots.length > 0 ? (
+                    {/* {morningSlots.length > 0 ? (
                       morningSlots
                         .slice(
                           morningSlotIndex,
@@ -4525,7 +4525,91 @@ const PatientHome = () => {
                       <p className="appointment-slot-section-message text-danger">
                         No slots available for morning
                       </p>
-                    )}
+                    )} */}
+
+{morningSlots.length > 0 ? (
+  morningSlots
+    .slice(
+      morningSlotIndex,
+      morningSlotIndex + SLOTS_PER_BATCH
+    )
+    .map((slot) => {
+      const currentTime = new Date();
+      const slotTime = new Date();
+      const [hours, minutes] = slot.appointment_slot.split(":");
+      slotTime.setHours(hours);
+      slotTime.setMinutes(minutes);
+
+      const isSameDate = new Date(slot.appointment_date).toDateString() === currentTime.toDateString();
+      const isPastSlot = isSameDate && currentTime >= slotTime;
+
+      const isDisabled = slot.is_booked || slot.is_selected;
+
+      return (
+        <div
+          key={slot.id}
+          style={{
+            position: "relative",
+            display: "inline-block",
+            margin: "5px",
+          }}
+          onMouseEnter={(e) =>
+            // isDisabled && setHoverMessage(slot.is_booked ? "This slot is already booked." : "This slot is selected.")
+            isDisabled && setHoverMessage("This slot is in use/Booked")
+          }
+          onMouseLeave={(e) => setHoverMessage("")}
+        >
+          <Button
+            variant="outline-primary"
+            className="appointment-slots-button mb-2"
+            onClick={() => !isDisabled && !isPastSlot && handleSlotClick(slot)}
+            disabled={isDisabled || isPastSlot}
+            style={{
+              padding: "10px",
+              textAlign: "center",
+              fontSize: "0.8rem",
+              width: "80px",
+              height: "50px",
+              backgroundColor: isDisabled
+                ? "#cccccc" // Gray for booked or selected slots
+                : isPastSlot
+                  ? "#d2a679" // Brown for past slots
+                  : "#ffffff",
+              color: isDisabled || isPastSlot ? "#666666" : "#000000",
+              border: isDisabled || isPastSlot ? "1px solid #999999" : "1px solid #0091A5",
+              cursor: isDisabled || isPastSlot ? "not-allowed" : "pointer",
+            }}
+          >
+            {formatTime(slot.appointment_slot)}
+          </Button>
+          {isDisabled && hoverMessage && (
+            <div
+              style={{
+                position: "absolute",
+                top: "-35px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
+                color: "#fff",
+                padding: "5px 10px",
+                borderRadius: "4px",
+                fontSize: "0.75rem",
+                whiteSpace: "nowrap",
+                zIndex: 10,
+              }}
+            >
+              {hoverMessage}
+            </div>
+          )}
+        </div>
+      );
+    })
+) : (
+  <p className="appointment-slot-section-message text-danger">
+    No slots available for morning
+  </p>
+)}
+
                   </div>
                 </Col>
 
@@ -4571,7 +4655,7 @@ const PatientHome = () => {
                     className="d-flex flex-wrap justify-content-center appointment-slot-buttons-container"
                     style={{ width: "100%" }}
                   >
-                    {afternoonSlots.length > 0 ? (
+                    {/* {afternoonSlots.length > 0 ? (
                       afternoonSlots
                         .slice(
                           afternoonSlotIndex,
@@ -4665,7 +4749,91 @@ const PatientHome = () => {
                       <p className="appointment-slot-section-message text-danger">
                         No slots available for afternoon
                       </p>
-                    )}
+                    )} */}
+
+{afternoonSlots.length > 0 ? (
+  afternoonSlots
+    .slice(
+      afternoonSlotIndex,
+      afternoonSlotIndex + SLOTS_PER_BATCH
+    )
+    .map((slot) => {
+      const currentTime = new Date();
+      const slotTime = new Date();
+      const [hours, minutes] = slot.appointment_slot.split(":");
+      slotTime.setHours(hours);
+      slotTime.setMinutes(minutes);
+
+      const isSameDate = new Date(slot.appointment_date).toDateString() === currentTime.toDateString();
+      const isPastSlot = isSameDate && currentTime >= slotTime;
+
+      const isDisabled = slot.is_booked || slot.is_selected;
+
+      return (
+        <div
+          key={slot.id}
+          style={{
+            position: "relative",
+            display: "inline-block",
+            margin: "5px",
+          }}
+          onMouseEnter={(e) =>
+            // isDisabled && setHoverMessage(slot.is_booked ? "This slot is already booked." : "This slot is selected.")
+            isDisabled && setHoverMessage("This slot is in use/Booked")
+          }
+          onMouseLeave={(e) => setHoverMessage("")}
+        >
+          <Button
+            variant="outline-primary"
+            className="appointment-slots-button mb-2"
+            onClick={() => !isDisabled && !isPastSlot && handleSlotClick(slot)}
+            disabled={isDisabled || isPastSlot}
+            style={{
+              padding: "10px",
+              textAlign: "center",
+              fontSize: "0.8rem",
+              width: "80px",
+              height: "50px",
+              backgroundColor: isDisabled
+                ? "#cccccc" // Gray for booked or selected slots
+                : isPastSlot
+                  ? "#d2a679" // Brown for past slots
+                  : "#ffffff",
+              color: isDisabled || isPastSlot ? "#666666" : "#000000",
+              border: isDisabled || isPastSlot ? "1px solid #999999" : "1px solid #0091A5",
+              cursor: isDisabled || isPastSlot ? "not-allowed" : "pointer",
+            }}
+          >
+            {formatTime(slot.appointment_slot)}
+          </Button>
+          {isDisabled && hoverMessage && (
+            <div
+              style={{
+                position: "absolute",
+                top: "-35px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
+                color: "#fff",
+                padding: "5px 10px",
+                borderRadius: "4px",
+                fontSize: "0.75rem",
+                whiteSpace: "nowrap",
+                zIndex: 10,
+              }}
+            >
+              {hoverMessage}
+            </div>
+          )}
+        </div>
+      );
+    })
+) : (
+  <p className="appointment-slot-section-message text-danger">
+    No slots available for afternoon
+  </p>
+)}
+
                   </div>
                 </Col>
 
@@ -4709,7 +4877,7 @@ const PatientHome = () => {
                     className="d-flex flex-wrap justify-content-center appointment-slot-buttons-container"
                     style={{ width: "100%" }}
                   >
-                    {eveningSlots.length > 0 ? (
+                    {/* {eveningSlots.length > 0 ? (
                       eveningSlots
                         .slice(
                           eveningSlotIndex,
@@ -4803,7 +4971,91 @@ const PatientHome = () => {
                       <p className="appointment-slot-section-message text-danger">
                         No slots available for evening
                       </p>
-                    )}
+                    )} */}
+
+{eveningSlots.length > 0 ? (
+  eveningSlots
+    .slice(
+      eveningSlotIndex,
+      eveningSlotIndex + SLOTS_PER_BATCH
+    )
+    .map((slot) => {
+      const currentTime = new Date();
+      const slotTime = new Date();
+      const [hours, minutes] = slot.appointment_slot.split(":");
+      slotTime.setHours(hours);
+      slotTime.setMinutes(minutes);
+
+      const isSameDate = new Date(slot.appointment_date).toDateString() === currentTime.toDateString();
+      const isPastSlot = isSameDate && currentTime >= slotTime;
+
+      const isDisabled = slot.is_booked || slot.is_selected;
+
+      return (
+        <div
+          key={slot.id}
+          style={{
+            position: "relative",
+            display: "inline-block",
+            margin: "5px",
+          }}
+          onMouseEnter={(e) =>
+            // isDisabled && setHoverMessage(slot.is_booked ? "This slot is already booked." : "This slot is selected.")
+            isDisabled && setHoverMessage("This slot is in use/Booked")
+          }
+          onMouseLeave={(e) => setHoverMessage("")}
+        >
+          <Button
+            variant="outline-primary"
+            className="appointment-slots-button mb-2"
+            onClick={() => !isDisabled && !isPastSlot && handleSlotClick(slot)}
+            disabled={isDisabled || isPastSlot}
+            style={{
+              padding: "10px",
+              textAlign: "center",
+              fontSize: "0.8rem",
+              width: "80px",
+              height: "50px",
+              backgroundColor: isDisabled
+                ? "#cccccc" // Gray for booked or selected slots
+                : isPastSlot
+                  ? "#d2a679" // Brown for past slots
+                  : "#ffffff",
+              color: isDisabled || isPastSlot ? "#666666" : "#000000",
+              border: isDisabled || isPastSlot ? "1px solid #999999" : "1px solid #0091A5",
+              cursor: isDisabled || isPastSlot ? "not-allowed" : "pointer",
+            }}
+          >
+            {formatTime(slot.appointment_slot)}
+          </Button>
+          {isDisabled && hoverMessage && (
+            <div
+              style={{
+                position: "absolute",
+                top: "-35px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
+                color: "#fff",
+                padding: "5px 10px",
+                borderRadius: "4px",
+                fontSize: "0.75rem",
+                whiteSpace: "nowrap",
+                zIndex: 10,
+              }}
+            >
+              {hoverMessage}
+            </div>
+          )}
+        </div>
+      );
+    })
+) : (
+  <p className="appointment-slot-section-message text-danger">
+    No slots available for evening
+  </p>
+)}
+
                   </div>
                 </Col>
               </Row>
