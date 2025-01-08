@@ -1,5 +1,3 @@
-
-
 // import React, { useEffect, useState } from "react";
 // import { FaRegSave } from "react-icons/fa";
 // import { MdFileUpload } from "react-icons/md";
@@ -38,9 +36,9 @@
 //   };
 //   useEffect(() => {
 //       fetchTemplates();
-    
+
 //   }, []);
-  
+
 //   const handleHeaderUpload = (e) => {
 //     const file = e.target.files[0];
 //     if (file) {
@@ -157,21 +155,6 @@
 
 // export default ManageTemplates;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import React, { useEffect, useState } from "react";
 import { FaRegSave } from "react-icons/fa";
 import { MdFileUpload } from "react-icons/md";
@@ -209,10 +192,9 @@ function ManageTemplates() {
     }
   };
   useEffect(() => {
-      fetchTemplates();
-    
+    fetchTemplates();
   }, []);
-  
+
   const handleHeaderUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -268,7 +250,9 @@ function ManageTemplates() {
   return (
     <div style={{ backgroundColor: "#D9EAFD" }} className="pt-4">
       <h2 className="text-center">Please upload your template</h2>
-      <p className="text-center text-danger font-weight-bold">(*Please upload Header and Footer of Height = 450px and Width = 2480px)</p>
+      <p className="text-center text-danger font-weight-bold">
+        (*Please upload Header and Footer of Height = 450px and Width = 2480px)
+      </p>
       <div className="manage-templates-container mt-4">
         <div className="button-panel">
           <label className="upload-button">
@@ -299,7 +283,7 @@ function ManageTemplates() {
               <img
                 src={
                   typeof header === "string"
-                    ? BaseUrl.defaults.baseURL + header
+                    ? `${BaseUrl.defaults.baseURL}${header}`
                     : URL.createObjectURL(header)
                 }
                 alt="Header"
@@ -313,7 +297,7 @@ function ManageTemplates() {
               <img
                 src={
                   typeof footer === "string"
-                    ? BaseUrl.defaults.baseURL + footer
+                    ? `${BaseUrl.defaults.baseURL}${footer}`
                     : URL.createObjectURL(footer)
                 }
                 alt="Footer"
