@@ -89,10 +89,10 @@ const CardContainer = () => {
     });
  
     return (
-        <div style={containerStyle} className="container-fluid p-2">
-            <div className="row no-gutters">
+        <div style={containerStyle} className="container-fluid p-3">
+            <div className="row no-gutters mt-5 mb-5">
                 {cardsData.map((card, index) => (
-                    <div className="col-lg-4 col-md-6 col-sm-12 p-2" key={index}>
+                    <div className="col-lg-4 col-md-6 col-sm-12 p-3 mt-2" key={index}>
                         <div
                             className="card"
                             style={{

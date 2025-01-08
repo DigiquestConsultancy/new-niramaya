@@ -15,6 +15,7 @@ import {
   faReceipt,
   faTimes as faTimesSolid,
 } from "@fortawesome/free-solid-svg-icons";
+import { FaSyncAlt, FaTrash } from "react-icons/fa";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Dropdown, DropdownButton } from "react-bootstrap";
 import { format, addDays, subDays } from "date-fns";
@@ -56,7 +57,8 @@ const ClinicHome = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [completedIndex, setCompletedIndex] = useState(0);
   const [canceledIndex, setCanceledIndex] = useState(0);
-
+  const [whatsappReport, setWhatsappReport] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [blockFormData, setBlockFormData] = useState({
     startDate: "",
@@ -222,7 +224,7 @@ const ClinicHome = () => {
     try {
       const formattedDate = selectedAppointmentDate
         ? new Date(selectedAppointmentDate).toISOString().split("T")[0]
-        : new Date().toISOString().split("T")[0]; 
+        : new Date().toISOString().split("T")[0];
 
       const response = await BaseUrl.get(`/patient/patientprescriptonfile/`, {
         params: {
@@ -240,8 +242,8 @@ const ClinicHome = () => {
       setUploadedPrescription(null);
       setError(
         error.response?.data?.error ||
-        error.message ||
-        "An unexpected error occurred."
+          error.message ||
+          "An unexpected error occurred."
       );
     }
   };
@@ -641,8 +643,11 @@ const ClinicHome = () => {
   const handlePrescriptionSubmit = async () => {
     try {
       const hasExistingPrescriptions = prescriptionData.length > 0;
-      const latestPrescription = hasExistingPrescriptions ? prescriptionData[prescriptionData.length - 1] : formPrescription;
-      const isNewPrescription = !hasExistingPrescriptions || !latestPrescription.id;
+      const latestPrescription = hasExistingPrescriptions
+        ? prescriptionData[prescriptionData.length - 1]
+        : formPrescription;
+      const isNewPrescription =
+        !hasExistingPrescriptions || !latestPrescription.id;
       const prescriptions = [
         {
           medicine_name: latestPrescription.medicine_name || "",
@@ -650,16 +655,16 @@ const ClinicHome = () => {
           comment: latestPrescription.comment || "",
           description: latestPrescription.description || "",
           appointment_id: selectedAppointmentId,
-        }
+        },
       ];
       const endpoint = "/patient/patientpriscription/";
       const response = isNewPrescription
         ? await BaseUrl.post(endpoint, prescriptions, {
-          headers: { "Content-Type": "application/json" },
-        })
+            headers: { "Content-Type": "application/json" },
+          })
         : await BaseUrl.put(endpoint, prescriptions, {
-          headers: { "Content-Type": "application/json" },
-        });
+            headers: { "Content-Type": "application/json" },
+          });
 
       if (response.status === 201 && response.data.success) {
         const successMessage =
@@ -695,7 +700,9 @@ const ClinicHome = () => {
       updateData.append("comment", prescriptionDataItem.comment);
       updateData.append("description", prescriptionDataItem.description);
 
-      const response = await BaseUrl.put(`/patient/patientpriscription/`, updateData,
+      const response = await BaseUrl.put(
+        `/patient/patientpriscription/`,
+        updateData,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
@@ -751,8 +758,12 @@ const ClinicHome = () => {
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
-    const formattedDate = selectedAppointmentDate ? new Date(selectedAppointmentDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]; 
-    const matchingAppointment = appointmentDetails.find((appointment) => appointment.appointment_date === formattedDate);
+    const formattedDate = selectedAppointmentDate
+      ? new Date(selectedAppointmentDate).toISOString().split("T")[0]
+      : new Date().toISOString().split("T")[0];
+    const matchingAppointment = appointmentDetails.find(
+      (appointment) => appointment.appointment_date === formattedDate
+    );
     const appointmentId = matchingAppointment.id;
     const formData = new FormData();
     formData.append("document_file", file);
@@ -760,51 +771,61 @@ const ClinicHome = () => {
     formData.append("document_date", formattedDate);
 
     try {
-        const response = await BaseUrl.post("/patient/patientprescriptonfile/", formData);
-        if (response.status === 201) {
-            const successMessage =
-                response.data.success || "Details have been successfully updated.";
-            setSuccessMessage(successMessage);
-            handleShow(successMessage);
-            await fetchUploadedPrescriptionDocument(appointmentId);
-        } else {
-            setErrorMessage("Failed to upload file.");
-            handleShow("Failed to upload Prescription files.");
-        }
-    } catch (error) {
-        const errorMessage = error.response?.data?.error || "An error occurred during file upload.";
-        setErrorMessage(errorMessage);
-        handleShow(errorMessage);
-    }
-};
-
-const handleDeleteDocumentFile = async (documentId) => {
-  const formattedDate = selectedAppointmentDate ? new Date(selectedAppointmentDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0];
-  const matchingAppointment = appointmentDetails.find((appointment) => appointment.appointment_date === formattedDate);
-  const appointmentId = matchingAppointment.id;
-  try {
-    const response = await BaseUrl.delete(`/patient/patientprescriptonfile/`,
-      {
-        data: { document_id: documentId },
+      const response = await BaseUrl.post(
+        "/patient/patientprescriptonfile/",
+        formData
+      );
+      if (response.status === 201) {
+        const successMessage =
+          response.data.success || "Details have been successfully updated.";
+        setSuccessMessage(successMessage);
+        handleShow(successMessage);
+        await fetchUploadedPrescriptionDocument(appointmentId);
+      } else {
+        setErrorMessage("Failed to upload file.");
+        handleShow("Failed to upload Prescription files.");
       }
-    );
-    if (response.status === 200) {
-      const successMessage =
-        response.data.success || "Document has been successfully deleted.";
-      setSuccessMessage(successMessage);
-      handleShow(successMessage);
-      await fetchUploadedPrescriptionDocument(appointmentId);
-    } else {
-      setErrorMessage("Failed to delete document.");
-      handleShow("Failed to delete document.");
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error || "An error occurred during file upload.";
+      setErrorMessage(errorMessage);
+      handleShow(errorMessage);
     }
-  } catch (error) {
-    const errorMessage =
-      error.response?.data?.error || "An error occurred during document deletion.";
-    setErrorMessage(errorMessage);
-    handleShow(errorMessage);
-  }
-};
+  };
+
+  const handleDeleteDocumentFile = async (documentId) => {
+    const formattedDate = selectedAppointmentDate
+      ? new Date(selectedAppointmentDate).toISOString().split("T")[0]
+      : new Date().toISOString().split("T")[0];
+    const matchingAppointment = appointmentDetails.find(
+      (appointment) => appointment.appointment_date === formattedDate
+    );
+    const appointmentId = matchingAppointment.id;
+    try {
+      const response = await BaseUrl.delete(
+        `/patient/patientprescriptonfile/`,
+        {
+          data: { document_id: documentId },
+        }
+      );
+      if (response.status === 200) {
+        const successMessage =
+          response.data.success || "Document has been successfully deleted.";
+        setSuccessMessage(successMessage);
+        handleShow(successMessage);
+        await fetchUploadedPrescriptionDocument(appointmentId);
+      } else {
+        setErrorMessage("Failed to delete document.");
+        handleShow("Failed to delete document.");
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error ||
+        "An error occurred during document deletion.";
+      setErrorMessage(errorMessage);
+      handleShow(errorMessage);
+    }
+  };
 
   const fetchPatientDetails = async (patientId, appointmentId) => {
     try {
@@ -869,7 +890,7 @@ const handleDeleteDocumentFile = async (documentId) => {
                 value={patientDetails.name}
                 onChange={(e) => {
                   const inputValue = e.target.value;
-                  const validInput = inputValue.replace(/[^a-zA-Z\s]/g, '');
+                  const validInput = inputValue.replace(/[^a-zA-Z\s]/g, "");
                   setPatientDetails({ ...patientDetails, name: validInput });
                 }}
               />
@@ -885,7 +906,7 @@ const handleDeleteDocumentFile = async (documentId) => {
                 value={patientDetails.age}
                 onChange={(e) => {
                   const inputValue = e.target.value;
-                  const validInput = inputValue.replace(/[^0-9]/g, '');
+                  const validInput = inputValue.replace(/[^0-9]/g, "");
                   setPatientDetails({ ...patientDetails, age: validInput });
                 }}
               />
@@ -918,8 +939,11 @@ const handleDeleteDocumentFile = async (documentId) => {
                 value={patientDetails.mobile_number}
                 onChange={(e) => {
                   const inputValue = e.target.value;
-                  const validInput = inputValue.replace(/[^0-9]/g, '');
-                  setPatientDetails({ ...patientDetails, mobile_number: validInput });
+                  const validInput = inputValue.replace(/[^0-9]/g, "");
+                  setPatientDetails({
+                    ...patientDetails,
+                    mobile_number: validInput,
+                  });
                 }}
               />
             </Form.Group>
@@ -1376,7 +1400,11 @@ const handleDeleteDocumentFile = async (documentId) => {
         <Form inline className="mb-3">
           <Form.Group
             className="mb-0"
-            style={{ display: "flex", alignItems: "center", position: "relative" }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              position: "relative",
+            }}
           >
             <div className="mb-4 w-100">
               <div className="mb-3">
@@ -1397,7 +1425,11 @@ const handleDeleteDocumentFile = async (documentId) => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   style={{ flex: 1, borderRadius: "0.25rem 0 0 0.25rem" }}
                 />
-                <Button variant="primary" onClick={handleSearch} style={{ flexShrink: 0, borderRadius: "0 0.25rem 0.25rem 0" }}>
+                <Button
+                  variant="primary"
+                  onClick={handleSearch}
+                  style={{ flexShrink: 0, borderRadius: "0 0.25rem 0.25rem 0" }}
+                >
                   Search
                 </Button>
               </div>
@@ -1499,7 +1531,10 @@ const handleDeleteDocumentFile = async (documentId) => {
                     type="text"
                     value={newSymptom.more_options}
                     onChange={(e) =>
-                      setNewSymptom({ ...newSymptom, more_options: e.target.value })
+                      setNewSymptom({
+                        ...newSymptom,
+                        more_options: e.target.value,
+                      })
                     }
                   />
                 </Form.Group>
@@ -1604,7 +1639,11 @@ const handleDeleteDocumentFile = async (documentId) => {
                   </Dropdown.Item>
                   <Dropdown.Item
                     onClick={() =>
-                      handleRemoveSymptom(symptom.symptoms, symptom.appointment, index)
+                      handleRemoveSymptom(
+                        symptom.symptoms,
+                        symptom.appointment,
+                        index
+                      )
                     }
                   >
                     Remove
@@ -1803,7 +1842,10 @@ const handleDeleteDocumentFile = async (documentId) => {
     } else if (displayedData === "symptoms") {
       await fetchSymptomsData(appointment_id);
     } else if (displayedData === "prescription") {
-      await fetchPrescriptionData(selectedAppointment.patient_id, appointment_id);
+      await fetchPrescriptionData(
+        selectedAppointment.patient_id,
+        appointment_id
+      );
       await fetchUploadedPrescriptionDocument(appointment_id, appointment_date);
     } else if (displayedData === "documents") {
       await handleDocumentsClick(appointment_id);
@@ -1812,13 +1854,16 @@ const handleDeleteDocumentFile = async (documentId) => {
     }
   };
 
+  const [patientId, setPatientId] = useState(null);
+
   const handleDocumentsClick = async () => {
     setSelectedHeading("documents");
+
     if (selectedAppointmentId && formattedDate) {
       try {
         const formattedDate = selectedAppointmentDate
-        ? new Date(selectedAppointmentDate).toISOString().split("T")[0]
-        : new Date().toISOString().split("T")[0]; 
+          ? new Date(selectedAppointmentDate).toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0];
 
         const response = await BaseUrl.get(
           `/patient/patientdocumentusingappointmentid/`,
@@ -1829,9 +1874,14 @@ const handleDeleteDocumentFile = async (documentId) => {
             },
           }
         );
+
         if (response.status === 200 && response.data.length > 0) {
           setDocumentsData(response.data);
           setDisplayedData("documents");
+          if (response.data.length > 0) {
+            const patientName = response.data[0].patient_name;
+            await handleRecordView(patientId, patientName);
+          }
         } else {
           setDocumentsData([]);
           setDisplayedData("documents");
@@ -1987,7 +2037,8 @@ const handleDeleteDocumentFile = async (documentId) => {
 
   const handleDeleteDocument = async (documentId) => {
     try {
-      const response = await BaseUrl.delete(`/patient/patientdocumentusingappointmentid/`,
+      const response = await BaseUrl.delete(
+        `/patient/patientdocumentusingappointmentid/`,
         {
           data: { document_id: documentId },
           headers: {
@@ -1996,7 +2047,8 @@ const handleDeleteDocumentFile = async (documentId) => {
         }
       );
       if (response.status === 204) {
-        const successMessage = response.data.success || "Documents have been successfully removed.";
+        const successMessage =
+          response.data.success || "Documents have been successfully removed.";
         setSuccessMessage(successMessage);
         handleShow(successMessage);
         handleDocumentsClick();
@@ -2011,7 +2063,118 @@ const handleDeleteDocumentFile = async (documentId) => {
     }
   };
 
+  const handleRequestDocument = async (appointmentId) => {
+    if (!appointmentId) {
+      setErrorMessage(
+        "Appointment ID is missing. Please select an appointment."
+      );
+      return;
+    }
+
+    try {
+      // Prepare form data
+      const formData = new FormData();
+      formData.append("appointment_id", appointmentId);
+
+      // Make the PUT request using BaseUrl
+      const response = await BaseUrl.put(
+        "/doctorappointment/askreport/",
+        formData
+      );
+
+      if (response.status === 200) {
+        const successMessage =
+          response.data?.success || "Request successfully sent.";
+        setSuccessMessage(successMessage);
+        setErrorMessage("");
+      } else {
+        const errorMessage = response.data?.error || "Failed to send request.";
+        setErrorMessage(errorMessage);
+        setSuccessMessage("");
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error ||
+        "An error occurred. Please try again later.";
+      setErrorMessage(errorMessage);
+      setSuccessMessage("");
+    }
+  };
+
+  const [showMore, setShowMore] = useState(false); // State to toggle "Show More"
+
+  const handleRecordView = async (patientId, patientName) => {
+    setLoading(true); // Start loading indicator
+
+    try {
+      // Decode token to get doctor_id
+      const token = localStorage.getItem("token"); // Retrieve the token from localStorage
+      const decodedToken = jwtDecode(token);
+      const doctorId = decodedToken?.doctor_id;
+
+      if (!doctorId) {
+        setErrorMessage("Doctor ID not available. Please log in again.");
+        return;
+      }
+
+      // API call
+      const response = await BaseUrl.get(`/doctorappointment/whatsappreport/`, {
+        params: {
+          patient_id: patientId,
+          doctor_id: doctorId,
+          patient_name: patientDetails.name, // Include the patient name
+        },
+      });
+
+      if (response.status === 200) {
+        const reports = response.data?.reports || [];
+        setWhatsappReport(reports); // Update state with fetched reports
+        setSuccessMessage("Medical record fetched successfully.");
+        setErrorMessage("");
+      } else {
+        setErrorMessage(
+          response.data?.error || "Failed to fetch medical record."
+        );
+        setSuccessMessage("");
+      }
+    } catch (error) {
+      setErrorMessage(error.response?.data?.error || "An error occurred.");
+      setSuccessMessage("");
+    } finally {
+      setLoading(false); // Stop loading indicator
+    }
+  };
+
+  const deleteRecord = async (id) => {
+    try {
+      const response = await BaseUrl.delete(
+        "/doctorappointment/whatsappreport/",
+        {
+          data: { id },
+        }
+      );
+
+      if (response.status === 200) {
+        alert("Record deleted successfully");
+        setWhatsappReport((prevPhotos) =>
+          prevPhotos.filter((photo) => photo.id !== id)
+        );
+      } else {
+        alert("Error deleting record");
+      }
+    } catch (error) {
+      alert("Failed to delete record");
+    }
+  };
+
   const renderDocumentsData = () => {
+    const visibleReports = showMore
+      ? whatsappReport
+      : whatsappReport.slice(0, 6);
+    const visibleDocuments = showMore
+      ? documentsData
+      : documentsData.slice(0, 6);
+
     return (
       <div>
         {successMessage && (
@@ -2029,125 +2192,306 @@ const handleDeleteDocumentFile = async (documentId) => {
             {fetchError}
           </div>
         )}
+
         <div className="d-flex justify-content-end">
-          <Button className="btn btn-primary" onClick={() => toggleFormModal()}>
+          <Button
+            className="btn btn-primary me-2"
+            onClick={() => toggleFormModal()}
+          >
             Upload Documents
           </Button>
+          <Button
+            className="btn btn-primary me-2"
+            onClick={() => handleRequestDocument(selectedAppointmentId)}
+          >
+            Request Document
+          </Button>
+          <Button
+            style={{
+              background: "#00DAF7",
+              color: "#000",
+              border: "none",
+              borderRadius: "5px",
+              padding: "10px 20px",
+            }}
+            onClick={() =>
+              handleRecordView(
+                selectedAppointment?.patient_id,
+                selectedAppointment?.doctor_id,
+                selectedAppointment?.patient_name
+              )
+            }
+          >
+            <FaSyncAlt />
+          </Button>
         </div>
-        {documentsData.map((document) => (
-          <div key={document.id} className="mb-3" style={{ cursor: "pointer" }}>
-            <Row className="mt-3">
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>
-                    <strong>Document Name:</strong>
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={document.document_name}
-                    readOnly
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>
-                    <strong>Document Date:</strong>
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={document.document_date}
-                    readOnly
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>
-                    <strong>Document Type:</strong>
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={document.document_type}
-                    readOnly
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>
-                    <strong>Patient Name:</strong>
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={document.patient_name}
-                    readOnly
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-            <Row className="mt-3">
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>
-                    <strong>Uploaded By:</strong>
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={document.uploaded_by}
-                    readOnly
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>
-                    <strong>Document File:</strong>
-                  </Form.Label>
-                  <Button
-                    variant="primary"
-                    onClick={() => viewDocument(document.id)}
-                    style={{
-                      backgroundColor: "#5c85d6",
-                      borderColor: "#5c85d6",
-                      borderRadius: "20px",
-                      padding: "8px 16px",
-                      transition: "background-color 0.3s, transform 0.3s",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#4c75c6")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.backgroundColor = "#5c85d6")
-                    }
-                    aria-label={`View document ${document.document_name}`}
-                  >
-                    View Document
-                  </Button>
-                </Form.Group>
-              </Col>
-              <Col md={3} className="mt-4">
-                <DropdownButton
-                  align="end"
-                  drop="end"
-                  title={<i className="bi bi-three-dots" />}
-                  variant="secondary"
-                  id={`dropdown-${document.id}`}
+
+        {/* <h5 className = "mt-3" style={{ fontWeight: "700" }}>Uploaded by : Doctor</h5> */}
+
+        {documentsData.length > 0 ? (
+          <table className="table table-striped mt-4">
+            <thead>
+              <tr>
+                <th>Document Name</th>
+                <th>Document Date</th>
+                <th>Document Type</th>
+                <th>Patient Name</th>
+                <th>Document File</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {documentsData.map((document) => (
+                <tr key={document.id}>
+                  <td>{document.document_name}</td>
+                  <td>{document.document_date}</td>
+                  <td>{document.document_type}</td>
+                  <td>{document.patient_name}</td>
+                  <td>
+                    <Button
+                      variant="primary"
+                      onClick={() => viewDocument(document.id)}
+                      style={{
+                        backgroundColor: "#5c85d6",
+                        borderColor: "#5c85d6",
+                        borderRadius: "20px",
+                        padding: "8px 16px",
+                        transition: "background-color 0.3s, transform 0.3s",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.backgroundColor = "#4c75c6")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.backgroundColor = "#5c85d6")
+                      }
+                      aria-label={`View document ${document.document_name}`}
+                    >
+                      View Document
+                    </Button>
+                  </td>
+                  <td>
+                    <DropdownButton
+                      align="end"
+                      drop="end"
+                      title={<i className="bi bi-three-dots" />}
+                      variant="secondary"
+                      id={`dropdown-${document.id}`}
+                    >
+                      <Dropdown.Item onClick={() => toggleFormModal(document)}>
+                        Modify
+                      </Dropdown.Item>
+                      <Dropdown.Item
+                        onClick={() => handleDeleteDocument(document.id)}
+                      >
+                        Delete
+                      </Dropdown.Item>
+                    </DropdownButton>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="text-center text-danger">
+            <p>No documents available to display.</p>
+          </div>
+        )}
+
+        <div className="d-flex flex-wrap justify-content-start">
+          {visibleDocuments.map((document) => (
+            <div key={document.id} className="p-2">
+              <div
+                className="card"
+                style={{
+                  width: "203px",
+                  position: "relative",
+                  marginBottom: "15px",
+                }}
+              >
+                <div
+                  style={{
+                    height: "200px",
+                    background: "#f3f3f3",
+                    borderRadius: "5px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
                 >
-                  <Dropdown.Item onClick={() => toggleFormModal(document)}>
-                    Modify
-                  </Dropdown.Item>
-                  <Dropdown.Item
+                  {document.document_file ? (
+                    <img
+                      src={document.document_file} // Valid image URL
+                      alt={`Uploaded by: ${document.uploaded_by}`}
+                      style={{
+                        objectFit: "cover",
+                        width: "100%",
+                        height: "90%",
+                        borderRadius: "5px",
+                         cursor: "pointer",
+                        // border: "1px solid red", // Debugging border
+                      }}
+                      onClick={() => viewDocument(document.id)}
+                    />
+                  ) : (
+                    <span>No Preview</span>
+                  )}
+                </div>
+                <div
+                  className="document-date"
+                  style={{
+                    position: "absolute",
+                    bottom: "0",
+                    left: "0",
+                    backgroundColor: "rgba(0, 0, 0, 0.6)",
+                    color: "white",
+                    padding: "5px",
+                    borderRadius: "5px",
+                  }}
+                >
+                  {new Intl.DateTimeFormat("en-GB").format(
+                    new Date(document.document_date)
+                  )}
+                </div>
+                <div className="card-body text-center">
+                  <button
+                    className="btn btn-danger btn-sm"
+                    style={{
+                      position: "absolute",
+                      bottom: "0",
+                      right: "10px",
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "red",
+                      fontSize: "24px",
+                    }}
                     onClick={() => handleDeleteDocument(document.id)}
                   >
-                    Delete
-                  </Dropdown.Item>
-                </DropdownButton>
-              </Col>
-            </Row>
-            <hr />
+                    <FaTrash />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {documentsData.length > 6 && (
+          <div className="text-center mt-3">
+            <Button
+              className="btn btn-primary"
+              onClick={() => setShowMore(!showMore)}
+            >
+              {showMore ? "Show Less" : "Show More"}
+            </Button>
           </div>
-        ))}
+        )}
+        <hr />
+
+        <h5 style={{ fontWeight: "700" }}>Uploaded by : Patient</h5>
+
+        <div>
+          {visibleReports.length > 0 ? (
+            <div className="d-flex flex-wrap justify-content-start">
+              {visibleReports.map((report) => (
+                <div key={report.id} className="p-2">
+                  <div
+                    className="card"
+                    style={{ width: "203px", position: "relative" }}
+                  >
+                    <img
+                      src={report.report_file}
+                      alt="WhatsApp Report"
+                      style={{
+                        objectFit: "cover",
+                        height: "200px",
+                        width: "100%",
+                        borderRadius: "5px",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => setSelectedImage(report.report_file)}
+                    />
+
+                    {/* Display Date on the Image */}
+                    <div
+                      className="report-date"
+                      style={{
+                        position: "absolute",
+                        bottom: "0",
+                        left: "0",
+                        backgroundColor: "rgba(0, 0, 0, 0.6)",
+                        color: "white",
+                        padding: "5px",
+                        borderRadius: "5px",
+                      }}
+                    >
+                      {new Intl.DateTimeFormat("en-GB").format(
+                        new Date(report.date)
+                      )}
+                    </div>
+
+                    {/* Delete Button */}
+                    <div className="card-body text-center">
+                      <button
+                        className="btn btn-danger btn-sm"
+                        style={{
+                          position: "absolute",
+                          bottom: "0",
+                          right: "10px",
+                          background: "transparent",
+                          border: "none",
+                          cursor: "pointer",
+                          color: "red",
+                          fontSize: "24px",
+                        }}
+                        onClick={() => deleteRecord(report.id)}
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center mt-4 text-danger">
+              <p>No reports available to display.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Show More Button */}
+        {whatsappReport.length > 6 && (
+          <div className="text-center mt-3">
+            <Button
+              className="btn btn-primary"
+              onClick={() => setShowMore(!showMore)}
+            >
+              {showMore ? "Show Less" : "Show More"}
+            </Button>
+          </div>
+        )}
+
+        <Modal
+          show={!!selectedImage}
+          onHide={() => setSelectedImage(null)}
+          centered
+        >
+          <Modal.Body style={{ padding: 0 }}>
+            <img
+              src={selectedImage}
+              alt="Selected Medical Record"
+              style={{
+                width: "100%",
+                borderRadius: "5px",
+              }}
+            />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setSelectedImage(null)}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     );
   };
@@ -2273,6 +2617,8 @@ const handleDeleteDocumentFile = async (documentId) => {
     setSelectedAppointmentId(slotOrAppointment.appointment_id);
     setSelectedHeading("patientDetails");
     try {
+      const patientId = slotOrAppointment.patient_id;
+      setPatientId(patientId);
       const patientDetailsResponse = await BaseUrl.get(`/patient/patient/`, {
         params: {
           patient_id: slotOrAppointment.patient_id,
@@ -2450,7 +2796,7 @@ const handleDeleteDocumentFile = async (documentId) => {
   };
 
   const renderSlotCards = (slots, index) => {
-    const startIndex = index * slotsPerPage * 4; 
+    const startIndex = index * slotsPerPage * 4;
     const endIndex = Math.min(startIndex + slotsPerPage * 4, slots.length);
     const displayedSlots = slots.slice(startIndex, endIndex);
     const rows = [];

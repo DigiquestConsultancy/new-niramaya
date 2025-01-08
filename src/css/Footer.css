@@ -1,27 +1,80 @@
-html, body, #root {
-  height: 100%;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-}
- 
-.App {
+
+body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  margin: 0; 
 }
  
-.page-content {
-  flex: 1;
-  padding-bottom: 0px;
+main {
+  flex: 1; 
 }
  
-footer {
-  background-color: #343a40;
+.footer {
+  background-color: #0e3a47;
   color: white;
-  padding: 10px 0;
-  position: relative;
-  bottom: 0;
-  width: 100%;
+  padding: 2rem 0;
+}
+ 
+.footer-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+ 
+.footer h4 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+ 
+.footer p, .footer ul, .footer a {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+ 
+.footer-link {
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.social-icons a {
+  color: white;
+  margin-right: 10px;
+  transition: color 0.3s ease;
+}
+
+.text-center {
   text-align: center;
 }
+ 
+ul.list-unstyled {
+  padding-left: 0;
+}
+ 
+ul.list-unstyled li {
+  margin-bottom: 0.5rem;
+  text-decoration: none;
+}
+ 
+@media (max-width: 768px) {
+  .footer h4 {
+    font-size: 1.25rem;
+  }
+  .footer p, .footer a {
+    font-size: 0.9rem;
+  }
+  .footer-link {
+    margin-bottom: 10px;
+  }
+  .social-icons a {
+    margin-right: 15px;
+  }
+  .s-icons {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+  .so-icons {
+    margin: 0 15px !important;
+  }
+}
+ 

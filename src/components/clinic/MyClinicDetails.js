@@ -332,17 +332,13 @@
 
 
 
-
-
-
-
 import React, { useState, useEffect, useCallback } from "react";
 import BaseUrl from "../../api/BaseUrl";
 import { useHistory } from "react-router-dom";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import Loader from "react-js-loader";
 import styled from "styled-components";
-
+ 
 const LoaderWrapper = styled.div`
   display: flex;
   justify-content: center;
@@ -355,11 +351,11 @@ const LoaderWrapper = styled.div`
   left: 0;
   z-index: 9999;
 `;
-
+ 
 const LoaderImage = styled.div`
   width: 400px;
 `;
-
+ 
 const ProfilePicCircle = styled.div`
   width: 150px;
   height: 150px;
@@ -374,24 +370,24 @@ const ProfilePicCircle = styled.div`
   margin-bottom: 10px;
   position: relative;
 `;
-
+ 
 const ProfilePicPreview = styled.img`
   width: 150px;
   height: 150px;
   border-radius: 50%;
   object-fit: cover;
 `;
-
+ 
 const MyClinicDetails = () => {
   const history = useHistory();
   const token = localStorage.getItem("token");
   let clinic_id = null;
-
+ 
   if (token) {
     const decodedToken = jwtDecode(token);
     clinic_id = decodedToken.clinic_id;
   }
-
+ 
   const [formData, setFormData] = useState({
     name: "",
     gender: "",
@@ -408,11 +404,14 @@ const MyClinicDetails = () => {
   const [detailsExist, setDetailsExist] = useState(false);
   const [loading, setLoading] = useState(false);
   const [profilePicPreview, setProfilePicPreview] = useState("");
-
+ 
   const fetchClinicDetail = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await BaseUrl.get(`/clinic/details/?clinic_id=${clinic_id}`);
+      const response = await BaseUrl.get(
+        `/clinic/details/?clinic_id=${clinic_id}`
+      );
+ 
       if (response.status === 200) {
         if (Array.isArray(response.data) && response.data.length > 0) {
           // Details exist
@@ -421,6 +420,12 @@ const MyClinicDetails = () => {
           setProfilePicPreview(
             `${BaseUrl.defaults.baseURL}${response.data[0].profile_pic}`
           );
+ 
+          // Set success message if present
+          if (response.data.success) {
+            setSuccessMessage(response.data.success);
+            setErrorMessage(""); // Clear any existing error messages
+          }
         } else if (response.data.success === "kindly update your details") {
           // No details exist, populate mobile number
           setFormData((prevData) => ({
@@ -428,17 +433,28 @@ const MyClinicDetails = () => {
             mobile_number: response.data.mobile_number,
           }));
           setDetailsExist(false);
+ 
+          setSuccessMessage(response.data.success);
+          setErrorMessage("");
+        } else if (response.data.error) {
+          setErrorMessage(response.data.error);
+          setSuccessMessage("");
         } else {
           setErrorMessage("Unexpected response from the server.");
+          setSuccessMessage("");
         }
       }
     } catch (error) {
-      setErrorMessage("Error fetching clinic details.");
+      // Handle backend error message or default error
+      setErrorMessage(
+        error.response?.data?.error || "Error fetching clinic details."
+      );
+      setSuccessMessage("");
     } finally {
       setLoading(false);
     }
   }, [clinic_id]);
-
+ 
   useEffect(() => {
     if (clinic_id) {
       fetchClinicDetail();
@@ -446,7 +462,7 @@ const MyClinicDetails = () => {
       setErrorMessage("No clinic ID found in token.");
     }
   }, [clinic_id, fetchClinicDetail]);
-
+ 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -454,7 +470,7 @@ const MyClinicDetails = () => {
       [name]: value,
     });
   };
-
+ 
   const handleProfilePicChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -466,7 +482,7 @@ const MyClinicDetails = () => {
       reader.readAsDataURL(file);
     }
   };
-
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const dataToSubmit = new FormData();
@@ -478,7 +494,7 @@ const MyClinicDetails = () => {
     if (formData.profile_pic instanceof File) {
       dataToSubmit.append("profile_pic", formData.profile_pic);
     }
-
+ 
     setLoading(true);
     try {
       let response;
@@ -505,7 +521,7 @@ const MyClinicDetails = () => {
       setLoading(false);
     }
   };
-
+ 
   return (
     <div className="container-fluid mt-5">
       {loading && (
@@ -522,7 +538,9 @@ const MyClinicDetails = () => {
         </LoaderWrapper>
       )}
       {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
-      {successMessage && <div className="alert alert-success">{successMessage}</div>}
+      {successMessage && (
+        <div className="alert alert-success">{successMessage}</div>
+      )}
       <form
         className="p-4 shadow"
         onSubmit={handleSubmit}
@@ -557,6 +575,7 @@ const MyClinicDetails = () => {
               value={formData.mobile_number}
               onChange={handleChange}
               required
+              disabled
             />
           </div>
           <div className="col-md-4">
@@ -568,6 +587,9 @@ const MyClinicDetails = () => {
               name="name"
               value={formData.name}
               onChange={handleChange}
+              onInput={(e) => {
+                e.target.value = e.target.value.replace(/[^a-zA-Z.\s]/g, "");
+              }}
               required
             />
           </div>
@@ -620,6 +642,9 @@ const MyClinicDetails = () => {
               name="specialization"
               value={formData.specialization}
               onChange={handleChange}
+              onInput={(e) => {
+                e.target.value = e.target.value.replace(/[^a-zA-Z,.\s]/g, ""); // Allows letters, commas, and spaces
+              }}
               required
             />
           </div>
@@ -634,6 +659,9 @@ const MyClinicDetails = () => {
               name="qualification"
               value={formData.qualification}
               onChange={handleChange}
+              onInput={(e) => {
+                e.target.value = e.target.value.replace(/[^a-zA-Z,.\s]/g, ""); // Allows only letters and commas
+              }}
               required
             />
           </div>
@@ -664,5 +692,5 @@ const MyClinicDetails = () => {
     </div>
   );
 };
-
+ 
 export default MyClinicDetails;

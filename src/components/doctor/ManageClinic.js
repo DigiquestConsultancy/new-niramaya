@@ -339,10 +339,4 @@ const mediaStyles = `
   }
 `;
 
-// Inject media query styles dynamically into the document
-// const styleSheet = document.createElement("style");
-// styleSheet.type = "text/css";
-// styleSheet.innerText = mediaStyles;
-// document.head.appendChild(styleSheet);
-
 export default ManageClinic;

@@ -393,6 +393,16 @@
 //                     >
 //                       Book Appointment
 //                     </Link>
+//                     <Link
+//                       className={`dropdown-item ${!areAllFieldsEnabled ? "disabled" : ""}`}
+//                       to="/doctor/paymenthistory"
+//                       onClick={(e) => {
+//                         if (!areAllFieldsEnabled) e.preventDefault();
+//                         toggleProfileDropdown();
+//                       }}
+//                     >
+//                       Payment History
+//                     </Link>
 //                   </>
 //                 )}
 
@@ -632,11 +642,21 @@
 
 
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import Company from "../../images/logo.jpeg";
+import { IoMdSettings } from "react-icons/io";
+import { ImProfile } from "react-icons/im";
+import { FaCheckToSlot } from "react-icons/fa6";
+import { FaClinicMedical, FaHome } from "react-icons/fa";
+import { MdFileDownloadDone } from "react-icons/md";
+import { GiNotebook } from "react-icons/gi";
+import { FcMoneyTransfer } from "react-icons/fc";
+import { MdOutlineLogout } from "react-icons/md";
+
+import Company from "../../images/logo.jpg";
 import ProfileIcon from "../profile/ProfileIcon";
 import { jwtDecode } from "jwt-decode";
+import BaseUrl from "../../api/BaseUrl";
 
 const DoctorNavbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -646,14 +666,33 @@ const DoctorNavbar = () => {
   const [userType, setUserType] = useState(null);
   const [isVerified, setIsVerified] = useState(false);
   const [isActive, setIsActive] = useState(false);
-  const [doctorId, setDoctorId] = useState(null);
   const [navbarOpen, setNavbarOpen] = useState(false);
+  const profileDropdownRef = useRef(null);
+
+  const handleLogout = async () => {
+    try {
+      const refreshToken = localStorage.getItem("refresh");
+      const response = await BaseUrl.post("/doctor/logout/", {
+        refresh: refreshToken,
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        try {
+          localStorage.clear();
+        } catch (storageError) {
+          console.error("Error clearing localStorage:", storageError);
+        }
+        window.location.href = "/doctor/login";
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       const decodedToken = jwtDecode(token);
-      setDoctorId(decodedToken.doctor_id);
       setIsVerified(decodedToken.is_verified);
       setIsActive(decodedToken.is_active);
     }
@@ -680,13 +719,33 @@ const DoctorNavbar = () => {
     setNavbarOpen(false);
   };
 
+  const closeProfileDropdown = () => {
+    setDropdownOpen(false);
+  };
+
+  const handleClickOutside = (event) => {
+    if (
+      profileDropdownRef.current &&
+      !profileDropdownRef.current.contains(event.target)
+    ) {
+      closeProfileDropdown();
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav className="navbar navbar-expand-lg sticky-top">
       <div className="container-fluid">
         <Link className="navbar-brand" to="/">
           <img src={Company} alt="Company Logo" height="40" />
         </Link>
-
         <button
           className="navbar-toggler"
           type="button"
@@ -699,7 +758,6 @@ const DoctorNavbar = () => {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-
         <div
           className={`collapse navbar-collapse ${navbarOpen ? "show" : ""}`}
           id="navbarNav"
@@ -959,7 +1017,7 @@ const DoctorNavbar = () => {
           </ul>
 
           <ul className="navbar-nav ml-auto d-none d-lg-flex">
-            <li className="nav-item">
+            <li className="nav-item" ref={profileDropdownRef}>
               <button className="btn nav-link" onClick={toggleProfileDropdown}>
                 <ProfileIcon />
               </button>
@@ -975,7 +1033,7 @@ const DoctorNavbar = () => {
                       to="/doctor/details"
                       onClick={toggleProfileDropdown}
                     >
-                      Doctor Details
+                      <ImProfile /> Doctor Details
                     </Link>
                     <Link
                       className={`dropdown-item ${!areAllFieldsEnabled ? "disabled" : ""}`}
@@ -985,7 +1043,7 @@ const DoctorNavbar = () => {
                         toggleProfileDropdown();
                       }}
                     >
-                      Appointment Slot
+                      <FaCheckToSlot /> Appointment Slot
                     </Link>
                     <Link
                       className={`dropdown-item ${!areAllFieldsEnabled ? "disabled" : ""}`}
@@ -995,7 +1053,7 @@ const DoctorNavbar = () => {
                         toggleProfileDropdown();
                       }}
                     >
-                      Manage Clinic
+                      <FaClinicMedical /> Manage Clinic
                     </Link>
                     <Link
                       className={`dropdown-item ${!areAllFieldsEnabled ? "disabled" : ""}`}
@@ -1005,7 +1063,7 @@ const DoctorNavbar = () => {
                         toggleProfileDropdown();
                       }}
                     >
-                      Manage Reception
+                      <FaClinicMedical /> Manage Reception
                     </Link>
                     <Link
                       className={`dropdown-item ${!areAllFieldsEnabled ? "disabled" : ""}`}
@@ -1015,7 +1073,7 @@ const DoctorNavbar = () => {
                         toggleProfileDropdown();
                       }}
                     >
-                      Booked Appointment
+                      <MdFileDownloadDone /> Booked Appointment
                     </Link>
                     <Link
                       className={`dropdown-item ${!areAllFieldsEnabled ? "disabled" : ""}`}
@@ -1025,7 +1083,31 @@ const DoctorNavbar = () => {
                         toggleProfileDropdown();
                       }}
                     >
-                      Book Appointment
+                      <GiNotebook /> Book Appointment
+                    </Link>
+                    <Link
+                      className={`dropdown-item ${!areAllFieldsEnabled ? "disabled" : ""}`}
+                      to="/doctor/paymenthistory"
+                      onClick={(e) => {
+                        if (!areAllFieldsEnabled) e.preventDefault();
+                        toggleProfileDropdown();
+                      }}
+                    >
+                      <FcMoneyTransfer /> Payment History
+                    </Link>
+                    <Link
+                      // className="dropdown-item"
+                      className={`dropdown-item ${!areAllFieldsEnabled ? "disabled" : ""}`}
+                      to="/doctor/managetemplates"
+                      onClick={(e) => {
+                        if (!areAllFieldsEnabled) e.preventDefault();
+                        toggleProfileDropdown();
+                      }}
+                    >
+                      <IoMdSettings /> Manage Templates
+                    </Link>
+                    <Link className="dropdown-item" onClick={handleLogout}>
+                      <MdOutlineLogout /> Logout
                     </Link>
                   </>
                 )}
@@ -1037,28 +1119,31 @@ const DoctorNavbar = () => {
                       to="/clinic/details"
                       onClick={toggleProfileDropdown}
                     >
-                      Clinic Details
+                       <ImProfile /> Clinic Details
                     </Link>
                     <Link
                       className={`dropdown-item`}
                       to="/clinic/createslot"
                       onClick={toggleProfileDropdown}
                     >
-                      Create Slot
+                      <FaCheckToSlot /> Create Slot
                     </Link>
                     <Link
                       className={`dropdown-item`}
                       to="/clinic/appointmentbook"
                       onClick={toggleProfileDropdown}
                     >
-                      Book Appointment
+                      <GiNotebook /> Book Appointment
                     </Link>
                     <Link
                       className={`dropdown-item`}
                       to="/clinic/bookedappointment"
                       onClick={toggleProfileDropdown}
                     >
-                      Booked Appointment
+                      <MdFileDownloadDone /> Booked Appointment
+                    </Link>
+                    <Link className={`dropdown-item`} onClick={handleLogout}>
+                    <MdOutlineLogout /> Logout
                     </Link>
                   </>
                 )}
@@ -1070,28 +1155,31 @@ const DoctorNavbar = () => {
                       to="/reception/details"
                       onClick={toggleProfileDropdown}
                     >
-                      Reception Details
+                      <ImProfile /> Reception Details
                     </Link>
                     <Link
                       className={`dropdown-item`}
                       to="/reception/createslot"
                       onClick={toggleProfileDropdown}
                     >
-                      Create Slot
+                      <FaCheckToSlot /> Create Slot
                     </Link>
                     <Link
                       className={`dropdown-item`}
                       to="/reception/appointmentbook"
                       onClick={toggleProfileDropdown}
                     >
-                      Book Appointment
+                      <GiNotebook /> Book Appointment
                     </Link>
                     <Link
                       className={`dropdown-item`}
                       to="/reception/bookedappointment"
                       onClick={toggleProfileDropdown}
                     >
-                      Booked Appointment
+                      <MdFileDownloadDone /> Booked Appointment
+                    </Link>
+                    <Link className={`dropdown-item`} onClick={handleLogout}>
+                    <MdOutlineLogout /> Logout
                     </Link>
                   </>
                 )}
@@ -1099,7 +1187,7 @@ const DoctorNavbar = () => {
             </li>
           </ul>
 
-          <ul className="navbar-nav d-lg-none">
+          <ul className="navbar-nav d-lg-none text-center">
             {userType === "doctor" && (
               <>
                 <li className="nav-item">
@@ -1108,7 +1196,7 @@ const DoctorNavbar = () => {
                     to="/doctor/home"
                     onClick={closeNavbar}
                   >
-                    Home
+                    <FaHome /> Home
                   </Link>
                 </li>
                 <li className="nav-item">
@@ -1117,92 +1205,66 @@ const DoctorNavbar = () => {
                     to="/doctor/details"
                     onClick={closeNavbar}
                   >
-                    Doctor Details
+                    <ImProfile /> Doctor Details
                   </Link>
                 </li>
                 <li className="nav-item">
                   <Link
                     className="nav-link"
                     to="/doctor/appointments"
-                    onClick={(e) => {
-                      if (!areAllFieldsEnabled) e.preventDefault();
-                      closeNavbar(false);
-                    }}
-                    style={{
-                      color: !areAllFieldsEnabled ? "gray" : "",
-                      pointerEvents: !areAllFieldsEnabled ? "none" : "auto",
-                      cursor: !areAllFieldsEnabled ? "not-allowed" : "pointer",
-                    }}
+                    onClick={closeNavbar}
                   >
-                    Appointment Slot
+                    <FaCheckToSlot /> Appointment Slot
                   </Link>
                 </li>
                 <li className="nav-item">
                   <Link
                     className="nav-link"
                     to="/doctor/manageclinic"
-                    onClick={(e) => {
-                      if (!areAllFieldsEnabled) e.preventDefault();
-                      closeNavbar(false);
-                    }}
-                    style={{
-                      color: !areAllFieldsEnabled ? "gray" : "",
-                      pointerEvents: !areAllFieldsEnabled ? "none" : "auto",
-                      cursor: !areAllFieldsEnabled ? "not-allowed" : "pointer",
-                    }}
+                    onClick={closeNavbar}
                   >
-                    Manage Clinic
+                    <FaClinicMedical /> Manage Clinic
                   </Link>
                 </li>
                 <li className="nav-item">
                   <Link
                     className="nav-link"
                     to="/doctor/managereception"
-                    onClick={(e) => {
-                      if (!areAllFieldsEnabled) e.preventDefault();
-                      closeNavbar(false);
-                    }}
-                    style={{
-                      color: !areAllFieldsEnabled ? "gray" : "",
-                      pointerEvents: !areAllFieldsEnabled ? "none" : "auto",
-                      cursor: !areAllFieldsEnabled ? "not-allowed" : "pointer",
-                    }}
+                    onClick={closeNavbar}
                   >
-                    Manage Reception
+                    <FaClinicMedical /> Manage Reception
                   </Link>
                 </li>
                 <li className="nav-item">
                   <Link
                     className="nav-link"
                     to="/doctor/bookedappointment"
-                    onClick={(e) => {
-                      if (!areAllFieldsEnabled) e.preventDefault();
-                      closeNavbar(false);
-                    }}
-                    style={{
-                      color: !areAllFieldsEnabled ? "gray" : "",
-                      pointerEvents: !areAllFieldsEnabled ? "none" : "auto",
-                      cursor: !areAllFieldsEnabled ? "not-allowed" : "pointer",
-                    }}
+                    onClick={closeNavbar}
                   >
-                    Booked Appointment
+                    <MdFileDownloadDone /> Booked Appointment
                   </Link>
                 </li>
                 <li className="nav-item">
                   <Link
                     className="nav-link"
                     to="/doctor/bookappointment"
-                    onClick={(e) => {
-                      if (!areAllFieldsEnabled) e.preventDefault();
-                      closeNavbar(false);
-                    }}
-                    style={{
-                      color: !areAllFieldsEnabled ? "gray" : "",
-                      pointerEvents: !areAllFieldsEnabled ? "none" : "auto",
-                      cursor: !areAllFieldsEnabled ? "not-allowed" : "pointer",
-                    }}
+                    onClick={closeNavbar}
                   >
-                    Book Appointment
+                    <GiNotebook /> Book Appointment
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link 
+                  className="nav-link"
+                  to="/doctor/managetemplates"
+                  onClick={closeNavbar}
+                  >
+                    <IoMdSettings /> Manage Templates
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" onClick={handleLogout}>
+                    <MdOutlineLogout /> Logout
                   </Link>
                 </li>
               </>
@@ -1216,7 +1278,7 @@ const DoctorNavbar = () => {
                     to="/clinic/details"
                     onClick={closeNavbar}
                   >
-                    Clinic Details
+                    <ImProfile /> Clinic Details
                   </Link>
                 </li>
                 <li className="nav-item">
@@ -1225,7 +1287,7 @@ const DoctorNavbar = () => {
                     to="/clinic/createslot"
                     onClick={closeNavbar}
                   >
-                    Create Slot
+                    <FaCheckToSlot /> Create Slot
                   </Link>
                 </li>
                 <li className="nav-item">
@@ -1234,7 +1296,7 @@ const DoctorNavbar = () => {
                     to="/clinic/appointmentbook"
                     onClick={closeNavbar}
                   >
-                    Book Appointment
+                    <GiNotebook /> Book Appointment
                   </Link>
                 </li>
                 <li className="nav-item">
@@ -1243,7 +1305,12 @@ const DoctorNavbar = () => {
                     to="/clinic/bookedappointment"
                     onClick={closeNavbar}
                   >
-                    Booked Appointment
+                     <MdFileDownloadDone /> Booked Appointment
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" onClick={handleLogout}>
+                  <MdOutlineLogout /> Logout
                   </Link>
                 </li>
               </>
@@ -1257,7 +1324,7 @@ const DoctorNavbar = () => {
                     to="/reception/details"
                     onClick={closeNavbar}
                   >
-                    Reception Details
+                    <ImProfile /> Reception Details
                   </Link>
                 </li>
                 <li className="nav-item">
@@ -1266,7 +1333,7 @@ const DoctorNavbar = () => {
                     to="/reception/createslot"
                     onClick={closeNavbar}
                   >
-                    Create Slot
+                    <FaCheckToSlot /> Create Slot
                   </Link>
                 </li>
                 <li className="nav-item">
@@ -1275,7 +1342,7 @@ const DoctorNavbar = () => {
                     to="/reception/appointmentbook"
                     onClick={closeNavbar}
                   >
-                    Book Appointment
+                    <GiNotebook /> Book Appointment
                   </Link>
                 </li>
                 <li className="nav-item">
@@ -1284,7 +1351,12 @@ const DoctorNavbar = () => {
                     to="/reception/bookedappointment"
                     onClick={closeNavbar}
                   >
-                    Booked Appointment
+                     <MdFileDownloadDone /> Booked Appointment
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" onClick={handleLogout}>
+                  <MdOutlineLogout /> Logout
                   </Link>
                 </li>
               </>

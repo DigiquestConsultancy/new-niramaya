@@ -1,0 +1,59 @@
+@media (max-width: 640px) {
+    .card-new {
+      display: flex; /* Enable flexbox */
+      flex-direction: column; /* Stack cards vertically */
+      align-items: center; /* Center-align cards horizontally */
+      justify-content: center; /* Center-align cards vertically */
+      margin: 0 auto; /* Center the container */
+      width: 100%; /* Ensure the container takes full width */
+    }
+  
+    .online-consultation-card, 
+    .clinic-visit-card {
+      width: 90%; /* Cards take 90% of the screen width */
+      margin: 10px 0; /* Add spacing between cards */
+      height: 350px; /* Adjust height automatically */
+      overflow: hidden; /* Prevent content overflow */
+      text-align: center; /* Center-align text within the card */
+    }
+  
+    .online-consultation-card .card-body,
+    .clinic-visit-card .card-body {
+      flex-wrap: wrap; /* Allow content to wrap */
+      justify-content: center; /* Center-align content */
+    }
+  
+    .online-consultation-card img,
+    .clinic-visit-card img {
+      margin-bottom: 10px;
+      width: 50px; /* Adjust image size */
+      height: 50px; /* Adjust image size */
+    }
+  
+    .online-consultation-card select,
+    .clinic-visit-card select {
+      font-size: 14px;
+      width: 100%; /* Make dropdown full width */
+      margin-top: 10px;
+    }
+  
+    .online-consultation-card .card-title,
+    .clinic-visit-card .card-title,
+    .online-consultation-card .card-text,
+    .clinic-visit-card .card-text {
+      font-size: 14px; /* Adjust font size for better readability */
+      text-align: center; /* Center-align text */
+    }
+  }
+  
+  @media (max-width: 468px) {
+    .card-new {
+      flex-direction: column !important; /* Stack cards vertically */
+    }
+  
+    .online-consultation-card,
+    .clinic-visit-card {
+      margin: 10px 0; /* Add spacing between cards */
+      width: 100%; /* Cards take full width on very small screens */
+    }
+  }

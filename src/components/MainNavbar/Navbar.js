@@ -1,72 +1,10 @@
 
-// import React from 'react';
-// import { Link, useLocation } from 'react-router-dom';
-// import Company from '../../images/logo.jpeg';
-// import '../../css/Navbar.css'; // Import Navbar.css for custom styles
-
-// const Navbar = () => {
-//     const location = useLocation();
-
-//     return (
-//         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-//             <div className="container-fluid">
-//                 <Link className="navbar-brand" to="/">
-//                     <img src={Company} alt="Company Logo" height="40" />
-//                 </Link>
-//                 <button
-//                     className="navbar-toggler"
-//                     type="button"
-//                     data-bs-toggle="collapse"
-//                     data-bs-target="#navbarNav"
-//                     aria-controls="navbarNav"
-//                     aria-expanded="false"
-//                     aria-label="Toggle navigation"
-//                 >
-//                     <span className="navbar-toggler-icon"></span>
-//                 </button>
-//                 <div className="collapse navbar-collapse" id="navbarNav">
-//                     <ul className="navbar-nav ms-auto">
-//                         {location.pathname === '/doctor/login' && (
-//                             <li className="nav-item">
-//                                 <Link to="/patient/register" className="btn btn-outline-light">Patient Register</Link>
-//                             </li>
-//                         )}
-//                         {location.pathname === '/patient/login' && (
-//                             <li className="nav-item">
-//                                 <Link to="/doctor/login" className="btn btn-outline-light">Doctor Login</Link>
-//                             </li>
-//                         )}
-//                         {(location.pathname === '/patient/register' || location.pathname === '/doctor/register') && (
-//                             <li className="nav-item">
-//                                 <Link to="/doctor/login" className="btn btn-outline-light">Doctor Login</Link>
-//                             </li>
-//                         )}
-//                         {location.pathname !== '/doctor/login' && location.pathname !== '/patient/register' && location.pathname !== '/doctor/register' && location.pathname !== '/patient/login' && (
-//                             <>
-//                                 <li className="nav-item">
-//                                     <Link to="/patient/login" className="btn btn-outline-light">Login</Link>
-//                                 </li>
-//                                 <li className="nav-item">
-//                                     <Link to="/patient/register" className="btn btn-outline-light ms-2">Register</Link>
-//                                 </li>
-//                             </>
-//                         )}
-//                     </ul>
-//                 </div>
-//             </div>
-//         </nav>
-//     );
-// };
-
-// export default Navbar;
-
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 import Container from 'react-bootstrap/Container';
-import Company from '../../images/logo.jpeg';
+import Company from '../../images/logo.jpg';
 import '../../css/Navbar.css';
  
 const CustomNavbar = () => {
@@ -82,8 +20,8 @@ const CustomNavbar = () => {
     };
  
     return (
-        <Navbar bg="dark" variant="dark" expand="lg">
-            <Container>
+        <Navbar expand="lg">
+            <Container className='sticky-top'>
                 <Navbar.Brand as={Link} to="/">
                     <img src={Company} alt="Company Logo" height="40" />
                 </Navbar.Brand>
@@ -91,7 +29,7 @@ const CustomNavbar = () => {
                     <Nav.Link
                         as={Link}
                         to={handleLoginSignUpRedirect()}
-                        className="btn custom-link"
+                        className="btn custom-link text-white"
                         style={{ paddingRight: '30px' }}
                     >
                         Login/SignUp

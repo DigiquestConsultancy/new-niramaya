@@ -201,8 +201,9 @@ const Transaction = () => {
     useEffect(() => {
         const fetchTransactions = async () => {
             try {
+                const patientToken = localStorage.getItem("patient_token");
                 const decodedToken = jwtDecode(patientToken);
-                const patientId = decodedToken?.patient_id;
+                const patientId = decodedToken.patient_id;
                 const response = await BaseUrl.get(`/payment/paymenthistory/?patient_id=${patientId}`);
                 if (response.status === 200) {
                     setTransactions(response.data);
@@ -271,7 +272,7 @@ const Transaction = () => {
                                         <td>{transaction.amount.toFixed(2)}</td>
                                         <td>{paymentDate}</td>
                                         <td>{paymentTime}</td>
-                                        <td>{transaction.payment_method}</td>
+                                        <td>{transaction.payment_group}</td>
                                         <td
                                             style={{
                                                 color:

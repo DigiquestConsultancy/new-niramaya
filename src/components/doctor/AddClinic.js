@@ -4,6 +4,8 @@ import { jwtDecode } from "jwt-decode";
 import { Modal, Button, Form } from "react-bootstrap";
 import styled from "styled-components";
 import Loader from "react-js-loader";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 const LoaderWrapper = styled.div`
   display: flex;
@@ -94,15 +96,18 @@ const AddClinic = () => {
       );
       if (response.status === 200) {
         setVerificationStatus(response.data.success);
+        setMessage(response.data.success); // Set success message
+        setMessageType("success");
         setShowOtpModal(true);
       } else {
+        setMessage(response.data.success || ""); // Set error message
         setMessageType("error");
-        setShowMessageModal(true);
+        setShowOtpModal(true);
       }
     } catch (error) {
       setMessage(error.response?.data?.error || "");
       setMessageType("error");
-      setShowMessageModal(true);
+      setShowOtpModal(true);
     } finally {
       setLoading(false);
     }
@@ -137,16 +142,16 @@ const AddClinic = () => {
         setFormData({ ...formData, mobile_number: mobileNumber });
         setMessage(response.data.success);
         setMessageType("success");
-        setShowMessageModal(true);
+        // setShowMessageModal(true);
       } else {
         setMessage("OTP verification failed");
         setMessageType("error");
-        setShowMessageModal(true);
+        // setShowMessageModal(true);
       }
     } catch (error) {
       setMessage(error.response?.data?.error || "");
       setMessageType("error");
-      setShowMessageModal(true);
+      // setShowMessageModal(true);
     } finally {
       setLoading(false);
     }
@@ -170,7 +175,7 @@ const AddClinic = () => {
       setMessageType("error");
     } finally {
       setLoading(false);
-      setShowMessageModal(true);
+      // setShowMessageModal(true);
     }
   };
 
@@ -181,8 +186,9 @@ const AddClinic = () => {
     let newErrors = { ...errors };
     switch (name) {
       case "name":
-        if (!/^[a-zA-Z\s]*$/.test(value)) {
-          newErrors[name] = "Name should contain only alphabets";
+        if (!/^[a-zA-Z.\s]*$/.test(value)) {
+          // Updated to allow dots
+          newErrors[name] = "Name should contain only alphabets and dots";
         } else {
           delete newErrors[name];
         }
@@ -309,13 +315,14 @@ const AddClinic = () => {
               Mobile Number:
             </label>
             <div className="col-sm-8">
-              <input
-                type="number"
-                placeholder="Please Enter Mobile Number"
-                className="form-control"
-                id="mobileNumber"
-                value={mobileNumber}
-                onChange={(e) => setMobileNumber(e.target.value)}
+              <PhoneInput
+                id="mobile_number"
+                name="mobile_number"
+                placeholder="Enter mobile number"
+                defaultCountry="IN" 
+                value={mobileNumber} 
+                onChange={setMobileNumber}
+                required
               />
             </div>
             <div className="col-sm-1">
@@ -364,7 +371,7 @@ const AddClinic = () => {
                 <Form.Label>Mobile Number</Form.Label>
                 <span className="text-danger">*</span>
                 <Form.Control
-                  type="number"
+                  type="text"
                   name="mobile_number"
                   value={formData.mobile_number}
                   required
@@ -379,9 +386,13 @@ const AddClinic = () => {
                   name="name"
                   value={formData.name}
                   required
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^[a-zA-Z\s.]*$/.test(value)) {
+                      handleInputChange(e);
+                    }
+                  }}
                 />
-                {errors.name && <p className="text-danger">{errors.name}</p>}
               </Form.Group>
               <Form.Group controlId="formGender" className="col-md-4">
                 <Form.Label>Gender</Form.Label>
@@ -398,9 +409,6 @@ const AddClinic = () => {
                   <option value="female">Female</option>
                   <option value="other">Other</option>
                 </Form.Control>
-                {errors.gender && (
-                  <p className="text-danger">{errors.gender}</p>
-                )}
               </Form.Group>
             </div>
             <div className="row mt-3">
@@ -413,9 +421,6 @@ const AddClinic = () => {
                   max={today}
                   onChange={handleInputChange}
                 />
-                {errors.date_of_birth && (
-                  <p className="text-danger">{errors.date_of_birth}</p>
-                )}
               </Form.Group>
               <Form.Group controlId="formAge" className="col-md-4">
                 <Form.Label>Age</Form.Label>
@@ -425,9 +430,13 @@ const AddClinic = () => {
                   name="age"
                   value={formData.age}
                   required
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^\d*$/.test(value)) {
+                      handleInputChange(e);
+                    }
+                  }}
                 />
-                {errors.age && <p className="text-danger">{errors.age}</p>}
               </Form.Group>
               <Form.Group controlId="formQualification" className="col-md-4">
                 <Form.Label>Qualification</Form.Label>
@@ -437,7 +446,12 @@ const AddClinic = () => {
                   name="qualification"
                   value={formData.qualification}
                   required
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^[a-zA-Z\s.,]*$/.test(value)) {
+                      handleInputChange(e);
+                    }
+                  }}
                 />
               </Form.Group>
             </div>
@@ -450,7 +464,12 @@ const AddClinic = () => {
                   name="specialization"
                   value={formData.specialization}
                   required
-                  onChange={handleInputChange}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^[a-zA-Z\s.,]*$/.test(value)) {
+                      handleInputChange(e);
+                    }
+                  }}
                 />
               </Form.Group>
               <Form.Group controlId="formAddress" className="col-md-8">
@@ -463,9 +482,6 @@ const AddClinic = () => {
                   required
                   onChange={handleInputChange}
                 />
-                {errors.address && (
-                  <p className="text-danger">{errors.address}</p>
-                )}
               </Form.Group>
             </div>
             <Button
@@ -488,6 +504,17 @@ const AddClinic = () => {
             <Modal.Title>OTP Verification</Modal.Title>
           </Modal.Header>
           <Modal.Body>
+            {/* Display the success or error message within the OTP modal */}
+            {message && (
+              <p
+                className={
+                  messageType === "success" ? "text-success" : "text-danger"
+                }
+              >
+                {message}
+              </p>
+            )}
+
             <div className="otp-container d-flex justify-content-between mb-3">
               {otp.map((digit, index) => (
                 <input

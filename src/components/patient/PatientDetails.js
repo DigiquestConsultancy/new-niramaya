@@ -1,6 +1,26 @@
 import React, { useState, useEffect } from "react";
 import BaseUrl from "../../api/BaseUrl"; // Import the BaseUrl instance
-import { jwtDecode } from "jwt-decode"; // Update this import
+import { jwtDecode } from "jwt-decode"; // Correct the import for jwt-decode
+import { Container } from "react-bootstrap";
+import styled from "styled-components";
+import Loader from "react-js-loader";
+
+const LoaderWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: rgba(255, 255, 255, 0.7);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+`;
+
+const LoaderImage = styled.div`
+  width: 400px;
+`;
 
 const PatientDetails = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +33,7 @@ const PatientDetails = () => {
     age: "",
   });
 
+   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -44,20 +65,18 @@ const PatientDetails = () => {
 
   const fetchPatientDetails = async () => {
     try {
+      setLoading(true);
       const mobile_number = localStorage.getItem("mobile_number");
-
-      if (!mobile_number) {
-        throw new Error("Phone number not found in local storage");
-      }
-
       const response = await BaseUrl.get(
         `/patient/details/?mobile_number=${mobile_number}`
       );
       const patientDetails = response.data[0];
 
-      if (patientDetails) {
-        setIsExistingUser(true); // Set to true if details exist
-        localStorage.setItem("patient_id", patientDetails.id); // Store patient ID in local storage
+      if (patientDetails.success) {
+        setIsExistingUser(false);
+      } else {
+        setIsExistingUser(true); 
+        localStorage.setItem("patient_id", patientDetails.id); 
 
         setFormData({
           name: patientDetails.name,
@@ -74,32 +93,9 @@ const PatientDetails = () => {
         error.response?.data?.error || "Error fetching patient details."
       );
     }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    const namePattern = /^[a-zA-Z\s]*$/;
-
-    if (!formData.name) {
-      newErrors.name = "Name is required";
-    } else if (!namePattern.test(formData.name)) {
-      newErrors.name = "Name cannot contain special characters or numbers";
+    finally {
+      setLoading(false);
     }
-
-    if (!formData.gender) {
-      newErrors.gender = "Gender is required";
-    }
-
-    if (!formData.date_of_birth) {
-      newErrors.date_of_birth = "Date of Birth is required";
-    }
-
-    if (!formData.address) {
-      newErrors.address = "Address is required";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e) => {
@@ -112,39 +108,33 @@ const PatientDetails = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
     const formDataToSubmit = new FormData();
     for (const key in formData) {
       formDataToSubmit.append(key, formData[key]);
     }
 
     try {
+      setLoading(true);
       const mobile_number = localStorage.getItem("mobile_number");
       formDataToSubmit.append("mobile_number", mobile_number);
 
       let response;
       if (isExistingUser) {
-        // Update details if they exist
         response = await BaseUrl.put(
           `/patient/details/?mobile_number=${mobile_number}`,
           formDataToSubmit
         );
       } else {
-        // Create new details if they don't exist
         response = await BaseUrl.post(
           `/patient/details/?mobile_number=${mobile_number}`,
           formDataToSubmit
         );
+        setIsExistingUser(true); 
       }
 
       if (response.status === 200) {
         setSuccessMessage(response.data.success);
         setErrorMessage("");
-        // Fetch updated details after successful submission
         fetchPatientDetails();
       }
     } catch (error) {
@@ -153,130 +143,143 @@ const PatientDetails = () => {
       );
       setSuccessMessage("");
     }
+    finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="container mt-5">
-      {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
-      {successMessage && (
-        <div className="alert alert-success">{successMessage}</div>
+    <Container fluid style={{ backgroundColor: "#D7EAF0", overflowX: "hidden" }}>
+      {loading && (
+        <LoaderWrapper>
+          <LoaderImage>
+            <Loader
+              type="spinner-circle"
+              bgColor="#0091A5"
+              color="#0091A5"
+              title="Loading..."
+              size={100}
+            />
+          </LoaderImage>
+        </LoaderWrapper>
       )}
-      <form
-        className="user-profile-form p-4 rounded shadow"
-        onSubmit={handleSubmit}
-        style={{
-          backgroundColor: "#f8f9fa",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-        }}
-      >
-        <h2>Patient Details</h2>
-        <div className="row mb-3">
-          <div className="col-md-6">
-            <label>Mobile No</label> <span className="text-danger">*</span>{" "}
-            {/* Mandatory indicator */}
-            <input
-              type="number"
-              className="form-control"
-              name="mobile_number"
-              value={formData.mobile_number}
-              disabled
-              onChange={handleChange}
-            />
-          </div>
-          <div className="col-md-6">
-            <label>Name</label> <span className="text-danger">*</span>{" "}
-            {/* Mandatory indicator */}
-            <input
-              type="text"
-              className="form-control"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-            />
-            {errors.name && <span className="text-danger">{errors.name}</span>}
-          </div>
-        </div>
-        <div className="row mb-3">
-          <div className="col-md-6">
-            <label>Gender</label> <span className="text-danger">*</span>{" "}
-            {/* Mandatory indicator */}
-            <select
-              className="form-select"
-              name="gender"
-              value={formData.gender}
-              onChange={handleChange}
-            >
-              <option value="">Select Gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Others</option>
-            </select>
-            {errors.gender && (
-              <span className="text-danger">{errors.gender}</span>
-            )}
-          </div>
-          <div className="col-md-6">
-            <label>Date of Birth</label> <span className="text-danger">*</span>{" "}
-            {/* Mandatory indicator */}
-            <input
-              type="date"
-              className="form-control"
-              name="date_of_birth"
-              max={today}
-              value={formData.date_of_birth}
-              onChange={handleChange}
-            />
-            {errors.date_of_birth && (
-              <span className="text-danger">{errors.date_of_birth}</span>
-            )}
-          </div>
-        </div>
-        <div className="row mb-3">
-          <div className="col-md-6">
-            <label>Blood Group</label>
-            <input
-              type="text"
-              className="form-control"
-              name="blood_group"
-              value={formData.blood_group}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="col-md-6">
-            <label>Age</label> <span className="text-danger">*</span>{" "}
-            {/* Mandatory indicator */}
-            <input
-              type="text"
-              className="form-control"
-              name="age"
-              value={formData.age}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="col-md-6">
-            <label>Address</label> <span className="text-danger">*</span>{" "}
-            {/* Mandatory indicator */}
-            <input
-              type="text"
-              className="form-control"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-            />
-            {errors.address && (
-              <span className="text-danger">{errors.address}</span>
-            )}
-          </div>
-        </div>
-        <button
-          type="submit"
-          className="btn"
-          style={{ backgroundColor: "#199fd9", color: "#f1f8dc" }}
+      <div className="container mt-5 mb-5">
+        {errorMessage && (
+          <div className="alert alert-danger">{errorMessage}</div>
+        )}
+        {successMessage && (
+          <div className="alert alert-success">{successMessage}</div>
+        )}
+        <form
+          className="user-profile-form p-4 rounded shadow"
+          onSubmit={handleSubmit}
+          style={{
+            backgroundColor: "#f8f9fa",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+          }}
         >
-          Update
-        </button>
-      </form>
-    </div>
+          <h2>Patient Details</h2>
+          <div className="row mb-3">
+            <div className="col-md-4">
+              <label>Mobile No</label> <span className="text-danger">*</span>{" "}
+              <input
+                type="text"
+                className="form-control"
+                name="mobile_number"
+                value={formData.mobile_number}
+                disabled
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="col-md-4">
+              <label>Name</label> <span className="text-danger">*</span>{" "}
+              <input
+                type="text"
+                className="form-control"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="col-md-4">
+              <label>Gender</label> <span className="text-danger">*</span>{" "}
+              <select
+                className="form-select"
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Others</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="row mb-3">
+            <div className="col-md-4">
+              <label>Date of Birth</label>{" "}
+              <span className="text-danger">*</span>{" "}
+              <input
+                type="date"
+                className="form-control"
+                name="date_of_birth"
+                max={today}
+                value={formData.date_of_birth}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="col-md-4">
+              <label>Blood Group</label>
+              <input
+                type="text"
+                className="form-control"
+                name="blood_group"
+                value={formData.blood_group}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="col-md-4">
+              <label>Age</label> <span className="text-danger">*</span>{" "}
+              <input
+                type="text"
+                className="form-control"
+                name="age"
+                value={formData.age}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="row mb-3">
+            <div className="col-md-4">
+              <label>Address</label> <span className="text-danger">*</span>{" "}
+              <input
+                type="text"
+                className="form-control"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+          <button
+            type="submit"
+            className="btn"
+            style={{ backgroundColor: "#199fd9", color: "#f1f8dc" }}
+          >
+            {isExistingUser ? "Update" : "Save"}
+          </button>
+        </form>
+      </div>
+    </Container>
   );
 };
 
