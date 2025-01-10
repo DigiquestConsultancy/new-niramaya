@@ -295,7 +295,7 @@ function ManageTemplates() {
           <div className="header-section">
             {header && (
               <img
-                src={`${header}`}
+                src={`${BaseUrl.defaults.baseURL}${header}`}
                 alt="Header"
                 className="header-image"
               />
@@ -316,7 +316,7 @@ function ManageTemplates() {
           <div className="footer-section">
             {footer && (
               <img
-              src={`${footer}`}
+              src={`${BaseUrl.defaults.baseURL}${footer}`}
                 alt="Footer"
                 className="footer-image"
               />
