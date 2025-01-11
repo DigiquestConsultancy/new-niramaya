@@ -3824,16 +3824,6 @@
 
 
 
-
-
-
-
-
-
-
-// // New changes in UI
-// // New changes in UI
-
 // import React, { useState, useEffect } from "react";
 // import "../../css/ClinicBookedAppointment.css";
 // import {
@@ -3850,7 +3840,7 @@
 //   Toast,
 //   ToastContainer,
 // } from "react-bootstrap";
-// import { FaEdit, FaTrash, FaChevronDown, FaChevronUp } from "react-icons/fa";
+// import { FaTrash, FaChevronDown, FaChevronUp } from "react-icons/fa";
 // import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 // import {
 //   faFileAlt,
@@ -3863,7 +3853,6 @@
 // import styled from "styled-components";
 // import Loader from "react-js-loader";
 // import { FaSyncAlt } from "react-icons/fa";
-// import { IoPrintOutline } from "react-icons/io5";
 // import { BsPrinterFill } from "react-icons/bs";
 
 // const LoaderWrapper = styled.div`
@@ -3889,7 +3878,6 @@
 //   const [doctorId, setDoctorId] = useState("");
 //   const [showConfirmation, setShowConfirmation] = useState(false);
 //   const [appointmentIdToDelete, setAppointmentIdToDelete] = useState(null);
-//   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);
 //   const [errorMessage, setErrorMessage] = useState("");
 //   const [expandedAppointmentId, setExpandedAppointmentId] = useState(null);
 //   const [expandedPrescriptionId, setExpandedPrescriptionId] = useState(null);
@@ -3931,7 +3919,6 @@
 //     document_type: "",
 //     document_file: "",
 //   });
-//   const [timeSlots, setTimeSlots] = useState([]);
 //   const [medicalRecords, setMedicalRecords] = useState([]);
 //   const [whatsappReport, setWhatsappReport] = useState([]);
 //   const [showMedicalRecords, setShowMedicalRecords] = useState(false);
@@ -3939,7 +3926,6 @@
 //   const [successMessage, setSuccessMessage] = useState("");
 //   const [mobileNumber, setMobileNumber] = useState("");
 //   const [showSymptomsForm, setShowSymptomsForm] = useState(false);
-//   const [appointmentData, setAppointmentData] = useState(null);
 //   const [searchSymptom, setSearchSymptom] = useState("");
 //   const [searchResults, setSearchResults] = useState([]);
 //   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
@@ -3979,8 +3965,6 @@
 //     try {
 //       const token = localStorage.getItem("token");
 //       const decodedToken = jwtDecode(token);
-//       const userId = decodedToken.doctor_id;
-//       const userType = decodedToken.user_type;
 
 //       const response = await BaseUrl.get(
 //         `/patient/patientdocumentusingappointmentid/`,
@@ -4129,22 +4113,17 @@
 //     } catch (error) {
 //       return;
 //     }
-
 //     const formDataToSend = new FormData();
-
 //     formDataToSend.append("appointment", expandedAppointmentId);
 //     formDataToSend.append("document_name", formData.document_name);
 //     formDataToSend.append("patient_name", formData.patient_name);
 //     formDataToSend.append("document_date", formData.document_date);
 //     formDataToSend.append("document_type", formData.document_type);
-
 //     if (selectedFiles.length > 0) {
 //       formDataToSend.append("document_file", selectedFiles[0]);
 //     }
-
 //     formDataToSend.append("user_type", decodedToken.user_type);
 //     formDataToSend.append("user_id", decodedToken.doctor_id);
-
 //     try {
 //       let response;
 //       if (editingRecordId) {
@@ -4253,25 +4232,6 @@
 //     }
 //   };
 
-//   const handleViewPrescription = async (prescriptionId, appointment_id) => {
-//     if (expandedPrescriptionId === prescriptionId) {
-//       setExpandedPrescriptionId(null);
-//     } else {
-//       try {
-//         const response = await BaseUrl.get(`/patient/patientprescriptonfile/`, {
-//           params: { appointment_id: appointment_id },
-//         });
-//         const prescriptionData = response.data;
-//         setPrescriptionDocuments(prescriptionData);
-//         setExpandedPrescriptionId(prescriptionId);
-//       } catch (error) {
-//         setShowToast(true);
-//         setToastMessage("Failed to view prescription.");
-//         setToastVariant("danger");
-//       }
-//     }
-//   };
-
 //   const handlePreview = async (documentId) => {
 //     setLoading(true);
 //     try {
@@ -4305,8 +4265,6 @@
 //   useEffect(() => {
 //     const getDoctorIdFromToken = async () => {
 //       const token = localStorage.getItem("token");
-//       if (!token) return;
-
 //       try {
 //         const decodedToken = jwtDecode(token);
 //         const doctor_id = decodedToken.doctor_id;
@@ -4524,22 +4482,6 @@
 //     }
 //   };
 
-//   const getPrescriptions = async (appointmentId) => {
-//     try {
-//       const response = await BaseUrl.get(`/patient/patientpriscription/`, {
-//         params: { appointment_id: appointmentId },
-//       });
-//       if (response.status === 200) {
-//         const fetchedPrescriptions = response.data;
-//         setPrescriptions(fetchedPrescriptions);
-//       } else {
-//         setErrorMessage("Failed to fetch prescriptions");
-//       }
-//     } catch (error) {
-//       setErrorMessage(error.response?.data?.error);
-//     }
-//   };
-
 //   const handleVitalChange = (e) => {
 //     const { name, value } = e.target;
 //     setRecordDetails((prevDetails) => {
@@ -4651,35 +4593,12 @@
 //     }
 //   };
 
-//   const handleDownload = async (appointment_id) => {
-//     try {
-//       const response = await BaseUrl.get(`/patient/printrepport/`, {
-//         params: {
-//           appointment_id: expandedAppointmentId,
-//         },
-//         responseType: "blob",
-//       });
-//       const blob = new Blob([response.data], { type: "application/pdf" });
-//       const url = window.URL.createObjectURL(blob);
-//       const link = document.createElement("a");
-//       link.href = url;
-//       link.setAttribute("download", "AppointmentRecord.pdf");
-//       document.body.appendChild(link);
-//       link.click();
-//       link.remove();
-//     } catch (error) {}
-//   };
-
 //   const handleUpdate = async () => {
 //     setLoading(true);
 //     try {
 //       const selectedAppointment = appointments.find(
 //         (appointment) => appointment.appointment_id === expandedAppointmentId
 //       );
-//       if (!selectedAppointment) {
-//         setErrorMessage("Selected appointment not found");
-//         return;
-//       }
 //       const payload = {
 //         appointment_id: selectedAppointment.appointment_id,
 //         patient_id: selectedAppointment.patient_id,
@@ -4903,61 +4822,6 @@
 //     } catch (error) {}
 //   };
 
-//   const toggleVitalForm = async (appointment_id) => {
-//     setShowVitalForm(!showVitalForm);
-//     setShowPrescriptionForm(false);
-//     setExpandedAppointmentId(appointment_id);
-//     if (!showVitalForm) {
-//       try {
-//         const selectedAppointment = appointments.find(
-//           (appointment) => appointment.appointment_id === appointment_id
-//         );
-//         if (selectedAppointment) {
-//           const appointment_date = selectedAppointment.appointment_date;
-//           const fetchDataResponse = await BaseUrl.get(`/patient/vital/`, {
-//             params: {
-//               appointment_id: appointment_id,
-//               appointment_date: appointment_date,
-//             },
-//           });
-//           if (
-//             fetchDataResponse.status === 200 &&
-//             fetchDataResponse.data.length > 0
-//           ) {
-//             const fetchedData = fetchDataResponse.data[0];
-//             setRecordDetails({
-//               appointment_id: appointment_id,
-//               blood_pressure: fetchedData.blood_pressure || "",
-//               oxygen_level: fetchedData.oxygen_level || "",
-//               body_temperature: fetchedData.body_temperature || "",
-//               heart_rate: fetchedData.heart_rate || "",
-//               pulse_rate: fetchedData.pulse_rate || "",
-//               sugar_level: fetchedData.sugar_level || "",
-//               weight: fetchedData.weight,
-//               appointment_date: appointment_date,
-//             });
-//           } else {
-//           }
-//         } else {
-//         }
-//       } catch (error) {}
-//     } else {
-//       setRecordDetails({
-//         appointment_id: "",
-//         blood_pressure: "",
-//         oxygen_level: "",
-//         sugar_level: "",
-//         weight: "",
-//         height: "",
-//         bmi: "",
-//         pulse_rate: "",
-//         heart_rate: "",
-//         body_temperature: "",
-//         appointment_date: "",
-//       });
-//     }
-//   };
-
 //   const handleVitalSubmit = async () => {
 //     setLoading(true);
 //     try {
@@ -5056,15 +4920,6 @@
 //     );
 //   };
 
-//   const handleSymptomDetailChange = (index, event) => {
-//     const { value } = event.target;
-//     setSelectedSymptoms((prevSymptoms) =>
-//       prevSymptoms.map((symptom, i) =>
-//         i === index ? `${symptom.symptoms_name}: ${value}` : symptom
-//       )
-//     );
-//   };
-
 //   const handleSymptomSearch = async (e) => {
 //     const value = e.target.value;
 //     setSearchSymptom(value);
@@ -5101,36 +4956,6 @@
 //         i === index ? { ...symptom, more_options: value } : symptom
 //       )
 //     );
-//   };
-
-//   const toggleSymptomsForm = async (appointment_id) => {
-//     setShowSymptomsForm(!showSymptomsForm);
-//     setExpandedAppointmentId(appointment_id);
-//     if (!showSymptomsForm) {
-//       try {
-//         const selectedAppointment = appointments.find(
-//           (appointment) => appointment.appointment_id === appointment_id
-//         );
-//         if (selectedAppointment) {
-//           const response = await BaseUrl.get(
-//             `/patient/patientsymptoms/?appointment_id=${appointment_id}`
-//           );
-//           if (response.status === 200) {
-//             setSelectedSymptoms(response.data.symptoms || []);
-//           } else {
-//           }
-//         } else {
-//         }
-//       } catch (error) {
-//         setErrorMessage("Failed to fetch symptoms.");
-//       }
-//     } else {
-//       setSelectedSymptoms([]);
-//     }
-//   };
-
-//   const handleSymptomSearchChange = (e) => {
-//     setSearchSymptom(e.target.value);
 //   };
 
 //   const handleAddSymptom = (symptom) => {
@@ -5321,22 +5146,6 @@
 //     }));
 //   };
 
-//   const handleTimeSelection = (e, index, timeSlot) => {
-//     const updatedPrescriptions = prescriptions.map((prescription, i) => {
-//       if (i === index) {
-//         let updatedTime;
-//         if (e.target.checked) {
-//           updatedTime = [...prescription.time, timeSlot];
-//         } else {
-//           updatedTime = prescription.time.filter((time) => time !== timeSlot);
-//         }
-//         return { ...prescription, time: updatedTime };
-//       }
-//       return prescription;
-//     });
-//     setPrescriptions(updatedPrescriptions);
-//   };
-
 //   const handlePrescriptionDocs = async (appointment_id) => {
 //     try {
 //       const selectedAppointment = appointments.find(
@@ -5513,10 +5322,6 @@
 //     }
 //   };
 
-//   const toggleDetailsVisibility = () => {
-//     setIsDetailsVisible(!isDetailsVisible);
-//   };
-
 //   return (
 //     <Container fluid style={{backgroundColor: "#F2F9FF", margin: "0px", padding: "0px"}}>
 //       {errorMessage && (
@@ -5618,14 +5423,7 @@
 //             </Form>
 //         </div>
 
-//       <div
-//         className="p-2"
-//         // style={{
-//         //   borderRadius: "15px",
-//         //   border: " #0091A5",
-//         //   background: "#0091A5",
-//         // }}
-//       >
+//       <div className="p-2">
 //         <Modal
 //           show={!!errorMessage || !!successMessage}
 //           onHide={handleCloseMessageModal}
@@ -5684,7 +5482,6 @@
 //                key={appointment.appointment_id}
 //                className="mb-5 p-3"
 //              >
-             
 //                   <Card
 //                     className={
 //                       appointment.is_patient ? "table-danger shadow" : "shadow"
@@ -5727,7 +5524,7 @@
 //                               style={{
 //                                 borderRadius: "15px",
 //                                 border: " #0091A5",
-//                                 background: "#C9E6F0",
+//                                 background: "#f1f8fb",
 //                               }}
 //                             >
 //                               <Card.Body
@@ -5740,7 +5537,6 @@
 //                                     display: "flex", 
 //                                     alignItems: "center", 
 //                                     justifyContent: "space-between",
-//                                     padding: "10px 20px",
 //                                   }}
 //                                 >
 //                                   <div
@@ -5752,7 +5548,6 @@
 //                                     <h2
 //                                       style={{
 //                                         fontWeight: "600",
-//                                         // fontSize: "40px",
 //                                         color: "#000",
 //                                         fontFamily: "Sans-Serif",
 //                                         lineHeight: "46.88px",
@@ -5807,7 +5602,7 @@
 //                                               style={{
 //                                                 color: "#003366",
 //                                                 fontFamily: "Sans-Serif",
-//                                                 fontSize: "25px",
+//                                                 fontSize: "18px",
 //                                                 fontWeight: 600,
 //                                                 lineHeight: "29.3px",
 //                                                 textAlign: "left",
@@ -5836,7 +5631,7 @@
 //                                               style={{
 //                                                 color: "#003366",
 //                                                 fontFamily: "Sans-Serif",
-//                                                 fontSize: "25px",
+//                                                 fontSize: "18px",
 //                                                 fontWeight: 600,
 //                                                 lineHeight: "29.3px",
 //                                                 textAlign: "left",
@@ -5868,7 +5663,7 @@
 //                                               style={{
 //                                                 color: "#003366",
 //                                                 fontFamily: "Sans-Serif",
-//                                                 fontSize: "25px",
+//                                                 fontSize: "18px",
 //                                                 fontWeight: 600,
 //                                                 lineHeight: "29.3px",
 //                                                 textAlign: "left",
@@ -5897,7 +5692,7 @@
 //                                               style={{
 //                                                 color: "#003366",
 //                                                 fontFamily: "Sans-Serif",
-//                                                 fontSize: "25px",
+//                                                 fontSize: "18px",
 //                                                 fontWeight: 600,
 //                                                 lineHeight: "29.3px",
 //                                                 textAlign: "left",
@@ -5936,7 +5731,7 @@
 //                                               style={{
 //                                                 color: "#003366",
 //                                                 fontFamily: "Sans-Serif",
-//                                                 fontSize: "25px",
+//                                                 fontSize: "18px",
 //                                                 fontWeight: 600,
 //                                                 lineHeight: "29.3px",
 //                                                 textAlign: "left",
@@ -5960,11 +5755,10 @@
 //                                       <div className="d-flex justify-content-center gap-2">
 //                                         <Button
 //                                           style={{
-//                                             backgroundColor: "#0166CB",
+//                                             backgroundColor: "#C62E2E",
 //                                             color: "#FFFFFF",
 //                                             border: "none",
 //                                             borderRadius: "5px",
-//                                             padding: "10px 20px",
 //                                             cursor: "pointer",
 //                                           }}
 //                                           onClick={() =>
@@ -5978,11 +5772,10 @@
 
 //                                         <Button
 //                                           style={{
-//                                             backgroundColor: "#0166CB",
+//                                             backgroundColor: "#FF8A08",
 //                                             color: "#FFFFFF",
 //                                             border: "none",
 //                                             borderRadius: "5px",
-//                                             padding: "10px 20px",
 //                                             cursor: "pointer",
 //                                           }}
 //                                           onClick={() =>
@@ -5995,14 +5788,10 @@
 //                                         </Button>
 //                                         <Button
 //                                           style={{
-//                                             // position: "absolute",
-//                                             // top: "10px",
-//                                             // centered: "15px",
-//                                             backgroundColor: "#0166CB",
+//                                             backgroundColor: "#295F98",
 //                                             color: "#ffffff",
 //                                             border: "none",
 //                                             borderRadius: "5px",
-//                                             padding: "10px 20px",
 //                                             cursor: "pointer",
 //                                           }}
 //                                           onClick={handleUpdate}
@@ -6017,18 +5806,19 @@
 //                             </Card>
 //                           </td>
 //                         </tr>
+                      
 //                       )}
 //                       {showSymptomsForm &&
 //                         expandedAppointmentId ===
 //                           appointment.appointment_id && (
 //                           <tr>
-//                             <td colSpan="7">
+//                             <td>
 //                               <Card
 //                                 className="shadow-sm mt-3"
 //                                 style={{
 //                                   borderRadius: "15px",
 //                                   border: "#0091A5",
-//                                   background: "#C9E6F0",
+//                                   background: "#f1f8fb",
 //                                 }}
 //                               >
 //                                 <Card.Body style={{ position: "relative" }}>
@@ -6038,7 +5828,6 @@
 //                                       display: "flex",
 //                                       alignItems: "center",
 //                                       justifyContent: "flex-start",
-//                                       padding: "10px 20px",
 //                                     }}
 //                                   >
 //                                     <h2
@@ -6270,7 +6059,7 @@
 //                                 style={{
 //                                   borderRadius: "15px",
 //                                   border: " #0091A5",
-//                                   background: "#C9E6F0",
+//                                   background: "#f1f8fb",
 //                                 }}
 //                               >
 //                                 <Card.Body
@@ -6283,7 +6072,6 @@
 //                                       display: "flex",
 //                                       alignItems: "center",
 //                                       justifyContent: "flex-start",
-//                                       padding: "10px 20px",
 //                                     }}
 //                                   >
 //                                     <h2
@@ -6328,6 +6116,7 @@
 //                                         <th
 //                                           style={{
 //                                             fontFamily: "sans-serif",
+//                                             fontSize: "16px",
 //                                             backgroundColor: "#D7EAF0",
 //                                             color: "#003366",
 //                                           }}
@@ -6337,6 +6126,7 @@
 //                                         <th
 //                                           style={{
 //                                             fontFamily: "sans-serif",
+//                                             fontSize: "16px",
 //                                             backgroundColor: "#D7EAF0",
 //                                             color: "#003366",
 //                                           }}
@@ -6346,6 +6136,7 @@
 //                                         <th
 //                                           style={{
 //                                             fontFamily: "sans-serif",
+//                                             fontSize: "16px",
 //                                             backgroundColor: "#D7EAF0",
 //                                             color: "#003366",
 //                                           }}
@@ -6355,6 +6146,7 @@
 //                                         <th
 //                                           style={{
 //                                             fontFamily: "sans-serif",
+//                                             fontSize: "16px",
 //                                             backgroundColor: "#D7EAF0",
 //                                             color: "#003366",
 //                                           }}
@@ -6364,6 +6156,7 @@
 //                                         <th
 //                                           style={{
 //                                             fontFamily: "sans-serif",
+//                                             fontSize: "16px",
 //                                             backgroundColor: "#D7EAF0",
 //                                             color: "#003366",
 //                                           }}
@@ -6373,6 +6166,7 @@
 //                                         <th
 //                                           style={{
 //                                             fontFamily: "sans-serif",
+//                                             fontSize: "16px",
 //                                             backgroundColor: "#D7EAF0",
 //                                             color: "#003366",
 //                                           }}
@@ -6382,6 +6176,7 @@
 //                                         <th
 //                                           style={{
 //                                             fontFamily: "sans-serif",
+//                                             fontSize: "16px",
 //                                             backgroundColor: "#D7EAF0",
 //                                             color: "#003366",
 //                                           }}
@@ -6391,6 +6186,7 @@
 //                                         <th
 //                                           style={{
 //                                             fontFamily: "sans-serif",
+//                                             fontSize: "16px",
 //                                             backgroundColor: "#D7EAF0",
 //                                             color: "#003366",
 //                                           }}
@@ -6400,6 +6196,7 @@
 //                                         <th
 //                                           style={{
 //                                             fontFamily: "sans-serif",
+//                                             fontSize: "16px",
 //                                             backgroundColor: "#D7EAF0",
 //                                             color: "#003366",
 //                                           }}
@@ -6533,7 +6330,7 @@
 //                                 style={{
 //                                   borderRadius: "15px",
 //                                   border: " #0091A5",
-//                                   background: "#C9E6F0",
+//                                   background: "#f1f8fb",
 //                                 }}
 //                               >
 //                                 <Card.Body style={{ position: "relative" }}>
@@ -6543,7 +6340,6 @@
 //                                       display: "flex",
 //                                       alignItems: "center",
 //                                       justifyContent: "flex-start",
-//                                       padding: "10px 20px",
 //                                     }}
 //                                   >
 //                                     <h2
@@ -6606,7 +6402,7 @@
 //                                                 style={{
 //                                                   color: "#003366",
 //                                                   fontFamily: "Sans-Serif",
-//                                                   fontSize: "25px",
+//                                                   fontSize: "18px",
 //                                                   fontWeight: 600,
 //                                                   lineHeight: "29.3px",
 //                                                   textAlign: "left",
@@ -6640,7 +6436,7 @@
 //                                                 style={{
 //                                                   color: "#003366",
 //                                                   fontFamily: "Sans-Serif",
-//                                                   fontSize: "25px",
+//                                                   fontSize: "18px",
 //                                                   fontWeight: 600,
 //                                                   lineHeight: "29.3px",
 //                                                   textAlign: "left",
@@ -6672,7 +6468,7 @@
 //                                                 style={{
 //                                                   color: "#003366",
 //                                                   fontFamily: "Sans-Serif",
-//                                                   fontSize: "25px",
+//                                                   fontSize: "18px",
 //                                                   fontWeight: 600,
 //                                                   lineHeight: "29.3px",
 //                                                   textAlign: "left",
@@ -6704,7 +6500,7 @@
 //                                                 style={{
 //                                                   color: "#003366",
 //                                                   fontFamily: "Sans-Serif",
-//                                                   fontSize: "25px",
+//                                                   fontSize: "px",
 //                                                   fontWeight: 600,
 //                                                   lineHeight: "29.3px",
 //                                                   textAlign: "left",
@@ -6793,7 +6589,7 @@
 //                                               }
 //                                               className="me-2"
 //                                               style={{
-//                                                 background: "#EF5A6F",
+//                                                 background: "#C62E2E",
 //                                                 border: "none",
 //                                                 fontSize: "0.9rem",
 //                                                 borderRadius: "5px",
@@ -6965,7 +6761,7 @@
 //                                 style={{
 //                                   borderRadius: "15px",
 //                                   border: " #0091A5",
-//                                   background: "#C9E6F0",
+//                                   background: "#f1f8fb",
 //                                 }}
 //                               >
 //                                 <Card.Body>
@@ -7328,7 +7124,7 @@
 //                                 style={{
 //                                   borderRadius: "15px",
 //                                   border: " #0091A5",
-//                                   background: "#C9E6F0",
+//                                   background: "#f1f8fb",
 //                                 }}
 //                               >
 //                                 <Card.Body>
@@ -7373,8 +7169,8 @@
 //                                     </Button>
 //                                     <Button
 //                                       style={{
-//                                         background: "#EF5A6F",
-//                                         color: "#000",
+//                                         background: "#C62E2E",
+//                                         color: "#fff",
 //                                         border: "none",
 //                                         borderRadius: "5px",
 //                                         padding: "10px 20px",
@@ -7639,6 +7435,9 @@
 
 
 
+
+
+
 import React, { useState, useEffect } from "react";
 import "../../css/ClinicBookedAppointment.css";
 import {
@@ -7695,7 +7494,6 @@ const DoctorBookedAppointment = () => {
   const [appointmentIdToDelete, setAppointmentIdToDelete] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [expandedAppointmentId, setExpandedAppointmentId] = useState(null);
-  const [expandedPrescriptionId, setExpandedPrescriptionId] = useState(null);
   const [formDetails, setFormDetails] = useState({});
   const [selectedPatientId, setSelectedPatientId] = useState(null);
   const [searchParams, setSearchParams] = useState({ booked_by: "" });
@@ -7756,13 +7554,12 @@ const DoctorBookedAppointment = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
-  const [isDetailsVisible, setIsDetailsVisible] = useState(false);
-
   const [toastVariant, setToastVariant] = useState("success");
 
   useEffect(() => {
     const token = localStorage.getItem("patient_token");
     try {
+      setLoading(true);
       const decodedToken = jwtDecode(token);
       const mobile_number = decodedToken.mobile_number;
       setMobileNumber(mobile_number);
@@ -7774,10 +7571,14 @@ const DoctorBookedAppointment = () => {
 
       fetchMedicalRecords(mobile_number);
     } catch (error) {}
+    finally {
+      setLoading(false);
+    }
   }, []);
 
   const fetchMedicalRecords = async (appointment_id) => {
     try {
+      setLoading(true);
       const token = localStorage.getItem("token");
       const decodedToken = jwtDecode(token);
 
@@ -7797,12 +7598,15 @@ const DoctorBookedAppointment = () => {
       setShowMedicalRecords(true);
     } catch (error) {
       setMedicalRecords([]);
+    }finally {
+      setLoading(false);
     }
   };
 
   const handleDownloadFile = async (record) => {
     setLoading(true);
     try {
+      setLoading(true)
       const response = await BaseUrl.get(`/patient/viewdocumentbyid/`, {
         params: {
           patient_id: record.patient,
@@ -7843,6 +7647,7 @@ const DoctorBookedAppointment = () => {
 
     if (!showFormModal) {
       try {
+        setLoading(true)
         const appointmentId = expandedAppointmentId;
         const documentResponse = await BaseUrl.get(`/patient/patientname/`, {
           params: {
@@ -7864,6 +7669,9 @@ const DoctorBookedAppointment = () => {
         } else {
         }
       } catch (error) {}
+      finally {
+        setLoading(false);
+      }
     } else {
       if (
         formData.document_name &&
@@ -7881,6 +7689,7 @@ const DoctorBookedAppointment = () => {
         formDataToSend.append("doctor_id", doctorId);
 
         try {
+          setLoading(true)
           const postResponse = await BaseUrl.post(
             "/patient/patientdocumentusingappointmentid/",
             formDataToSend,
@@ -7901,6 +7710,8 @@ const DoctorBookedAppointment = () => {
           }
         } catch (postError) {
           setErrorMessage("Error uploading document file");
+        } finally {
+           setLoading(false);
         }
       }
 
@@ -7940,6 +7751,7 @@ const DoctorBookedAppointment = () => {
     formDataToSend.append("user_type", decodedToken.user_type);
     formDataToSend.append("user_id", decodedToken.doctor_id);
     try {
+      setLoading(true)
       let response;
       if (editingRecordId) {
         formDataToSend.append("document_id", editingRecordId);
@@ -7993,6 +7805,7 @@ const DoctorBookedAppointment = () => {
   const handleDeleteRecord = async (recordId) => {
     setLoading(true);
     try {
+      setLoading(true)
       const response = await BaseUrl.delete(
         `/patient/patientdocumentusingappointmentid/`,
         {
@@ -8024,8 +7837,9 @@ const DoctorBookedAppointment = () => {
   };
 
   const handleViewFile = async (record) => {
-    setLoading(true);
+    
     try {
+      setLoading(true);
       const response = await BaseUrl.get(`/patient/viewdocumentbyid/`, {
         params: {
           patient_id: record.patient,
@@ -8048,8 +7862,9 @@ const DoctorBookedAppointment = () => {
   };
 
   const handlePreview = async (documentId) => {
-    setLoading(true);
+    
     try {
+      setLoading(true);
       const response = await BaseUrl.get(
         `/patient/patientprescriptonfileView/`,
         {
@@ -8081,19 +7896,24 @@ const DoctorBookedAppointment = () => {
     const getDoctorIdFromToken = async () => {
       const token = localStorage.getItem("token");
       try {
+        setLoading(true)
         const decodedToken = jwtDecode(token);
         const doctor_id = decodedToken.doctor_id;
         setDoctorId(doctor_id);
         await fetchAppointments(doctor_id);
       } catch (error) {}
+      finally {
+        setLoading(false);
+      }
     };
 
     getDoctorIdFromToken();
   }, []);
 
   const fetchAppointments = async (doctorId) => {
-    setLoading(true);
+    
     try {
+      setLoading(true);
       const response = await BaseUrl.get(
         `/doctorappointment/getslot/?doctor_id=${doctorId}`
       );
@@ -8318,6 +8138,7 @@ const DoctorBookedAppointment = () => {
 
   const fetchPrescriptionDocuments = async (appointment_id) => {
     try {
+      setLoading(true)
       const response = await BaseUrl.get(`/patient/patientprescriptonfile/`, {
         params: { appointment_id: appointment_id },
       });
@@ -8329,11 +8150,14 @@ const DoctorBookedAppointment = () => {
       }
     } catch (error) {
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDeletePrescriptionDoc = async (docId) => {
     try {
+      setLoading(true)
       const response = await BaseUrl.delete(
         `/patient/patientprescriptonfile/`,
         {
@@ -8357,12 +8181,15 @@ const DoctorBookedAppointment = () => {
       setErrorMessage(
         error.response?.data?.error || "An error occurred. Please try again."
       );
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDownloadPrescriptionDoc = async (doc) => {
     setLoading(true);
     try {
+      setLoading(true)
       const response = await BaseUrl.get(
         `/patient/patientprescriptonfileView/`,
         {
@@ -8390,6 +8217,7 @@ const DoctorBookedAppointment = () => {
 
   const handlePrint = async (appointment_id) => {
     try {
+      setLoading(true)
       const response = await BaseUrl.get(`/patient/printrepport/`, {
         params: {
           appointment_id: expandedAppointmentId,
@@ -8405,12 +8233,15 @@ const DoctorBookedAppointment = () => {
       setSuccessMessage(response.data.success);
     } catch (error) {
       setErrorMessage(error.response?.data?.error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleUpdate = async () => {
-    setLoading(true);
+   
     try {
+      setLoading(true);
       const selectedAppointment = appointments.find(
         (appointment) => appointment.appointment_id === expandedAppointmentId
       );
@@ -8434,8 +8265,9 @@ const DoctorBookedAppointment = () => {
   };
 
   const handleDelete = async (appointment_id) => {
-    setLoading(true);
+    
     try {
+      setLoading(true);
       const response = await BaseUrl.delete(`/doctorappointment/getslot/`, {
         data: { appointment_id },
       });
@@ -8454,6 +8286,7 @@ const DoctorBookedAppointment = () => {
 
   const handleCancelAppointment = async (appointment_id) => {
     try {
+      setLoading(true)
       const response = await BaseUrl.patch(`/doctorappointment/getslot/`, {
         appointment_id,
       });
@@ -8465,6 +8298,8 @@ const DoctorBookedAppointment = () => {
       }
     } catch (error) {
       setErrorMessage(error.response?.data?.error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -8484,7 +8319,7 @@ const DoctorBookedAppointment = () => {
   };
 
   const removePrescriptionRow = async (index) => {
-    setLoading(true);
+    
     const prescriptionToDelete = prescriptions[index];
     if (!prescriptionToDelete.id) {
       const updatedPrescriptions = prescriptions.filter((_, i) => i !== index);
@@ -8492,6 +8327,7 @@ const DoctorBookedAppointment = () => {
       return;
     }
     try {
+      setLoading(true);
       const prescription_id = prescriptionToDelete.id;
 
       const response = await BaseUrl.delete(`/patient/patientpriscription/`, {
@@ -8520,8 +8356,9 @@ const DoctorBookedAppointment = () => {
   };
 
   const fetchPrescriptions = async (appointment_id, patient_id) => {
-    setLoading(true);
+    
     try {
+      setLoading(true);
       const response = await BaseUrl.get("/patient/patientpriscription/", {
         params: {
           appointment_id: appointment_id,
@@ -8540,8 +8377,9 @@ const DoctorBookedAppointment = () => {
   };
 
   const handlePrescriptionSubmit = async (index) => {
-    setLoading(true);
-    try {
+   
+    try { 
+      setLoading(true);
       const selectedAppointment = appointments.find(
         (appointment) => appointment.appointment_id === expandedAppointmentId
       );
@@ -8581,8 +8419,9 @@ const DoctorBookedAppointment = () => {
   };
 
   const handleUpdatePrescription = async (index) => {
-    setLoading(true);
+    
     try {
+      setLoading(true);
       const selectedAppointment = appointments.find(
         (appointment) => appointment.appointment_id === expandedAppointmentId
       );
@@ -8621,6 +8460,7 @@ const DoctorBookedAppointment = () => {
 
   const fetchDocumentIds = async (appointmentId) => {
     try {
+      setLoading(true)
       const response = await BaseUrl.get(
         `/patient/patientdocumentusingappointmentid/`,
         {
@@ -8635,11 +8475,15 @@ const DoctorBookedAppointment = () => {
       } else {
       }
     } catch (error) {}
+    finally {
+      setLoading(false);
+    }
   };
 
   const handleVitalSubmit = async () => {
-    setLoading(true);
+    
     try {
+      setLoading(true);
       const selectedAppointment = appointments.find(
         (appointment) => appointment.appointment_id === expandedAppointmentId
       );
@@ -8693,8 +8537,9 @@ const DoctorBookedAppointment = () => {
   };
 
   const handleVitalUpdate = async () => {
-    setLoading(true);
+    
     try {
+      setLoading(true);
       const selectedAppointment = appointments.find(
         (appointment) => appointment.appointment_id === expandedAppointmentId
       );
@@ -8740,6 +8585,7 @@ const DoctorBookedAppointment = () => {
     setSearchSymptom(value);
     if (value) {
       try {
+        setLoading(true)
         const response = await BaseUrl.get(`/doctor/symptomssearch/`, {
           params: { name: value },
         });
@@ -8750,6 +8596,9 @@ const DoctorBookedAppointment = () => {
           setSearchResults([]);
         }
       } catch (error) {}
+      finally {
+        setLoading(false);
+      }
     } else {
       setSearchResults([]);
     }
@@ -8790,7 +8639,7 @@ const DoctorBookedAppointment = () => {
   };
 
   const handleRemoveSymptom = async (symptom) => {
-    setLoading(true);
+    
     if (!symptom.id) {
       setSelectedSymptoms((prevSymptoms) =>
         prevSymptoms.filter((s) => s !== symptom)
@@ -8798,6 +8647,7 @@ const DoctorBookedAppointment = () => {
       return;
     }
     try {
+      setLoading(true);
       const response = await BaseUrl.delete(`/doctor/symptomsdetail/`, {
         data: {
           appointment_id: expandedAppointmentId,
@@ -8824,8 +8674,9 @@ const DoctorBookedAppointment = () => {
   };
 
   const handleSaveSymptoms = async () => {
-    setLoading(true);
+    
     try {
+      setLoading(true);
       const selectedAppointment = appointments.find(
         (appointment) => appointment.appointment_id === expandedAppointmentId
       );
@@ -8844,6 +8695,7 @@ const DoctorBookedAppointment = () => {
         };
 
         try {
+          setLoading(true)
           const response = await BaseUrl.post(
             "/doctor/symptomsdetail/",
             symptomPayload,
@@ -8864,6 +8716,8 @@ const DoctorBookedAppointment = () => {
           }
         } catch (error) {
           const errorMessage = error.response?.data?.error;
+        } finally {
+          setLoading(false);
         }
       }
 
@@ -8884,8 +8738,9 @@ const DoctorBookedAppointment = () => {
   };
 
   const handleUpdateSymptom = async () => {
-    setLoading(true);
+    
     try {
+      setLoading(true);
       const selectedAppointment = appointments.find(
         (appointment) => appointment.appointment_id === expandedAppointmentId
       );
@@ -8901,6 +8756,7 @@ const DoctorBookedAppointment = () => {
           more_options: symptom.more_options,
         };
         try {
+          setLoading(true)
           const response = await BaseUrl.put(
             "/doctor/symptomsdetail/",
             symptomPayload,
@@ -8919,6 +8775,8 @@ const DoctorBookedAppointment = () => {
           }
         } catch (error) {
           const errorMessage = error.response?.data?.error;
+        } finally {
+          setLoading(false);
         }
       }
 
@@ -8963,6 +8821,7 @@ const DoctorBookedAppointment = () => {
 
   const handlePrescriptionDocs = async (appointment_id) => {
     try {
+      setLoading(true)
       const selectedAppointment = appointments.find(
         (appointment) => appointment.appointment_id === appointment_id
       );
@@ -9009,6 +8868,7 @@ const DoctorBookedAppointment = () => {
       setSelectedFile(null);
     }
   };
+
   const handleSearchChange = (e) => {
     const { name, value } = e.target;
 
@@ -9035,6 +8895,7 @@ const DoctorBookedAppointment = () => {
 
   const handleSearch = async () => {
     try {
+      setLoading(true)
       const response = await BaseUrl.get("/doctorappointment/searchslot/", {
         params: {
           doctor_id: doctorId,
@@ -9061,11 +8922,14 @@ const DoctorBookedAppointment = () => {
     } catch (error) {
       setErrorMessage("No appointments found");
       setAppointments([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleRequestDocument = async (appointmentId) => {
     try {
+      setLoading(true)
       const formData = new FormData();
       formData.append("appointment_id", appointmentId);
       const response = await BaseUrl.put(
@@ -9085,12 +8949,15 @@ const DoctorBookedAppointment = () => {
       const errorMessage = error.response?.data?.error;
       setErrorMessage(errorMessage);
       setSuccessMessage("");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleRecordView = async (patientId) => {
-    setLoading(true);
+    
     try {
+      setLoading(true);
       const response = await BaseUrl.get(`/doctorappointment/whatsappreport/`, {
         params: {
           patient_id: patientId,
@@ -9117,6 +8984,7 @@ const DoctorBookedAppointment = () => {
 
   const deleteRecord = async (id) => {
     try {
+      setLoading(true)
       const response = await BaseUrl.delete(
         "/doctorappointment/whatsappreport/",
         {
@@ -9134,6 +9002,8 @@ const DoctorBookedAppointment = () => {
       }
     } catch (error) {
       alert("Failed to delete record");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -9627,7 +9497,7 @@ const DoctorBookedAppointment = () => {
                         expandedAppointmentId ===
                           appointment.appointment_id && (
                           <tr>
-                            <td colSpan="7">
+                            <td>
                               <Card
                                 className="shadow-sm mt-3"
                                 style={{
@@ -9720,6 +9590,7 @@ const DoctorBookedAppointment = () => {
                                               fontFamily: "sans-serif",
                                               backgroundColor: "#D7EAF0",
                                               color: "#003366",
+                                              width: "50%", 
                                             }}
                                           >
                                             Symptom
@@ -9729,6 +9600,7 @@ const DoctorBookedAppointment = () => {
                                               fontFamily: "sans-serif",
                                               backgroundColor: "#D7EAF0",
                                               color: "#003366",
+                                              width: "10%",
                                             }}
                                           >
                                             Severity
@@ -9738,6 +9610,7 @@ const DoctorBookedAppointment = () => {
                                               fontFamily: "sans-serif",
                                               backgroundColor: "#D7EAF0",
                                               color: "#003366",
+                                              width: "10%", 
                                             }}
                                           >
                                             Since
@@ -9747,6 +9620,7 @@ const DoctorBookedAppointment = () => {
                                               fontFamily: "sans-serif",
                                               backgroundColor: "#D7EAF0",
                                               color: "#003366",
+                                              width: "25%", 
                                             }}
                                           >
                                             More Options
@@ -9756,87 +9630,64 @@ const DoctorBookedAppointment = () => {
                                               fontFamily: "sans-serif",
                                               backgroundColor: "#D7EAF0",
                                               color: "#003366",
+                                              width: "5%",
                                             }}
                                           >
                                             Actions
                                           </th>
                                         </tr>
                                       </thead>
-
                                       <tbody>
-                                        {selectedSymptoms.map(
-                                          (symptom, index) => (
-                                            <tr key={index}>
-                                              <td>{symptom.symptoms_name}</td>
-                                              <td>
-                                                <Form.Select
-                                                  name={`severity-${index}`}
-                                                  value={symptom.severity}
-                                                  onChange={(e) =>
-                                                    handleSeverityChange(
-                                                      index,
-                                                      e
-                                                    )
-                                                  }
-                                                >
-                                                  <option value="">
-                                                    Select Severity
-                                                  </option>
-                                                  <option value="mild">
-                                                    Mild
-                                                  </option>
-                                                  <option value="moderate">
-                                                    Moderate
-                                                  </option>
-                                                  <option value="severe">
-                                                    Severe
-                                                  </option>
-                                                </Form.Select>
-                                              </td>
-                                              <td>
-                                                <Form.Control
-                                                  type="text"
-                                                  name={`since-${index}`}
-                                                  value={symptom.since}
-                                                  onChange={(e) =>
-                                                    handleSinceChange(index, e)
-                                                  }
-                                                />
-                                              </td>
-                                              <td>
-                                                <Form.Control
-                                                  type="text"
-                                                  name={`more_options-${index}`}
-                                                  value={symptom.more_options}
-                                                  onChange={(e) =>
-                                                    handleMoreOptionsChange(
-                                                      index,
-                                                      e
-                                                    )
-                                                  }
-                                                />
-                                              </td>
-                                              <td>
-                                                <Button
-                                                  style={{
-                                                    backgroundColor: "#EF5A6F",
-                                                    color: "#FFFFFF",
-                                                    border: "none",
-                                                    borderRadius: "5px",
-                                                    cursor: "pointer",
-                                                  }}
-                                                  onClick={() =>
-                                                    handleRemoveSymptom(symptom)
-                                                  }
-                                                >
-                                                  Remove
-                                                </Button>
-                                              </td>
-                                            </tr>
-                                          )
-                                        )}
+                                        {selectedSymptoms.map((symptom, index) => (
+                                          <tr key={index}>
+                                            <td>{symptom.symptoms_name}</td>
+                                            <td>
+                                              <Form.Select
+                                                name={`severity-${index}`}
+                                                value={symptom.severity}
+                                                onChange={(e) => handleSeverityChange(index, e)}
+                                              >
+                                                <option value="">Select Severity</option>
+                                                <option value="mild">Mild</option>
+                                                <option value="moderate">Moderate</option>
+                                                <option value="severe">Severe</option>
+                                              </Form.Select>
+                                            </td>
+                                            <td>
+                                              <Form.Control
+                                                type="text"
+                                                name={`since-${index}`}
+                                                value={symptom.since}
+                                                onChange={(e) => handleSinceChange(index, e)}
+                                              />
+                                            </td>
+                                            <td>
+                                              <Form.Control
+                                                type="text"
+                                                name={`more_options-${index}`}
+                                                value={symptom.more_options}
+                                                onChange={(e) => handleMoreOptionsChange(index, e)}
+                                              />
+                                            </td>
+                                            <td>
+                                              <Button
+                                                style={{
+                                                  backgroundColor: "#C62E2E",
+                                                  color: "#FFFFFF",
+                                                  border: "none",
+                                                  borderRadius: "5px",
+                                                  cursor: "pointer",
+                                                }}
+                                                onClick={() => handleRemoveSymptom(symptom)}
+                                              >
+                                                Remove
+                                              </Button>
+                                            </td>
+                                          </tr>
+                                        ))}
                                       </tbody>
                                     </Table>
+
                                     <div
                                       style={{
                                         display: "flex",
@@ -9868,7 +9719,7 @@ const DoctorBookedAppointment = () => {
                         expandedAppointmentId ===
                           appointment.appointment_id && (
                           <tr>
-                            <td colSpan="7">
+                            <td>
                               <Card
                                 className="shadow-sm mt-3"
                                 style={{
@@ -9923,7 +9774,7 @@ const DoctorBookedAppointment = () => {
                                     bordered
                                     hover
                                     responsive
-                                    className="table-sm"
+                                    className="table-sm mt-3"
                                     style={{ fontSize: "0.9rem" }}
                                   >
                                     <thead>
@@ -10139,7 +9990,7 @@ const DoctorBookedAppointment = () => {
                         expandedAppointmentId ===
                           appointment.appointment_id && (
                           <tr>
-                            <td colSpan="7">
+                            <td>
                               <Card
                                 className="shadow-sm mt-3"
                                 style={{
@@ -10205,7 +10056,7 @@ const DoctorBookedAppointment = () => {
                                     </Button>
                                   </div>
 
-                                  <Form>
+                                  <Form className="mt-3">
                                     {prescriptions.map(
                                       (prescription, index) => (
                                         <Row className="mb-3" key={index}>
@@ -10221,8 +10072,6 @@ const DoctorBookedAppointment = () => {
                                                   fontWeight: 600,
                                                   lineHeight: "29.3px",
                                                   textAlign: "left",
-                                                  width: "186px",
-                                                  height: "40px",
                                                   opacity: 1,
                                                 }}
                                               >
@@ -10255,8 +10104,6 @@ const DoctorBookedAppointment = () => {
                                                   fontWeight: 600,
                                                   lineHeight: "29.3px",
                                                   textAlign: "left",
-                                                  width: "186px",
-                                                  height: "40px",
                                                   opacity: 1,
                                                 }}
                                               >
@@ -10266,38 +10113,6 @@ const DoctorBookedAppointment = () => {
                                                 type="text"
                                                 name="comment"
                                                 value={prescription.comment}
-                                                onChange={(e) =>
-                                                  handlePrescriptionChange(
-                                                    index,
-                                                    e
-                                                  )
-                                                }
-                                              />
-                                            </Form.Group>
-                                          </Col>
-                                          <Col>
-                                            <Form.Group
-                                              controlId={`formDescription${index}`}
-                                            >
-                                              <Form.Label
-                                                style={{
-                                                  color: "#003366",
-                                                  fontFamily: "Sans-Serif",
-                                                  fontSize: "18px",
-                                                  fontWeight: 600,
-                                                  lineHeight: "29.3px",
-                                                  textAlign: "left",
-                                                  width: "186px",
-                                                  height: "40px",
-                                                  opacity: 1,
-                                                }}
-                                              >
-                                                Description
-                                              </Form.Label>
-                                              <Form.Control
-                                                type="text"
-                                                name="description"
-                                                value={prescription.description}
                                                 onChange={(e) =>
                                                   handlePrescriptionChange(
                                                     index,
@@ -10319,12 +10134,10 @@ const DoctorBookedAppointment = () => {
                                                   fontWeight: 600,
                                                   lineHeight: "29.3px",
                                                   textAlign: "left",
-                                                  width: "186px",
-                                                  height: "40px",
                                                   opacity: 1,
                                                 }}
                                               >
-                                                Time
+                                                Description
                                               </Form.Label>
                                               <Form.Control
                                                 as="select"
@@ -10362,6 +10175,37 @@ const DoctorBookedAppointment = () => {
                                                   Night
                                                 </option>
                                               </Form.Control>
+                                            </Form.Group>
+                                          </Col>
+                                          
+                                          <Col>
+                                            <Form.Group
+                                              controlId={`formDescription${index}`}
+                                            >
+                                              <Form.Label
+                                                style={{
+                                                  color: "#003366",
+                                                  fontFamily: "Sans-Serif",
+                                                  fontSize: "18px",
+                                                  fontWeight: 600,
+                                                  lineHeight: "29.3px",
+                                                  textAlign: "left",
+                                                  opacity: 1,
+                                                }}
+                                              >
+                                                Duration
+                                              </Form.Label>
+                                              <Form.Control
+                                                type="text"
+                                                name="description"
+                                                value={prescription.description}
+                                                onChange={(e) =>
+                                                  handlePrescriptionChange(
+                                                    index,
+                                                    e
+                                                  )
+                                                }
+                                              />
                                             </Form.Group>
                                           </Col>
                                           <Col className="d-flex align-items-center">
