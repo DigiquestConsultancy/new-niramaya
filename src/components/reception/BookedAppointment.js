@@ -5536,8 +5536,16 @@ const ReceptionBookedAppointment = () => {
     }
   };
 
+  const groupedAppointments = appointments.reduce((acc, appointment) => {
+    const date = new Date(appointment.appointment_date);
+    const formattedDate = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+    if (!acc[formattedDate]) acc[formattedDate] = [];
+    acc[formattedDate].push(appointment);
+    return acc;
+  }, {}); 
+
   return (
-    <Container fluid>
+   <Container fluid style={{backgroundColor: "#F2F9FF", margin: "0px", padding: "0px"}}>
       {errorMessage && (
         <div className="alert alert-danger" role="alert">
           {errorMessage}
@@ -5656,17 +5664,21 @@ const ReceptionBookedAppointment = () => {
               style={{
                 color: "#000",
                 fontSize: "14px",
-                fontWeight: "500",
+                fontWeight: "700",
                 marginLeft: "8px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
               }}
             >
               <span
                 style={{
                   display: "inline-block",
-                  width: "12px",
-                  height: "12px",
-                  backgroundColor: " #f5c6cb",
+                  width: "18px",
+                  height: "18px",
+                  backgroundColor: " #F5ECD5",
                   borderRadius: "50%",
+                  border: "2px solid black",
                   marginRight: "8px",
                 }}
               ></span>
@@ -5674,9 +5686,13 @@ const ReceptionBookedAppointment = () => {
             </span>
           </h2>
 
-          <div style={{ padding: "10px" }}>
-            <Row>
-              {appointments.map((appointment) => (
+          {Object.keys(groupedAppointments).map((date) => (
+                    <div key={date}><hr/>
+                      <h4 style={{ color: "#003366" }} className="text-center">
+                        {date}
+                      </h4>
+                      <Row className="d-flex justify-content-center align-items-center mx-auto">
+                        {groupedAppointments[date].map((appointment) => (
                 <Col
                   sm={12}
                   md={
@@ -5692,11 +5708,7 @@ const ReceptionBookedAppointment = () => {
                   key={appointment.appointment_id}
                   className="mb-5 p-3"
                 >
-                  <Card
-                    className={
-                      appointment.is_patient ? "table-danger shadow" : "shadow"
-                    }
-                  >
+                  <Card>
                     <Card.Header
                       style={{
                         background: "#D7EAF0",
@@ -5726,7 +5738,7 @@ const ReceptionBookedAppointment = () => {
                       </div>
                     </Card.Header>
                     <Card.Body
-                      style={{ overflowX: "auto", whiteSpace: "nowrap" }}
+                      style={{ overflowX: "auto", whiteSpace: "nowrap", background: appointment.booked_by !== appointment.doctor_name ? "#F5ECD5" : "#FFFFFF" }}
                     >
                       <p>
                         <strong>Time Slot:</strong>{" "}
@@ -7324,6 +7336,7 @@ const ReceptionBookedAppointment = () => {
               ))}
             </Row>
           </div>
+            ))}
         </Card.Body>
       </div>
 

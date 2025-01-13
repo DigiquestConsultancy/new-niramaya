@@ -9007,6 +9007,21 @@ const DoctorBookedAppointment = () => {
     }
   };
 
+  // const groupedAppointments = appointments.reduce((acc, appointment) => {
+  //   const date = appointment.appointment_date;
+  //   if (!acc[date]) acc[date] = [];
+  //   acc[date].push(appointment);
+  //   return acc;
+  // }, {});
+
+  const groupedAppointments = appointments.reduce((acc, appointment) => {
+    const date = new Date(appointment.appointment_date);
+    const formattedDate = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+    if (!acc[formattedDate]) acc[formattedDate] = [];
+    acc[formattedDate].push(appointment);
+    return acc;
+  }, {});  
+
   return (
     <Container fluid style={{backgroundColor: "#F2F9FF", margin: "0px", padding: "0px"}}>
       {errorMessage && (
@@ -9139,17 +9154,21 @@ const DoctorBookedAppointment = () => {
               style={{
                 color: "#000",
                 fontSize: "14px",
-                fontWeight: "500",
+                fontWeight: "700",
                 marginLeft: "8px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
               }}
             >
               <span
                 style={{
                   display: "inline-block",
-                  width: "12px",
-                  height: "12px",
-                  backgroundColor: " #f5c6cb",
+                  width: "18px",
+                  height: "18px",
+                  backgroundColor: " #F5ECD5",
                   borderRadius: "50%",
+                  border: "2px solid black",
                   marginRight: "8px",
                 }}
               ></span>
@@ -9157,9 +9176,13 @@ const DoctorBookedAppointment = () => {
             </span>
           </h2>
 
-          <div style={{ padding: "10px" }}>
-            <Row>
-              {appointments.map((appointment) => (
+        {Object.keys(groupedAppointments).map((date) => (
+          <div key={date}><hr/>
+            <h4 style={{ color: "#003366" }} className="text-center">
+              {date}
+            </h4>
+            <Row className="d-flex justify-content-center align-items-center mx-auto">
+              {groupedAppointments[date].map((appointment) => (
                <Col
                sm={12}
                md={expandedAppointmentId === appointment.appointment_id ? 12 : 4}
@@ -9167,11 +9190,7 @@ const DoctorBookedAppointment = () => {
                key={appointment.appointment_id}
                className="mb-5 p-3"
              >
-                  <Card
-                    className={
-                      appointment.is_patient ? "table-danger shadow" : "shadow"
-                    }
-                  >
+                  <Card>
                     <Card.Header
                       style={{
                         background: "#D7EAF0",
@@ -9197,7 +9216,7 @@ const DoctorBookedAppointment = () => {
                         </div>
 
                     </Card.Header>
-                    <Card.Body style={{ overflowX: 'auto', whiteSpace: 'nowrap' }}>
+                    <Card.Body style={{ overflowX: 'auto', whiteSpace: 'nowrap', background: appointment.booked_by !== appointment.doctor_name ? "#F5ECD5" : "#FFFFFF" }}>
                       <p><strong>Time Slot:</strong>{" "}{appointment.appointment_slot}</p>
                       <p><strong>Booked By:</strong> {appointment.booked_by}</p>
                       <p><strong>Status:</strong> {appointment.status}</p>
@@ -9544,7 +9563,6 @@ const DoctorBookedAppointment = () => {
                                         color: "#ffffff",
                                         border: "none",
                                         borderRadius: "5px",
-                                        // padding: "10px 20px",
                                         cursor: "pointer",
                                       }}
                                       onClick={handleUpdateSymptom}
@@ -9701,8 +9719,6 @@ const DoctorBookedAppointment = () => {
                                         style={{
                                           background: "#295F98",
                                           border: "none",
-                                          width: "74.05px",
-                                          height: "36px",
                                         }}
                                       >
                                         Save
@@ -9974,10 +9990,10 @@ const DoctorBookedAppointment = () => {
                                       className="me-2"
                                       style={{
                                         background: "#295F98",
-                                        border: "none",
+                                        border: "none"
                                       }}
                                     >
-                                      Submit
+                                      Save
                                     </Button>
                                   </div>
                                 </Card.Body>
@@ -10999,6 +11015,7 @@ const DoctorBookedAppointment = () => {
               ))}
             </Row>
           </div>
+        ))}
         </Card.Body>
       </div>
 

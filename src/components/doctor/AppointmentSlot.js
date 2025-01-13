@@ -5,7 +5,8 @@ import { useHistory } from "react-router-dom";
 import { Modal, Button, Form } from "react-bootstrap";
 import styled from "styled-components";
 import Loader from "react-js-loader";
- 
+import "../../css/AppointmentSlot.css";
+
 const LoaderWrapper = styled.div`
   display: flex;
   justify-content: center;
@@ -18,11 +19,11 @@ const LoaderWrapper = styled.div`
   left: 0;
   z-index: 9999;
 `;
- 
+
 const LoaderImage = styled.div`
   width: 500px;
 `;
- 
+
 const AppointmentSlot = () => {
   const [appointmentSlots, setAppointmentSlots] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
@@ -32,7 +33,7 @@ const AppointmentSlot = () => {
   const [showBlockSlotModal, setShowBlockSlotModal] = useState(false);
   const [pagination, setPagination] = useState({});
   const slotsPerPage = 18;
- 
+
   const [showUnblockSlotModal, setShowUnblockSlotModal] = useState(false);
   const [loading, setLoading] = useState(false); // Loader state
   const [blockSlotData, setBlockSlotData] = useState({
@@ -47,19 +48,19 @@ const AppointmentSlot = () => {
     startTime: "",
     endTime: "",
   });
- 
+
   const history = useHistory();
- 
+
   useEffect(() => {
     const today = new Date().toISOString().split("T")[0];
     setSelectedDate(today);
   }, []);
- 
+
   useEffect(() => {
     const storeUserIdInLocalStorage = () => {
       const token = localStorage.getItem("token");
       if (!token) return;
- 
+
       try {
         const decodedToken = jwtDecode(token);
         const doctor_id = decodedToken.doctor_id;
@@ -72,18 +73,18 @@ const AppointmentSlot = () => {
     storeUserIdInLocalStorage();
     fetchTodayAppointmentSlots();
   }, []);
- 
+
   useEffect(() => {
     if (errorMessage || successMessage) {
       const timer = setTimeout(() => {
         setErrorMessage("");
         setSuccessMessage("");
       }, 10000);
- 
+
       return () => clearTimeout(timer);
     }
   }, [errorMessage, successMessage]);
- 
+
   const fetchTodayAppointmentSlots = async () => {
     setLoading(true);
     try {
@@ -108,7 +109,7 @@ const AppointmentSlot = () => {
       setErrorMessage(error.response?.data?.error);
     }
   };
- 
+
   const handleViewDateSlot = async () => {
     setLoading(true);
     try {
@@ -116,7 +117,7 @@ const AppointmentSlot = () => {
         const response = await BaseUrl.get(`/doctorappointment/slot/`, {
           params: { doctor_id: doctorId, slot_date: selectedDate },
         });
- 
+
         if (response.status === 200) {
           if (response.data.length === 0) {
             setAppointmentSlots([]);
@@ -139,14 +140,14 @@ const AppointmentSlot = () => {
       setLoading(false);
     }
   };
- 
+
   const fetchAllAppointmentSlots = async () => {
     setLoading(true);
     try {
       const response = await BaseUrl.get(`/doctorappointment/todayafterslot/`, {
         params: { doctor_id: doctorId },
       });
- 
+
       if (response.status === 200) {
         setAppointmentSlots(response.data || []);
         setErrorMessage("");
@@ -163,7 +164,7 @@ const AppointmentSlot = () => {
       setLoading(false);
     }
   };
- 
+
   const groupedSlots = appointmentSlots.reduce((acc, slot) => {
     const date = slot.appointment_date;
     if (!acc[date]) {
@@ -172,27 +173,27 @@ const AppointmentSlot = () => {
     acc[date].push(slot);
     return acc;
   }, {});
- 
+
   const formatTime = (timeString) => {
     const time = new Date(`1970-01-01T${timeString}Z`);
     const hours = time.getUTCHours().toString().padStart(2, "0");
     const minutes = time.getUTCMinutes().toString().padStart(2, "0");
     return `${hours}:${minutes}`;
   };
- 
+
   const formatDate = (dateString) => {
     const [year, month, day] = dateString.split("-");
     return `${day}-${month}-${year}`;
   };
- 
+
   const handleBlockSlot = () => {
     setShowBlockSlotModal(true);
   };
- 
+
   const handleBlockSlotClose = () => {
     setShowBlockSlotModal(false);
   };
- 
+
   const handleBlockSlotSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
@@ -204,7 +205,7 @@ const AppointmentSlot = () => {
         end_time: blockSlotData.endTime,
         doctor_id: doctorId,
       });
- 
+
       if (response.status === 200) {
         setShowBlockSlotModal(false);
         fetchAllAppointmentSlots();
@@ -217,15 +218,15 @@ const AppointmentSlot = () => {
       setLoading(false); // Hide loader
     }
   };
- 
+
   const handleUnblockSlot = () => {
     setShowUnblockSlotModal(true);
   };
- 
+
   const handleUnblockSlotClose = () => {
     setShowUnblockSlotModal(false);
   };
- 
+
   const handleUnblockSlotSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
@@ -237,7 +238,7 @@ const AppointmentSlot = () => {
         end_time: unblockSlotData.endTime,
         doctor_id: doctorId,
       });
- 
+
       if (response.status === 200) {
         setShowUnblockSlotModal(false);
         fetchAllAppointmentSlots();
@@ -251,27 +252,26 @@ const AppointmentSlot = () => {
       setLoading(false);
     }
   };
- 
+
   const handleNextPage = (date) => {
     setPagination((prev) => ({
       ...prev,
       [date]: (prev[date] || 1) + 1,
     }));
   };
- 
+
   const handlePrevPage = (date) => {
     setPagination((prev) => ({
       ...prev,
       [date]: (prev[date] || 1) - 1,
     }));
   };
- 
+
   return (
     <div
-      className="container-fluid"
+      className="container-fluid pt-5"
       style={{
         backgroundColor: "#D7EAF0",
-        // minHeight: "200vh", // Ensure full height
         paddingBottom: "30px",
         position: "relative",
       }}
@@ -279,7 +279,6 @@ const AppointmentSlot = () => {
       <h2
         style={{
           textAlign: "center",
-          marginTop: "20px",
           fontWeight: "bold",
           color: "#0C1187",
           fontFamily: "sans-serif",
@@ -287,7 +286,7 @@ const AppointmentSlot = () => {
       >
         Appointment Slots
       </h2>
- 
+
       {loading && (
         <LoaderWrapper>
           <LoaderImage>
@@ -301,12 +300,12 @@ const AppointmentSlot = () => {
           </LoaderImage>
         </LoaderWrapper>
       )}
- 
+
       {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
       {successMessage && (
         <div className="alert alert-success">{successMessage}</div>
       )}
- 
+
       <div className="d-flex justify-content-end align-items-center mb-3">
         <div>
           <button
@@ -335,7 +334,7 @@ const AppointmentSlot = () => {
           </button>
         </div>
       </div>
- 
+
       <form
         className="appointment-slot-form mb-3 p-4 shadow"
         style={{ backgroundColor: "#f9f9f9", borderRadius: "8px" }}
@@ -378,7 +377,7 @@ const AppointmentSlot = () => {
           </div>
         </div>
       </form>
- 
+
       <style>{`
   .legend {
     display: flex;
@@ -423,7 +422,7 @@ const AppointmentSlot = () => {
     }
   }
 `}</style>
- 
+
       <div className="legend">
         <div>
           <span
@@ -454,8 +453,8 @@ const AppointmentSlot = () => {
           <span className="legend-text">Canceled</span>
         </div>
       </div>
- 
-      <div className="row">
+
+      {/* <div className="row">
         {Object.keys(groupedSlots).map((date, dateIndex) => {
           const totalSlots = groupedSlots[date].length;
           const totalPages = Math.ceil(totalSlots / slotsPerPage);
@@ -527,8 +526,60 @@ const AppointmentSlot = () => {
             </div>
           );
         })}
+      </div> */}
+
+      <div className="row">
+        {Object.keys(groupedSlots).map((date, dateIndex) => {
+          const totalSlots = groupedSlots[date].length;
+
+          return (
+            <div key={dateIndex} className="mb-4">
+              <h4 className="text-center mb-3">{formatDate(date)}</h4>
+              <div
+                className="row"
+                style={{
+                  maxHeight: totalSlots > 24 ? "500px" : "none",
+                  overflowY: totalSlots > 24 ? "scroll" : "visible", 
+                }}
+              >
+                {groupedSlots[date].map((slot, slotIndex) => (
+                  <div className="col-md-2 mb-4" key={slotIndex}>
+                    <div
+                      className="card"
+                      style={{
+                        backgroundColor: slot.is_blocked
+                          ? "#f8d7da"
+                          : slot.is_canceled
+                            ? "#F45050"
+                            : slot.is_booked
+                              ? "#A0DEFF"
+                              : "#B0D9B1",
+                      }}
+                    >
+                      <div className="card-body text-center">
+                        <strong>Slot:</strong>{" "}
+                        {formatTime(slot.appointment_slot)}
+                        <br />
+                        <strong>Status:</strong>{" "}
+                        {slot.is_blocked
+                          ? "Blocked"
+                          : slot.is_canceled
+                            ? "Canceled"
+                            : slot.is_booked
+                              ? "Booked"
+                              : "Available"}
+                        <br />
+                        <strong>Patient:</strong> {slot.booked_by || "N/A"}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
- 
+
       <Modal show={showBlockSlotModal} onHide={handleBlockSlotClose}>
         <Modal.Header closeButton>
           <Modal.Title>Block Slot</Modal.Title>
@@ -598,7 +649,7 @@ const AppointmentSlot = () => {
           </Form>
         </Modal.Body>
       </Modal>
- 
+
       <Modal show={showUnblockSlotModal} onHide={handleUnblockSlotClose}>
         <Modal.Header closeButton>
           <Modal.Title>Unblock Slot</Modal.Title>
@@ -671,6 +722,5 @@ const AppointmentSlot = () => {
     </div>
   );
 };
- 
+
 export default AppointmentSlot;
- 
