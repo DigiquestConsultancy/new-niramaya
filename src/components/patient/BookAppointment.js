@@ -1,12 +1,13 @@
 
 
+
 // import React, { useState, useEffect, useRef } from "react";
 // import { Button, Row, Col, Card, Form, Modal, Alert } from "react-bootstrap";
 // import { load } from "@cashfreepayments/cashfree-js";
 // import clinicVisitImage from "../../images/a-53-512.webp";
 // import onlineConsultationImage from "../../images/2562653-200.png";
 // import BaseUrl from "../../api/BaseUrl";
-// import { useNavigate, useHistory } from "react-router-dom";
+// import { useHistory } from "react-router-dom";
 // import { FaArrowLeft, FaArrowRight, FaTimes } from "react-icons/fa";
 // import { format, addDays } from "date-fns";
 // import PhoneInput from "react-phone-number-input";
@@ -78,7 +79,7 @@
 //     evening: [],
 //   });
 
-//   const doctorId = 8;
+//   const doctorId = 13;
 
 //   useEffect(() => {
 //     loadAvailableDates();
@@ -164,7 +165,7 @@
 //   const fetchAvailableSlotsCount = async (selectedDates) => {
 //     try {
 //       const datesQuery = selectedDates.map((date) => `dates=${date}`).join("&");
-//       const endpoint = `/clinic/countavailableslots/?doctor_id=8&${datesQuery}`;
+//       const endpoint = `/clinic/countavailableslots/?doctor_id=13&${datesQuery}`;
 //       const countResponse = await BaseUrl.get(endpoint);
 //       const availableCounts = countResponse.data;
 //       const newSlotCounts = {};
@@ -177,7 +178,7 @@
 //         ...newSlotCounts,
 //       }));
 //       for (let date of selectedDates) {
-//         await BaseUrl.get(`/clinic/availableslots/?doctor_id=8&date=${date}`);
+//         await BaseUrl.get(`/clinic/availableslots/?doctor_id=13&date=${date}`);
 //       }
 //     } catch (error) {
 //       console.error(error);
@@ -186,7 +187,7 @@
 
 //   const fetchSlots = async (selectedDate, appointmentType) => {
 //     try {
-//       const endpoint = `/doctorappointment/blankslot/?doctor_id=8&slot_date=${selectedDate}&consultation_type=${appointmentType}`;
+//       const endpoint = `/doctorappointment/blankslot/?doctor_id=13&slot_date=${selectedDate}&consultation_type=${appointmentType}`;
 //       const slotsResponse = await BaseUrl.get(endpoint);
 //       const fetchedSlots = slotsResponse.data;
 //       const { morningSlots, afternoonSlots, eveningSlots } =
@@ -240,7 +241,7 @@
 
 //       if (updateResponse.status === 200) {
 //         const fetchResponse = await BaseUrl.get(
-//           `/doctorappointment/blankslot/?doctor_id=8&slot_date=${selectedDate}&consultation_type=${type}`
+//           `/doctorappointment/blankslot/?doctor_id=13&slot_date=${selectedDate}&consultation_type=${type}`
 //         );
 
 //         if (fetchResponse.status === 200) {
@@ -843,96 +844,102 @@
 //             />
 //           </div>
 //           <div>
-//             {slots.morning.length > 0 ? (
-//               <>
-//                 {Array.from({
-//                   length: Math.ceil(
-//                     slots.morning.slice(morningIndex, morningIndex + 16)
-//                       .length / 4
-//                   ),
-//                 }).map((_, rowIndex) => (
-//                   <div
-//                     key={rowIndex}
-//                     className="d-flex justify-content-center flex-wrap"
+//   {slots.morning.length > 0 ? (
+//     <>
+//       {Array.from({
+//         length: Math.ceil(
+//           slots.morning.slice(morningIndex, morningIndex + 16).length / 4
+//         ),
+//       }).map((_, rowIndex) => (
+//         <div
+//           key={rowIndex}
+//           className="d-flex justify-content-center flex-wrap"
+//         >
+//           {slots.morning
+//             .slice(
+//               morningIndex + rowIndex * 4,
+//               morningIndex + (rowIndex + 1) * 4
+//             )
+//             .map((slot) => {
+//               const currentTime = new Date(); // Current date and time
+//               const slotDate = new Date(slot.appointment_date); // Slot date
+//               const slotTime = new Date(
+//                 `${slot.appointment_date}T${slot.appointment_slot}`
+//               ); // Combine date and time
+
+//               // Check if the slot is for today
+//               const isSameDate =
+//                 currentTime.toDateString() === slotDate.toDateString();
+
+//               // Determine if the slot should be disabled
+//               const isDisabled =
+//                 slot.is_booked || (isSameDate && currentTime >= slotTime);
+
+//               // Styling for the button
+//               const buttonStyle = {
+//                 backgroundColor: slot.is_booked
+//                   ? "gray"
+//                   : isDisabled
+//                   ? "#d2a679"
+//                   : selectedSlot?.id === slot.id
+//                   ? "#B8E8B1"
+//                   : "#FFFFFF",
+//                 color: isDisabled ? "#FFFFFF" : "#000000",
+//                 borderColor: "#3D9F41",
+//                 cursor: isDisabled ? "not-allowed" : "pointer",
+//                 opacity: isDisabled ? 0.7 : 1,
+//               };
+
+//               return (
+//                 <div
+//                   key={slot.id}
+//                   onMouseEnter={() =>
+//                     slot.is_booked &&
+//                     setHoverMessage(" booked")
+//                   }
+//                   onMouseLeave={() => setHoverMessage("")}
+//                   style={{ position: "relative" }}
+//                 >
+//                   <Button
+//                     className="slot-button mx-2 my-2"
+//                     style={buttonStyle}
+//                     onClick={() =>
+//                       !isDisabled && handleSlotClick(slot)
+//                     }
+//                     disabled={isDisabled}
 //                   >
-//                     {slots.morning
-//                       .slice(
-//                         morningIndex + rowIndex * 4,
-//                         morningIndex + (rowIndex + 1) * 4
-//                       )
-//                       .map((slot) => {
-//                         const currentTime = new Date();
-//                         const slotTime = new Date();
-//                         const [hours, minutes] =
-//                           slot.appointment_slot.split(":");
-//                         slotTime.setHours(hours);
-//                         slotTime.setMinutes(minutes);
+//                     {formatTime(slot.appointment_slot)}
+//                   </Button>
+//                   {slot.is_booked && hoverMessage && (
+//                     <div
+//                       style={{
+//                         position: "absolute",
+//                         top: "-35px",
+//                         left: "50%",
+//                         transform: "translateX(-50%)",
+//                         backgroundColor: "rgba(0, 0, 0, 0.8)",
+//                         color: "#fff",
+//                         padding: "5px 10px",
+//                         borderRadius: "4px",
+//                         fontSize: "0.75rem",
+//                         whiteSpace: "nowrap",
+//                         zIndex: 10,
+//                       }}
+//                     >
+//                       {hoverMessage}
+//                     </div>
+//                   )}
+//                 </div>
+//               );
+//             })}
+//         </div>
+//       ))}
+//     </>
+//   ) : (
+//     <p style={{ color: "red" }}>No slots available</p>
+//   )}
+// </div>
 
-//                         const isDisabled =
-//                           slot.is_selected || currentTime >= slotTime;
-//                         const buttonStyle = {
-//                           backgroundColor: slot.is_selected
-//                             ? "gray"
-//                             : currentTime >= slotTime
-//                             ? "#d2a679"
-//                             : selectedSlot?.id === slot.id
-//                             ? "#B8E8B1"
-//                             : "#FFFFFF",
-//                           color: isDisabled ? "#FFFFFF" : "#000000",
-//                           borderColor: "#3D9F41",
-//                           cursor: isDisabled ? "not-allowed" : "pointer",
-//                           opacity: isDisabled ? 0.7 : 1,
-//                         };
-
-//                         return (
-//                           <div
-//                             key={slot.id}
-//                             onMouseEnter={() =>
-//                               slot.is_selected &&
-//                               setHoverMessage("This slot is in use/Booked")
-//                             }
-//                             onMouseLeave={() => setHoverMessage("")}
-//                             style={{ position: "relative" }}
-//                           >
-//                             <Button
-//                               className="slot-button mx-2 my-2"
-//                               style={buttonStyle}
-//                               onClick={() =>
-//                                 !isDisabled && handleSlotClick(slot)
-//                               }
-//                               disabled={isDisabled}
-//                             >
-//                               {formatTime(slot.appointment_slot)}
-//                             </Button>
-//                             {slot.is_selected && hoverMessage && (
-//                               <div
-//                                 style={{
-//                                   position: "absolute",
-//                                   top: "-35px",
-//                                   left: "50%",
-//                                   transform: "translateX(-50%)",
-//                                   backgroundColor: "rgba(0, 0, 0, 0.8)",
-//                                   color: "#fff",
-//                                   padding: "5px 10px",
-//                                   borderRadius: "4px",
-//                                   fontSize: "0.75rem",
-//                                   whiteSpace: "nowrap",
-//                                   zIndex: 10,
-//                                 }}
-//                               >
-//                                 {hoverMessage}
-//                               </div>
-//                             )}
-//                           </div>
-//                         );
-//                       })}
-//                   </div>
-//                 ))}
-//               </>
-//             ) : (
-//               <p style={{ color: "red" }}>No slots available</p>
-//             )}
-//           </div>
 //         </Col>
 
 //         <Col>
@@ -961,96 +968,99 @@
 //             />
 //           </div>
 //           <div>
-//             {slots.afternoon.length > 0 ? (
-//               <>
-//                 {Array.from({
-//                   length: Math.ceil(
-//                     slots.afternoon.slice(afternoonIndex, afternoonIndex + 16)
-//                       .length / 4
-//                   ),
-//                 }).map((_, rowIndex) => (
-//                   <div
-//                     key={rowIndex}
-//                     className="d-flex justify-content-center flex-wrap"
+//   {slots.afternoon.length > 0 ? (
+//     <>
+//       {Array.from({
+//         length: Math.ceil(
+//           slots.afternoon.slice(afternoonIndex, afternoonIndex + 16).length / 4
+//         ),
+//       }).map((_, rowIndex) => (
+//         <div
+//           key={rowIndex}
+//           className="d-flex justify-content-center flex-wrap"
+//         >
+//           {slots.afternoon
+//             .slice(
+//               afternoonIndex + rowIndex * 4,
+//               afternoonIndex + (rowIndex + 1) * 4
+//             )
+//             .map((slot) => {
+//               const currentTime = new Date(); // Current date and time
+//               const slotTime = new Date(`${slot.appointment_date}T${slot.appointment_slot}`); // Combine date and time
+
+//               // Check if the slot is for today
+//               const isSameDate =
+//                 currentTime.toDateString() === slotTime.toDateString();
+
+//               // Determine if the slot should be disabled
+//               const isDisabled =
+//                 slot.is_booked || (isSameDate && currentTime >= slotTime);
+
+//               // Styling for the button
+//               const buttonStyle = {
+//                 backgroundColor: slot.is_booked
+//                   ? "gray"
+//                   : isDisabled
+//                   ? "#d2a679"
+//                   : selectedSlot?.id === slot.id
+//                   ? "#B8E8B1"
+//                   : "#FFFFFF",
+//                 color: isDisabled ? "#FFFFFF" : "#000000",
+//                 borderColor: "#3D9F41",
+//                 cursor: isDisabled ? "not-allowed" : "pointer",
+//                 opacity: isDisabled ? 0.7 : 1,
+//               };
+
+//               return (
+//                 <div
+//                   key={slot.id}
+//                   onMouseEnter={() =>
+//                     slot.is_booked &&
+//                     setHoverMessage("This slot is already booked")
+//                   }
+//                   onMouseLeave={() => setHoverMessage("")}
+//                   style={{ position: "relative" }}
+//                 >
+//                   <Button
+//                     className="slot-button mx-2 my-2"
+//                     style={buttonStyle}
+//                     onClick={() =>
+//                       !isDisabled && handleSlotClick(slot)
+//                     }
+//                     disabled={isDisabled}
 //                   >
-//                     {slots.afternoon
-//                       .slice(
-//                         afternoonIndex + rowIndex * 4,
-//                         afternoonIndex + (rowIndex + 1) * 4
-//                       )
-//                       .map((slot) => {
-//                         const currentTime = new Date();
-//                         const slotTime = new Date();
-//                         const [hours, minutes] =
-//                           slot.appointment_slot.split(":");
-//                         slotTime.setHours(hours);
-//                         slotTime.setMinutes(minutes);
+//                     {formatTime(slot.appointment_slot)}
+//                   </Button>
+//                   {slot.is_booked && hoverMessage && (
+//                     <div
+//                       style={{
+//                         position: "absolute",
+//                         top: "-35px",
+//                         left: "50%",
+//                         transform: "translateX(-50%)",
+//                         backgroundColor: "rgba(0, 0, 0, 0.8)",
+//                         color: "#fff",
+//                         padding: "5px 10px",
+//                         borderRadius: "4px",
+//                         fontSize: "0.75rem",
+//                         whiteSpace: "nowrap",
+//                         zIndex: 10,
+//                       }}
+//                     >
+//                       {hoverMessage}
+//                     </div>
+//                   )}
+//                 </div>
+//               );
+//             })}
+//         </div>
+//       ))}
+//     </>
+//   ) : (
+//     <p style={{ color: "red" }}>No slots available</p>
+//   )}
+// </div>
 
-//                         const isDisabled =
-//                           slot.is_selected || currentTime >= slotTime;
-//                         const buttonStyle = {
-//                           backgroundColor: slot.is_selected
-//                             ? "gray"
-//                             : currentTime >= slotTime
-//                             ? "#d2a679"
-//                             : selectedSlot?.id === slot.id
-//                             ? "#B8E8B1"
-//                             : "#FFFFFF",
-//                           color: isDisabled ? "#FFFFFF" : "#000000",
-//                           borderColor: "#3D9F41",
-//                           cursor: isDisabled ? "not-allowed" : "pointer",
-//                           opacity: isDisabled ? 0.7 : 1,
-//                         };
-
-//                         return (
-//                           <div
-//                             key={slot.id}
-//                             onMouseEnter={() =>
-//                               slot.is_selected &&
-//                               setHoverMessage("This slot is in use/Booked")
-//                             }
-//                             onMouseLeave={() => setHoverMessage("")}
-//                             style={{ position: "relative" }}
-//                           >
-//                             <Button
-//                               className="slot-button mx-2 my-2"
-//                               style={buttonStyle}
-//                               onClick={() =>
-//                                 !isDisabled && handleSlotClick(slot)
-//                               }
-//                               disabled={isDisabled}
-//                             >
-//                               {formatTime(slot.appointment_slot)}
-//                             </Button>
-//                             {slot.is_selected && hoverMessage && (
-//                               <div
-//                                 style={{
-//                                   position: "absolute",
-//                                   top: "-35px",
-//                                   left: "50%",
-//                                   transform: "translateX(-50%)",
-//                                   backgroundColor: "rgba(0, 0, 0, 0.8)",
-//                                   color: "#fff",
-//                                   padding: "5px 10px",
-//                                   borderRadius: "4px",
-//                                   fontSize: "0.75rem",
-//                                   whiteSpace: "nowrap",
-//                                   zIndex: 10,
-//                                 }}
-//                               >
-//                                 {hoverMessage}
-//                               </div>
-//                             )}
-//                           </div>
-//                         );
-//                       })}
-//                   </div>
-//                 ))}
-//               </>
-//             ) : (
-//               <p style={{ color: "red" }}>No slots available</p>
-//             )}
-//           </div>
 //         </Col>
 
 //         <Col>
@@ -1077,96 +1087,99 @@
 //             />
 //           </div>
 //           <div>
-//             {slots.evening.length > 0 ? (
-//               <>
-//                 {Array.from({
-//                   length: Math.ceil(
-//                     slots.evening.slice(eveningIndex, eveningIndex + 16)
-//                       .length / 4
-//                   ),
-//                 }).map((_, rowIndex) => (
-//                   <div
-//                     key={rowIndex}
-//                     className="d-flex justify-content-center flex-wrap"
+//   {slots.evening.length > 0 ? (
+//     <>
+//       {Array.from({
+//         length: Math.ceil(
+//           slots.evening.slice(eveningIndex, eveningIndex + 16).length / 4
+//         ),
+//       }).map((_, rowIndex) => (
+//         <div
+//           key={rowIndex}
+//           className="d-flex justify-content-center flex-wrap"
+//         >
+//           {slots.evening
+//             .slice(
+//               eveningIndex + rowIndex * 4,
+//               eveningIndex + (rowIndex + 1) * 4
+//             )
+//             .map((slot) => {
+//               const currentTime = new Date(); // Current date and time
+//               const slotTime = new Date(`${slot.appointment_date}T${slot.appointment_slot}`); // Combine date and time
+
+//               // Check if the slot is for today
+//               const isSameDate =
+//                 currentTime.toDateString() === slotTime.toDateString();
+
+//               // Determine if the slot should be disabled
+//               const isDisabled =
+//                 slot.is_booked || (isSameDate && currentTime >= slotTime);
+
+//               // Styling for the button
+//               const buttonStyle = {
+//                 backgroundColor: slot.is_booked
+//                   ? "gray"
+//                   : isDisabled
+//                   ? "#d2a679"
+//                   : selectedSlot?.id === slot.id
+//                   ? "#B8E8B1"
+//                   : "#FFFFFF",
+//                 color: isDisabled ? "#FFFFFF" : "#000000",
+//                 borderColor: "#3D9F41",
+//                 cursor: isDisabled ? "not-allowed" : "pointer",
+//                 opacity: isDisabled ? 0.7 : 1,
+//               };
+
+//               return (
+//                 <div
+//                   key={slot.id}
+//                   onMouseEnter={() =>
+//                     slot.is_booked &&
+//                     setHoverMessage(" booked")
+//                   }
+//                   onMouseLeave={() => setHoverMessage("")}
+//                   style={{ position: "relative" }}
+//                 >
+//                   <Button
+//                     className="slot-button mx-2 my-2"
+//                     style={buttonStyle}
+//                     onClick={() =>
+//                       !isDisabled && handleSlotClick(slot)
+//                     }
+//                     disabled={isDisabled}
 //                   >
-//                     {slots.evening
-//                       .slice(
-//                         eveningIndex + rowIndex * 4,
-//                         eveningIndex + (rowIndex + 1) * 4
-//                       )
-//                       .map((slot) => {
-//                         const currentTime = new Date();
-//                         const slotTime = new Date();
-//                         const [hours, minutes] =
-//                           slot.appointment_slot.split(":");
-//                         slotTime.setHours(hours);
-//                         slotTime.setMinutes(minutes);
+//                     {formatTime(slot.appointment_slot)}
+//                   </Button>
+//                   {slot.is_booked && hoverMessage && (
+//                     <div
+//                       style={{
+//                         position: "absolute",
+//                         top: "-35px",
+//                         left: "50%",
+//                         transform: "translateX(-50%)",
+//                         backgroundColor: "rgba(0, 0, 0, 0.8)",
+//                         color: "#fff",
+//                         padding: "5px 10px",
+//                         borderRadius: "4px",
+//                         fontSize: "0.75rem",
+//                         whiteSpace: "nowrap",
+//                         zIndex: 10,
+//                       }}
+//                     >
+//                       {hoverMessage}
+//                     </div>
+//                   )}
+//                 </div>
+//               );
+//             })}
+//         </div>
+//       ))}
+//     </>
+//   ) : (
+//     <p style={{ color: "red" }}>No slots available</p>
+//   )}
+// </div>
 
-//                         const isDisabled =
-//                           slot.is_selected || currentTime >= slotTime;
-//                         const buttonStyle = {
-//                           backgroundColor: slot.is_selected
-//                             ? "gray"
-//                             : currentTime >= slotTime
-//                             ? "#d2a679"
-//                             : selectedSlot?.id === slot.id
-//                             ? "#B8E8B1"
-//                             : "#FFFFFF",
-//                           color: isDisabled ? "#FFFFFF" : "#000000",
-//                           borderColor: "#3D9F41",
-//                           cursor: isDisabled ? "not-allowed" : "pointer",
-//                           opacity: isDisabled ? 0.7 : 1,
-//                         };
-
-//                         return (
-//                           <div
-//                             key={slot.id}
-//                             onMouseEnter={() =>
-//                               slot.is_selected &&
-//                               setHoverMessage("This slot is in use/Booked")
-//                             }
-//                             onMouseLeave={() => setHoverMessage("")}
-//                             style={{ position: "relative" }}
-//                           >
-//                             <Button
-//                               className="slot-button mx-2 my-2"
-//                               style={buttonStyle}
-//                               onClick={() =>
-//                                 !isDisabled && handleSlotClick(slot)
-//                               }
-//                               disabled={isDisabled}
-//                             >
-//                               {formatTime(slot.appointment_slot)}
-//                             </Button>
-//                             {slot.is_selected && hoverMessage && (
-//                               <div
-//                                 style={{
-//                                   position: "absolute",
-//                                   top: "-35px",
-//                                   left: "50%",
-//                                   transform: "translateX(-50%)",
-//                                   backgroundColor: "rgba(0, 0, 0, 0.8)",
-//                                   color: "#fff",
-//                                   padding: "5px 10px",
-//                                   borderRadius: "4px",
-//                                   fontSize: "0.75rem",
-//                                   whiteSpace: "nowrap",
-//                                   zIndex: 10,
-//                                 }}
-//                               >
-//                                 {hoverMessage}
-//                               </div>
-//                             )}
-//                           </div>
-//                         );
-//                       })}
-//                   </div>
-//                 ))}
-//               </>
-//             ) : (
-//               <p style={{ color: "red" }}>No slots available</p>
-//             )}
-//           </div>
 //         </Col>
 //       </Row>
 
@@ -1404,6 +1417,9 @@
 // };
 
 // export default BookAppointment;
+
+
+
 
 
 
@@ -2433,7 +2449,7 @@ const BookAppointment = () => {
                   key={slot.id}
                   onMouseEnter={() =>
                     slot.is_booked &&
-                    setHoverMessage("This slot is already booked")
+                    setHoverMessage(" booked")
                   }
                   onMouseLeave={() => setHoverMessage("")}
                   style={{ position: "relative" }}

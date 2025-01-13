@@ -42,7 +42,7 @@ const Checkout = () => {
     evening: [],
   });
 
-  const doctorId = 1;
+  const doctorId = 13;
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -50,12 +50,7 @@ const Checkout = () => {
       try {
         setLoading(true);
         setError(null);
-
-        // Assume country code is stored in localStorage
-        const countryCode = localStorage.getItem("countryCode") || "91"; // Default to '91' (India)
-        
-
-        // Fetch fee from API
+        const countryCode = localStorage.getItem("countryCode") || "91"; 
         const response = await BaseUrl.get(
           `/patient/fee/?country_code=${countryCode}`
         );
@@ -277,7 +272,7 @@ const Checkout = () => {
 
   const fetchSlots = async (selectedDate, appointmentType) => {
     try {
-      const endpoint = `/doctorappointment/blankslot/?doctor_id=1&slot_date=${selectedDate}&consultation_type=${appointmentType}`;
+      const endpoint = `/doctorappointment/blankslot/?doctor_id=13&slot_date=${selectedDate}&consultation_type=${appointmentType}`;
       const slotsResponse = await BaseUrl.get(endpoint);
       const fetchedSlots = slotsResponse.data;
       const { morningSlots, afternoonSlots, eveningSlots } =

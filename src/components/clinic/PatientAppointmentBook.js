@@ -1,3 +1,6 @@
+
+
+
 // import React, { useState, useEffect } from "react";
 // import BaseUrl from "../../api/BaseUrl";
 // import { jwtDecode } from "jwt-decode";
@@ -48,15 +51,6 @@
 //     address: "",
 //   });
 
-//   const [formErrors, setFormErrors] = useState({
-//     name: "",
-//     mobile_number: "",
-//     age: "",
-//     address: "",
-//     gender: "",
-//     date_of_birth: "",
-//   });
-
 //   useEffect(() => {
 //     const token = localStorage.getItem("token");
 //     if (token) {
@@ -101,76 +95,44 @@
 //     });
 //   };
 
-//   const validateForm = () => {
-//     let isValid = true;
-//     const errors = {
-//       name: "",
-//       mobile_number: "",
-//       age: "",
-//       address: "",
-//       gender: "",
-//       date_of_birth: "",
-//     };
+//   const renderInputField = (name, label, value, options) => {
+//     const {
+//       type = "text",
+//       placeholder = "",
+//       required = false,
+//       max = null,
+//       pattern = null,
+//       error = null,
+//     } = options;
 
-//     // Validate Name
-//     if (!/^[A-Za-z\s]+$/.test(patientDetails.name)) {
-//       errors.name = "Name must contain only alphabets and spaces.";
-//       isValid = false;
-//     }
-
-//     // Validate Mobile Number
-//     if (!/^\d{10}$/.test(patientDetails.mobile_number)) {
-//       errors.mobile_number = "Mobile number must be a 10-digit number.";
-//       isValid = false;
-//     }
-
-//     // Validate Age
-//     if (!/^\d+$/.test(patientDetails.age) || Number(patientDetails.age) <= 0) {
-//       errors.age = "Age must be a positive number.";
-//       isValid = false;
-//     }
-
-//     // Validate Address
-//     if (!patientDetails.address.trim()) {
-//       errors.address = "Address is required.";
-//       isValid = false;
-//     }
-
-//     // Validate Gender
-//     if (!patientDetails.gender) {
-//       errors.gender = "Gender is required.";
-//       isValid = false;
-//     }
-
-//     // Validate Date of Birth
-//     // if (!patientDetails.date_of_birth) {
-//     //   errors.date_of_birth = "Date of Birth is required.";
-//     //   isValid = false;
-//     // }
-
-//     setFormErrors(errors);
-//     return isValid;
+//     return (
+//       <div className="col-md-3">
+//         <label htmlFor={name} className="form-label fw-bold">
+//           {label}
+//           {required && <span className="text-danger">*</span>}
+//         </label>
+//         <input
+//           type={type}
+//           className="form-control"
+//           id={name}
+//           name={name}
+//           value={value}
+//           onChange={handleInputChange}
+//           placeholder={placeholder}
+//           max={max}
+//           pattern={pattern}
+//           required={required}
+//         />
+//       </div>
+//     );
 //   };
 
 //   const handleSaveDetails = async (e) => {
 //     e.preventDefault();
-
-//     if (!validateForm()) {
-//       return;
-//     }
-
-//     const formData = new FormData();
-//     formData.append("mobile_number", patientDetails.mobile_number);
-//     formData.append("name", patientDetails.name);
-//     formData.append("address", patientDetails.address);
-//     formData.append("date_of_birth", patientDetails.date_of_birth);
-//     formData.append("age", patientDetails.age);
-//     formData.append("gender", patientDetails.gender);
-//     formData.append("blood_group", patientDetails.blood_group);
-
-//     if (patientDetails.profile_pic) {
-//       formData.append("profile_pic", patientDetails.profile_pic);
-//     }
+//     const formData = {
+//       ...patientDetails,
+//       mobile_number: patientDetails.mobile_number, // Ensure this includes the country code
+//     };
 
 //     try {
 //       setLoading(true);
@@ -183,21 +145,16 @@
 //         setPatientId(response.data.data.id);
 //       } else if (response.status === 400) {
 //         setErrorMessage(response.data.error || "Validation failed.");
-//         setSuccessMessage(""); // Clear success message if any
 //       } else {
-//         // Generic error handling
 //         setErrorMessage("Failed to save patient details.");
-//         setSuccessMessage(""); // Clear success message if any
 //       }
 //     } catch (error) {
-//       // Handle network or server errors
 //       setErrorMessage(
 //         error.response?.data?.error ||
 //           "An error occurred while saving patient details."
 //       );
-//       setSuccessMessage(""); // Clear success message if any
 //     } finally {
-//       setLoading(false); // Stop loading spinner or visual indicator
+//       setLoading(false);
 //     }
 //   };
 
@@ -569,18 +526,14 @@
 //                   value={patientDetails.name}
 //                   onChange={(e) => {
 //                     const value = e.target.value;
-//                     // Regex to allow only letters and spaces
-//                     if (/^[a-zA-Z\s]*$/.test(value) || value === "") {
-//                       handleInputChange(e); // Call the handler to update state
+//                     if (/^[a-zA-Z\s]*$/.test(value)) {
+//                       handleInputChange(e);
 //                     }
 //                   }}
 //                   required
 //                 />
-
-//                 {formErrors.name && (
-//                   <div className="text-danger">{formErrors.name}</div>
-//                 )}
 //               </div>
+
 //               <div className="col-md-3">
 //                 <label
 //                   htmlFor="mobile_number"
@@ -593,26 +546,22 @@
 //                 >
 //                   Mobile Number<span className="text-danger">*</span>
 //                 </label>
-//                 <input
-//                   type="text"
-//                   className="form-control"
+//                 <PhoneInput
 //                   id="mobile_number"
 //                   name="mobile_number"
+//                   placeholder="Enter mobile number"
+//                   defaultCountry="IN"
 //                   value={patientDetails.mobile_number}
-//                   onChange={(e) => {
-//                     const value = e.target.value;
-//                     // Regex to allow only numbers
-//                     if (/^\d*$/.test(value)) {
-//                       handleInputChange(e); // Call the handler to update state
-//                     }
-//                   }}
+//                   onChange={(value) =>
+//                     setPatientDetails((prevDetails) => ({
+//                       ...prevDetails,
+//                       mobile_number: value,
+//                     }))
+//                   }
 //                   required
 //                 />
-
-//                 {formErrors.mobile_number && (
-//                   <div className="text-danger">{formErrors.mobile_number}</div>
-//                 )}
 //               </div>
+
 //               <div className="col-md-3">
 //                 <label
 //                   htmlFor="date_of_birth"
@@ -623,7 +572,7 @@
 //                     display: "block",
 //                   }}
 //                 >
-//                   Date of Birth
+//                   Date of Birth<span className="text-danger">*</span>
 //                 </label>
 //                 <input
 //                   type="date"
@@ -633,11 +582,10 @@
 //                   value={patientDetails.date_of_birth}
 //                   onChange={handleInputChange}
 //                   max={today}
+//                   required
 //                 />
-//                 {formErrors.date_of_birth && (
-//                   <div className="text-danger">{formErrors.date_of_birth}</div>
-//                 )}
 //               </div>
+
 //               <div className="col-md-3">
 //                 <label
 //                   htmlFor="age"
@@ -656,12 +604,17 @@
 //                   id="age"
 //                   name="age"
 //                   value={patientDetails.age}
-//                   onChange={handleInputChange}
+//                   onChange={(e) => {
+//                     const value = e.target.value;
+//                     if (
+//                       value === "" ||
+//                       (Number(value) > 0 && /^[0-9]+$/.test(value))
+//                     ) {
+//                       handleInputChange(e);
+//                     }
+//                   }}
 //                   required
 //                 />
-//                 {formErrors.age && (
-//                   <div className="text-danger">{formErrors.age}</div>
-//                 )}
 //               </div>
 //             </div>
 
@@ -687,6 +640,7 @@
 //                   onChange={handleInputChange}
 //                 />
 //               </div>
+
 //               <div className="col-md-3">
 //                 <label
 //                   htmlFor="gender"
@@ -712,9 +666,6 @@
 //                   <option value="female">Female</option>
 //                   <option value="others">Others</option>
 //                 </select>
-//                 {formErrors.gender && (
-//                   <div className="text-danger">{formErrors.gender}</div>
-//                 )}
 //               </div>
 
 //               <div className="col-md-3">
@@ -738,13 +689,11 @@
 //                   rows="1"
 //                   required
 //                 ></textarea>
-//                 {formErrors.address && (
-//                   <div className="text-danger">{formErrors.address}</div>
-//                 )}
 //               </div>
+
 //               <div className="col-md-3">
 //                 <label
-//                   className="mr-2"
+//                   className="form-label"
 //                   style={{
 //                     fontWeight: "bold",
 //                     textAlign: "left",
@@ -770,6 +719,7 @@
 //               </div>
 //             </div>
 //           </form>
+
 //           <div className="mt-4">
 //             <h3
 //               style={{ textAlign: "center", margin: "32px", fontWeight: "600" }}
@@ -864,6 +814,23 @@
 
 // export default PatientAppointmentBook;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import React, { useState, useEffect } from "react";
 import BaseUrl from "../../api/BaseUrl";
 import { jwtDecode } from "jwt-decode";
@@ -904,6 +871,7 @@ const PatientAppointmentBook = () => {
   const [slotErrorMessage, setSlotErrorMessage] = useState("");
   const [loading, setLoading] = useState(true); // Loading state
   const today = new Date().toISOString().split("T")[0];
+  const [hoverMessage, setHoverMessage] = useState("");
   const [patientDetails, setPatientDetails] = useState({
     name: "",
     mobile_number: "",
@@ -914,6 +882,13 @@ const PatientAppointmentBook = () => {
     address: "",
   });
 
+  const formatTime = (time) => {
+    const [hours, minutes] = time.split(":").map(Number);
+    const period = hours >= 12 ? "PM" : "AM";
+    const formattedHours = hours % 12 || 12; // Convert 24-hour format to 12-hour format
+    return `${formattedHours}:${minutes.toString().padStart(2, "0")} ${period}`;
+  };
+  
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -1590,68 +1565,168 @@ const PatientAppointmentBook = () => {
               Select Slot
             </h3>
             <div className="row justify-content-center mb-3">
-              <div className="col-4 text-center mb-3">
-                <Button
-                  variant={
-                    selectedSlot === "today" ? "primary" : "outline-primary"
-                  }
-                  onClick={handleToday}
-                >
-                  Today ({format(new Date(), "dd MMM")})
-                </Button>
-                <div
-                  style={getSlotCountStyle(
-                    slotCount[format(new Date(), "yyyy-MM-dd")] || 0
-                  )}
-                >
-                  {slotCount[format(new Date(), "yyyy-MM-dd")] || 0} slots
-                  available
-                </div>
-              </div>
-
-              <div className="col-4 text-center mb-3">
-                <Button
-                  variant={
-                    selectedSlot === "tomorrow" ? "primary" : "outline-primary"
-                  }
-                  onClick={handleTomorrow}
-                >
-                  Tomorrow ({format(addDays(new Date(), 1), "dd MMM")})
-                </Button>
-                <div
-                  style={getSlotCountStyle(
-                    slotCount[format(addDays(new Date(), 1), "yyyy-MM-dd")] || 0
-                  )}
-                >
-                  {slotCount[format(addDays(new Date(), 1), "yyyy-MM-dd")] || 0}{" "}
-                  slots available
-                </div>
-              </div>
-
-              <div className="col-4 text-center mb-3">
-                <Button
-                  variant={
-                    selectedSlot === "dayAfterTomorrow"
-                      ? "primary"
-                      : "outline-primary"
-                  }
-                  onClick={handleDayAfterTomorrow}
-                >
-                  {format(addDays(new Date(), 2), "EEEE")} (
-                  {format(addDays(new Date(), 2), "dd MMM")})
-                </Button>
-                <div
-                  style={getSlotCountStyle(
-                    slotCount[format(addDays(new Date(), 2), "yyyy-MM-dd")] || 0
-                  )}
-                >
-                  {slotCount[format(addDays(new Date(), 2), "yyyy-MM-dd")] || 0}{" "}
-                  slots available
-                </div>
-              </div>
-            </div>
-
-            {showSlots && <div className="row">{renderSlots(slots)}</div>}
+                        {/* Today Slots */}
+                        <div className="col-4 text-center mb-3">
+                          <Button
+                            variant={
+                              selectedSlot === "today" ? "primary" : "outline-primary"
+                            }
+                            onClick={handleToday}
+                          >
+                            Today ({format(new Date(), "dd MMM")})
+                          </Button>
+                          <div
+                            style={getSlotCountStyle(
+                              slotCount[format(new Date(), "yyyy-MM-dd")] || 0
+                            )}
+                          >
+                            {slotCount[format(new Date(), "yyyy-MM-dd")] || 0} slots
+                            available
+                          </div>
+                        </div>
+            
+                        {/* Tomorrow Slots */}
+                        <div className="col-4 text-center mb-3">
+                          <Button
+                            variant={
+                              selectedSlot === "tomorrow" ? "primary" : "outline-primary"
+                            }
+                            onClick={handleTomorrow}
+                          >
+                            Tomorrow ({format(addDays(new Date(), 1), "dd MMM")})
+                          </Button>
+                          <div
+                            style={getSlotCountStyle(
+                              slotCount[format(addDays(new Date(), 1), "yyyy-MM-dd")] || 0
+                            )}
+                          >
+                            {slotCount[format(addDays(new Date(), 1), "yyyy-MM-dd")] || 0}{" "}
+                            slots available
+                          </div>
+                        </div>
+            
+                        {/* Day After Tomorrow Slots */}
+                        <div className="col-4 text-center mb-3">
+                          <Button
+                            variant={
+                              selectedSlot === "dayAfterTomorrow"
+                                ? "primary"
+                                : "outline-primary"
+                            }
+                            onClick={handleDayAfterTomorrow}
+                          >
+                            {format(addDays(new Date(), 2), "EEEE")} (
+                            {format(addDays(new Date(), 2), "dd MMM")})
+                          </Button>
+                          <div
+                            style={getSlotCountStyle(
+                              slotCount[format(addDays(new Date(), 2), "yyyy-MM-dd")] || 0
+                            )}
+                          >
+                            {slotCount[format(addDays(new Date(), 2), "yyyy-MM-dd")] || 0}{" "}
+                            slots available
+                          </div>
+                        </div>
+                      </div>
+            
+                      {/* Render Slots Horizontally with 6 slots per row */}
+                      {showSlots && (
+                        <div className="d-flex flex-column align-items-center">
+                          {Array.from({ length: Math.ceil(slots.length / 6) }).map(
+                            (_, rowIndex) => (
+                              <div
+                                className="d-flex flex-wrap justify-content-center mb-2"
+                                key={rowIndex}
+                              >
+                                {slots
+                                  .slice(rowIndex * 6, (rowIndex + 1) * 6)
+                                  .map((slot) => {
+                                    const currentTime = new Date();
+                                    const slotTime = new Date(
+                                      `${slot.appointment_date}T${slot.appointment_slot}`
+                                    );
+            
+                                    const isPast =
+                                      currentTime >= slotTime &&
+                                      format(currentTime, "yyyy-MM-dd") ===
+                                        slot.appointment_date;
+                                    const isBooked = slot.is_booked;
+            
+                                    const isDisabled = isPast || isBooked;
+            
+                                    const buttonStyle = {
+                                      width: "196px", // Fixed width
+                                      height: "38px", // Fixed height
+                                      backgroundColor: isBooked
+                                        ? "gray"
+                                        : isDisabled
+                                          ? "gray"
+                                          : "#FFFFFF",
+                                      color: isDisabled ? "#FFFFFF" : "#000000",
+                                      borderColor: "#3D9F41",
+                                      cursor: isDisabled ? "not-allowed" : "pointer",
+                                      opacity: isDisabled ? 0.7 : 1,
+                                      margin: "5px", // Add margin between buttons
+                                      textAlign: "center", // Center text alignment
+                                      position: "relative", // Required for hover message
+                                      display: "flex", // Ensures alignment works
+                                      alignItems: "center", // Centers vertically
+                                      justifyContent: "center", // Centers horizontally
+                                    };
+            
+                                    const timeStyle = {
+                                      marginTop: "2px", // Moves the time slightly downward
+                                    };
+            
+                                    return (
+                                      <div
+                                        key={slot.id}
+                                        style={{ position: "relative" }}
+                                        onMouseEnter={() =>
+                                          isDisabled && setHoverMessage("Booked")
+                                        }
+                                        onMouseLeave={() => setHoverMessage("")}
+                                      >
+                                        <Button
+                                          style={buttonStyle}
+                                          className="slot-button"
+                                          onClick={() =>
+                                            !isDisabled && handleSlotClick(slot)
+                                          }
+                                          disabled={isDisabled}
+                                        >
+                                          <span style={timeStyle}>
+                                            {formatTime(slot.appointment_slot)}
+                                          </span>
+                                        </Button>
+            
+                                        {isDisabled && hoverMessage && (
+                                          <div
+                                            style={{
+                                              position: "absolute",
+                                              top: "-30px",
+                                              left: "50%",
+                                              transform: "translateX(-50%)",
+                                              backgroundColor: "rgba(0, 0, 0, 0.8)",
+                                              color: "#fff",
+                                              padding: "5px 10px",
+                                              borderRadius: "4px",
+                                              fontSize: "0.8rem",
+                                              zIndex: 10,
+                                              whiteSpace: "nowrap",
+                                            }}
+                                          >
+                                            {hoverMessage}
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                              </div>
+                            )
+                          )}
+                        </div>
+                      )}
           </div>
           <Modal show={isModalOpen} onHide={handleCancelAppointment}>
             <Modal.Header closeButton>

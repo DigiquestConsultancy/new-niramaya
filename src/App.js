@@ -119,18 +119,6 @@
 
 // export default App;
 
-
-
-
-
-
-
-
-
-
-
-
-
 // import React, { useState, useEffect } from "react";
 // import {
 //   BrowserRouter as Router,
@@ -390,10 +378,6 @@
 
 
 
-
-
-
-
 import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -447,7 +431,6 @@ import ReceptionBookedAppointment from "./components/reception/BookedAppointment
 import ClinicBookedAppointment from "./components/clinic/BookedAppointment";
 import MedicalRecords from "./components/patient/MedicalRecords";
 import Transaction from "./components/patient/Transaction";
-import PatientBook from "./components/PatientBook";
 import ContactUs from "./components/patient/ContactUs";
 import Checkout from "./components/patient/CheckOut";
 import CheckOutBook from "./components/patient/CheckOutBook";
@@ -459,8 +442,9 @@ import RefundPolicy from "./components/conditions/RefundPolicy";
 import PatientFooter from "./components/MainFooter/PatientFooter";
 import DoctorFooter from "./components/MainFooter/DoctorFooter";
 
-import ProtectedRoute from "./components/ProtectedRoute"; 
+import ProtectedRoute from "./components/ProtectedRoute";
 import RestrictedPage from "./components/RestrictedPage";
+
 function App() {
   const [userType, setUserType] = useState(null);
 
@@ -503,13 +487,12 @@ function App() {
 
         <main className="app-content">
           <Switch>
-          <Route
+            <Route
               exact
               path="/restricted"
               // render={() => <div>Please log in first</div>} // Custom login page
               component={RestrictedPage}
             />
-
             <Route exact path="/finddoctor" component={FindDoctor} />
             <Route exact path="/consult" component={Consult} />
             <Route exact path="/medicine" component={Medicine} />
@@ -535,7 +518,11 @@ function App() {
               component={BookAppointments}
             />
             <ProtectedRoute exact path="/doctor/addslot" component={AddSlot} />
-            <ProtectedRoute exact path="/doctor/manageclinic" component={ManageClinic} />
+            <ProtectedRoute
+              exact
+              path="/doctor/manageclinic"
+              component={ManageClinic}
+            />
             <ProtectedRoute
               exact
               path="/doctor/manageclinic/addclinic"
@@ -551,7 +538,11 @@ function App() {
               path="/doctor/managereception"
               component={ManageReception}
             />
-            <ProtectedRoute exact path="/doctor/addreception" component={AddReception} />
+            <ProtectedRoute
+              exact
+              path="/doctor/addreception"
+              component={AddReception}
+            />
             <ProtectedRoute
               exact
               path="/doctor/receptiondetails/:reception_id"
@@ -572,19 +563,51 @@ function App() {
                 setIsPatientLoggedIn={() => handleLogin("patient")}
               />
             </Route>
-            <ProtectedRoute exact path="/patient/register" component={PatientRegister} />
-            <ProtectedRoute exact path="/patient/home" component={PatientHome} />
-            <ProtectedRoute exact path="/patient/home/checkout" component={Checkout} />
-            <ProtectedRoute exact path="/patient/details" component={PatientDetails} />
+            <ProtectedRoute
+              exact
+              path="/patient/register"
+              component={PatientRegister}
+            />
+            <ProtectedRoute
+              exact
+              path="/patient/home"
+              component={PatientHome}
+            />
+            <ProtectedRoute
+              exact
+              path="/patient/home/checkout"
+              component={Checkout}
+            />
+            <ProtectedRoute
+              exact
+              path="/patient/details"
+              component={PatientDetails}
+            />
             <ProtectedRoute
               exact
               path="/patient/medicalrecords"
               component={MedicalRecords}
             />
-            <ProtectedRoute exact path="/patient/transaction" component={Transaction} />
-            <ProtectedRoute exact path="/patient/contactus" component={ContactUs} />
-            <ProtectedRoute exact path="/doctor/details" component={DoctorDetails} />
-            <ProtectedRoute exact path="/patient/slots" component={PatientSlot} />
+            <ProtectedRoute
+              exact
+              path="/patient/transaction"
+              component={Transaction}
+            />
+            <ProtectedRoute
+              exact
+              path="/patient/contactus"
+              component={ContactUs}
+            />
+            <ProtectedRoute
+              exact
+              path="/doctor/details"
+              component={DoctorDetails}
+            />
+            <ProtectedRoute
+              exact
+              path="/patient/slots"
+              component={PatientSlot}
+            />
             <ProtectedRoute
               exact
               path="/patient/bookappointment"
@@ -597,8 +620,16 @@ function App() {
             />
             <ProtectedRoute exact path="/clinic/home" component={ClinicHome} />{" "}
             {/* Add ClinicHome Route */}
-            <ProtectedRoute exact path="/clinic/details" component={MyClinicDetails} />
-            <ProtectedRoute exact path="/clinic/createslot" component={ClinicAddSlot} />
+            <ProtectedRoute
+              exact
+              path="/clinic/details"
+              component={MyClinicDetails}
+            />
+            <ProtectedRoute
+              exact
+              path="/clinic/createslot"
+              component={ClinicAddSlot}
+            />
             <ProtectedRoute
               exact
               path="/clinic/appointmentbook"
@@ -609,7 +640,11 @@ function App() {
               path="/clinic/bookedappointment"
               component={ClinicBookedAppointment}
             />
-            <ProtectedRoute exact path="/reception/home" component={ReceptionHome} />{" "}
+            <ProtectedRoute
+              exact
+              path="/reception/home"
+              component={ReceptionHome}
+            />{" "}
             {/* Add ReceptionHome Route */}
             <ProtectedRoute
               exact
@@ -632,7 +667,6 @@ function App() {
               component={ReceptionBookedAppointment}
             />
             <Route exact path="/" component={CardContainer} />
-            <Route exact path="/patientbook" component={PatientBook} />
             <Route
               exact
               path="/conditions/tearmandconditions"
