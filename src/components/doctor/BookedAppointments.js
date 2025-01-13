@@ -9059,7 +9059,7 @@ const DoctorBookedAppointment = () => {
         <div
           className="shadow-sm mb-5 p-5"
           style={{
-            backgroundColor: "#0091A5",
+            backgroundColor: "#D7EAF0",
             padding: "30px 0",
           }}
         >
