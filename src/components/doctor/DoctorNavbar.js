@@ -661,8 +661,7 @@ import BaseUrl from "../../api/BaseUrl";
 const DoctorNavbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [hospitalDropdownOpen, setHospitalDropdownOpen] = useState(false);
-  const [appointmentsDropdownOpen, setAppointmentsDropdownOpen] =
-    useState(false);
+  const [appointmentsDropdownOpen, setAppointmentsDropdownOpen] = useState(false);
   const [userType, setUserType] = useState(null);
   const [isVerified, setIsVerified] = useState(false);
   const [isActive, setIsActive] = useState(false);
@@ -1251,6 +1250,15 @@ const DoctorNavbar = () => {
                     onClick={closeNavbar}
                   >
                     <GiNotebook /> Book Appointment
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link
+                    className="nav-link"
+                    to="/doctor/paymenthistory"
+                    onClick={closeNavbar}
+                  >
+                    <FcMoneyTransfer /> Payment History
                   </Link>
                 </li>
                 <li className="nav-item">

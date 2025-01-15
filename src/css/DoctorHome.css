@@ -3,54 +3,50 @@
     max-width: 100px;
     margin-bottom: 10px;
   }
- 
+
   .header .heading {
     font-size: 24px;
     padding-left: 0;
     padding: 10px 20px;
   }
- 
+
   .doctor-container h3 {
     font-size: 16px;
     padding-left: 0;
     text-align: center;
     padding: 10px 20px;
   }
- 
- 
 }
- 
+
 @media (max-width: 576px) {
   .appointments-col h5,
   .content-col h5.clickable {
     font-size: 1rem;
     padding: 8px;
   }
- 
+
   .appointments-col {
     padding: 10px;
     max-height: 300px;
   }
- 
+
   .content-col h5.clickable {
     border-radius: 4px;
   }
 }
- 
+
 @media (max-width: 768px) {
   .appointments-col h5,
   .content-col h5.clickable {
     font-size: 1.1rem;
     padding: 9px;
   }
- 
+
   .content-col h5.clickable {
     border-radius: 5px;
   }
 }
- 
- 
- 
+
 body {
   overflow-x: hidden;
 }

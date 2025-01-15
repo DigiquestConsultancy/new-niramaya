@@ -3842,8 +3842,12 @@ const LoaderImage = styled.div`
 `;
 
 const ClinicBookedAppointment = () => {
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [loading, setLoading] = useState(false);
   const [appointments, setAppointments] = useState([]);
+  const [appointmentId, setAppointmentId] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [clinicId, setClinicId] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -4282,12 +4286,13 @@ const ClinicBookedAppointment = () => {
     getClinicIdFromToken();
   }, []);
 
-  const fetchAppointments = async (clinicId) => {
+  const fetchAppointments = async (doctorId) => {
     try {
       setLoading(true);
       const response = await BaseUrl.get(
-        `/clinic/appointmentbyclinicid/?clinic_id=${clinicId}`
+        `/doctorappointment/getslot/?doctor_id=${doctorId}`
       );
+
       const fetchedAppointments = response.data.map((appointment) => ({
         appointment_id: appointment.appointment_id,
         appointment_date: appointment.appointment_date,
@@ -4297,7 +4302,20 @@ const ClinicBookedAppointment = () => {
         mobile_number: appointment.mobile_number,
         patient_id: appointment.patient_id,
         is_patient: appointment.is_patient,
+        is_complete: appointment.is_complete, // Ensure you have is_complete from the API response
+        status: appointment.is_canceled
+          ? "Canceled"
+          : appointment.is_complete
+            ? "Completed"
+            : "Upcoming",
       }));
+
+      for (let index in response.data) {
+        // Access the appointment object at each index
+        const appointment = response.data[index];
+        setAppointmentId(appointment.appointment_id); // Extract and log appointment_id
+      }
+
       setAppointments(fetchedAppointments);
       if (fetchedAppointments.length > 0) {
         setSelectedPatientId(fetchedAppointments[0].patient_id);
@@ -5414,14 +5432,44 @@ const ClinicBookedAppointment = () => {
 
   const groupedAppointments = appointments.reduce((acc, appointment) => {
     const date = new Date(appointment.appointment_date);
-    const formattedDate = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+    const formattedDate = `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
     if (!acc[formattedDate]) acc[formattedDate] = [];
     acc[formattedDate].push(appointment);
     return acc;
-  }, {}); 
+  }, {});
+
+  const [switchState, setSwitchState] = useState(false);
+
+  const handleEndVisit = async (appointment_id) => {
+    setSwitchState(true); // Set the switch state manually since there is no event in this context.
+
+    try {
+      console.log(appointment_id);
+      const response = await BaseUrl.patch(
+        "/doctorappointment/completedappointment/",
+        {
+          appointment_id: appointment_id,
+        }
+      );
+    } catch (error) {
+      console.error("Error updating appointment status:", error);
+    }
+  };
+
+  const handleConfirmAction = () => {
+    if (confirmAction === "endVisit") {
+      handleEndVisit(selectedAppointment.appointment_id);
+    } else if (confirmAction === "cancelAppointment") {
+      handleCancelAppointment(selectedAppointment.appointment_id);
+    }
+    setShowConfirmModal(false);
+  };
 
   return (
-    <div fluid style={{backgroundColor: "#F2F9FF", margin: "0px", padding: "0px"}}>
+    <div
+      fluid
+      style={{ backgroundColor: "#F2F9FF", margin: "0px", padding: "0px" }}
+    >
       {errorMessage && (
         <div className="alert alert-danger" role="alert">
           {errorMessage}
@@ -5544,7 +5592,7 @@ const ClinicBookedAppointment = () => {
                 marginLeft: "8px",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center"
+                justifyContent: "center",
               }}
             >
               <span
@@ -5563,37 +5611,39 @@ const ClinicBookedAppointment = () => {
           </h2>
 
           {Object.keys(groupedAppointments).map((date) => (
-                   <div key={date}><hr/>
-                     <h4 style={{ color: "#003366" }} className="text-center">
-                       {date}
-                     </h4>
-                     <Row className="d-flex justify-content-center align-items-center mx-auto">
-                       {groupedAppointments[date].map((appointment) => (
-                <Col
-                  sm={12}
-                  md={
-                    expandedAppointmentId === appointment.appointment_id
-                      ? 12
-                      : 4
-                  }
-                  lg={
-                    expandedAppointmentId === appointment.appointment_id
-                      ? 12
-                      : 2
-                  }
-                  key={appointment.appointment_id}
-                  className="mb-5 p-3"
-                >
-                  <Card>
-                    <Card.Header
-                      style={{
-                        background: "#D7EAF0",
-                        color: "#003366",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      <div
-                        className="d-flex justify-content-between align-items-center"
+            <div key={date}>
+              <hr />
+              <h4
+                style={{ color: "#003366", fontWeight: "700" }}
+                className="text-center"
+              >
+                {date}
+              </h4>
+              <Row className="d-flex justify-content-center align-items-center mx-auto">
+                {groupedAppointments[date].map((appointment) => (
+                  <Col
+                    sm={12}
+                    md={
+                      expandedAppointmentId === appointment.appointment_id
+                        ? 12
+                        : 4
+                    }
+                    lg={
+                      expandedAppointmentId === appointment.appointment_id
+                        ? 12
+                        : 2
+                    }
+                    key={appointment.appointment_id}
+                    className="mb-5 p-3"
+                  >
+                    <Card>
+                      <Card.Header
+                        style={{
+                          background: "#D7EAF0",
+                          color: "#003366",
+                          fontWeight: "bold",
+                          cursor: "pointer",
+                        }}
                         onClick={() =>
                           expandedAppointmentId === appointment.appointment_id
                             ? setExpandedAppointmentId(null)
@@ -5602,570 +5652,96 @@ const ClinicBookedAppointment = () => {
                                 appointment
                               )
                         }
-                        style={{ cursor: "pointer" }}
                       >
-                        <span>{appointment.appointment_date}</span>
-                        {expandedAppointmentId ===
-                        appointment.appointment_id ? (
-                          <FaChevronUp />
-                        ) : (
-                          <FaChevronDown />
-                        )}
-                      </div>
-                    </Card.Header>
-                    <Card.Body
-                      style={{ overflowX: "auto", whiteSpace: "nowrap", background: appointment.booked_by !== appointment.doctor_name ? "#F5ECD5" : "#FFFFFF" }}
-                    >
-                      <p>
-                        <strong>Time Slot:</strong>{" "}
-                        {appointment.appointment_slot}
-                      </p>
-                      <p>
-                        <strong>Booked By:</strong> {appointment.booked_by}
-                      </p>
-                      <p>
-                        <strong>Status:</strong> {appointment.status}
-                      </p>
+                        <div className="d-flex flex-column w-100">
+                          {/* First Row: Case ID */}
+                          <div className="row">
+                            <div className="col-12">
+                              <span>
+                                <strong>Case ID:</strong>{" "}
+                                {appointment.case_id || "N/A"}
+                              </span>
+                            </div>
+                          </div>
 
-                      {expandedAppointmentId === appointment.appointment_id && (
-                        <tr>
-                          <td>
-                            <Card
-                              className="shadow-sm mt-3"
-                              style={{
-                                borderRadius: "15px",
-                                border: " #0091A5",
-                                background: "#f1f8fb",
-                              }}
-                            >
-                              <Card.Body
-                                style={{
-                                  position: "relative",
-                                }}
-                              >
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "space-between",
+                          {/* Second Row: End Visit and Cancel */}
+                          <div className="row align-items-center mt-2">
+                            {/* End Visit Column */}
+                            <div className="col-6 d-flex align-items-center">
+                              <span className="me-1">End Visit</span>
+                              <label className="form-check form-switch">
+                                <input
+                                  className="form-check-input"
+                                  type="checkbox"
+                                  id="endVisitSwitch"
+                                  style={{ cursor: "pointer" }}
+                                  onChange={() => {
+                                    setConfirmAction("endVisit");
+                                    setShowConfirmModal(true);
+                                    setSelectedAppointment(appointment); // Set the selected appointment
                                   }}
-                                >
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                    }}
-                                  >
-                                    <h2
-                                      style={{
-                                        fontWeight: "600",
-                                        color: "#000",
-                                        fontFamily: "Sans-Serif",
-                                        lineHeight: "46.88px",
-                                        margin: "0px",
-                                        textAlign: "left",
-                                      }}
-                                    >
-                                      Patient Details
-                                    </h2>
-                                    <Button
-                                      style={{
-                                        marginLeft: "20px",
-                                        backgroundColor: "#295F98",
-                                        color: "#ffffff",
-                                        border: "none",
-                                        borderRadius: "5px",
-                                        // padding: "10px 20px",
-                                        cursor: "pointer",
-                                      }}
-                                      onClick={() =>
-                                        setShowPatientDetails((prev) => !prev)
-                                      }
-                                    >
-                                      {showPatientDetails
-                                        ? "Hide Details"
-                                        : "Show Details"}
-                                    </Button>
-                                  </div>
-                                  {/* <Button
-                                                     style={{
-                                                       backgroundColor: "#8E1616",
-                                                       color: "#ffffff",
-                                                       border: "none",
-                                                       borderRadius: "5px",
-                                                       cursor: "pointer",
-                                                       padding: "12px"
-                                                     }}
-                                                     onClick={handlePrint}
-                                                   >
-                                                    <BsPrinterFill /> Print Report
-                                                   </Button> */}
-                                </div>
-                                {showPatientDetails && (
-                                  <Form>
-                                    <Row className="mb-3">
-                                      <Col sm={6} md={4}>
-                                        <Form.Group
-                                          controlId="formName"
-                                          className="mb-3"
-                                        >
-                                          <Form.Label
-                                            style={{
-                                              color: "#003366",
-                                              fontFamily: "Sans-Serif",
-                                              fontSize: "18px",
-                                              fontWeight: 600,
-                                              lineHeight: "29.3px",
-                                              textAlign: "left",
-                                              width: "100%",
-                                            }}
-                                          >
-                                            Name
-                                          </Form.Label>
-                                          <Form.Control
-                                            type="text"
-                                            name="name"
-                                            value={formDetails.name || ""}
-                                            onChange={handleInputChange}
-                                            style={{
-                                              textAlign: "left",
-                                            }}
-                                          />
-                                        </Form.Group>
-                                      </Col>
-                                      <Col sm={6} md={4}>
-                                        <Form.Group
-                                          controlId="formMobileNumber"
-                                          className="mb-3"
-                                        >
-                                          <Form.Label
-                                            style={{
-                                              color: "#003366",
-                                              fontFamily: "Sans-Serif",
-                                              fontSize: "18px",
-                                              fontWeight: 600,
-                                              lineHeight: "29.3px",
-                                              textAlign: "left",
-                                              width: "100%",
-                                            }}
-                                          >
-                                            Mobile Number
-                                          </Form.Label>
-                                          <Form.Control
-                                            type="text"
-                                            name="mobile_number"
-                                            value={
-                                              formDetails.mobile_number || ""
-                                            }
-                                            onChange={handleInputChange}
-                                            style={{
-                                              textAlign: "left",
-                                            }}
-                                            disabled
-                                          />
-                                        </Form.Group>
-                                      </Col>
-                                      <Col sm={6} md={4}>
-                                        <Form.Group
-                                          controlId="formAge"
-                                          className="mb-3"
-                                        >
-                                          <Form.Label
-                                            style={{
-                                              color: "#003366",
-                                              fontFamily: "Sans-Serif",
-                                              fontSize: "18px",
-                                              fontWeight: 600,
-                                              lineHeight: "29.3px",
-                                              textAlign: "left",
-                                              width: "100%",
-                                            }}
-                                          >
-                                            Age
-                                          </Form.Label>
-                                          <Form.Control
-                                            type="text"
-                                            name="age"
-                                            value={formDetails.age || ""}
-                                            onChange={handleInputChange}
-                                            style={{
-                                              textAlign: "left",
-                                            }}
-                                          />
-                                        </Form.Group>
-                                      </Col>
-                                      <Col sm={6} md={4}>
-                                        <Form.Group
-                                          controlId="formGender"
-                                          className="mb-3"
-                                        >
-                                          <Form.Label
-                                            style={{
-                                              color: "#003366",
-                                              fontFamily: "Sans-Serif",
-                                              fontSize: "18px",
-                                              fontWeight: 600,
-                                              lineHeight: "29.3px",
-                                              textAlign: "left",
-                                              width: "100%",
-                                            }}
-                                          >
-                                            Gender
-                                          </Form.Label>
-                                          <Form.Select
-                                            name="gender"
-                                            value={formDetails.gender || ""}
-                                            onChange={handleInputChange}
-                                            style={{
-                                              textAlign: "left",
-                                            }}
-                                          >
-                                            <option value="">
-                                              Select Gender
-                                            </option>
-                                            <option value="male">Male</option>
-                                            <option value="female">
-                                              Female
-                                            </option>
-                                            <option value="others">
-                                              Others
-                                            </option>
-                                          </Form.Select>
-                                        </Form.Group>
-                                      </Col>
-                                      <Col sm={6} md={4}>
-                                        <Form.Group
-                                          controlId="formAddress"
-                                          className="mb-3"
-                                        >
-                                          <Form.Label
-                                            style={{
-                                              color: "#003366",
-                                              fontFamily: "Sans-Serif",
-                                              fontSize: "18px",
-                                              fontWeight: 600,
-                                              lineHeight: "29.3px",
-                                              textAlign: "left",
-                                              width: "100%",
-                                            }}
-                                          >
-                                            Address
-                                          </Form.Label>
-                                          <Form.Control
-                                            type="text"
-                                            name="address"
-                                            value={formDetails.address || ""}
-                                            onChange={handleInputChange}
-                                            style={{
-                                              textAlign: "left",
-                                            }}
-                                          />
-                                        </Form.Group>
-                                      </Col>
-                                    </Row>
-                                    <div className="d-flex justify-content-center gap-2">
-                                      <Button
-                                        style={{
-                                          backgroundColor: "#C62E2E",
-                                          color: "#FFFFFF",
-                                          border: "none",
-                                          borderRadius: "5px",
-                                          cursor: "pointer",
-                                        }}
-                                        onClick={() =>
-                                          handleDelete(
-                                            appointment.appointment_id
-                                          )
-                                        }
-                                      >
-                                        Delete
-                                      </Button>
+                                  disabled={appointment.is_complete} // Disable if is_complete is true
+                                  checked={appointment.is_complete}
+                                />
+                              </label>
+                            </div>
 
-                                      <Button
-                                        style={{
-                                          backgroundColor: "#FF8A08",
-                                          color: "#FFFFFF",
-                                          border: "none",
-                                          borderRadius: "5px",
-                                          cursor: "pointer",
-                                        }}
-                                        onClick={() =>
-                                          handleCancelAppointment(
-                                            appointment.appointment_id
-                                          )
-                                        }
-                                      >
-                                        Cancel Appointment
-                                      </Button>
-                                      <Button
-                                        style={{
-                                          backgroundColor: "#295F98",
-                                          color: "#ffffff",
-                                          border: "none",
-                                          borderRadius: "5px",
-                                          cursor: "pointer",
-                                        }}
-                                        onClick={handleUpdate}
-                                      >
-                                        Update
-                                      </Button>
-                                    </div>
-                                    <div className="d-flex justify-content-end mt-4"></div>
-                                  </Form>
-                                )}
-                              </Card.Body>
-                            </Card>
-                          </td>
-                        </tr>
-                      )}
-                      {showSymptomsForm &&
-                        expandedAppointmentId ===
-                          appointment.appointment_id && (
-                          <tr>
-                            <td>
-                              <Card
-                                className="shadow-sm mt-3"
-                                style={{
-                                  borderRadius: "15px",
-                                  border: "#0091A5",
-                                  background: "#f1f8fb",
-                                }}
-                              >
-                                <Card.Body style={{ position: "relative" }}>
-                                  <div
-                                    className="symptoms-header"
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "flex-start",
-                                    }}
-                                  >
-                                    <h2
-                                      style={{
-                                        fontWeight: "600",
-                                        color: "#000",
-                                        fontFamily: "Sans-Serif",
-                                        lineHeight: "46.88px",
-                                        margin: "0px 20px 0px 0px",
-                                        textAlign: "left",
-                                      }}
-                                    >
-                                      Symptoms
-                                    </h2>
-                                    <Form.Control
-                                      type="text"
-                                      placeholder="Search symptoms"
-                                      value={searchSymptom}
-                                      onChange={handleSymptomSearch}
-                                      style={{
-                                        width: "300px",
-                                        margin: "0px",
-                                      }}
-                                    />
-                                    <Button
-                                      style={{
-                                        marginLeft: "auto",
-                                        backgroundColor: "#295F98",
-                                        color: "#ffffff",
-                                        border: "none",
-                                        borderRadius: "5px",
-                                        // padding: "10px 20px",
-                                        cursor: "pointer",
-                                      }}
-                                      onClick={handleUpdateSymptom}
-                                    >
-                                      Update Symptoms
-                                    </Button>
-                                  </div>
+                            {/* Cancel Column */}
+                            {/* <div className="col-6 d-flex align-items-center">
+                                                <span className="me-1">Cancel</span>
+                                                <label className="form-check form-switch">
+                                                  <input
+                                                    className="form-check-input"
+                                                    type="checkbox"
+                                                    id="cancelSwitch"
+                                                    style={{ cursor: "pointer" }}
+                                                    onChange={() => {
+                                                      setConfirmAction("cancelAppointment");
+                                                      setShowConfirmModal(true);
+                                                      setSelectedAppointment(appointment); // Set the selected appointment
+                                                    }}
+                                                    disabled={appointment.is_cancel} // Disable if is_cancel is true
+                                                    checked={appointment.is_cancel}
+                                                  />
+                                                </label>
+                                              </div> */}
+                          </div>
+                        </div>
+                      </Card.Header>
+                      <Card.Body
+                        style={{
+                          overflowX: "auto",
+                          whiteSpace: "nowrap",
+                          background:
+                            appointment.is_patient === false
+                              ? "#FFFFFF"
+                              : "#F5ECD5",
+                        }}
+                      >
+                        <div
+                          onClick={() =>
+                            expandedAppointmentId === appointment.appointment_id
+                              ? setExpandedAppointmentId(null)
+                              : toggleForm(
+                                  appointment.appointment_id,
+                                  appointment
+                                )
+                          }
+                          style={{ cursor: "pointer" }}
+                        >
+                          <p>
+                            <strong>Time Slot:</strong>{" "}
+                            {appointment.appointment_slot}
+                          </p>
+                          <p>
+                            <strong>Booked By:</strong> {appointment.booked_by}
+                          </p>
+                          <p>
+                            <strong>Status:</strong> {appointment.status}
+                          </p>
+                        </div>
 
-                                  <Form>
-                                    <Row className="mb-3">
-                                      <Col xs={12}>
-                                        {searchResults.length > 0 && (
-                                          <ul className="list-group mt-2">
-                                            {searchResults.map(
-                                              (symptom, index) => (
-                                                <li
-                                                  key={index}
-                                                  className="list-group-item"
-                                                  onClick={() =>
-                                                    handleAddSymptom({
-                                                      id: symptom.id,
-                                                      symptoms_name:
-                                                        symptom.symptoms_name,
-                                                      severity: "",
-                                                    })
-                                                  }
-                                                  style={{ cursor: "pointer" }}
-                                                >
-                                                  {symptom.symptoms_name}
-                                                </li>
-                                              )
-                                            )}
-                                          </ul>
-                                        )}
-                                      </Col>
-                                    </Row>
-
-                                    <Table striped bordered hover>
-                                      <thead className="table-light">
-                                        <tr>
-                                          <th
-                                            style={{
-                                              fontFamily: "sans-serif",
-                                              backgroundColor: "#D7EAF0",
-                                              color: "#003366",
-                                              width: "50%",
-                                            }}
-                                          >
-                                            Symptom
-                                          </th>
-                                          <th
-                                            style={{
-                                              fontFamily: "sans-serif",
-                                              backgroundColor: "#D7EAF0",
-                                              color: "#003366",
-                                              width: "10%",
-                                            }}
-                                          >
-                                            Severity
-                                          </th>
-                                          <th
-                                            style={{
-                                              fontFamily: "sans-serif",
-                                              backgroundColor: "#D7EAF0",
-                                              color: "#003366",
-                                              width: "10%",
-                                            }}
-                                          >
-                                            Since
-                                          </th>
-                                          <th
-                                            style={{
-                                              fontFamily: "sans-serif",
-                                              backgroundColor: "#D7EAF0",
-                                              color: "#003366",
-                                              width: "25%",
-                                            }}
-                                          >
-                                            More Options
-                                          </th>
-                                          <th
-                                            style={{
-                                              fontFamily: "sans-serif",
-                                              backgroundColor: "#D7EAF0",
-                                              color: "#003366",
-                                              width: "5%",
-                                            }}
-                                          >
-                                            Actions
-                                          </th>
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        {selectedSymptoms.map(
-                                          (symptom, index) => (
-                                            <tr key={index}>
-                                              <td>{symptom.symptoms_name}</td>
-                                              <td>
-                                                <Form.Select
-                                                  name={`severity-${index}`}
-                                                  value={symptom.severity}
-                                                  onChange={(e) =>
-                                                    handleSeverityChange(
-                                                      index,
-                                                      e
-                                                    )
-                                                  }
-                                                >
-                                                  <option value="">
-                                                    Select Severity
-                                                  </option>
-                                                  <option value="mild">
-                                                    Mild
-                                                  </option>
-                                                  <option value="moderate">
-                                                    Moderate
-                                                  </option>
-                                                  <option value="severe">
-                                                    Severe
-                                                  </option>
-                                                </Form.Select>
-                                              </td>
-                                              <td>
-                                                <Form.Control
-                                                  type="text"
-                                                  name={`since-${index}`}
-                                                  value={symptom.since}
-                                                  onChange={(e) =>
-                                                    handleSinceChange(index, e)
-                                                  }
-                                                />
-                                              </td>
-                                              <td>
-                                                <Form.Control
-                                                  type="text"
-                                                  name={`more_options-${index}`}
-                                                  value={symptom.more_options}
-                                                  onChange={(e) =>
-                                                    handleMoreOptionsChange(
-                                                      index,
-                                                      e
-                                                    )
-                                                  }
-                                                />
-                                              </td>
-                                              <td>
-                                                <Button
-                                                  style={{
-                                                    backgroundColor: "#C62E2E",
-                                                    color: "#FFFFFF",
-                                                    border: "none",
-                                                    borderRadius: "5px",
-                                                    cursor: "pointer",
-                                                  }}
-                                                  onClick={() =>
-                                                    handleRemoveSymptom(symptom)
-                                                  }
-                                                >
-                                                  Remove
-                                                </Button>
-                                              </td>
-                                            </tr>
-                                          )
-                                        )}
-                                      </tbody>
-                                    </Table>
-
-                                    <div
-                                      style={{
-                                        display: "flex",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                      }}
-                                    >
-                                      <Button
-                                        variant="primary"
-                                        onClick={handleSaveSymptoms}
-                                        style={{
-                                          background: "#295F98",
-                                          border: "none",
-                                          width: "74.05px",
-                                          height: "36px",
-                                        }}
-                                      >
-                                        Save
-                                      </Button>
-                                    </div>
-                                  </Form>
-                                </Card.Body>
-                              </Card>
-                            </td>
-                          </tr>
-                        )}
-
-                      {showVitalForm &&
-                        expandedAppointmentId ===
+                        {expandedAppointmentId ===
                           appointment.appointment_id && (
                           <tr>
                             <td>
@@ -6186,1048 +5762,1620 @@ const ClinicBookedAppointment = () => {
                                     style={{
                                       display: "flex",
                                       alignItems: "center",
-                                      justifyContent: "flex-start",
+                                      justifyContent: "space-between",
                                     }}
                                   >
-                                    <h2
+                                    <div
                                       style={{
-                                        fontWeight: "600",
-                                        color: "#000",
-                                        fontFamily: "Sans-Serif",
-                                        lineHeight: "46.88px",
-                                        margin: "0px",
-                                        textAlign: "left",
+                                        display: "flex",
+                                        alignItems: "center",
                                       }}
                                     >
-                                      Patient Vitals
-                                    </h2>
-                                  </div>
-
-                                  <Button
-                                    style={{
-                                      position: "absolute",
-                                      top: "10px",
-                                      right: "10px",
-                                      backgroundColor: "#295F98",
-                                      color: "#ffffff",
-                                      border: "none",
-                                      borderRadius: "5px",
-                                      cursor: "pointer",
-                                    }}
-                                    onClick={handleVitalUpdate}
-                                  >
-                                    Update Vitals
-                                  </Button>
-
-                                  <Table
-                                    bordered
-                                    hover
-                                    responsive
-                                    className="table-sm mt-3"
-                                    style={{ fontSize: "0.9rem" }}
-                                  >
-                                    <thead>
-                                      <tr>
-                                        <th
-                                          style={{
-                                            fontFamily: "sans-serif",
-                                            fontSize: "16px",
-                                            backgroundColor: "#D7EAF0",
-                                            color: "#003366",
-                                          }}
-                                        >
-                                          Blood Pressure
-                                        </th>
-                                        <th
-                                          style={{
-                                            fontFamily: "sans-serif",
-                                            fontSize: "16px",
-                                            backgroundColor: "#D7EAF0",
-                                            color: "#003366",
-                                          }}
-                                        >
-                                          Oxygen Level
-                                        </th>
-                                        <th
-                                          style={{
-                                            fontFamily: "sans-serif",
-                                            fontSize: "16px",
-                                            backgroundColor: "#D7EAF0",
-                                            color: "#003366",
-                                          }}
-                                        >
-                                          Body Temp.
-                                        </th>
-                                        <th
-                                          style={{
-                                            fontFamily: "sans-serif",
-                                            fontSize: "16px",
-                                            backgroundColor: "#D7EAF0",
-                                            color: "#003366",
-                                          }}
-                                        >
-                                          Heart Rate
-                                        </th>
-                                        <th
-                                          style={{
-                                            fontFamily: "sans-serif",
-                                            fontSize: "16px",
-                                            backgroundColor: "#D7EAF0",
-                                            color: "#003366",
-                                          }}
-                                        >
-                                          Pulse Rate
-                                        </th>
-                                        <th
-                                          style={{
-                                            fontFamily: "sans-serif",
-                                            fontSize: "16px",
-                                            backgroundColor: "#D7EAF0",
-                                            color: "#003366",
-                                          }}
-                                        >
-                                          Sugar Level
-                                        </th>
-                                        <th
-                                          style={{
-                                            fontFamily: "sans-serif",
-                                            fontSize: "16px",
-                                            backgroundColor: "#D7EAF0",
-                                            color: "#003366",
-                                          }}
-                                        >
-                                          Height (cm)
-                                        </th>
-                                        <th
-                                          style={{
-                                            fontFamily: "sans-serif",
-                                            fontSize: "16px",
-                                            backgroundColor: "#D7EAF0",
-                                            color: "#003366",
-                                          }}
-                                        >
-                                          Weight (kg)
-                                        </th>
-                                        <th
-                                          style={{
-                                            fontFamily: "sans-serif",
-                                            fontSize: "16px",
-                                            backgroundColor: "#D7EAF0",
-                                            color: "#003366",
-                                          }}
-                                        >
-                                          BMI
-                                        </th>
-                                      </tr>
-                                    </thead>
-
-                                    <tbody>
-                                      <tr>
-                                        <td>
-                                          <Form.Control
-                                            type="text"
-                                            name="blood_pressure"
-                                            value={recordDetails.blood_pressure}
-                                            onChange={handleVitalChange}
-                                            style={{ padding: "5px" }}
-                                          />
-                                        </td>
-                                        <td>
-                                          <Form.Control
-                                            type="text"
-                                            name="oxygen_level"
-                                            value={recordDetails.oxygen_level}
-                                            onChange={handleVitalChange}
-                                            style={{ padding: "5px" }}
-                                          />
-                                        </td>
-                                        <td>
-                                          <Form.Control
-                                            type="text"
-                                            name="body_temperature"
-                                            value={
-                                              recordDetails.body_temperature
-                                            }
-                                            onChange={handleVitalChange}
-                                            style={{ padding: "5px" }}
-                                          />
-                                        </td>
-                                        <td>
-                                          <Form.Control
-                                            type="text"
-                                            name="heart_rate"
-                                            value={recordDetails.heart_rate}
-                                            onChange={handleVitalChange}
-                                            style={{ padding: "5px" }}
-                                          />
-                                        </td>
-                                        <td>
-                                          <Form.Control
-                                            type="text"
-                                            name="pulse_rate"
-                                            value={recordDetails.pulse_rate}
-                                            onChange={handleVitalChange}
-                                            style={{ padding: "5px" }}
-                                          />
-                                        </td>
-                                        <td>
-                                          <Form.Control
-                                            type="text"
-                                            name="sugar_level"
-                                            value={recordDetails.sugar_level}
-                                            onChange={handleVitalChange}
-                                            style={{ padding: "5px" }}
-                                          />
-                                        </td>
-                                        <td>
-                                          <Form.Control
-                                            type="text"
-                                            name="height"
-                                            value={recordDetails.height || ""}
-                                            onChange={handleVitalChange}
-                                            style={{ padding: "5px" }}
-                                          />
-                                        </td>
-                                        <td>
-                                          <Form.Control
-                                            type="text"
-                                            name="weight"
-                                            value={recordDetails.weight || ""}
-                                            onChange={handleVitalChange}
-                                            style={{ padding: "5px" }}
-                                          />
-                                        </td>
-                                        <td>
-                                          <Form.Control
-                                            type="text"
-                                            name="bmi"
-                                            value={recordDetails.bmi || ""}
-                                            readOnly
-                                            style={{ padding: "5px" }}
-                                          />
-                                        </td>
-                                      </tr>
-                                    </tbody>
-                                  </Table>
-
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      justifyContent: "center",
-                                      alignItems: "center",
-                                    }}
-                                  >
-                                    <Button
-                                      variant="primary"
-                                      onClick={handleVitalSubmit}
-                                      className="me-2"
-                                      style={{
-                                        background: "#295F98",
-                                        border: "none",
-                                      }}
-                                    >
-                                      Submit
-                                    </Button>
-                                  </div>
-                                </Card.Body>
-                              </Card>
-                            </td>
-                          </tr>
-                        )}
-
-                      {showPrescriptionForm &&
-                        expandedAppointmentId ===
-                          appointment.appointment_id && (
-                          <tr>
-                            <td>
-                              <Card
-                                className="shadow-sm mt-3"
-                                style={{
-                                  borderRadius: "15px",
-                                  border: " #0091A5",
-                                  background: "#f1f8fb",
-                                }}
-                              >
-                                <Card.Body style={{ position: "relative" }}>
-                                  <div
-                                    className="prescription-header"
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "flex-start",
-                                    }}
-                                  >
-                                    <h2
-                                      style={{
-                                        fontWeight: "600",
-                                        color: "#000",
-                                        fontFamily: "Sans-Serif",
-                                        lineHeight: "46.88px",
-                                        margin: "0px",
-                                        textAlign: "left",
-                                      }}
-                                    >
-                                      Prescription
-                                    </h2>
-                                    <div className="upload-prescription-wrapper">
+                                      <h2
+                                        style={{
+                                          fontWeight: "600",
+                                          color: "#000",
+                                          fontFamily: "Sans-Serif",
+                                          lineHeight: "46.88px",
+                                          margin: "0px",
+                                          textAlign: "left",
+                                        }}
+                                      >
+                                        Patient Details
+                                      </h2>
                                       <Button
                                         style={{
-                                          position: "absolute",
-                                          top: "10px",
-                                          right: "10px",
-                                          background: "#295F98",
-                                          color: "#fff",
+                                          marginLeft: "20px",
+                                          backgroundColor: "#295F98",
+                                          color: "#ffffff",
                                           border: "none",
                                           borderRadius: "5px",
+                                          // padding: "10px 20px",
                                           cursor: "pointer",
                                         }}
-                                        onClick={addPrescriptionRow}
+                                        onClick={() =>
+                                          setShowPatientDetails((prev) => !prev)
+                                        }
                                       >
-                                        Add Prescription
+                                        {showPatientDetails
+                                          ? "Hide Details"
+                                          : "Show Details"}
                                       </Button>
                                     </div>
-                                    <Button
-                                      variant="success"
-                                      className="ms-3"
-                                      onClick={() => {
-                                        setIsPrescriptionDocs(true);
-                                        setShowPrescriptionDocsForm(true);
-                                      }}
-                                      style={{
-                                        backgroundColor: "#295F98",
-                                        color: "#ffffff",
-                                        border: "none",
-                                        borderRadius: "5px",
-                                        cursor: "pointer",
-                                      }}
-                                    >
-                                      Upload Prescription
-                                    </Button>
+                                    {/* <Button
+                                                     style={{
+                                                       backgroundColor: "#8E1616",
+                                                       color: "#ffffff",
+                                                       border: "none",
+                                                       borderRadius: "5px",
+                                                       cursor: "pointer",
+                                                       padding: "12px"
+                                                     }}
+                                                     onClick={handlePrint}
+                                                   >
+                                                    <BsPrinterFill /> Print Report
+                                                   </Button> */}
                                   </div>
+                                  {showPatientDetails && (
+                                    <Form>
+                                      <Row className="mb-3">
+                                        <Col sm={6} md={4}>
+                                          <Form.Group
+                                            controlId="formName"
+                                            className="mb-3"
+                                          >
+                                            <Form.Label
+                                              style={{
+                                                color: "#003366",
+                                                fontFamily: "Sans-Serif",
+                                                fontSize: "18px",
+                                                fontWeight: 600,
+                                                lineHeight: "29.3px",
+                                                textAlign: "left",
+                                                width: "100%",
+                                              }}
+                                            >
+                                              Name
+                                            </Form.Label>
+                                            <Form.Control
+                                              type="text"
+                                              name="name"
+                                              value={formDetails.name || ""}
+                                              onChange={handleInputChange}
+                                              style={{
+                                                textAlign: "left",
+                                              }}
+                                            />
+                                          </Form.Group>
+                                        </Col>
+                                        <Col sm={6} md={4}>
+                                          <Form.Group
+                                            controlId="formMobileNumber"
+                                            className="mb-3"
+                                          >
+                                            <Form.Label
+                                              style={{
+                                                color: "#003366",
+                                                fontFamily: "Sans-Serif",
+                                                fontSize: "18px",
+                                                fontWeight: 600,
+                                                lineHeight: "29.3px",
+                                                textAlign: "left",
+                                                width: "100%",
+                                              }}
+                                            >
+                                              Mobile Number
+                                            </Form.Label>
+                                            <Form.Control
+                                              type="text"
+                                              name="mobile_number"
+                                              value={
+                                                formDetails.mobile_number || ""
+                                              }
+                                              onChange={handleInputChange}
+                                              style={{
+                                                textAlign: "left",
+                                              }}
+                                              disabled
+                                            />
+                                          </Form.Group>
+                                        </Col>
+                                        <Col sm={6} md={4}>
+                                          <Form.Group
+                                            controlId="formAge"
+                                            className="mb-3"
+                                          >
+                                            <Form.Label
+                                              style={{
+                                                color: "#003366",
+                                                fontFamily: "Sans-Serif",
+                                                fontSize: "18px",
+                                                fontWeight: 600,
+                                                lineHeight: "29.3px",
+                                                textAlign: "left",
+                                                width: "100%",
+                                              }}
+                                            >
+                                              Age
+                                            </Form.Label>
+                                            <Form.Control
+                                              type="text"
+                                              name="age"
+                                              value={formDetails.age || ""}
+                                              onChange={handleInputChange}
+                                              style={{
+                                                textAlign: "left",
+                                              }}
+                                            />
+                                          </Form.Group>
+                                        </Col>
+                                        <Col sm={6} md={4}>
+                                          <Form.Group
+                                            controlId="formGender"
+                                            className="mb-3"
+                                          >
+                                            <Form.Label
+                                              style={{
+                                                color: "#003366",
+                                                fontFamily: "Sans-Serif",
+                                                fontSize: "18px",
+                                                fontWeight: 600,
+                                                lineHeight: "29.3px",
+                                                textAlign: "left",
+                                                width: "100%",
+                                              }}
+                                            >
+                                              Gender
+                                            </Form.Label>
+                                            <Form.Select
+                                              name="gender"
+                                              value={formDetails.gender || ""}
+                                              onChange={handleInputChange}
+                                              style={{
+                                                textAlign: "left",
+                                              }}
+                                            >
+                                              <option value="">
+                                                Select Gender
+                                              </option>
+                                              <option value="male">Male</option>
+                                              <option value="female">
+                                                Female
+                                              </option>
+                                              <option value="others">
+                                                Others
+                                              </option>
+                                            </Form.Select>
+                                          </Form.Group>
+                                        </Col>
+                                        <Col sm={6} md={4}>
+                                          <Form.Group
+                                            controlId="formAddress"
+                                            className="mb-3"
+                                          >
+                                            <Form.Label
+                                              style={{
+                                                color: "#003366",
+                                                fontFamily: "Sans-Serif",
+                                                fontSize: "18px",
+                                                fontWeight: 600,
+                                                lineHeight: "29.3px",
+                                                textAlign: "left",
+                                                width: "100%",
+                                              }}
+                                            >
+                                              Address
+                                            </Form.Label>
+                                            <Form.Control
+                                              type="text"
+                                              name="address"
+                                              value={formDetails.address || ""}
+                                              onChange={handleInputChange}
+                                              style={{
+                                                textAlign: "left",
+                                              }}
+                                            />
+                                          </Form.Group>
+                                        </Col>
+                                      </Row>
+                                      <div className="d-flex justify-content-center gap-2">
+                                        <Button
+                                          style={{
+                                            backgroundColor: "#C62E2E",
+                                            color: "#FFFFFF",
+                                            border: "none",
+                                            borderRadius: "5px",
+                                            cursor: "pointer",
+                                          }}
+                                          onClick={() =>
+                                            handleDelete(
+                                              appointment.appointment_id
+                                            )
+                                          }
+                                        >
+                                          Delete
+                                        </Button>
 
-                                  <Form className="mt-3">
-                                    {prescriptions.map(
-                                      (prescription, index) => (
-                                        <Row className="mb-3" key={index}>
-                                          <Col>
-                                            <Form.Group
-                                              controlId={`formMedicineName${index}`}
-                                            >
-                                              <Form.Label
-                                                style={{
-                                                  color: "#003366",
-                                                  fontFamily: "Sans-Serif",
-                                                  fontSize: "18px",
-                                                  fontWeight: 600,
-                                                  lineHeight: "29.3px",
-                                                  textAlign: "left",
-                                                  opacity: 1,
-                                                }}
-                                              >
-                                                Medicine Name
-                                              </Form.Label>
-                                              <Form.Control
-                                                type="text"
-                                                name="medicine_name"
-                                                value={
-                                                  prescription.medicine_name
-                                                }
-                                                onChange={(e) =>
-                                                  handlePrescriptionChange(
-                                                    index,
-                                                    e
-                                                  )
-                                                }
-                                              />
-                                            </Form.Group>
-                                          </Col>
-                                          <Col>
-                                            <Form.Group
-                                              controlId={`formComment${index}`}
-                                            >
-                                              <Form.Label
-                                                style={{
-                                                  color: "#003366",
-                                                  fontFamily: "Sans-Serif",
-                                                  fontSize: "18px",
-                                                  fontWeight: 600,
-                                                  lineHeight: "29.3px",
-                                                  textAlign: "left",
-                                                  opacity: 1,
-                                                }}
-                                              >
-                                                Precautions
-                                              </Form.Label>
-                                              <Form.Control
-                                                type="text"
-                                                name="comment"
-                                                value={prescription.comment}
-                                                onChange={(e) =>
-                                                  handlePrescriptionChange(
-                                                    index,
-                                                    e
-                                                  )
-                                                }
-                                              />
-                                            </Form.Group>
-                                          </Col>
-                                          <Col>
-                                            <Form.Group
-                                              controlId={`formTimeSlot${index}`}
-                                            >
-                                              <Form.Label
-                                                style={{
-                                                  color: "#003366",
-                                                  fontFamily: "Sans-Serif",
-                                                  fontSize: "px",
-                                                  fontWeight: 600,
-                                                  lineHeight: "29.3px",
-                                                  textAlign: "left",
-                                                  opacity: 1,
-                                                }}
-                                              >
-                                                Description
-                                              </Form.Label>
-                                              <Form.Control
-                                                as="select"
-                                                name="time"
-                                                value={prescription.time}
-                                                onChange={(e) =>
-                                                  handlePrescriptionChange(
-                                                    index,
-                                                    e
-                                                  )
-                                                }
-                                              >
-                                                <option value="">
-                                                  Select Time
-                                                </option>
-                                                <option value="morning">
-                                                  Morning
-                                                </option>
-                                                <option value="morning-afternoon">
-                                                  Morning-Afternoon
-                                                </option>
-                                                <option value="morning-afternoon-evening">
-                                                  Morning-Afternoon-Evening
-                                                </option>
-                                                <option value="morning-afternoon-evening-night">
-                                                  Morning-Afternoon-Evening-Night
-                                                </option>
-                                                <option value="afternoon">
-                                                  Afternoon
-                                                </option>
-                                                <option value="evening">
-                                                  Evening
-                                                </option>
-                                                <option value="night">
-                                                  Night
-                                                </option>
-                                              </Form.Control>
-                                            </Form.Group>
-                                          </Col>
-
-                                          <Col>
-                                            <Form.Group
-                                              controlId={`formDescription${index}`}
-                                            >
-                                              <Form.Label
-                                                style={{
-                                                  color: "#003366",
-                                                  fontFamily: "Sans-Serif",
-                                                  fontSize: "18px",
-                                                  fontWeight: 600,
-                                                  lineHeight: "29.3px",
-                                                  textAlign: "left",
-                                                  opacity: 1,
-                                                }}
-                                              >
-                                                Duration
-                                              </Form.Label>
-                                              <Form.Control
-                                                type="text"
-                                                name="description"
-                                                value={prescription.description}
-                                                onChange={(e) =>
-                                                  handlePrescriptionChange(
-                                                    index,
-                                                    e
-                                                  )
-                                                }
-                                              />
-                                            </Form.Group>
-                                          </Col>
-                                          <Col className="d-flex align-items-center">
-                                            <Button
-                                              variant="primary"
-                                              onClick={() =>
-                                                handlePrescriptionSubmit(index)
-                                              }
-                                              className="me-2"
-                                              style={{
-                                                background: "#295F98",
-                                                border: "none",
-                                                fontSize: "0.9rem",
-                                                borderRadius: "5px",
-                                                marginTop: "44px",
-                                              }}
-                                            >
-                                              Submit
-                                            </Button>
-                                            <Button
-                                              variant="danger"
-                                              onClick={() =>
-                                                handleUpdatePrescription(index)
-                                              }
-                                              className="me-2"
-                                              style={{
-                                                background: "#295F98",
-                                                border: "none",
-                                                fontSize: "0.9rem",
-                                                borderRadius: "5px",
-                                                marginTop: "44px",
-                                              }}
-                                            >
-                                              Update
-                                            </Button>
-                                            <Button
-                                              variant="danger"
-                                              onClick={() =>
-                                                removePrescriptionRow(index)
-                                              }
-                                              className="me-2"
-                                              style={{
-                                                background: "#C62E2E",
-                                                border: "none",
-                                                fontSize: "0.9rem",
-                                                borderRadius: "5px",
-                                                marginTop: "44px",
-                                              }}
-                                            >
-                                              Delete
-                                            </Button>
-                                          </Col>
-                                        </Row>
-                                      )
-                                    )}
-                                  </Form>
+                                        <Button
+                                          style={{
+                                            backgroundColor: "#FF8A08",
+                                            color: "#FFFFFF",
+                                            border: "none",
+                                            borderRadius: "5px",
+                                            cursor: "pointer",
+                                          }}
+                                          onClick={() =>
+                                            handleCancelAppointment(
+                                              appointment.appointment_id
+                                            )
+                                          }
+                                        >
+                                          Cancel Appointment
+                                        </Button>
+                                        <Button
+                                          style={{
+                                            backgroundColor: "#295F98",
+                                            color: "#ffffff",
+                                            border: "none",
+                                            borderRadius: "5px",
+                                            cursor: "pointer",
+                                          }}
+                                          onClick={handleUpdate}
+                                        >
+                                          Update
+                                        </Button>
+                                      </div>
+                                      <div className="d-flex justify-content-end mt-4"></div>
+                                    </Form>
+                                  )}
                                 </Card.Body>
                               </Card>
-                              <Table
-                                striped
-                                bordered
-                                hover
-                                style={{ backgroundColor: "#D7EAF0" }}
-                              >
-                                <thead className="table-light">
-                                  <tr>
-                                    <th
-                                      style={{
-                                        fontFamily: "sans-serif",
-                                        backgroundColor: "#D7EAF0",
-                                        color: "#003366",
-                                      }}
-                                    >
-                                      SNo.
-                                    </th>
-                                    <th
-                                      style={{
-                                        fontFamily: "sans-serif",
-                                        backgroundColor: "#D7EAF0",
-                                        color: "#003366",
-                                      }}
-                                    >
-                                      Document Date
-                                    </th>
-                                    <th
-                                      className="text-center"
-                                      style={{
-                                        fontFamily: "sans-serif",
-                                        backgroundColor: "#D7EAF0",
-                                        color: "#003366",
-                                      }}
-                                    >
-                                      Actions
-                                    </th>
-                                  </tr>
-                                </thead>
-
-                                <tbody>
-                                  {prescriptionDocuments.map((doc, index) => (
-                                    <React.Fragment key={doc.id}>
-                                      <tr>
-                                        <td>{index + 1}</td>
-                                        <td>{doc.document_date}</td>
-                                        <td className="text-center">
-                                          <div className="d-flex justify-content-center align-items-center">
-                                            <Button
-                                              variant="primary"
-                                              className="me-2"
-                                              onClick={() =>
-                                                handlePreview(doc.id)
-                                              }
-                                              style={{
-                                                backgroundColor: "#295F98",
-                                                borderColor: "#0166CB",
-                                              }}
-                                            >
-                                              Preview
-                                            </Button>
-
-                                            <DropdownButton
-                                              id="dropdown-basic-button"
-                                              title={
-                                                <FontAwesomeIcon
-                                                  icon={faEllipsisV}
-                                                />
-                                              }
-                                              variant="secondary"
-                                            >
-                                              <Dropdown.Item
-                                                onClick={() =>
-                                                  handleDownloadPrescriptionDoc(
-                                                    doc
-                                                  )
-                                                }
-                                              >
-                                                Download
-                                              </Dropdown.Item>
-                                              <Dropdown.Item
-                                                onClick={() =>
-                                                  handleDeletePrescriptionDoc(
-                                                    doc.id
-                                                  )
-                                                }
-                                              >
-                                                Delete
-                                              </Dropdown.Item>
-                                            </DropdownButton>
-                                          </div>
-                                        </td>
-                                      </tr>
-                                    </React.Fragment>
-                                  ))}
-                                </tbody>
-                              </Table>
-
-                              <Modal
-                                show={showPrescriptionDocsForm}
-                                onHide={() =>
-                                  setShowPrescriptionDocsForm(false)
-                                }
-                              >
-                                <Modal.Header closeButton>
-                                  <Modal.Title>
-                                    Upload Prescription File
-                                  </Modal.Title>
-                                </Modal.Header>
-                                <Modal.Body>
-                                  <Form>
-                                    <Form.Group controlId="formPrescriptionFile">
-                                      <Form.Label>Prescription File</Form.Label>
-                                      <Form.Control
-                                        type="file"
-                                        onChange={
-                                          handleFileSelectForPrescription
-                                        }
-                                      />
-                                    </Form.Group>
-                                  </Form>
-                                </Modal.Body>
-                                <Modal.Footer>
-                                  <Button
-                                    variant="secondary"
-                                    onClick={() =>
-                                      setShowPrescriptionDocsForm(false)
-                                    }
-                                  >
-                                    Cancel
-                                  </Button>
-                                  <Button
-                                    variant="primary"
-                                    onClick={() =>
-                                      handlePrescriptionDocs(
-                                        appointment.appointment_id
-                                      )
-                                    }
-                                  >
-                                    Upload
-                                  </Button>
-                                </Modal.Footer>
-                              </Modal>
                             </td>
                           </tr>
                         )}
+                        {showSymptomsForm &&
+                          expandedAppointmentId ===
+                            appointment.appointment_id && (
+                            <tr>
+                              <td>
+                                <Card
+                                  className="shadow-sm mt-3"
+                                  style={{
+                                    borderRadius: "15px",
+                                    border: "#0091A5",
+                                    background: "#f1f8fb",
+                                  }}
+                                >
+                                  <Card.Body style={{ position: "relative" }}>
+                                    <div
+                                      className="symptoms-header"
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "flex-start",
+                                      }}
+                                    >
+                                      <h2
+                                        style={{
+                                          fontWeight: "600",
+                                          color: "#000",
+                                          fontFamily: "Sans-Serif",
+                                          lineHeight: "46.88px",
+                                          margin: "0px 20px 0px 0px",
+                                          textAlign: "left",
+                                        }}
+                                      >
+                                        Symptoms
+                                      </h2>
+                                      <Form.Control
+                                        type="text"
+                                        placeholder="Search symptoms"
+                                        value={searchSymptom}
+                                        onChange={handleSymptomSearch}
+                                        style={{
+                                          width: "300px",
+                                          margin: "0px",
+                                        }}
+                                      />
+                                      <Button
+                                        style={{
+                                          marginLeft: "auto",
+                                          backgroundColor: "#295F98",
+                                          color: "#ffffff",
+                                          border: "none",
+                                          borderRadius: "5px",
+                                          // padding: "10px 20px",
+                                          cursor: "pointer",
+                                        }}
+                                        onClick={handleUpdateSymptom}
+                                      >
+                                        Update Symptoms
+                                      </Button>
+                                    </div>
 
-                      {showRecordForm &&
-                        expandedAppointmentId ===
-                          appointment.appointment_id && (
-                          <tr>
-                            <td colSpan="7">
-                              <Card
-                                className="shadow-sm mt-3"
-                                style={{
-                                  borderRadius: "15px",
-                                  border: " #0091A5",
-                                  background: "#f1f8fb",
-                                }}
-                              >
-                                <Card.Body>
-                                  <h2
-                                    style={{
-                                      fontFamily: "Sans-Serif",
-                                      fontWeight: 600,
-                                      lineHeight: "46.88px",
-                                      textAlign: "left",
-                                      width: "225px",
-                                      height: "46px",
-                                      gap: "0px",
-                                      opacity: 1,
-                                      color: "#000",
-                                    }}
-                                  >
-                                    Document
-                                  </h2>
+                                    <Form>
+                                      <Row className="mb-3">
+                                        <Col xs={12}>
+                                          {searchResults.length > 0 && (
+                                            <ul className="list-group mt-2">
+                                              {searchResults.map(
+                                                (symptom, index) => (
+                                                  <li
+                                                    key={index}
+                                                    className="list-group-item"
+                                                    onClick={() =>
+                                                      handleAddSymptom({
+                                                        id: symptom.id,
+                                                        symptoms_name:
+                                                          symptom.symptoms_name,
+                                                        severity: "",
+                                                      })
+                                                    }
+                                                    style={{
+                                                      cursor: "pointer",
+                                                    }}
+                                                  >
+                                                    {symptom.symptoms_name}
+                                                  </li>
+                                                )
+                                              )}
+                                            </ul>
+                                          )}
+                                        </Col>
+                                      </Row>
 
-                                  <Button
-                                    variant="outline-primary"
-                                    style={{
-                                      position: "absolute",
-                                      top: "10px",
-                                      right: "10px",
-                                      background: "#295F98",
-                                      color: "#ffffff",
-                                      border: "none",
-                                      borderRadius: "5px",
-                                    }}
-                                    onClick={() => {
-                                      setIsPrescriptionDocs(true);
-                                      toggleFormModal();
-                                    }}
-                                  >
-                                    Upload Document
-                                  </Button>
-
-                                  <Row className="mb-5">
-                                    <Col xs={12} md={12}>
                                       <Table striped bordered hover>
                                         <thead className="table-light">
                                           <tr>
                                             <th
                                               style={{
                                                 fontFamily: "sans-serif",
-                                                fontWeight: "bold",
-                                                background: "#D7EAF0",
+                                                backgroundColor: "#D7EAF0",
                                                 color: "#003366",
+                                                width: "50%",
                                               }}
                                             >
-                                              Document Name
+                                              Symptom
                                             </th>
                                             <th
                                               style={{
                                                 fontFamily: "sans-serif",
-                                                fontWeight: "bold",
-                                                background: "#D7EAF0",
+                                                backgroundColor: "#D7EAF0",
                                                 color: "#003366",
+                                                width: "10%",
                                               }}
                                             >
-                                              Patient Name
+                                              Severity
                                             </th>
                                             <th
                                               style={{
                                                 fontFamily: "sans-serif",
-                                                fontWeight: "bold",
-                                                background: "#D7EAF0",
+                                                backgroundColor: "#D7EAF0",
                                                 color: "#003366",
+                                                width: "10%",
                                               }}
                                             >
-                                              Document Date
+                                              Since
                                             </th>
                                             <th
                                               style={{
                                                 fontFamily: "sans-serif",
-                                                fontWeight: "bold",
-                                                background: "#D7EAF0",
+                                                backgroundColor: "#D7EAF0",
                                                 color: "#003366",
+                                                width: "25%",
                                               }}
                                             >
-                                              Document Type
+                                              More Options
                                             </th>
                                             <th
                                               style={{
                                                 fontFamily: "sans-serif",
-                                                fontWeight: "bold",
-                                                background: "#D7EAF0",
+                                                backgroundColor: "#D7EAF0",
                                                 color: "#003366",
-                                              }}
-                                            >
-                                              Document File
-                                            </th>
-                                            <th
-                                              style={{
-                                                fontFamily: "sans-serif",
-                                                background: "#D7EAF0",
-                                                fontWeight: "bold",
-                                                color: "#003366",
+                                                width: "5%",
                                               }}
                                             >
                                               Actions
                                             </th>
                                           </tr>
                                         </thead>
-
                                         <tbody>
-                                          {medicalRecords.map((record) => (
-                                            <tr key={record.id}>
-                                              <td>{record.document_name}</td>
-                                              <td>{record.patient_name}</td>
-                                              <td>{record.document_date}</td>
-                                              <td>{record.document_type}</td>
-                                              <td>
-                                                <Button
-                                                  style={{
-                                                    backgroundColor: "#295F98",
-                                                    color: "#ffffff",
-                                                  }}
-                                                  onClick={() =>
-                                                    handleViewFile(record)
-                                                  }
-                                                >
-                                                  View
-                                                </Button>
-                                              </td>
-                                              <td>
-                                                <DropdownButton
-                                                  id="dropdown-basic-button"
-                                                  title={
-                                                    <FontAwesomeIcon
-                                                      icon={faEllipsisV}
-                                                    />
-                                                  }
-                                                  variant="secondary"
-                                                >
-                                                  <Dropdown.Item
-                                                    onClick={() =>
-                                                      handleModifyRecord(record)
-                                                    }
-                                                  >
-                                                    Modify
-                                                  </Dropdown.Item>
-                                                  <Dropdown.Item
-                                                    onClick={() =>
-                                                      handleDownloadFile(record)
-                                                    }
-                                                  >
-                                                    Download
-                                                  </Dropdown.Item>
-                                                  <Dropdown.Item
-                                                    onClick={() =>
-                                                      handleDeleteRecord(
-                                                        record.id
+                                          {selectedSymptoms.map(
+                                            (symptom, index) => (
+                                              <tr key={index}>
+                                                <td>{symptom.symptoms_name}</td>
+                                                <td>
+                                                  <Form.Select
+                                                    name={`severity-${index}`}
+                                                    value={symptom.severity}
+                                                    onChange={(e) =>
+                                                      handleSeverityChange(
+                                                        index,
+                                                        e
                                                       )
                                                     }
                                                   >
-                                                    Delete
-                                                  </Dropdown.Item>
-                                                </DropdownButton>
-                                              </td>
-                                            </tr>
-                                          ))}
-                                        </tbody>
-                                      </Table>
-                                    </Col>
-                                  </Row>
-
-                                  <Modal
-                                    show={showFormModal}
-                                    onHide={toggleFormModal}
-                                  >
-                                    <Modal.Header closeButton>
-                                      <Modal.Title>
-                                        {isPrescriptionDocs
-                                          ? "Upload Document Files"
-                                          : editingRecordId
-                                            ? "Edit Medical Record"
-                                            : "Upload Medical Record"}
-                                      </Modal.Title>
-                                    </Modal.Header>
-                                    <Modal.Body>
-                                      <Form>
-                                        <Form.Group controlId="documentName">
-                                          <Form.Label>Document Name</Form.Label>
-                                          <Form.Control
-                                            type="text"
-                                            placeholder="Enter document name"
-                                            value={formData.document_name}
-                                            onChange={(e) =>
-                                              setFormData({
-                                                ...formData,
-                                                document_name: e.target.value,
-                                              })
-                                            }
-                                          />
-                                        </Form.Group>
-                                        <Form.Group controlId="patientName">
-                                          <Form.Label>Patient Name</Form.Label>
-                                          <Form.Control
-                                            type="text"
-                                            placeholder="Enter patient name"
-                                            value={formData.patient_name}
-                                            onChange={(e) =>
-                                              setFormData({
-                                                ...formData,
-                                                patient_name: e.target.value,
-                                              })
-                                            }
-                                          />
-                                        </Form.Group>
-                                        <Form.Group controlId="documentDate">
-                                          <Form.Label>Document Date</Form.Label>
-                                          <Form.Control
-                                            type="date"
-                                            value={formData.document_date}
-                                            onChange={(e) =>
-                                              setFormData({
-                                                ...formData,
-                                                document_date: e.target.value,
-                                              })
-                                            }
-                                          />
-                                        </Form.Group>
-
-                                        <Form.Group controlId="documentType">
-                                          <Form.Label>Document Type</Form.Label>
-                                          <div className="d-flex">
-                                            <Button
-                                              variant={
-                                                formData.document_type ===
-                                                "report"
-                                                  ? "primary"
-                                                  : "outline-primary"
-                                              }
-                                              className="me-2"
-                                              onClick={() =>
-                                                setFormData({
-                                                  ...formData,
-                                                  document_type: "report",
-                                                })
-                                              }
-                                            >
-                                              <FontAwesomeIcon
-                                                icon={faFileAlt}
-                                              />{" "}
-                                              Report
-                                            </Button>
-                                            <Button
-                                              variant={
-                                                formData.document_type ===
-                                                "invoice"
-                                                  ? "primary"
-                                                  : "outline-primary"
-                                              }
-                                              onClick={() =>
-                                                setFormData({
-                                                  ...formData,
-                                                  document_type: "invoice",
-                                                })
-                                              }
-                                            >
-                                              <FontAwesomeIcon
-                                                icon={faReceipt}
-                                              />{" "}
-                                              Invoice
-                                            </Button>
-                                          </div>
-                                        </Form.Group>
-
-                                        <Form.Group controlId="documentFile">
-                                          <Form.Label>Document File</Form.Label>
-                                          <div className="file-input">
-                                            <input
-                                              type="file"
-                                              id="fileInput"
-                                              onChange={handleFileSelect}
-                                              style={{ display: "none" }}
-                                            />
-                                            <Button
-                                              onClick={handleAddFileClick}
-                                            >
-                                              Add a File
-                                            </Button>
-                                            {selectedFiles.map(
-                                              (file, index) => (
-                                                <div
-                                                  key={index}
-                                                  className="selected-file"
-                                                >
-                                                  <span>{file.name}</span>
+                                                    <option value="">
+                                                      Select Severity
+                                                    </option>
+                                                    <option value="mild">
+                                                      Mild
+                                                    </option>
+                                                    <option value="moderate">
+                                                      Moderate
+                                                    </option>
+                                                    <option value="severe">
+                                                      Severe
+                                                    </option>
+                                                  </Form.Select>
+                                                </td>
+                                                <td>
+                                                  <Form.Control
+                                                    type="text"
+                                                    name={`since-${index}`}
+                                                    value={symptom.since}
+                                                    onChange={(e) =>
+                                                      handleSinceChange(
+                                                        index,
+                                                        e
+                                                      )
+                                                    }
+                                                  />
+                                                </td>
+                                                <td>
+                                                  <Form.Control
+                                                    type="text"
+                                                    name={`more_options-${index}`}
+                                                    value={symptom.more_options}
+                                                    onChange={(e) =>
+                                                      handleMoreOptionsChange(
+                                                        index,
+                                                        e
+                                                      )
+                                                    }
+                                                  />
+                                                </td>
+                                                <td>
                                                   <Button
-                                                    variant="danger"
-                                                    size="sm"
+                                                    style={{
+                                                      backgroundColor:
+                                                        "#C62E2E",
+                                                      color: "#FFFFFF",
+                                                      border: "none",
+                                                      borderRadius: "5px",
+                                                      cursor: "pointer",
+                                                    }}
                                                     onClick={() =>
-                                                      handleDeleteFile(index)
+                                                      handleRemoveSymptom(
+                                                        symptom
+                                                      )
                                                     }
                                                   >
-                                                    <FontAwesomeIcon
-                                                      icon={faTimesSolid}
-                                                    />
+                                                    Remove
                                                   </Button>
-                                                </div>
-                                              )
-                                            )}
-                                          </div>
-                                        </Form.Group>
-                                      </Form>
-                                    </Modal.Body>
-                                    <Modal.Footer>
-                                      <Button
-                                        variant="secondary"
-                                        onClick={toggleFormModal}
-                                      >
-                                        Cancel
-                                      </Button>
-                                      <Button
-                                        variant="primary"
-                                        onClick={handleSave}
-                                      >
-                                        {editingRecordId ? "Update" : "Save"}
-                                      </Button>
-                                    </Modal.Footer>
-                                  </Modal>
+                                                </td>
+                                              </tr>
+                                            )
+                                          )}
+                                        </tbody>
+                                      </Table>
 
-                                  <Modal
-                                    show={!!errorMessage || !!successMessage}
-                                    onHide={handleCloseMessageModal}
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          justifyContent: "center",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        <Button
+                                          variant="primary"
+                                          onClick={handleSaveSymptoms}
+                                          style={{
+                                            background: "#295F98",
+                                            border: "none",
+                                            width: "74.05px",
+                                            height: "36px",
+                                          }}
+                                        >
+                                          Save
+                                        </Button>
+                                      </div>
+                                    </Form>
+                                  </Card.Body>
+                                </Card>
+                              </td>
+                            </tr>
+                          )}
+
+                        {showVitalForm &&
+                          expandedAppointmentId ===
+                            appointment.appointment_id && (
+                            <tr>
+                              <td>
+                                <Card
+                                  className="shadow-sm mt-3"
+                                  style={{
+                                    borderRadius: "15px",
+                                    border: " #0091A5",
+                                    background: "#f1f8fb",
+                                  }}
+                                >
+                                  <Card.Body
+                                    style={{
+                                      position: "relative",
+                                    }}
                                   >
-                                    <Modal.Header closeButton>
-                                      <Modal.Title>
-                                        {errorMessage ? "Error" : "Success"}
-                                      </Modal.Title>
-                                    </Modal.Header>
-                                    <Modal.Body>
-                                      <p>{errorMessage || successMessage}</p>
-                                    </Modal.Body>
-                                    <Modal.Footer>
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "flex-start",
+                                      }}
+                                    >
+                                      <h2
+                                        style={{
+                                          fontWeight: "600",
+                                          color: "#000",
+                                          fontFamily: "Sans-Serif",
+                                          lineHeight: "46.88px",
+                                          margin: "0px",
+                                          textAlign: "left",
+                                        }}
+                                      >
+                                        Patient Vitals
+                                      </h2>
+                                    </div>
+
+                                    <Button
+                                      style={{
+                                        position: "absolute",
+                                        top: "10px",
+                                        right: "10px",
+                                        backgroundColor: "#295F98",
+                                        color: "#ffffff",
+                                        border: "none",
+                                        borderRadius: "5px",
+                                        cursor: "pointer",
+                                      }}
+                                      onClick={handleVitalUpdate}
+                                    >
+                                      Update Vitals
+                                    </Button>
+
+                                    <Table
+                                      bordered
+                                      hover
+                                      responsive
+                                      className="table-sm mt-3"
+                                      style={{ fontSize: "0.9rem" }}
+                                    >
+                                      <thead>
+                                        <tr>
+                                          <th
+                                            style={{
+                                              fontFamily: "sans-serif",
+                                              fontSize: "16px",
+                                              backgroundColor: "#D7EAF0",
+                                              color: "#003366",
+                                            }}
+                                          >
+                                            Blood Pressure
+                                          </th>
+                                          <th
+                                            style={{
+                                              fontFamily: "sans-serif",
+                                              fontSize: "16px",
+                                              backgroundColor: "#D7EAF0",
+                                              color: "#003366",
+                                            }}
+                                          >
+                                            Oxygen Level
+                                          </th>
+                                          <th
+                                            style={{
+                                              fontFamily: "sans-serif",
+                                              fontSize: "16px",
+                                              backgroundColor: "#D7EAF0",
+                                              color: "#003366",
+                                            }}
+                                          >
+                                            Body Temp.
+                                          </th>
+                                          <th
+                                            style={{
+                                              fontFamily: "sans-serif",
+                                              fontSize: "16px",
+                                              backgroundColor: "#D7EAF0",
+                                              color: "#003366",
+                                            }}
+                                          >
+                                            Heart Rate
+                                          </th>
+                                          <th
+                                            style={{
+                                              fontFamily: "sans-serif",
+                                              fontSize: "16px",
+                                              backgroundColor: "#D7EAF0",
+                                              color: "#003366",
+                                            }}
+                                          >
+                                            Pulse Rate
+                                          </th>
+                                          <th
+                                            style={{
+                                              fontFamily: "sans-serif",
+                                              fontSize: "16px",
+                                              backgroundColor: "#D7EAF0",
+                                              color: "#003366",
+                                            }}
+                                          >
+                                            Sugar Level
+                                          </th>
+                                          <th
+                                            style={{
+                                              fontFamily: "sans-serif",
+                                              fontSize: "16px",
+                                              backgroundColor: "#D7EAF0",
+                                              color: "#003366",
+                                            }}
+                                          >
+                                            Height (cm)
+                                          </th>
+                                          <th
+                                            style={{
+                                              fontFamily: "sans-serif",
+                                              fontSize: "16px",
+                                              backgroundColor: "#D7EAF0",
+                                              color: "#003366",
+                                            }}
+                                          >
+                                            Weight (kg)
+                                          </th>
+                                          <th
+                                            style={{
+                                              fontFamily: "sans-serif",
+                                              fontSize: "16px",
+                                              backgroundColor: "#D7EAF0",
+                                              color: "#003366",
+                                            }}
+                                          >
+                                            BMI
+                                          </th>
+                                        </tr>
+                                      </thead>
+
+                                      <tbody>
+                                        <tr>
+                                          <td>
+                                            <Form.Control
+                                              type="text"
+                                              name="blood_pressure"
+                                              value={
+                                                recordDetails.blood_pressure
+                                              }
+                                              onChange={handleVitalChange}
+                                              style={{ padding: "5px" }}
+                                            />
+                                          </td>
+                                          <td>
+                                            <Form.Control
+                                              type="text"
+                                              name="oxygen_level"
+                                              value={recordDetails.oxygen_level}
+                                              onChange={handleVitalChange}
+                                              style={{ padding: "5px" }}
+                                            />
+                                          </td>
+                                          <td>
+                                            <Form.Control
+                                              type="text"
+                                              name="body_temperature"
+                                              value={
+                                                recordDetails.body_temperature
+                                              }
+                                              onChange={handleVitalChange}
+                                              style={{ padding: "5px" }}
+                                            />
+                                          </td>
+                                          <td>
+                                            <Form.Control
+                                              type="text"
+                                              name="heart_rate"
+                                              value={recordDetails.heart_rate}
+                                              onChange={handleVitalChange}
+                                              style={{ padding: "5px" }}
+                                            />
+                                          </td>
+                                          <td>
+                                            <Form.Control
+                                              type="text"
+                                              name="pulse_rate"
+                                              value={recordDetails.pulse_rate}
+                                              onChange={handleVitalChange}
+                                              style={{ padding: "5px" }}
+                                            />
+                                          </td>
+                                          <td>
+                                            <Form.Control
+                                              type="text"
+                                              name="sugar_level"
+                                              value={recordDetails.sugar_level}
+                                              onChange={handleVitalChange}
+                                              style={{ padding: "5px" }}
+                                            />
+                                          </td>
+                                          <td>
+                                            <Form.Control
+                                              type="text"
+                                              name="height"
+                                              value={recordDetails.height || ""}
+                                              onChange={handleVitalChange}
+                                              style={{ padding: "5px" }}
+                                            />
+                                          </td>
+                                          <td>
+                                            <Form.Control
+                                              type="text"
+                                              name="weight"
+                                              value={recordDetails.weight || ""}
+                                              onChange={handleVitalChange}
+                                              style={{ padding: "5px" }}
+                                            />
+                                          </td>
+                                          <td>
+                                            <Form.Control
+                                              type="text"
+                                              name="bmi"
+                                              value={recordDetails.bmi || ""}
+                                              readOnly
+                                              style={{ padding: "5px" }}
+                                            />
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </Table>
+
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                      }}
+                                    >
                                       <Button
                                         variant="primary"
-                                        onClick={handleCloseMessageModal}
+                                        onClick={handleVitalSubmit}
+                                        className="me-2"
+                                        style={{
+                                          background: "#295F98",
+                                          border: "none",
+                                        }}
                                       >
-                                        Close
+                                        Submit
                                       </Button>
-                                    </Modal.Footer>
-                                  </Modal>
-                                </Card.Body>
-                              </Card>
-                            </td>
-                          </tr>
-                        )}
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
-          </div>
-           ))}
+                                    </div>
+                                  </Card.Body>
+                                </Card>
+                              </td>
+                            </tr>
+                          )}
+
+                        {showPrescriptionForm &&
+                          expandedAppointmentId ===
+                            appointment.appointment_id && (
+                            <tr>
+                              <td>
+                                <Card
+                                  className="shadow-sm mt-3"
+                                  style={{
+                                    borderRadius: "15px",
+                                    border: " #0091A5",
+                                    background: "#f1f8fb",
+                                  }}
+                                >
+                                  <Card.Body style={{ position: "relative" }}>
+                                    <div
+                                      className="prescription-header"
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "flex-start",
+                                      }}
+                                    >
+                                      <h2
+                                        style={{
+                                          fontWeight: "600",
+                                          color: "#000",
+                                          fontFamily: "Sans-Serif",
+                                          lineHeight: "46.88px",
+                                          margin: "0px",
+                                          textAlign: "left",
+                                        }}
+                                      >
+                                        Prescription
+                                      </h2>
+                                      <div className="upload-prescription-wrapper">
+                                        <Button
+                                          style={{
+                                            position: "absolute",
+                                            top: "10px",
+                                            right: "10px",
+                                            background: "#295F98",
+                                            color: "#fff",
+                                            border: "none",
+                                            borderRadius: "5px",
+                                            cursor: "pointer",
+                                          }}
+                                          onClick={addPrescriptionRow}
+                                        >
+                                          Add Prescription
+                                        </Button>
+                                      </div>
+                                      <Button
+                                        variant="success"
+                                        className="ms-3"
+                                        onClick={() => {
+                                          setIsPrescriptionDocs(true);
+                                          setShowPrescriptionDocsForm(true);
+                                        }}
+                                        style={{
+                                          backgroundColor: "#295F98",
+                                          color: "#ffffff",
+                                          border: "none",
+                                          borderRadius: "5px",
+                                          cursor: "pointer",
+                                        }}
+                                      >
+                                        Upload Prescription
+                                      </Button>
+                                    </div>
+
+                                    <Form className="mt-3">
+                                      {prescriptions.map(
+                                        (prescription, index) => (
+                                          <Row className="mb-3" key={index}>
+                                            <Col>
+                                              <Form.Group
+                                                controlId={`formMedicineName${index}`}
+                                              >
+                                                <Form.Label
+                                                  style={{
+                                                    color: "#003366",
+                                                    fontFamily: "Sans-Serif",
+                                                    fontSize: "18px",
+                                                    fontWeight: 600,
+                                                    lineHeight: "29.3px",
+                                                    textAlign: "left",
+                                                    opacity: 1,
+                                                  }}
+                                                >
+                                                  Medicine Name
+                                                </Form.Label>
+                                                <Form.Control
+                                                  type="text"
+                                                  name="medicine_name"
+                                                  value={
+                                                    prescription.medicine_name
+                                                  }
+                                                  onChange={(e) =>
+                                                    handlePrescriptionChange(
+                                                      index,
+                                                      e
+                                                    )
+                                                  }
+                                                />
+                                              </Form.Group>
+                                            </Col>
+                                            <Col>
+                                              <Form.Group
+                                                controlId={`formComment${index}`}
+                                              >
+                                                <Form.Label
+                                                  style={{
+                                                    color: "#003366",
+                                                    fontFamily: "Sans-Serif",
+                                                    fontSize: "18px",
+                                                    fontWeight: 600,
+                                                    lineHeight: "29.3px",
+                                                    textAlign: "left",
+                                                    opacity: 1,
+                                                  }}
+                                                >
+                                                  Precautions
+                                                </Form.Label>
+                                                <Form.Control
+                                                  type="text"
+                                                  name="comment"
+                                                  value={prescription.comment}
+                                                  onChange={(e) =>
+                                                    handlePrescriptionChange(
+                                                      index,
+                                                      e
+                                                    )
+                                                  }
+                                                />
+                                              </Form.Group>
+                                            </Col>
+                                            <Col>
+                                              <Form.Group
+                                                controlId={`formTimeSlot${index}`}
+                                              >
+                                                <Form.Label
+                                                  style={{
+                                                    color: "#003366",
+                                                    fontFamily: "Sans-Serif",
+                                                    fontSize: "px",
+                                                    fontWeight: 600,
+                                                    lineHeight: "29.3px",
+                                                    textAlign: "left",
+                                                    opacity: 1,
+                                                  }}
+                                                >
+                                                  Description
+                                                </Form.Label>
+                                                <Form.Control
+                                                  as="select"
+                                                  name="time"
+                                                  value={prescription.time}
+                                                  onChange={(e) =>
+                                                    handlePrescriptionChange(
+                                                      index,
+                                                      e
+                                                    )
+                                                  }
+                                                >
+                                                  <option value="">
+                                                    Select Time
+                                                  </option>
+                                                  <option value="morning">
+                                                    Morning
+                                                  </option>
+                                                  <option value="morning-afternoon">
+                                                    Morning-Afternoon
+                                                  </option>
+                                                  <option value="morning-afternoon-evening">
+                                                    Morning-Afternoon-Evening
+                                                  </option>
+                                                  <option value="morning-afternoon-evening-night">
+                                                    Morning-Afternoon-Evening-Night
+                                                  </option>
+                                                  <option value="afternoon">
+                                                    Afternoon
+                                                  </option>
+                                                  <option value="evening">
+                                                    Evening
+                                                  </option>
+                                                  <option value="night">
+                                                    Night
+                                                  </option>
+                                                </Form.Control>
+                                              </Form.Group>
+                                            </Col>
+
+                                            <Col>
+                                              <Form.Group
+                                                controlId={`formDescription${index}`}
+                                              >
+                                                <Form.Label
+                                                  style={{
+                                                    color: "#003366",
+                                                    fontFamily: "Sans-Serif",
+                                                    fontSize: "18px",
+                                                    fontWeight: 600,
+                                                    lineHeight: "29.3px",
+                                                    textAlign: "left",
+                                                    opacity: 1,
+                                                  }}
+                                                >
+                                                  Duration
+                                                </Form.Label>
+                                                <Form.Control
+                                                  type="text"
+                                                  name="description"
+                                                  value={
+                                                    prescription.description
+                                                  }
+                                                  onChange={(e) =>
+                                                    handlePrescriptionChange(
+                                                      index,
+                                                      e
+                                                    )
+                                                  }
+                                                />
+                                              </Form.Group>
+                                            </Col>
+                                            <Col className="d-flex align-items-center">
+                                              <Button
+                                                variant="primary"
+                                                onClick={() =>
+                                                  handlePrescriptionSubmit(
+                                                    index
+                                                  )
+                                                }
+                                                className="me-2"
+                                                style={{
+                                                  background: "#295F98",
+                                                  border: "none",
+                                                  fontSize: "0.9rem",
+                                                  borderRadius: "5px",
+                                                  marginTop: "44px",
+                                                }}
+                                              >
+                                                Submit
+                                              </Button>
+                                              <Button
+                                                variant="danger"
+                                                onClick={() =>
+                                                  handleUpdatePrescription(
+                                                    index
+                                                  )
+                                                }
+                                                className="me-2"
+                                                style={{
+                                                  background: "#295F98",
+                                                  border: "none",
+                                                  fontSize: "0.9rem",
+                                                  borderRadius: "5px",
+                                                  marginTop: "44px",
+                                                }}
+                                              >
+                                                Update
+                                              </Button>
+                                              <Button
+                                                variant="danger"
+                                                onClick={() =>
+                                                  removePrescriptionRow(index)
+                                                }
+                                                className="me-2"
+                                                style={{
+                                                  background: "#C62E2E",
+                                                  border: "none",
+                                                  fontSize: "0.9rem",
+                                                  borderRadius: "5px",
+                                                  marginTop: "44px",
+                                                }}
+                                              >
+                                                Delete
+                                              </Button>
+                                            </Col>
+                                          </Row>
+                                        )
+                                      )}
+                                    </Form>
+                                  </Card.Body>
+                                </Card>
+                                <Table
+                                  striped
+                                  bordered
+                                  hover
+                                  style={{ backgroundColor: "#D7EAF0" }}
+                                >
+                                  <thead className="table-light">
+                                    <tr>
+                                      <th
+                                        style={{
+                                          fontFamily: "sans-serif",
+                                          backgroundColor: "#D7EAF0",
+                                          color: "#003366",
+                                        }}
+                                      >
+                                        SNo.
+                                      </th>
+                                      <th
+                                        style={{
+                                          fontFamily: "sans-serif",
+                                          backgroundColor: "#D7EAF0",
+                                          color: "#003366",
+                                        }}
+                                      >
+                                        Document Date
+                                      </th>
+                                      <th
+                                        className="text-center"
+                                        style={{
+                                          fontFamily: "sans-serif",
+                                          backgroundColor: "#D7EAF0",
+                                          color: "#003366",
+                                        }}
+                                      >
+                                        Actions
+                                      </th>
+                                    </tr>
+                                  </thead>
+
+                                  <tbody>
+                                    {prescriptionDocuments.map((doc, index) => (
+                                      <React.Fragment key={doc.id}>
+                                        <tr>
+                                          <td>{index + 1}</td>
+                                          <td>{doc.document_date}</td>
+                                          <td className="text-center">
+                                            <div className="d-flex justify-content-center align-items-center">
+                                              <Button
+                                                variant="primary"
+                                                className="me-2"
+                                                onClick={() =>
+                                                  handlePreview(doc.id)
+                                                }
+                                                style={{
+                                                  backgroundColor: "#295F98",
+                                                  borderColor: "#0166CB",
+                                                }}
+                                              >
+                                                Preview
+                                              </Button>
+
+                                              <DropdownButton
+                                                id="dropdown-basic-button"
+                                                title={
+                                                  <FontAwesomeIcon
+                                                    icon={faEllipsisV}
+                                                  />
+                                                }
+                                                variant="secondary"
+                                              >
+                                                <Dropdown.Item
+                                                  onClick={() =>
+                                                    handleDownloadPrescriptionDoc(
+                                                      doc
+                                                    )
+                                                  }
+                                                >
+                                                  Download
+                                                </Dropdown.Item>
+                                                <Dropdown.Item
+                                                  onClick={() =>
+                                                    handleDeletePrescriptionDoc(
+                                                      doc.id
+                                                    )
+                                                  }
+                                                >
+                                                  Delete
+                                                </Dropdown.Item>
+                                              </DropdownButton>
+                                            </div>
+                                          </td>
+                                        </tr>
+                                      </React.Fragment>
+                                    ))}
+                                  </tbody>
+                                </Table>
+
+                                <Modal
+                                  show={showPrescriptionDocsForm}
+                                  onHide={() =>
+                                    setShowPrescriptionDocsForm(false)
+                                  }
+                                >
+                                  <Modal.Header closeButton>
+                                    <Modal.Title>
+                                      Upload Prescription File
+                                    </Modal.Title>
+                                  </Modal.Header>
+                                  <Modal.Body>
+                                    <Form>
+                                      <Form.Group controlId="formPrescriptionFile">
+                                        <Form.Label>
+                                          Prescription File
+                                        </Form.Label>
+                                        <Form.Control
+                                          type="file"
+                                          onChange={
+                                            handleFileSelectForPrescription
+                                          }
+                                        />
+                                      </Form.Group>
+                                    </Form>
+                                  </Modal.Body>
+                                  <Modal.Footer>
+                                    <Button
+                                      variant="secondary"
+                                      onClick={() =>
+                                        setShowPrescriptionDocsForm(false)
+                                      }
+                                    >
+                                      Cancel
+                                    </Button>
+                                    <Button
+                                      variant="primary"
+                                      onClick={() =>
+                                        handlePrescriptionDocs(
+                                          appointment.appointment_id
+                                        )
+                                      }
+                                    >
+                                      Upload
+                                    </Button>
+                                  </Modal.Footer>
+                                </Modal>
+                              </td>
+                            </tr>
+                          )}
+
+                        {showRecordForm &&
+                          expandedAppointmentId ===
+                            appointment.appointment_id && (
+                            <tr>
+                              <td colSpan="7">
+                                <Card
+                                  className="shadow-sm mt-3"
+                                  style={{
+                                    borderRadius: "15px",
+                                    border: " #0091A5",
+                                    background: "#f1f8fb",
+                                  }}
+                                >
+                                  <Card.Body>
+                                    <h2
+                                      style={{
+                                        fontFamily: "Sans-Serif",
+                                        fontWeight: 600,
+                                        lineHeight: "46.88px",
+                                        textAlign: "left",
+                                        width: "225px",
+                                        height: "46px",
+                                        gap: "0px",
+                                        opacity: 1,
+                                        color: "#000",
+                                      }}
+                                    >
+                                      Document
+                                    </h2>
+
+                                    <Button
+                                      variant="outline-primary"
+                                      style={{
+                                        position: "absolute",
+                                        top: "10px",
+                                        right: "10px",
+                                        background: "#295F98",
+                                        color: "#ffffff",
+                                        border: "none",
+                                        borderRadius: "5px",
+                                      }}
+                                      onClick={() => {
+                                        setIsPrescriptionDocs(true);
+                                        toggleFormModal();
+                                      }}
+                                    >
+                                      Upload Document
+                                    </Button>
+
+                                    <Row className="mb-5">
+                                      <Col xs={12} md={12}>
+                                        <Table striped bordered hover>
+                                          <thead className="table-light">
+                                            <tr>
+                                              <th
+                                                style={{
+                                                  fontFamily: "sans-serif",
+                                                  fontWeight: "bold",
+                                                  background: "#D7EAF0",
+                                                  color: "#003366",
+                                                }}
+                                              >
+                                                Document Name
+                                              </th>
+                                              <th
+                                                style={{
+                                                  fontFamily: "sans-serif",
+                                                  fontWeight: "bold",
+                                                  background: "#D7EAF0",
+                                                  color: "#003366",
+                                                }}
+                                              >
+                                                Patient Name
+                                              </th>
+                                              <th
+                                                style={{
+                                                  fontFamily: "sans-serif",
+                                                  fontWeight: "bold",
+                                                  background: "#D7EAF0",
+                                                  color: "#003366",
+                                                }}
+                                              >
+                                                Document Date
+                                              </th>
+                                              <th
+                                                style={{
+                                                  fontFamily: "sans-serif",
+                                                  fontWeight: "bold",
+                                                  background: "#D7EAF0",
+                                                  color: "#003366",
+                                                }}
+                                              >
+                                                Document Type
+                                              </th>
+                                              <th
+                                                style={{
+                                                  fontFamily: "sans-serif",
+                                                  fontWeight: "bold",
+                                                  background: "#D7EAF0",
+                                                  color: "#003366",
+                                                }}
+                                              >
+                                                Document File
+                                              </th>
+                                              <th
+                                                style={{
+                                                  fontFamily: "sans-serif",
+                                                  background: "#D7EAF0",
+                                                  fontWeight: "bold",
+                                                  color: "#003366",
+                                                }}
+                                              >
+                                                Actions
+                                              </th>
+                                            </tr>
+                                          </thead>
+
+                                          <tbody>
+                                            {medicalRecords.map((record) => (
+                                              <tr key={record.id}>
+                                                <td>{record.document_name}</td>
+                                                <td>{record.patient_name}</td>
+                                                <td>{record.document_date}</td>
+                                                <td>{record.document_type}</td>
+                                                <td>
+                                                  <Button
+                                                    style={{
+                                                      backgroundColor:
+                                                        "#295F98",
+                                                      color: "#ffffff",
+                                                    }}
+                                                    onClick={() =>
+                                                      handleViewFile(record)
+                                                    }
+                                                  >
+                                                    View
+                                                  </Button>
+                                                </td>
+                                                <td>
+                                                  <DropdownButton
+                                                    id="dropdown-basic-button"
+                                                    title={
+                                                      <FontAwesomeIcon
+                                                        icon={faEllipsisV}
+                                                      />
+                                                    }
+                                                    variant="secondary"
+                                                  >
+                                                    <Dropdown.Item
+                                                      onClick={() =>
+                                                        handleModifyRecord(
+                                                          record
+                                                        )
+                                                      }
+                                                    >
+                                                      Modify
+                                                    </Dropdown.Item>
+                                                    <Dropdown.Item
+                                                      onClick={() =>
+                                                        handleDownloadFile(
+                                                          record
+                                                        )
+                                                      }
+                                                    >
+                                                      Download
+                                                    </Dropdown.Item>
+                                                    <Dropdown.Item
+                                                      onClick={() =>
+                                                        handleDeleteRecord(
+                                                          record.id
+                                                        )
+                                                      }
+                                                    >
+                                                      Delete
+                                                    </Dropdown.Item>
+                                                  </DropdownButton>
+                                                </td>
+                                              </tr>
+                                            ))}
+                                          </tbody>
+                                        </Table>
+                                      </Col>
+                                    </Row>
+
+                                    <Modal
+                                      show={showFormModal}
+                                      onHide={toggleFormModal}
+                                    >
+                                      <Modal.Header closeButton>
+                                        <Modal.Title>
+                                          {isPrescriptionDocs
+                                            ? "Upload Document Files"
+                                            : editingRecordId
+                                              ? "Edit Medical Record"
+                                              : "Upload Medical Record"}
+                                        </Modal.Title>
+                                      </Modal.Header>
+                                      <Modal.Body>
+                                        <Form>
+                                          <Form.Group controlId="documentName">
+                                            <Form.Label>
+                                              Document Name
+                                            </Form.Label>
+                                            <Form.Control
+                                              type="text"
+                                              placeholder="Enter document name"
+                                              value={formData.document_name}
+                                              onChange={(e) =>
+                                                setFormData({
+                                                  ...formData,
+                                                  document_name: e.target.value,
+                                                })
+                                              }
+                                            />
+                                          </Form.Group>
+                                          <Form.Group controlId="patientName">
+                                            <Form.Label>
+                                              Patient Name
+                                            </Form.Label>
+                                            <Form.Control
+                                              type="text"
+                                              placeholder="Enter patient name"
+                                              value={formData.patient_name}
+                                              onChange={(e) =>
+                                                setFormData({
+                                                  ...formData,
+                                                  patient_name: e.target.value,
+                                                })
+                                              }
+                                            />
+                                          </Form.Group>
+                                          <Form.Group controlId="documentDate">
+                                            <Form.Label>
+                                              Document Date
+                                            </Form.Label>
+                                            <Form.Control
+                                              type="date"
+                                              value={formData.document_date}
+                                              onChange={(e) =>
+                                                setFormData({
+                                                  ...formData,
+                                                  document_date: e.target.value,
+                                                })
+                                              }
+                                            />
+                                          </Form.Group>
+
+                                          <Form.Group controlId="documentType">
+                                            <Form.Label>
+                                              Document Type
+                                            </Form.Label>
+                                            <div className="d-flex">
+                                              <Button
+                                                variant={
+                                                  formData.document_type ===
+                                                  "report"
+                                                    ? "primary"
+                                                    : "outline-primary"
+                                                }
+                                                className="me-2"
+                                                onClick={() =>
+                                                  setFormData({
+                                                    ...formData,
+                                                    document_type: "report",
+                                                  })
+                                                }
+                                              >
+                                                <FontAwesomeIcon
+                                                  icon={faFileAlt}
+                                                />{" "}
+                                                Report
+                                              </Button>
+                                              <Button
+                                                variant={
+                                                  formData.document_type ===
+                                                  "invoice"
+                                                    ? "primary"
+                                                    : "outline-primary"
+                                                }
+                                                onClick={() =>
+                                                  setFormData({
+                                                    ...formData,
+                                                    document_type: "invoice",
+                                                  })
+                                                }
+                                              >
+                                                <FontAwesomeIcon
+                                                  icon={faReceipt}
+                                                />{" "}
+                                                Invoice
+                                              </Button>
+                                            </div>
+                                          </Form.Group>
+
+                                          <Form.Group controlId="documentFile">
+                                            <Form.Label>
+                                              Document File
+                                            </Form.Label>
+                                            <div className="file-input">
+                                              <input
+                                                type="file"
+                                                id="fileInput"
+                                                onChange={handleFileSelect}
+                                                style={{ display: "none" }}
+                                              />
+                                              <Button
+                                                onClick={handleAddFileClick}
+                                              >
+                                                Add a File
+                                              </Button>
+                                              {selectedFiles.map(
+                                                (file, index) => (
+                                                  <div
+                                                    key={index}
+                                                    className="selected-file"
+                                                  >
+                                                    <span>{file.name}</span>
+                                                    <Button
+                                                      variant="danger"
+                                                      size="sm"
+                                                      onClick={() =>
+                                                        handleDeleteFile(index)
+                                                      }
+                                                    >
+                                                      <FontAwesomeIcon
+                                                        icon={faTimesSolid}
+                                                      />
+                                                    </Button>
+                                                  </div>
+                                                )
+                                              )}
+                                            </div>
+                                          </Form.Group>
+                                        </Form>
+                                      </Modal.Body>
+                                      <Modal.Footer>
+                                        <Button
+                                          variant="secondary"
+                                          onClick={toggleFormModal}
+                                        >
+                                          Cancel
+                                        </Button>
+                                        <Button
+                                          variant="primary"
+                                          onClick={handleSave}
+                                        >
+                                          {editingRecordId ? "Update" : "Save"}
+                                        </Button>
+                                      </Modal.Footer>
+                                    </Modal>
+
+                                    <Modal
+                                      show={!!errorMessage || !!successMessage}
+                                      onHide={handleCloseMessageModal}
+                                    >
+                                      <Modal.Header closeButton>
+                                        <Modal.Title>
+                                          {errorMessage ? "Error" : "Success"}
+                                        </Modal.Title>
+                                      </Modal.Header>
+                                      <Modal.Body>
+                                        <p>{errorMessage || successMessage}</p>
+                                      </Modal.Body>
+                                      <Modal.Footer>
+                                        <Button
+                                          variant="primary"
+                                          onClick={handleCloseMessageModal}
+                                        >
+                                          Close
+                                        </Button>
+                                      </Modal.Footer>
+                                    </Modal>
+                                  </Card.Body>
+                                </Card>
+                              </td>
+                            </tr>
+                          )}
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            </div>
+          ))}
         </Card.Body>
       </div>
 
@@ -7290,6 +7438,36 @@ const ClinicBookedAppointment = () => {
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClosePreviewModal}>
             Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal
+        show={showConfirmModal}
+        onHide={() => setShowConfirmModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Action</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            Are you sure you want to{" "}
+            {confirmAction === "endVisit"
+              ? "end this visit"
+              : "cancel this appointment"}{" "}
+            ?
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowConfirmModal(false)}
+          >
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleConfirmAction}>
+            Confirm
           </Button>
         </Modal.Footer>
       </Modal>
