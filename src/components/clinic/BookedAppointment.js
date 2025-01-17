@@ -3795,6 +3795,17 @@
 
 // export default ClinicBookedAppointment;
 
+
+
+
+
+
+
+
+
+
+
+
 import React, { useState, useEffect } from "react";
 import "../../css/ClinicBookedAppointment.css";
 import {
@@ -3811,7 +3822,6 @@ import {
   Toast,
   ToastContainer,
 } from "react-bootstrap";
-import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFileAlt,
@@ -4302,8 +4312,8 @@ const ClinicBookedAppointment = () => {
         mobile_number: appointment.mobile_number,
         patient_id: appointment.patient_id,
         is_patient: appointment.is_patient,
-        is_complete: appointment.is_complete, 
-        is_canceled: appointment.is_canceled, 
+        is_complete: appointment.is_complete,
+        is_canceled: appointment.is_canceled,
         status: appointment.is_canceled
           ? "Canceled"
           : appointment.is_complete
@@ -4689,10 +4699,13 @@ const ClinicBookedAppointment = () => {
   const handleCancelAppointment = async (appointment_id) => {
     try {
       setLoading(true);
-      const response = await BaseUrl.patch(`/doctorappointment/canceledappointment/`, {
-      // const response = await BaseUrl.patch(`/doctorappointment/getslot/`, {
-        appointment_id,
-      });
+      const response = await BaseUrl.patch(
+        `/doctorappointment/canceledappointment/`,
+        {
+          // const response = await BaseUrl.patch(`/doctorappointment/getslot/`, {
+          appointment_id,
+        }
+      );
 
       if (response.status === 200) {
         await fetchAppointments(clinicId);
@@ -5443,7 +5456,7 @@ const ClinicBookedAppointment = () => {
   const [switchState, setSwitchState] = useState(false);
 
   const handleEndVisit = async (appointment_id) => {
-    setSwitchState(true); 
+    setSwitchState(true);
 
     try {
       console.log(appointment_id);
@@ -5500,15 +5513,16 @@ const ClinicBookedAppointment = () => {
         }}
       >
         <h2
-            className="card-title text-center mb-5 mt-4"
-            style={{
-              color: "#003366",
-              fontFamily: "Sans-Serif",
-              fontWeight: "700",
-            }}
-          >
-            Booked Appointments </h2>
-        
+          className="card-title text-center mb-5 mt-4"
+          style={{
+            color: "#003366",
+            fontFamily: "Sans-Serif",
+            fontWeight: "700",
+          }}
+        >
+          Booked Appointments{" "}
+        </h2>
+
         <Form
           onSubmit={(e) => {
             e.preventDefault();
@@ -5577,7 +5591,32 @@ const ClinicBookedAppointment = () => {
           </Modal.Footer>
         </Modal>
         <Card.Body>
-          
+          <span
+            style={{
+              color: "#000",
+              fontSize: "14px",
+              fontWeight: "700",
+              marginLeft: "8px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexWrap: "wrap",
+              marginTop: "0.5rem",
+              marginBottom: "3rem",
+            }}
+          >
+            <span
+              style={{
+                display: "inline-block",
+                width: "18px",
+                height: "18px",
+                backgroundColor: "#F5ECD5",
+                borderRadius: "50%",
+                border: "2px solid black",
+                marginRight: "8px",
+              }}
+            ></span>
+            (Booked by patient)
             <span
               style={{
                 color: "#000",
@@ -5587,9 +5626,7 @@ const ClinicBookedAppointment = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                flexWrap: "wrap", 
-                marginTop: "0.5rem",
-                marginBottom: "3rem",
+                flexWrap: "wrap",
               }}
             >
               <span
@@ -5597,13 +5634,13 @@ const ClinicBookedAppointment = () => {
                   display: "inline-block",
                   width: "18px",
                   height: "18px",
-                  backgroundColor: "#F5ECD5", 
+                  backgroundColor: "#D1F7D7",
                   borderRadius: "50%",
                   border: "2px solid black",
                   marginRight: "8px",
                 }}
               ></span>
-              (Booked by patient)
+              (Ended)
               <span
                 style={{
                   color: "#000",
@@ -5621,41 +5658,16 @@ const ClinicBookedAppointment = () => {
                     display: "inline-block",
                     width: "18px",
                     height: "18px",
-                    backgroundColor: "#D1F7D7", 
+                    backgroundColor: "#F8D7DA",
                     borderRadius: "50%",
                     border: "2px solid black",
                     marginRight: "8px",
                   }}
                 ></span>
-                (Ended)
-                <span
-                  style={{
-                    color: "#000",
-                    fontSize: "14px",
-                    fontWeight: "700",
-                    marginLeft: "8px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexWrap: "wrap", 
-                  }}
-                >
-                  <span
-                    style={{
-                      display: "inline-block",
-                      width: "18px",
-                      height: "18px",
-                      backgroundColor: "#F8D7DA", 
-                      borderRadius: "50%",
-                      border: "2px solid black",
-                      marginRight: "8px",
-                    }}
-                  ></span>
-                  (Canceled)
-                </span>
+                (Canceled)
               </span>
-              </span>
-          
+            </span>
+          </span>
 
           {Object.keys(groupedAppointments).map((date) => (
             <div key={date}>
@@ -5685,68 +5697,78 @@ const ClinicBookedAppointment = () => {
                   >
                     <Card>
                       <Card.Header
-                                                  style={{
-                                                      background: appointment.is_complete
-                                                      ? "#D1F7D7" 
-                                                      : appointment.is_canceled
-                                                      ? "#F8D7DA" 
-                                                      : appointment.is_patient
-                                                      ? "#F5ECD5" 
-                                                      : "#D7EAF0", 
-                                                      color: "#003366",
-                                                      fontWeight: "bold",
-                                                  }}
-                                              >
-                                              <div className="d-flex flex-column w-100">
-                                                  {/* First Row: Case ID */}
-                                                  <div className="row text-center">
+                        style={{
+                          background: appointment.is_complete
+                            ? "#D1F7D7"
+                            : appointment.is_canceled
+                              ? "#F8D7DA"
+                              : appointment.is_patient
+                                ? "#F5ECD5"
+                                : "#D7EAF0",
+                          color: "#003366",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        <div className="d-flex flex-column w-100">
+                          {/* First Row: Case ID */}
+                          <div className="row text-center">
                             <div className="col-12">
-                                <span>Case ID:</span> {appointment.case_id || "N/A"}
+                              <span>Case ID:</span>{" "}
+                              {appointment.case_id || "N/A"}
                             </div>
+                          </div>
+
+                          {/* Second Row: End Visit and Cancel */}
+                          <div className="row align-items-center mt-2 responsive-toggles">
+                            <div className="col-6 d-flex align-items-center toggle-item">
+                              <span className="me-1">End Visit</span>
+                              <label className="form-check form-switch">
+                                <input
+                                  className="form-check-input"
+                                  type="checkbox"
+                                  id="endVisitSwitch"
+                                  style={{
+                                    cursor: "pointer",
+                                    alignItems: "center",
+                                  }}
+                                  onChange={() => {
+                                    setConfirmAction("endVisit");
+                                    setShowConfirmModal(true);
+                                    setSelectedAppointment(appointment);
+                                  }}
+                                  disabled={
+                                    appointment.is_complete ||
+                                    appointment.is_canceled
+                                  }
+                                  checked={appointment.is_complete}
+                                />
+                              </label>
                             </div>
-                      
-                                                  {/* Second Row: End Visit and Cancel */}
-                                                  <div className="row align-items-center mt-2">
-                                                  <div className="col-6 d-flex align-items-center">
-                                                      <span className="me-1">End Visit</span>
-                                                      <label className="form-check form-switch">
-                                                      <input
-                                                          className="form-check-input"
-                                                          type="checkbox"
-                                                          id="endVisitSwitch"
-                                                          style={{ cursor: "pointer" }}
-                                                          onChange={() => {
-                                                          setConfirmAction("endVisit");
-                                                          setShowConfirmModal(true);
-                                                          setSelectedAppointment(appointment);
-                                                          }}
-                                                          disabled={appointment.is_complete || appointment.is_canceled} 
-                                                          checked={appointment.is_complete}
-                                                      />
-                                                      </label>
-                                                  </div>
-                      
-                                                  <div className="col-6 d-flex align-items-center">
-                                                      <span className="me-1">Cancel</span>
-                                                      <label className="form-check form-switch">
-                                                      <input
-                                                          className="form-check-input"
-                                                          type="checkbox"
-                                                          id="cancelSwitch"
-                                                          style={{ cursor: "pointer" }}
-                                                          onChange={() => {
-                                                          setConfirmAction("cancelAppointment");
-                                                          setShowConfirmModal(true);
-                                                          setSelectedAppointment(appointment);
-                                                          }}
-                                                          disabled={appointment.is_canceled || appointment.is_complete} 
-                                                          checked={appointment.is_canceled}
-                                                      />
-                                                      </label>
-                                                  </div>
-                                                  </div>
-                                              </div>
-                                              </Card.Header>
+
+                            <div className="col-6 d-flex align-items-center toggle-item">
+                              <span className="me-1">Cancel</span>
+                              <label className="form-check form-switch">
+                                <input
+                                  className="form-check-input"
+                                  type="checkbox"
+                                  id="cancelSwitch"
+                                  style={{ cursor: "pointer" }}
+                                  onChange={() => {
+                                    setConfirmAction("cancelAppointment");
+                                    setShowConfirmModal(true);
+                                    setSelectedAppointment(appointment);
+                                  }}
+                                  disabled={
+                                    appointment.is_canceled ||
+                                    appointment.is_complete
+                                  }
+                                  checked={appointment.is_canceled}
+                                />
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </Card.Header>
                       <Card.Body
                         style={{
                           overflowX: "auto",

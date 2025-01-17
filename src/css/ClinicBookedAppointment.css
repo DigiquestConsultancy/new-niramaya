@@ -87,3 +87,26 @@
     margin-top: 57px;
   }
 }
+
+/* Default styles */
+.responsive-toggles {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.responsive-toggles .toggle-item {
+  flex: 1;
+  margin-bottom: 10px;
+}
+
+/* Media query for 991px to 1400px */
+@media (min-width: 991px) and (max-width: 1400px) {
+  .responsive-toggles {
+    flex-direction: column;
+  }
+
+  .responsive-toggles .toggle-item {
+    width: 100%;
+    flex: none;
+  }
+}
