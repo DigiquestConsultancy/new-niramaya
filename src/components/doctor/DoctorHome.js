@@ -6529,10 +6529,10 @@ const DoctorHome = () => {
       endIndex
     );
     return displayedAppointments.map((appointment, index) => (
-      <Col key={index}>
+      <Col key={index} className="p-4">
         <Card
-          className="mb-4 shadow-sm reception-card"
-          style={{ backgroundColor: "#2CABC7", color: "#fff" }}
+          className="mb-2 shadow-sm reception-card"
+          style={{ backgroundColor: "#2CABC7", color: "#fff", cursor: "pointer" }}
           onClick={() => handleAppointmentClick(appointment, "completed")}
         >
           <Card.Body>
@@ -6551,10 +6551,10 @@ const DoctorHome = () => {
       endIndex
     );
     return displayedAppointments.map((appointment, index) => (
-      <Col key={index}>
+      <Col key={index} className="p-4">
         <Card
           className="mb-4 shadow-sm reception-card"
-          style={{ backgroundColor: "#BC1B2E", color: "#fff" }}
+          style={{ backgroundColor: "#BC1B2E", color: "#fff", cursor: "pointer" }}
           onClick={() => handleAppointmentClick(appointment, "canceled")}
         >
           <Card.Body>
@@ -6576,9 +6576,11 @@ const DoctorHome = () => {
         style={{
           position: "relative",
           backgroundColor: "#F4F6F9",
-          padding: "20px 20px 40px 20px",
+          padding: "20px",
           borderRadius: "10px",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+           overflowX: "auto", 
+           whiteSpace: "nowrap"
         }}
       >
         <button
@@ -6851,7 +6853,7 @@ const DoctorHome = () => {
 
   return (
     <div className="doctor-container" style={{ backgroundColor: "#D7EAF0" }}>
-      <header className="mb-2 reception-header d-flex flex-column flex-md-row justify-content-between align-items-center text-center text-md-start">
+      <header className="reception-header d-flex flex-column flex-md-row justify-content-between align-items-center text-center text-md-start">
         {clinicName && clinicPhoto && (
           <>
             <Col xs={12} md="auto">
@@ -6870,14 +6872,14 @@ const DoctorHome = () => {
         )}
       </header>
 
-      <div className="d-flex justify-content-center align-items-center mt-2">
+      <div className="d-flex justify-content-center align-items-center">
         <button
           className="btn btn-outline-primary me-3"
           onClick={handlePreviousDate}
         >
           &larr;
         </button>
-        <h4 className="text-center">{formattedDate}</h4>
+        <h5 className="text-center">{formattedDate}</h5>
         <button
           className="btn btn-outline-primary ms-3"
           onClick={handleNextDate}
@@ -6888,70 +6890,35 @@ const DoctorHome = () => {
 
       <Row className="text-center mt-4">
         <Col>
-          <Card.Body>
-            <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
-              Appointments
-            </Card.Title>
-            <Card.Text style={{ fontWeight: "700" }}>
-              {totalAppointments}
-            </Card.Text>
-          </Card.Body>
+          <h5 style={{ fontWeight: "700", fontSize: "16px" }}>Appointments</h5>
+          <p style={{ fontWeight: "700", fontSize: "16px" }}>{totalAppointments}</p>
         </Col>
         <Col>
-          <Card.Body>
-            <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
-              Booked
-            </Card.Title>
-            <Card.Text style={{ fontWeight: "700" }}>
-              {bookedAppointmentCount}
-            </Card.Text>
-          </Card.Body>
+          <h5 style={{ fontWeight: "700", fontSize: "16px" }}>Booked</h5>
+          <p style={{ fontWeight: "700", fontSize: "16px" }}>{bookedAppointmentCount}</p>
         </Col>
         <Col>
-          <Card.Body>
-            <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
-              Completed
-            </Card.Title>
-            <Card.Text style={{ fontWeight: "700" }}>
-              {completedAppointmentsCount}
-            </Card.Text>
-          </Card.Body>
+          <h5 style={{ fontWeight: "700", fontSize: "16px" }}>Completed</h5>
+          <p style={{ fontWeight: "700", fontSize: "16px" }}>{completedAppointmentsCount}</p>
         </Col>
         <Col>
-          <Card.Body>
-            <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
-              Canceled
-            </Card.Title>
-            <Card.Text style={{ fontWeight: "700" }}>
-              {canceledAppointmentsCount}
-            </Card.Text>
-          </Card.Body>
+          <h5 style={{ fontWeight: "700", fontSize: "16px" }}>Canceled</h5>
+          <p style={{ fontWeight: "700", fontSize: "16px" }}>{canceledAppointmentsCount}</p>
         </Col>
         <Col>
-          <Card.Body>
-            <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
-              Online
-            </Card.Title>
-            <Card.Text style={{ fontWeight: "700" }}>{onlineCount}</Card.Text>
-          </Card.Body>
+          <h5 style={{ fontWeight: "700", fontSize: "16px" }}>Online</h5>
+          <p style={{ fontWeight: "700", fontSize: "16px" }}>{onlineCount}</p>
         </Col>
         <Col>
-          <Card.Body>
-            <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
-              Walk-Ins
-            </Card.Title>
-            <Card.Text style={{ fontWeight: "700" }}>{walkInCount}</Card.Text>
-          </Card.Body>
+          <h5 style={{ fontWeight: "700", fontSize: "16px" }}>Walk-Ins</h5>
+          <p style={{ fontWeight: "700", fontSize: "16px" }}>{walkInCount}</p>
         </Col>
         <Col>
-          <Card.Body>
-            <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
-              Follow-Ups
-            </Card.Title>
-            <Card.Text style={{ fontWeight: "700" }}>{followUpCount}</Card.Text>
-          </Card.Body>
+          <h5 style={{ fontWeight: "700", fontSize: "16px" }}>Follow-Ups</h5>
+          <p style={{ fontWeight: "700", fontSize: "16px" }}>{followUpCount}</p>
         </Col>
       </Row>
+
       <hr />
 
       <div className="new">
@@ -7016,8 +6983,8 @@ const DoctorHome = () => {
           </div>
         </div>
 
-        <Row>
-          <Col className="ms-4">
+        <Row className="p-3">
+          <Col>
             <div className="d-flex justify-content-between align-items-center mb-2">
               {morningSlots.length > 16 && (
                 <Button
@@ -7050,7 +7017,7 @@ const DoctorHome = () => {
               </p>
             )}
           </Col>
-          <Col className="ms-4">
+          <Col >
             <div className="d-flex justify-content-between align-items-center mb-2">
               {afternoonSlots.length > 16 && (
                 <Button
@@ -7083,7 +7050,7 @@ const DoctorHome = () => {
               </p>
             )}
           </Col>
-          <Col className="ms-4">
+          <Col >
             <div className="d-flex justify-content-between align-items-center mb-2">
               {eveningSlots.length > 16 && (
                 <Button
@@ -7137,44 +7104,45 @@ const DoctorHome = () => {
           <span className="legend-text">Follow-Up</span>
         </div>
       </div>
-      <Row className="mb-4 text-center align-items-center justify-content-center appointment-list">
-        {todayAppointments.length > 4 && currentIndex > 0 && (
-          <Col xs="auto">
-            <Button
-              variant="outline-primary"
-              onClick={handlePrevious}
-              disabled={currentIndex === 0}
-            >
-              <BsChevronLeft />
-            </Button>
-          </Col>
-        )}
-        {todayAppointments.length > 0 ? (
-          renderAppointments()
-        ) : (
-          <Col xs="auto" className="d-flex justify-content-center mt-3">
-            <div
-              className="alert alert-danger p-2"
-              style={{ maxWidth: "350px", display: "inline-block" }}
-              role="alert"
-            >
-              {"No appointments available for today."}
-            </div>
-          </Col>
-        )}
-        {todayAppointments.length > 4 &&
-          currentIndex < todayAppointments.length - 4 && (
+
+        <Row className="mb-4 p-2 text-center align-items-center justify-content-center">
+          {todayAppointments.length > 4 && currentIndex > 0 && (
             <Col xs="auto">
               <Button
                 variant="outline-primary"
-                onClick={handleNext}
-                disabled={currentIndex >= todayAppointments.length - 4}
+                onClick={handlePrevious}
+                disabled={currentIndex === 0}
               >
-                <BsChevronRight />
+                <BsChevronLeft />
               </Button>
             </Col>
           )}
-      </Row>
+          {todayAppointments.length > 0 ? (
+            renderAppointments()
+          ) : (
+            <Col xs="auto" className="d-flex justify-content-center mt-3">
+              <div
+                className="alert alert-danger p-2"
+                style={{ maxWidth: "350px", display: "inline-block" }}
+                role="alert"
+              >
+                {"No appointments available for today."}
+              </div>
+            </Col>
+          )}
+          {todayAppointments.length > 4 &&
+            currentIndex < todayAppointments.length - 4 && (
+              <Col xs="auto">
+                <Button
+                  variant="outline-primary"
+                  onClick={handleNext}
+                  disabled={currentIndex >= todayAppointments.length - 4}
+                >
+                  <BsChevronRight />
+                </Button>
+              </Col>
+            )}
+        </Row>
       {selectedTodayAppointment &&
         renderSelectedAppointmentDetails(selectedTodayAppointment)}
       <hr />

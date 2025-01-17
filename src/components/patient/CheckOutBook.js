@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios"; // Assuming you use axios for API requests
-import image1 from "../../images/UPI.png";
 import BaseUrl from "../../api/BaseUrl";
 import { load } from "@cashfreepayments/cashfree-js";
 import gpay from "../../images/gpay.jpeg";
