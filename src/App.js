@@ -490,7 +490,6 @@ function App() {
             <Route
               exact
               path="/restricted"
-              // render={() => <div>Please log in first</div>} // Custom login page
               component={RestrictedPage}
             />
             <Route exact path="/finddoctor" component={FindDoctor} />
@@ -563,7 +562,7 @@ function App() {
                 setIsPatientLoggedIn={() => handleLogin("patient")}
               />
             </Route>
-            <ProtectedRoute
+            <Route
               exact
               path="/patient/register"
               component={PatientRegister}
