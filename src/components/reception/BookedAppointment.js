@@ -3884,8 +3884,6 @@
 
 
 
-
-
 import React, { useState, useEffect } from "react";
 import "../../css/ClinicBookedAppointment.css";
 import {
@@ -3913,6 +3911,7 @@ import BaseUrl from "../../api/BaseUrl";
 import { jwtDecode } from "jwt-decode";
 import styled from "styled-components";
 import Loader from "react-js-loader";
+import { BsPrinterFill } from "react-icons/bs";
 
 const LoaderWrapper = styled.div`
   display: flex;
@@ -3941,11 +3940,8 @@ const ReceptionBookedAppointment = () => {
   const [receptionId, setReceptionId] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [appointmentIdToDelete, setAppointmentIdToDelete] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
   const [expandedAppointmentId, setExpandedAppointmentId] = useState(null);
-  const [expandedPrescriptionId, setExpandedPrescriptionId] = useState(null);
   const [formDetails, setFormDetails] = useState({});
-  const [selectedPatientId, setSelectedPatientId] = useState(null);
   const [searchParams, setSearchParams] = useState({ booked_by: "" });
   const [showPrescriptionForm, setShowPrescriptionForm] = useState(false);
   const [showVitalForm, setShowVitalForm] = useState(false);
@@ -3984,24 +3980,34 @@ const ReceptionBookedAppointment = () => {
     document_file: "",
   });
   const [medicalRecords, setMedicalRecords] = useState([]);
-  const [showMedicalRecords, setShowMedicalRecords] = useState(false);
   const [editingRecordId, setEditingRecordId] = useState(null);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [mobileNumber, setMobileNumber] = useState("");
   const [showSymptomsForm, setShowSymptomsForm] = useState(false);
   const [searchSymptom, setSearchSymptom] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
-  const [uploadedPrescription, setUploadedPrescription] = useState(null);
 
   const [isPrescriptionDocs, setIsPrescriptionDocs] = useState(false);
   const [showPrescriptionDocsForm, setShowPrescriptionDocsForm] =
     useState(false);
-  const [documentIds, setDocumentIds] = useState([]);
 
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastVariant, setToastVariant] = useState("success");
+
+  const [successMessageDetail, setSuccessMessageDetail] = useState("");
+  const [successMessageSymptom, setSuccessMessageSymptom] = useState("");
+  const [successMessageVital, setSuccessMessageVital] = useState("");
+  const [successMessagePrescription, setSuccessMessagePrescription] =
+    useState("");
+  const [successMessageDocument, setSuccessMessageDocument] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const [errorMessageDetail, setErrorMessageDetail] = useState("");
+  const [errorMessageSymptom, setErrorMessageSymptom] = useState("");
+  const [errorMessageVital, setErrorMessageVital] = useState("");
+  const [errorMessagePrescription, setErrorMessagePrescription] = useState("");
+  const [errorMessageDocument, setErrorMessageDocument] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem("patient_token");
@@ -4010,7 +4016,6 @@ const ReceptionBookedAppointment = () => {
       setLoading(true);
       const decodedToken = jwtDecode(token);
       const mobile_number = decodedToken.mobile_number;
-      setMobileNumber(mobile_number);
 
       setFormData((prevFormData) => ({
         ...prevFormData,
@@ -4047,7 +4052,6 @@ const ReceptionBookedAppointment = () => {
       } else {
         setMedicalRecords([]);
       }
-      setShowMedicalRecords(true);
     } catch (error) {
       setMedicalRecords([]);
     } finally {
@@ -4072,11 +4076,10 @@ const ReceptionBookedAppointment = () => {
       link.download = `${record.document_name}.${
         response.data.type.split("/")[1]
       }`;
-      setSuccessMessage(response.data.success);
+      setSuccessMessageDocument(response.data.success);
       link.click();
     } catch (error) {
-      console.error("Error downloading file:", error);
-      setErrorMessage(error.response?.data?.error);
+      setErrorMessageDocument(error.response?.data?.error);
     } finally {
       setLoading(false);
     }
@@ -4120,10 +4123,8 @@ const ReceptionBookedAppointment = () => {
             patient_name: documentData.name || "",
           }));
         } else {
-          console.error("Failed to fetch document data");
         }
       } catch (error) {
-        console.error("Error fetching document data:", error);
       } finally {
         setLoading(false);
       }
@@ -4156,15 +4157,14 @@ const ReceptionBookedAppointment = () => {
           );
 
           if (postResponse.status === 200) {
-            setUploadedPrescription(selectedFiles[0]);
             await fetchMedicalRecords(expandedAppointmentId);
             await fetchAppointments(receptionId);
-            setSuccessMessage("Document file uploaded successfully");
+            setSuccessMessageDocument("Document file uploaded successfully");
           } else {
-            setErrorMessage("Failed to upload document file");
+            setErrorMessageDocument("Failed to upload document file");
           }
         } catch (postError) {
-          setErrorMessage("Error uploading document file");
+          setErrorMessageDocument("Error uploading document file");
         } finally {
           setLoading(false);
         }
@@ -4217,18 +4217,18 @@ const ReceptionBookedAppointment = () => {
           `/patient/patientdocumentusingappointmentid/`,
           formDataToSend
         );
-        setSuccessMessage(response.data.success);
+        setSuccessMessageDocument(response.data.success);
       } else {
         response = await BaseUrl.post(
           `/patient/patientdocumentusingappointmentid/`,
           formDataToSend
         );
-        setSuccessMessage(response.data.success);
+        setSuccessMessageDocument(response.data.success);
       }
       setShowFormModal(false);
       await fetchMedicalRecords(expandedAppointmentId);
     } catch (error) {
-      setErrorMessage(error.response?.data?.error);
+      setErrorMessageDocument(error.response?.data?.error);
     } finally {
       setLoading(false);
     }
@@ -4317,28 +4317,6 @@ const ReceptionBookedAppointment = () => {
     }
   };
 
-  const handleViewPrescription = async (prescriptionId, appointment_id) => {
-    if (expandedPrescriptionId === prescriptionId) {
-      setExpandedPrescriptionId(null);
-    } else {
-      try {
-        setLoading(true);
-        const response = await BaseUrl.get(`/patient/patientprescriptonfile/`, {
-          params: { appointment_id: appointment_id },
-        });
-        const prescriptionData = response.data;
-        setPrescriptionDocuments(prescriptionData);
-        setExpandedPrescriptionId(prescriptionId);
-      } catch (error) {
-        setShowToast(true);
-        setToastMessage("Failed to view prescription.");
-        setToastVariant("danger");
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
   const handlePreview = async (documentId) => {
     try {
       setLoading(true);
@@ -4413,15 +4391,10 @@ const ReceptionBookedAppointment = () => {
       }));
 
       for (let index in response.data) {
-        // Access the appointment object at each index
         const appointment = response.data[index];
-        setAppointmentId(appointment.appointment_id); // Extract and log appointment_id
+        setAppointmentId(appointment.appointment_id);
       }
-
       setAppointments(fetchedAppointments);
-      if (fetchedAppointments.length > 0) {
-        setSelectedPatientId(fetchedAppointments[0].patient_id);
-      }
     } catch (error) {
       setShowToast(true);
       setToastMessage("Failed to fetch appointments.");
@@ -4461,7 +4434,6 @@ const ReceptionBookedAppointment = () => {
       setShowPrescriptionForm(false);
       setShowRecordForm(false);
       setShowVitalForm(false);
-      setShowMedicalRecords(false);
       setShowSymptomsForm(false);
     } else {
       setExpandedAppointmentId(appointment_id);
@@ -4476,7 +4448,6 @@ const ReceptionBookedAppointment = () => {
       setShowPrescriptionForm(true);
       setShowRecordForm(true);
       setShowSymptomsForm(true);
-      setShowMedicalRecords(true);
 
       try {
         setLoading(true);
@@ -4524,11 +4495,6 @@ const ReceptionBookedAppointment = () => {
               ...prevDetails,
               ...patientDetails,
             }));
-          } else {
-            console.error(
-              "Failed to fetch patient details:",
-              patientResponse.reason
-            );
           }
 
           const checkupResponse = results[1];
@@ -4541,11 +4507,6 @@ const ReceptionBookedAppointment = () => {
               ...prevDetails,
               ...checkupDetails,
             }));
-          } else {
-            console.error(
-              "Failed to fetch checkup details:",
-              checkupResponse.reason
-            );
           }
 
           const prescriptionResponse = results[2];
@@ -4554,11 +4515,6 @@ const ReceptionBookedAppointment = () => {
             prescriptionResponse.value.status === 200
           ) {
             setPrescriptions(prescriptionResponse.value.data);
-          } else {
-            console.error(
-              "Failed to fetch prescriptions:",
-              prescriptionResponse.reason
-            );
           }
 
           const prescriptionDocResponse = results[3];
@@ -4567,11 +4523,6 @@ const ReceptionBookedAppointment = () => {
             prescriptionDocResponse.value.status === 200
           ) {
             setPrescriptionDocuments(prescriptionDocResponse.value.data);
-          } else {
-            console.error(
-              "Failed to fetch prescription documents:",
-              prescriptionDocResponse.reason
-            );
           }
 
           const symptomsResponse = results[4];
@@ -4580,38 +4531,14 @@ const ReceptionBookedAppointment = () => {
             symptomsResponse.value.status === 200
           ) {
             setSelectedSymptoms(symptomsResponse.value.data);
-          } else {
-            console.error("Failed to fetch symptoms:", symptomsResponse.reason);
           }
         };
-
         await fetchDataForPatient();
       } catch (error) {
         console.error("Error fetching patient data:", error);
       } finally {
         setLoading(false);
       }
-    }
-  };
-
-  const getPrescriptions = async (appointmentId) => {
-    try {
-      setLoading(true);
-      const response = await BaseUrl.get(`/patient/patientpriscription/`, {
-        params: { appointment_id: appointmentId },
-      });
-
-      if (response.status === 200) {
-        const fetchedPrescriptions = response.data;
-        setPrescriptions(fetchedPrescriptions);
-      } else {
-        setErrorMessage("Failed to fetch prescriptions");
-      }
-    } catch (error) {
-      console.error("Error fetching prescriptions:", error);
-      setErrorMessage(error.response?.data?.error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -4670,9 +4597,9 @@ const ReceptionBookedAppointment = () => {
       );
 
       if (response.status === 200) {
-        const successMessage =
+        const successMessagePrescription =
           response.data.success || "Prescription document deleted successfully";
-        setSuccessMessage(successMessage);
+        setSuccessMessagePrescription(successMessagePrescription);
         setPrescriptionDocuments((prevDocuments) => {
           return prevDocuments.filter((doc) => doc.id !== docId);
         });
@@ -4681,7 +4608,7 @@ const ReceptionBookedAppointment = () => {
         throw new Error("Failed to delete prescription document");
       }
     } catch (error) {
-      setErrorMessage(
+      setErrorMessagePrescription(
         error.response?.data?.error || "An error occurred. Please try again."
       );
     } finally {
@@ -4702,7 +4629,7 @@ const ReceptionBookedAppointment = () => {
           responseType: "blob",
         }
       );
-      setSuccessMessage(response.data.success);
+      setSuccessMessagePrescription(response.data.success);
       const url = URL.createObjectURL(response.data);
       const link = document.createElement("a");
       link.href = url;
@@ -4711,7 +4638,7 @@ const ReceptionBookedAppointment = () => {
       }`;
       link.click();
     } catch (error) {
-      setErrorMessage(error.response?.data?.error);
+      setErrorMessagePrescription(error.response?.data?.error);
     } finally {
       setLoading(false);
     }
@@ -4740,30 +4667,6 @@ const ReceptionBookedAppointment = () => {
     }
   };
 
-  const handleDownload = async (appointment_id) => {
-    try {
-      setLoading(true);
-      const response = await BaseUrl.get(`/patient/printrepport/`, {
-        params: {
-          appointment_id: expandedAppointmentId,
-        },
-        responseType: "blob",
-      });
-      const blob = new Blob([response.data], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", "AppointmentRecord.pdf");
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (error) {
-      console.error("Error downloading the file:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleUpdate = async () => {
     try {
       setLoading(true);
@@ -4779,12 +4682,12 @@ const ReceptionBookedAppointment = () => {
       const response = await BaseUrl.put(`/patient/patient/`, payload);
       if (response.status === 201) {
         await fetchAppointments(receptionId);
-        setSuccessMessage(response.data.success);
+        setSuccessMessageDetail(response.data.success);
       } else {
-        setErrorMessage(response.data?.message);
+        setErrorMessageDetail(response.data?.message);
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.error);
+      setErrorMessageDetail(error.response?.data?.error);
     } finally {
       setLoading(false);
     }
@@ -4799,12 +4702,12 @@ const ReceptionBookedAppointment = () => {
 
       if (response.status === 200) {
         await fetchAppointments(receptionId);
-        setSuccessMessage(response.data.success);
+        setSuccessMessageDetail(response.data.success);
       } else {
-        throw new Error(response.data?.message);
+        setErrorMessageDetail(response.data?.message);
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.error);
+      setErrorMessageDetail(error.response?.data?.error);
     } finally {
       setLoading(false);
     }
@@ -4813,7 +4716,6 @@ const ReceptionBookedAppointment = () => {
   const handleCancelAppointment = async (appointment_id) => {
     try {
       setLoading(true);
-      // const response = await BaseUrl.patch(`/doctorappointment/getslot/`, {
       const response = await BaseUrl.patch(
         `/doctorappointment/canceledappointment/`,
         {
@@ -4823,12 +4725,12 @@ const ReceptionBookedAppointment = () => {
 
       if (response.status === 200) {
         await fetchAppointments(receptionId);
-        setSuccessMessage(response.data.success);
+        setSuccessMessageDetail(response.data.success);
       } else {
-        setErrorMessage(response.data?.message);
+        setErrorMessageDetail(response.data?.message);
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.error);
+      setErrorMessageDetail(error.response?.data?.error);
     } finally {
       setLoading(false);
     }
@@ -4868,16 +4770,16 @@ const ReceptionBookedAppointment = () => {
           (_, i) => i !== index
         );
         setPrescriptions(updatedPrescriptions);
-        setSuccessMessage(
+        setSuccessMessagePrescription(
           response.data.success || "Prescription removed successfully"
         );
       } else {
-        setErrorMessage(
+        setErrorMessagePrescription(
           response.data?.message || "Failed to remove prescription"
         );
       }
     } catch (error) {
-      setErrorMessage(
+      setErrorMessagePrescription(
         error.response?.data?.error || "Error removing prescription"
       );
     } finally {
@@ -4897,8 +4799,6 @@ const ReceptionBookedAppointment = () => {
       if (response.status === 200) {
         const fetchedPrescriptions = response.data;
         setPrescriptions(fetchedPrescriptions);
-      } else {
-        console.error("Failed to fetch prescriptions");
       }
     } catch (error) {
       console.error("Error fetching prescriptions:", error);
@@ -4931,7 +4831,7 @@ const ReceptionBookedAppointment = () => {
       ]);
 
       if (response.status === 201) {
-        setSuccessMessage(response.data.success);
+        setSuccessMessagePrescription(response.data.success);
         const updatedPrescriptions = prescriptions.map((prescription, i) =>
           i === index
             ? { medicine_name: "", time: "", comment: "", description: "" }
@@ -4941,10 +4841,10 @@ const ReceptionBookedAppointment = () => {
         await fetchPrescriptions(appointment_id, patient_id);
         await fetchDocumentIds(appointment_id);
       } else {
-        setErrorMessage(response.data?.message);
+        setErrorMessagePrescription(response.data?.message);
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.error);
+      setErrorMessagePrescription(error.response?.data?.error);
     } finally {
       setLoading(false);
     }
@@ -4975,13 +4875,13 @@ const ReceptionBookedAppointment = () => {
       );
 
       if (response.status === 200) {
-        setSuccessMessage(response.data.success);
+        setSuccessMessagePrescription(response.data.success);
         await fetchPrescriptions(appointment_id, patient_id);
       } else {
-        setErrorMessage(response.data?.message);
+        setErrorMessagePrescription(response.data?.message);
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.error);
+      setErrorMessagePrescription(error.response?.data?.error);
     } finally {
       setLoading(false);
     }
@@ -5001,73 +4901,11 @@ const ReceptionBookedAppointment = () => {
 
       if (response.status === 200) {
         const ids = response.data.map((doc) => doc.id);
-        setDocumentIds(ids);
       }
     } catch (error) {
       console.error("Error fetching document IDs:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const toggleVitalForm = async (appointment_id) => {
-    setShowVitalForm(!showVitalForm);
-    setShowPrescriptionForm(false);
-    setExpandedAppointmentId(appointment_id);
-
-    if (!showVitalForm) {
-      try {
-        setLoading(true);
-        const selectedAppointment = appointments.find(
-          (appointment) => appointment.appointment_id === appointment_id
-        );
-
-        if (selectedAppointment) {
-          const appointment_date = selectedAppointment.appointment_date;
-
-          const fetchDataResponse = await BaseUrl.get(`/patient/vital/`, {
-            params: {
-              appointment_id: appointment_id,
-              appointment_date: appointment_date,
-            },
-          });
-          if (
-            fetchDataResponse.status === 200 &&
-            fetchDataResponse.data.length > 0
-          ) {
-            const fetchedData = fetchDataResponse.data[0];
-            setRecordDetails({
-              appointment_id: appointment_id,
-              blood_pressure: fetchedData.blood_pressure || "",
-              oxygen_level: fetchedData.oxygen_level || "",
-              body_temperature: fetchedData.body_temperature || "",
-              heart_rate: fetchedData.heart_rate || "",
-              pulse_rate: fetchedData.pulse_rate || "",
-              sugar_level: fetchedData.sugar_level || "",
-              weight: fetchedData.weight,
-              appointment_date: appointment_date,
-            });
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching vitals data:", error);
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      setRecordDetails({
-        appointment_id: "",
-        blood_pressure: "",
-        oxygen_level: "",
-        sugar_level: "",
-        weight: "",
-        height: "",
-        bmi: "",
-        pulse_rate: "",
-        heart_rate: "",
-        body_temperature: "",
-        appointment_date: "",
-      });
     }
   };
 
@@ -5100,7 +4938,7 @@ const ReceptionBookedAppointment = () => {
       });
 
       if (postResponse.status === 201) {
-        setErrorMessage("");
+        setErrorMessageVital("");
         await fetchAppointments(receptionId);
         await fetchMedicalRecords(expandedAppointmentId);
         setRecordDetails({
@@ -5117,16 +4955,13 @@ const ReceptionBookedAppointment = () => {
           appointment_id: "",
           appointment_date: "",
         });
-        setSuccessMessage("Vitals submitted successfully");
+        setSuccessMessageVital(postResponse.data.success);
         setRecordDetails(recordDetails);
       } else {
-        setErrorMessage("Failed to submit vitals");
+        setErrorMessageVital(postResponse.data.error);
       }
     } catch (postError) {
-      setErrorMessage("Error submitting vitals");
-      setShowToast(true);
-      setToastMessage("Error submitting vitals.");
-      setToastVariant("danger");
+      setErrorMessageVital("Error submitting vitals");
     } finally {
       setLoading(false);
     }
@@ -5156,12 +4991,12 @@ const ReceptionBookedAppointment = () => {
       const response = await BaseUrl.put(`/patient/vital/`, payload);
 
       if (response.status === 200) {
-        setSuccessMessage(response.data.success);
+        setSuccessMessageVital(response.data.success);
       } else {
-        setErrorMessage(response.data?.message);
+        setErrorMessageVital(response.data?.message);
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.error);
+      setErrorMessageVital(error.response?.data?.error);
     } finally {
       setLoading(false);
     }
@@ -5172,15 +5007,6 @@ const ReceptionBookedAppointment = () => {
     setSelectedSymptoms((prevSymptoms) =>
       prevSymptoms.map((symptom, i) =>
         i === index ? { ...symptom, severity: value } : symptom
-      )
-    );
-  };
-
-  const handleSymptomDetailChange = (index, event) => {
-    const { value } = event.target;
-    setSelectedSymptoms((prevSymptoms) =>
-      prevSymptoms.map((symptom, i) =>
-        i === index ? `${symptom.symptoms_name}: ${value}` : symptom
       )
     );
   };
@@ -5266,16 +5092,16 @@ const ReceptionBookedAppointment = () => {
         setSelectedSymptoms((prevSymptoms) =>
           prevSymptoms.filter((s) => s.id !== symptom.id)
         );
-        setSuccessMessage(response.data.success);
+        setSuccessMessageSymptom(response.data.success);
       } else {
-        const errorMessage =
+        const errorMessageSymptom =
           response.data?.message || "Failed to delete symptom";
-        setErrorMessage(errorMessage);
+        setErrorMessageSymptom(errorMessage);
       }
     } catch (error) {
-      const errorMessage =
+      const errorMessageSymptom =
         error.response?.data?.message || "An error occurred.";
-      setErrorMessage(errorMessage);
+      setErrorMessageSymptom(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -5315,30 +5141,30 @@ const ReceptionBookedAppointment = () => {
 
           if (response.status === 200 || response.status === 201) {
             successCount++;
-            const successMessage = response.data.success;
+            const successMessageSymptom = response.data.success;
             selectedSymptoms[i].id = response.data.data.id;
           } else {
-            const errorMessage =
+            const errorMessageSymptom =
               response.data?.message || "Failed to save symptom";
           }
         } catch (error) {
-          const errorMessage = error.response?.data?.error;
+          const errorMessageSymptom = error.response?.data?.error;
         } finally {
           setLoading(false);
         }
       }
       if (successCount > 0) {
-        setSuccessMessage(
+        setSuccessMessageSymptom(
           `${successCount} symptom(s) details saved successfully`
         );
       } else {
-        setErrorMessage("No symptoms details were saved");
+        setErrorMessageSymptom("No symptoms details were saved");
       }
 
       await fetchAppointments(receptionId);
       await fetchMedicalRecords(expandedAppointmentId);
     } catch (error) {
-      setErrorMessage("An error occurred while saving symptoms");
+      setErrorMessageSymptom("An error occurred while saving symptoms");
     } finally {
       setLoading(false);
     }
@@ -5374,22 +5200,24 @@ const ReceptionBookedAppointment = () => {
           );
           if (response.status === 200 || response.status === 201) {
             successCount++;
-            const successMessage = response.data.success;
+            const successMessageSymptom = response.data.success;
           } else {
-            const errorMessage =
+            const errorMessageSymptom =
               response.data?.message || "Failed to update symptom";
           }
         } catch (error) {
-          const errorMessage = error.response?.data?.error;
+          const errorMessageSymptom = error.response?.data?.error;
         } finally {
           setLoading(false);
         }
       }
 
       if (successCount > 0) {
-        setSuccessMessage(`${successCount} symptom(s) updated successfully`);
+        setSuccessMessageSymptom(
+          `${successCount} symptom(s) updated successfully`
+        );
       } else {
-        setErrorMessage("No symptoms were updated");
+        setErrorMessageSymptom("No symptoms were updated");
       }
       await fetchAppointments(receptionId);
       await fetchMedicalRecords(expandedAppointmentId);
@@ -5424,22 +5252,6 @@ const ReceptionBookedAppointment = () => {
     }));
   };
 
-  const handleTimeSelection = (e, index, timeSlot) => {
-    const updatedPrescriptions = prescriptions.map((prescription, i) => {
-      if (i === index) {
-        let updatedTime;
-        if (e.target.checked) {
-          updatedTime = [...prescription.time, timeSlot];
-        } else {
-          updatedTime = prescription.time.filter((time) => time !== timeSlot);
-        }
-        return { ...prescription, time: updatedTime };
-      }
-      return prescription;
-    });
-    setPrescriptions(updatedPrescriptions);
-  };
-
   const handlePrescriptionDocs = async (appointment_id) => {
     try {
       setLoading(true);
@@ -5463,10 +5275,10 @@ const ReceptionBookedAppointment = () => {
       );
 
       if (response.status === 200 || response.status === 201) {
-        const successMessage =
+        const successMessagePrescription =
           response.data.success ||
           "Prescription document uploaded successfully";
-        setSuccessMessage(successMessage);
+        setSuccessMessagePrescription(successMessage);
         setPrescriptionDocuments((prevDocuments) => [
           ...prevDocuments,
           response.data,
@@ -5478,12 +5290,12 @@ const ReceptionBookedAppointment = () => {
         await fetchMedicalRecords(appointment_id);
         await fetchAppointments(receptionId);
       } else {
-        const errorMessage =
+        const errorMessagePrescription =
           response.data.error || "Failed to upload prescription document";
-        setErrorMessage(errorMessage);
+        setErrorMessagePrescription(errorMessage);
       }
     } catch (error) {
-      setErrorMessage(
+      setErrorMessagePrescription(
         error.response?.data?.error || "Error uploading prescription document"
       );
     } finally {
@@ -5561,11 +5373,7 @@ const ReceptionBookedAppointment = () => {
     return acc;
   }, {});
 
-  const [switchState, setSwitchState] = useState(false);
-
   const handleEndVisit = async (appointment_id) => {
-    setSwitchState(true); // Set the switch state manually since there is no event in this context.
-
     try {
       console.log(appointment_id);
       const response = await BaseUrl.patch(
@@ -5587,6 +5395,66 @@ const ReceptionBookedAppointment = () => {
     }
     setShowConfirmModal(false);
   };
+
+  useEffect(() => {
+    if (successMessageDetail || errorMessageDetail) {
+      const timer = setTimeout(() => {
+        setSuccessMessageDetail("");
+        setErrorMessageDetail("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessageDetail, errorMessageDetail]);
+
+  useEffect(() => {
+    if (successMessageSymptom || errorMessageSymptom) {
+      const timer = setTimeout(() => {
+        setSuccessMessageSymptom("");
+        setErrorMessageSymptom("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessageSymptom, errorMessageSymptom]);
+
+  useEffect(() => {
+    if (successMessageVital || errorMessageVital) {
+      const timer = setTimeout(() => {
+        setSuccessMessageVital("");
+        setErrorMessageVital("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessageVital, errorMessageVital]);
+
+  useEffect(() => {
+    if (successMessagePrescription || errorMessagePrescription) {
+      const timer = setTimeout(() => {
+        setSuccessMessagePrescription("");
+        setErrorMessagePrescription("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessagePrescription, errorMessagePrescription]);
+
+  useEffect(() => {
+    if (successMessageDocument || errorMessageDocument) {
+      const timer = setTimeout(() => {
+        setSuccessMessageDocument("");
+        setErrorMessageDocument("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessageDocument, errorMessageDocument]);
+
+  useEffect(() => {
+    if (successMessage || errorMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage("");
+        setErrorMessage("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage, errorMessage]);
 
   return (
     <Container
@@ -5706,8 +5574,8 @@ const ReceptionBookedAppointment = () => {
               fontWeight: "700",
               marginLeft: "8px",
               display: "flex",
-              alignItems: "center",
               justifyContent: "center",
+              alignItems: "center",
               flexWrap: "wrap",
               marginTop: "0.5rem",
               marginBottom: "3rem",
@@ -5715,26 +5583,51 @@ const ReceptionBookedAppointment = () => {
           >
             <span
               style={{
-                display: "inline-block",
-                width: "18px",
-                height: "18px",
-                backgroundColor: "#F5ECD5",
-                borderRadius: "50%",
-                border: "2px solid black",
-                marginRight: "8px",
+                display: "inline-flex",
+                alignItems: "center",
+                marginRight: "1rem",
               }}
-            ></span>
-            (Booked by patient)
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "18px",
+                  height: "18px",
+                  backgroundColor: "#F5ECD5",
+                  borderRadius: "50%",
+                  border: "2px solid black",
+                  marginRight: "0.2rem",
+                }}
+              ></span>
+              <span>(Booked by patient)</span>
+            </span>
+
             <span
               style={{
-                color: "#000",
-                fontSize: "14px",
-                fontWeight: "700",
-                marginLeft: "8px",
-                display: "flex",
+                display: "inline-flex",
                 alignItems: "center",
-                justifyContent: "center",
-                flexWrap: "wrap",
+                marginRight: "1rem",
+              }}
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "18px",
+                  height: "18px",
+                  backgroundColor: "#D7EAF0",
+                  borderRadius: "50%",
+                  border: "2px solid black",
+                  marginRight: "0.2rem",
+                }}
+              ></span>
+              <span>(Booked by Clinic)</span>
+            </span>
+
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                marginRight: "1rem",
               }}
             >
               <span
@@ -5745,35 +5638,31 @@ const ReceptionBookedAppointment = () => {
                   backgroundColor: "#D1F7D7",
                   borderRadius: "50%",
                   border: "2px solid black",
-                  marginRight: "8px",
+                  marginRight: "0.2rem",
                 }}
               ></span>
-              (Ended)
+              <span>(Completed)</span>
+            </span>
+
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                marginRight: "1rem",
+              }}
+            >
               <span
                 style={{
-                  color: "#000",
-                  fontSize: "14px",
-                  fontWeight: "700",
-                  marginLeft: "8px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexWrap: "wrap",
+                  display: "inline-block",
+                  width: "18px",
+                  height: "18px",
+                  backgroundColor: "#F8D7DA",
+                  borderRadius: "50%",
+                  border: "2px solid black",
+                  marginRight: "0.2rem",
                 }}
-              >
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: "18px",
-                    height: "18px",
-                    backgroundColor: "#F8D7DA",
-                    borderRadius: "50%",
-                    border: "2px solid black",
-                    marginRight: "8px",
-                  }}
-                ></span>
-                (Canceled)
-              </span>
+              ></span>
+              <span>(Canceled)</span>
             </span>
           </span>
 
@@ -5959,6 +5848,7 @@ const ReceptionBookedAppointment = () => {
                                           color: "#ffffff",
                                           border: "none",
                                           borderRadius: "5px",
+                                          // padding: "10px 20px",
                                           cursor: "pointer",
                                         }}
                                         onClick={() =>
@@ -5970,6 +5860,19 @@ const ReceptionBookedAppointment = () => {
                                           : "Show Details"}
                                       </Button>
                                     </div>
+                                    <Button
+                                      style={{
+                                        backgroundColor: "#8E1616",
+                                        color: "#ffffff",
+                                        border: "none",
+                                        borderRadius: "5px",
+                                        cursor: "pointer",
+                                        padding: "12px",
+                                      }}
+                                      onClick={handlePrint}
+                                    >
+                                      <BsPrinterFill /> Print Report
+                                    </Button>
                                   </div>
                                   {showPatientDetails && (
                                     <Form>
@@ -6167,6 +6070,7 @@ const ReceptionBookedAppointment = () => {
                                         >
                                           Cancel Appointment
                                         </Button>
+
                                         <Button
                                           style={{
                                             backgroundColor: "#295F98",
@@ -6179,8 +6083,45 @@ const ReceptionBookedAppointment = () => {
                                         >
                                           Update
                                         </Button>
+
+                                        <div
+                                          style={{
+                                            marginLeft: "1rem",
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            position: "absolute",
+                                            top: "0",
+                                            left: "50",
+                                          }}
+                                        >
+                                          {successMessageDetail && (
+                                            <div
+                                              style={{
+                                                color: "green",
+                                                fontWeight: "bold",
+                                                padding: "0.5rem",
+                                                backgroundColor: "#DFF2BF",
+                                                borderRadius: "5px",
+                                              }}
+                                            >
+                                              {successMessageDetail}
+                                            </div>
+                                          )}
+                                          {errorMessageDetail && (
+                                            <div
+                                              style={{
+                                                color: "red",
+                                                fontWeight: "bold",
+                                                padding: "0.5rem",
+                                                backgroundColor: "#FFBABA",
+                                                borderRadius: "5px",
+                                              }}
+                                            >
+                                              {errorMessageDetail}
+                                            </div>
+                                          )}
+                                        </div>
                                       </div>
-                                      <div className="d-flex justify-content-end mt-4"></div>
                                     </Form>
                                   )}
                                 </Card.Body>
@@ -6245,6 +6186,43 @@ const ReceptionBookedAppointment = () => {
                                       >
                                         Update Symptoms
                                       </Button>
+                                      <div
+                                        style={{
+                                          marginLeft: "1rem",
+                                          display: "flex",
+                                          flexDirection: "column",
+                                          position: "absolute",
+                                          top: "0",
+                                          left: "50%",
+                                        }}
+                                      >
+                                        {successMessageSymptom && (
+                                          <div
+                                            style={{
+                                              color: "green",
+                                              fontWeight: "bold",
+                                              padding: "0.5rem",
+                                              backgroundColor: "#DFF2BF",
+                                              borderRadius: "5px",
+                                            }}
+                                          >
+                                            {successMessageSymptom}
+                                          </div>
+                                        )}
+                                        {errorMessageSymptom && (
+                                          <div
+                                            style={{
+                                              color: "red",
+                                              fontWeight: "bold",
+                                              padding: "0.5rem",
+                                              backgroundColor: "#FFBABA",
+                                              borderRadius: "5px",
+                                            }}
+                                          >
+                                            {errorMessageSymptom}
+                                          </div>
+                                        )}
+                                      </div>
                                     </div>
 
                                     <Form>
@@ -6427,8 +6405,6 @@ const ReceptionBookedAppointment = () => {
                                           style={{
                                             background: "#295F98",
                                             border: "none",
-                                            width: "74.05px",
-                                            height: "36px",
                                           }}
                                         >
                                           Save
@@ -6705,8 +6681,45 @@ const ReceptionBookedAppointment = () => {
                                           border: "none",
                                         }}
                                       >
-                                        Submit
+                                        Save
                                       </Button>
+                                      <div
+                                        style={{
+                                          marginLeft: "1rem",
+                                          display: "flex",
+                                          flexDirection: "column",
+                                          position: "absolute",
+                                          top: "0",
+                                          left: "50",
+                                        }}
+                                      >
+                                        {successMessageVital && (
+                                          <div
+                                            style={{
+                                              color: "green",
+                                              fontWeight: "bold",
+                                              padding: "0.5rem",
+                                              backgroundColor: "#DFF2BF",
+                                              borderRadius: "5px",
+                                            }}
+                                          >
+                                            {successMessageVital}
+                                          </div>
+                                        )}
+                                        {errorMessageVital && (
+                                          <div
+                                            style={{
+                                              color: "red",
+                                              fontWeight: "bold",
+                                              padding: "0.5rem",
+                                              backgroundColor: "#FFBABA",
+                                              borderRadius: "5px",
+                                            }}
+                                          >
+                                            {errorMessageVital}
+                                          </div>
+                                        )}
+                                      </div>
                                     </div>
                                   </Card.Body>
                                 </Card>
@@ -6991,6 +7004,45 @@ const ReceptionBookedAppointment = () => {
                                               >
                                                 Delete
                                               </Button>
+                                              <div
+                                                style={{
+                                                  marginLeft: "1rem",
+                                                  display: "flex",
+                                                  flexDirection: "column",
+                                                  position: "absolute",
+                                                  top: "0",
+                                                  left: "50",
+                                                }}
+                                              >
+                                                {successMessagePrescription && (
+                                                  <div
+                                                    style={{
+                                                      color: "green",
+                                                      fontWeight: "bold",
+                                                      padding: "0.5rem",
+                                                      backgroundColor:
+                                                        "#DFF2BF",
+                                                      borderRadius: "5px",
+                                                    }}
+                                                  >
+                                                    {successMessagePrescription}
+                                                  </div>
+                                                )}
+                                                {errorMessagePrescription && (
+                                                  <div
+                                                    style={{
+                                                      color: "red",
+                                                      fontWeight: "bold",
+                                                      padding: "0.5rem",
+                                                      backgroundColor:
+                                                        "#FFBABA",
+                                                      borderRadius: "5px",
+                                                    }}
+                                                  >
+                                                    {errorMessagePrescription}
+                                                  </div>
+                                                )}
+                                              </div>
                                             </Col>
                                           </Row>
                                         )
@@ -7194,7 +7246,43 @@ const ReceptionBookedAppointment = () => {
                                     >
                                       Upload Document
                                     </Button>
-
+                                    <div
+                                      style={{
+                                        marginLeft: "1rem",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        position: "absolute",
+                                        top: "0",
+                                        left: "50",
+                                      }}
+                                    >
+                                      {successMessageDocument && (
+                                        <div
+                                          style={{
+                                            color: "green",
+                                            fontWeight: "bold",
+                                            padding: "0.5rem",
+                                            backgroundColor: "#DFF2BF",
+                                            borderRadius: "5px",
+                                          }}
+                                        >
+                                          {successMessageDocument}
+                                        </div>
+                                      )}
+                                      {errorMessageDocument && (
+                                        <div
+                                          style={{
+                                            color: "red",
+                                            fontWeight: "bold",
+                                            padding: "0.5rem",
+                                            backgroundColor: "#FFBABA",
+                                            borderRadius: "5px",
+                                          }}
+                                        >
+                                          {errorMessageDocument}
+                                        </div>
+                                      )}
+                                    </div>
                                     <Row className="mb-5">
                                       <Col xs={12} md={12}>
                                         <Table striped bordered hover>
@@ -7493,28 +7581,6 @@ const ReceptionBookedAppointment = () => {
                                           onClick={handleSave}
                                         >
                                           {editingRecordId ? "Update" : "Save"}
-                                        </Button>
-                                      </Modal.Footer>
-                                    </Modal>
-
-                                    <Modal
-                                      show={!!errorMessage || !!successMessage}
-                                      onHide={handleCloseMessageModal}
-                                    >
-                                      <Modal.Header closeButton>
-                                        <Modal.Title>
-                                          {errorMessage ? "Error" : "Success"}
-                                        </Modal.Title>
-                                      </Modal.Header>
-                                      <Modal.Body>
-                                        <p>{errorMessage || successMessage}</p>
-                                      </Modal.Body>
-                                      <Modal.Footer>
-                                        <Button
-                                          variant="primary"
-                                          onClick={handleCloseMessageModal}
-                                        >
-                                          Close
                                         </Button>
                                       </Modal.Footer>
                                     </Modal>
