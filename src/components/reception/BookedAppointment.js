@@ -4269,11 +4269,11 @@ const ReceptionBookedAppointment = () => {
           },
         }
       );
-      setSuccessMessage(response.data.success);
+      setSuccessMessageDocument(response.data.success);
       await fetchMedicalRecords(expandedAppointmentId);
       await fetchAppointments(receptionId);
     } catch (error) {
-      setErrorMessage(
+      setErrorMessageDocument(
         error.response?.data?.error || "Failed to delete the record."
       );
     } finally {
@@ -4383,6 +4383,7 @@ const ReceptionBookedAppointment = () => {
         is_patient: appointment.is_patient,
         is_complete: appointment.is_complete,
         is_canceled: appointment.is_canceled,
+        uhid: appointment.uhid || "---",
         status: appointment.is_canceled
           ? "Canceled"
           : appointment.is_complete
@@ -5711,7 +5712,7 @@ const ReceptionBookedAppointment = () => {
                           <div className="row text-center">
                             <div className="col-12">
                               <span>Case ID:</span>{" "}
-                              {appointment.case_id || "N/A"}
+                              {appointment.uhid}
                             </div>
                           </div>
 

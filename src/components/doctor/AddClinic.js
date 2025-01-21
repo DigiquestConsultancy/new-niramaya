@@ -315,7 +315,7 @@ const AddClinic = () => {
               Mobile Number:
             </label>
             <div className="col-sm-8">
-              <PhoneInput
+              {/* <PhoneInput
                 id="mobile_number"
                 name="mobile_number"
                 placeholder="Enter mobile number"
@@ -323,6 +323,15 @@ const AddClinic = () => {
                 value={mobileNumber} 
                 onChange={setMobileNumber}
                 required
+              /> */}
+
+              <input
+                // type="number"
+                placeholder="Please Enter Mobile Number"
+                className="form-control"
+                id="mobileNumber"
+                value={mobileNumber}
+                onChange={(e) => setMobileNumber(e.target.value)}
               />
             </div>
             <div className="col-sm-1">

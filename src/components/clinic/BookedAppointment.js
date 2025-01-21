@@ -4189,11 +4189,11 @@ const ClinicBookedAppointment = () => {
           },
         }
       );
-      setSuccessMessage(response.data.success);
+      setSuccessMessageDocument(response.data.success);
       await fetchMedicalRecords(expandedAppointmentId);
       await fetchAppointments(clinicId);
     } catch (error) {
-      setErrorMessage(error.response?.data?.error);
+      setErrorMessageDocument(error.response?.data?.error);
     } finally {
       setLoading(false);
     }
@@ -4304,6 +4304,7 @@ const ClinicBookedAppointment = () => {
         is_patient: appointment.is_patient,
         is_complete: appointment.is_complete,
         is_canceled: appointment.is_canceled,
+        uhid: appointment.uhid || "---",
         status: appointment.is_canceled
           ? "Canceled"
           : appointment.is_complete
@@ -5636,7 +5637,7 @@ const ClinicBookedAppointment = () => {
                           <div className="row text-center">
                             <div className="col-12">
                               <span>Case ID:</span>{" "}
-                              {appointment.case_id || "N/A"}
+                              {appointment.uhid}
                             </div>
                           </div>
 

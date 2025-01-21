@@ -7801,11 +7801,11 @@ const DoctorBookedAppointment = () => {
           },
         }
       );
-      setSuccessMessage(response.data.success);
+      setSuccessMessageDocument(response.data.success);
       await fetchMedicalRecords(expandedAppointmentId);
       await fetchAppointments(doctorId);
     } catch (error) {
-      setErrorMessage(error.response?.data?.error);
+      setErrorMessageDocument(error.response?.data?.error);
     } finally {
       setLoading(false);
     }
@@ -7913,6 +7913,7 @@ const DoctorBookedAppointment = () => {
         is_patient: appointment.is_patient,
         is_complete: appointment.is_complete,
         is_canceled: appointment.is_canceled,
+        uhid: appointment.uhid || "---",
         status: appointment.is_canceled
           ? "Canceled"
           : appointment.is_complete
@@ -7922,7 +7923,7 @@ const DoctorBookedAppointment = () => {
 
       for (let index in response.data) {
         const appointment = response.data[index];
-        setSelectedAppointment(appointment.appointment_id);
+        setSelectedAppointment(appointment.appointment_id); 
       }
 
       setAppointments(fetchedAppointments);
@@ -9312,7 +9313,7 @@ const DoctorBookedAppointment = () => {
                           <div className="row text-center">
                             <div className="col-12">
                               <span>Case ID:</span>{" "}
-                              {appointment.case_id || "N/A"}
+                              {appointment.uhid}
                             </div>
                           </div>
 
@@ -10360,7 +10361,47 @@ const DoctorBookedAppointment = () => {
                                       >
                                         Prescription
                                       </h2>
+                                      
                                       <div className="upload-prescription-wrapper">
+                                      <div
+                                                style={{
+                                                  marginLeft: "1rem",
+                                                  display: "flex",
+                                                  flexDirection: "column",
+                                                  position: "absolute",
+                                                  top: "0",
+                                                  left: "30",
+                                                }}
+                                              >
+                                                {successMessagePrescription && (
+                                                  <div
+                                                    style={{
+                                                      color: "green",
+                                                      fontWeight: "bold",
+                                                      padding: "0.5rem",
+                                                      backgroundColor:
+                                                        "#DFF2BF",
+                                                      borderRadius: "5px",
+                                                    }}
+                                                  >
+                                                    {successMessagePrescription}
+                                                  </div>
+                                                )}
+                                                {errorMessagePrescription && (
+                                                  <div
+                                                    style={{
+                                                      color: "red",
+                                                      fontWeight: "bold",
+                                                      padding: "0.5rem",
+                                                      backgroundColor:
+                                                        "#FFBABA",
+                                                      borderRadius: "5px",
+                                                    }}
+                                                  >
+                                                    {errorMessagePrescription}
+                                                  </div>
+                                                )}
+                                              </div>
                                         <Button
                                           style={{
                                             position: "absolute",
@@ -10603,45 +10644,6 @@ const DoctorBookedAppointment = () => {
                                               >
                                                 Delete
                                               </Button>
-                                              <div
-                                                style={{
-                                                  marginLeft: "1rem",
-                                                  display: "flex",
-                                                  flexDirection: "column",
-                                                  position: "absolute",
-                                                  top: "0",
-                                                  left: "50",
-                                                }}
-                                              >
-                                                {successMessagePrescription && (
-                                                  <div
-                                                    style={{
-                                                      color: "green",
-                                                      fontWeight: "bold",
-                                                      padding: "0.5rem",
-                                                      backgroundColor:
-                                                        "#DFF2BF",
-                                                      borderRadius: "5px",
-                                                    }}
-                                                  >
-                                                    {successMessagePrescription}
-                                                  </div>
-                                                )}
-                                                {errorMessagePrescription && (
-                                                  <div
-                                                    style={{
-                                                      color: "red",
-                                                      fontWeight: "bold",
-                                                      padding: "0.5rem",
-                                                      backgroundColor:
-                                                        "#FFBABA",
-                                                      borderRadius: "5px",
-                                                    }}
-                                                  >
-                                                    {errorMessagePrescription}
-                                                  </div>
-                                                )}
-                                              </div>
                                             </Col>
                                           </Row>
                                         )
@@ -10852,7 +10854,7 @@ const DoctorBookedAppointment = () => {
                                         flexDirection: "column",
                                         position: "absolute",
                                         top: "0",
-                                        left: "50",
+                                        right: "50",
                                       }}
                                     >
                                       {successMessageDocument && (
@@ -11267,7 +11269,7 @@ const DoctorBookedAppointment = () => {
                                         flexDirection: "column",
                                         position: "absolute",
                                         top: "0",
-                                        left: "50",
+                                        left: "0",
                                       }}
                                     >
                                       {successMessage && (
