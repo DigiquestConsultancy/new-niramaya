@@ -23,13 +23,13 @@ const RestrictedPage = () => {
         <h2 className="heading">Please log in first</h2>
         <p className="message">You need to be logged in to access this page.</p>
         <div className="login-links">
-          <p>Choose your login type:</p>
-          <Link className="login-button doctor-login" to="/doctor/login">
+          {/* <p>Choose your login type:</p> */}
+          <Link className="login-button doctor-login" to="/admin">
             Doctor Login
           </Link>
-          <Link className="login-button patient-login" to="/patient/login">
+          {/* <Link className="login-button patient-login" to="/patient/login">
             Patient Login
-          </Link>
+          </Link> */}
         </div>
       </div>
     </div>

@@ -14,7 +14,6 @@
 
 .button-panel {
   width: 35%;
-  /* padding: 20px; */
   border-right: 1px solid #ddd;
   display: flex;
   flex-direction: column;
@@ -49,7 +48,7 @@
 
 .custom-page {
   width: 30%;
-  height: 80%;
+  height: 75%;
   background-color: #fff;
   display: flex;
   flex-direction: column;
@@ -63,7 +62,7 @@
 .header-section,
 .footer-section {
   flex-shrink: 0;
-  height: 20%;
+  height: 15%;
   width: 100%;
   display: flex;
   align-items: center;

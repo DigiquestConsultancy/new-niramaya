@@ -367,7 +367,7 @@ const PatientLogin = ({ setIsPatientLoggedIn }) => {
                   <div className="doctor-login-link">
                     <p style={{fontSize: '15px'}} className="text-link">
                       Are you a Doctor?{" "}
-                      <Link to="/doctor/login">Login here</Link>
+                      <Link to="/admin">Login here</Link>
                     </p>
                   </div>
                   <h2 className="text-dark mb-4">Patient Login</h2>

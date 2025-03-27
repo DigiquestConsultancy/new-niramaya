@@ -4,6 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import Select from "react-select";
 import styled from "styled-components";
 import Loader from "react-js-loader";
+import Sidebar from "./Sidebar";
  
 const LoaderWrapper = styled.div`
   display: flex;
@@ -37,6 +38,13 @@ const AddSlot = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
  
+  const [selectedMenu, setSelectedMenu] = useState("Dashboard");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const handleMenuClick = (menu) => {
+    setSelectedMenu(menu);
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -133,7 +141,14 @@ const AddSlot = () => {
   });
  
   return (
-    <div className="container mt-5">
+    <div className="d-flex">
+       <Sidebar
+              selectedMenu={selectedMenu}
+              handleMenuClick={handleMenuClick}
+              isSidebarCollapsed={isSidebarCollapsed}
+              setIsSidebarCollapsed={setIsSidebarCollapsed}
+            />
+            <main className="p-4">
       {loading && (
         <LoaderWrapper>
           <LoaderImage>
@@ -174,7 +189,7 @@ const AddSlot = () => {
           color: "#000000",
         }}
       >
-        <h2>Add Slot</h2>
+        <h2 className="text-center mb-5">Create Slot</h2>
         <div className="row mb-3">
           <div className="col-md-4">
             <label>Start Date</label>
@@ -266,6 +281,7 @@ const AddSlot = () => {
           Add Slot
         </button>
       </form>
+      </main>
     </div>
   );
 };

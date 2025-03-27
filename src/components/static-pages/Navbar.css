@@ -1,0 +1,52 @@
+.custom-navbar {
+  background-color: white;
+  padding: 10px 0;
+}
+
+.navbar-logo {
+  height: 50px;
+}
+
+.nav-item {
+  font-size: 16px;
+  color: black !important; /* Force black text */
+  margin: 0 10px;
+}
+
+.nav-item:hover,
+.nav-item.active {
+  color: blue !important; /* Change to blue on hover */
+}
+
+.appointment-button {
+  border: 1px solid red;
+  color: red;
+}
+
+.appointment-button:hover {
+  background-color: red;
+  color: white;
+}
+
+/* Full-width navbar collapse on mobile */
+@media (max-width: 991px) {
+  .nav-collapse {
+    width: 100%;
+    text-align: center; /* Center links */
+    background-color: white; /* Ensure proper visibility */
+    padding: 10px 0;
+  }
+
+  .nav-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center links */
+    width: 100%;
+  }
+
+  .nav-item {
+    width: 100%;
+    text-align: center;
+    padding: 10px 0;
+  }
+}

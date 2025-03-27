@@ -1859,7 +1859,8 @@ const BookAppointment = () => {
       const cashfree = await load({ mode: "production" });
       await cashfree.checkout({
         paymentSessionId,
-        returnUrl: "http://localhost:3000/patientbookappointment",
+        // returnUrl: "http://localhost:3000/patientbookappointment",
+        returnUrl: "https://niramayahomoeopathy.com/patientbookappointment",
       });
 
       await pollPaymentStatus();

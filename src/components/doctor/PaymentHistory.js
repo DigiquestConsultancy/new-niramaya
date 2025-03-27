@@ -555,6 +555,7 @@ import * as XLSX from "xlsx";
 import styled from "styled-components";
 import Loader from "react-js-loader";
 import _ from "lodash";
+import Sidebar from "./Sidebar";
 
 const LoaderWrapper = styled.div`
   display: flex;
@@ -588,6 +589,13 @@ const PaymentHistory = () => {
   const rowsPerPage = 15;
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [selectedMenu, setSelectedMenu] = useState("Dashboard");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const handleMenuClick = (menu) => {
+    setSelectedMenu(menu);
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -790,9 +798,16 @@ const PaymentHistory = () => {
 
   return (
     <div
-      className="payment-history-container"
-      style={{ backgroundColor: "#D7EAF0", padding: "20px" }}
+      className="payment-history-container d-flex"
+      style={{height: "calc(100vh - 80px)"}}
     >
+       <Sidebar
+              selectedMenu={selectedMenu}
+              handleMenuClick={handleMenuClick}
+              isSidebarCollapsed={isSidebarCollapsed}
+              setIsSidebarCollapsed={setIsSidebarCollapsed}
+            />
+            <main className="p-4 overflow-y-auto">
       {loading && (
         <LoaderWrapper>
           <LoaderImage>
@@ -1060,6 +1075,7 @@ const PaymentHistory = () => {
           />
         </Pagination>
       </div>
+      </main>
     </div>
   );
 };

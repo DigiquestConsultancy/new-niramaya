@@ -5,7 +5,6 @@ import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 import Container from 'react-bootstrap/Container';
 import Company from '../../images/logo.jpg';
-import '../../css/Navbar.css';
  
 const CustomNavbar = () => {
     const location = useLocation();
@@ -13,7 +12,7 @@ const CustomNavbar = () => {
     const handleLoginSignUpRedirect = () => {
         if (location.pathname === '/patient/login') {
             return '/patient/register';
-        } else if (location.pathname === '/doctor/login') {
+        } else if (location.pathname === '/admin') {
             return '/doctor/register';
         }
         return '/patient/login';

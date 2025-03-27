@@ -803,6 +803,7 @@ import styled from "styled-components";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
+import Sidebar from "./Sidebar";
 
 const LoaderWrapper = styled.div`
   display: flex;
@@ -831,7 +832,7 @@ const BookAppointment = () => {
   const [slots, setSlots] = useState([]);
   const [showSlots, setShowSlots] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const [hoverMessage, setHoverMessage] = useState(""); // Define hoverMessage state
+  const [hoverMessage, setHoverMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [patientId, setPatientId] = useState(null);
@@ -842,7 +843,7 @@ const BookAppointment = () => {
   const [searchInput, setSearchInput] = useState("");
   const [datesToFetch, setDatesToFetch] = useState([]);
   const [doctorId, setDoctorId] = useState("");
-  const [loading, setLoading] = useState(false); // Loader state
+  const [loading, setLoading] = useState(false); 
   const [patientDetails, setPatientDetails] = useState({
     name: "",
     mobile_number: "",
@@ -851,6 +852,7 @@ const BookAppointment = () => {
     blood_group: "",
     gender: "",
     address: "",
+    case_number: "",
   });
   const [formErrors, setFormErrors] = useState({
     name: "",
@@ -860,6 +862,13 @@ const BookAppointment = () => {
     gender: "",
     date_of_birth: "",
   });
+
+  const [selectedMenu, setSelectedMenu] = useState("Dashboard");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const handleMenuClick = (menu) => {
+    setSelectedMenu(menu);
+  };
 
   const [currentPage, setCurrentPage] = useState(1);
   const slotsPerPage = 30;
@@ -967,7 +976,7 @@ const BookAppointment = () => {
     try {
       const response = await BaseUrl.post("/patient/patient/", {
         ...patientDetails,
-        mobile_number: patientDetails.mobile_number, // Includes country code
+        mobile_number: patientDetails.mobile_number, 
       });
 
       if (response.data.success) {
@@ -1188,6 +1197,7 @@ const BookAppointment = () => {
           date_of_birth: patientData.date_of_birth,
           age: String(patientData.age),
           blood_group: patientData.blood_group,
+          case_number: patientData.case_number,
           gender: patientData.gender,
           address: patientData.address,
         });
@@ -1275,7 +1285,14 @@ const BookAppointment = () => {
   };
 
   return (
-    <div className="container-fluid">
+    <div className="d-flex" style={{height: "calc(100vh - 80px)"}}>
+       <Sidebar
+              selectedMenu={selectedMenu}
+              handleMenuClick={handleMenuClick}
+              isSidebarCollapsed={isSidebarCollapsed}
+              setIsSidebarCollapsed={setIsSidebarCollapsed}
+            />
+            <main className="overflow-y-auto">
       {/* Loader Component */}
       {loading && (
         <LoaderWrapper>
@@ -1413,7 +1430,7 @@ const BookAppointment = () => {
             </div>
           </div>
 
-          <div className="row g-4 mt-3">
+          {/* <div className="row g-4 mt-3">
             <div className="col-md-3">
               <label htmlFor="blood_group" className="form-label fw-bold">
                 Blood Group
@@ -1425,6 +1442,22 @@ const BookAppointment = () => {
                 name="blood_group"
                 value={patientDetails.blood_group}
                 placeholder="Enter blood group"
+                onChange={handleInputChange}
+              />
+            </div> */}
+        
+          <div className="row g-4 mt-3">
+            <div className="col-md-3">
+              <label htmlFor="case_number" className="form-label fw-bold">
+                Case no.
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="case_number"
+                name="case_number"
+                value={patientDetails.case_number}
+                placeholder="Enter case no."
                 onChange={handleInputChange}
               />
             </div>
@@ -1498,6 +1531,7 @@ const BookAppointment = () => {
                   selectedSlot === "today" ? "primary" : "outline-primary"
                 }
                 onClick={handleToday}
+                disabled={!patientId}
               >
                 Today ({format(new Date(), "dd MMM")})
               </Button>
@@ -1518,6 +1552,7 @@ const BookAppointment = () => {
                   selectedSlot === "tomorrow" ? "primary" : "outline-primary"
                 }
                 onClick={handleTomorrow}
+                disabled={!patientId}
               >
                 Tomorrow ({format(addDays(new Date(), 1), "dd MMM")})
               </Button>
@@ -1540,6 +1575,7 @@ const BookAppointment = () => {
                     : "outline-primary"
                 }
                 onClick={handleDayAfterTomorrow}
+                disabled={!patientId}
               >
                 {format(addDays(new Date(), 2), "EEEE")} (
                 {format(addDays(new Date(), 2), "dd MMM")})
@@ -1592,16 +1628,16 @@ const BookAppointment = () => {
                           borderColor: "#3D9F41",
                           cursor: isDisabled ? "not-allowed" : "pointer",
                           opacity: isDisabled ? 0.7 : 1,
-                          margin: "5px", // Add margin between buttons
-                          textAlign: "center", // Center text alignment
-                          position: "relative", // Required for hover message
-                          display: "flex", // Ensures alignment works
-                          alignItems: "center", // Centers vertically
-                          justifyContent: "center", // Centers horizontally
+                          margin: "5px", 
+                          textAlign: "center", 
+                          position: "relative", 
+                          display: "flex", 
+                          alignItems: "center", 
+                          justifyContent: "center", 
                         };
 
                         const timeStyle = {
-                          marginTop: "2px", // Moves the time slightly downward
+                          marginTop: "2px", 
                         };
 
                         return (
@@ -1671,6 +1707,7 @@ const BookAppointment = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+      </main>
     </div>
   );
 };

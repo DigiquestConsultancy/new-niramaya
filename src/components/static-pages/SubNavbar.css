@@ -1,0 +1,61 @@
+/* Styling for the Subnavbar */
+.subnavbar {
+  background-color: #006fa6;
+  padding: 15px 0;
+  text-align: center;
+}
+
+/* Remove margin from icon to keep it close to text */
+.icon {
+  margin-right: 5px;
+  font-size: 18px;
+}
+
+.social-icon {
+  font-size: 18px;
+  color: white;
+  margin: 0 8px;
+}
+
+.social-icon:hover {
+  color: #ccc;
+}
+
+/* Styling for the text */
+.email, .hours {
+  font-size: 16px;
+  display: inline-block;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 767px) {
+  .subnavbar .email-section,
+  .subnavbar .hours-section,
+  .subnavbar .social-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 10px;
+    flex-direction: row;
+  }
+
+  /* Stack elements in center properly */
+  .subnavbar .email-section,
+  .subnavbar .hours-section {
+    flex-direction: row;
+  }
+
+  .subnavbar .social-section {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Make sure entire content is centered */
+  .subnavbar .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}

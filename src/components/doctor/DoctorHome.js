@@ -1,57 +1,52 @@
 // import React, { useEffect, useState, useCallback, useRef } from "react";
 // import BaseUrl from "../../api/BaseUrl";
-// import { Row, Col, Card, Button, ButtonGroup, Form, Modal, FormGroup, Dropdown, DropdownButton } from "react-bootstrap";
+// import {
+//   Row,
+//   Col,
+//   Card,
+//   Button,
+//   ButtonGroup,
+//   Form,
+//   Modal,
+//   FormGroup,
+//   Dropdown,
+//   DropdownButton,
+// } from "react-bootstrap";
 // import { jwtDecode } from "jwt-decode";
 // import "../../css/DoctorHome.css";
 // import { format, subDays, addDays } from "date-fns";
 // import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
-// import { FaTimes } from "react-icons/fa";
-// import { faFileAlt, faReceipt, faTimes as faTimesSolid } from "@fortawesome/free-solid-svg-icons";
+// import { FaTimes, FaTrash } from "react-icons/fa";
+// import {
+//   faFileAlt,
+//   faReceipt,
+//   faTimes as faTimesSolid,
+// } from "@fortawesome/free-solid-svg-icons";
 // import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// import { FaSyncAlt } from "react-icons/fa";
+// import slotcreated from "../../images/slotcreated.png";
+// import booked from "../../images/booked.png";
+// import completed from "../../images/completed.png";
+// import canceled from "../../images/canceled.png";
+// import online from "../../images/online.png";
+// import walkin from "../../images/walkin.png";
+// import followup from "../../images/followup.png";
 
 // const DoctorHome = () => {
 //   const [totalAppointments, setTotalAppointments] = useState();
 //   const [bookedAppointmentCount, setBookedAppointmentCount] = useState();
-//   const [completedAppointmentsCount, setCompletedAppointmentsCount] = useState();
+//   const [availableAppointmentsCount, setAvailableAppointmentCount] = useState();
+//   const [completedAppointmentsCount, setCompletedAppointmentsCount] =
+//     useState();
 //   const [canceledAppointmentsCount, setCanceledAppointmentsCount] = useState();
+//   const [blockedAppointmentsCount, setBlockedAppointmentsCount] = useState();
 //   const [walkInCount, setWalkInCount] = useState();
 //   const [onlineCount, setOnlineCount] = useState();
 //   const [followUpCount, setFollowUpCount] = useState();
 
-//   const [clinicPhoto, setClinicPhoto] = useState(null);
-//   const [clinicName, setClinicName] = useState();
-//   const mobileNumber = useState(null);
 //   const [loading, setLoading] = useState(false);
 //   const isPrescriptionDocs = useState(false);
 //   const editingRecordId = useState(null);
-
-//   const fetchClinicDetails = async () => {
-//     try {
-//       const response = await BaseUrl.get(`/doctor/opddays/`, {
-//         params: {
-//           doctor_id: doctorId,
-//           mobile_number: mobileNumber,
-//         },
-//       });
-//       if (response.status === 200 && response.data.length > 0) {
-//         const data = response.data[0];
-//         setClinicName(data.clinic_name);
-
-//         if (data.doc_file) {
-//           const fullImageUrl = `${BaseUrl.defaults.baseURL}${data.doc_file}`;
-//           setClinicPhoto(fullImageUrl);
-//         } else {
-//           setClinicPhoto("");
-//         }
-//       } else {
-//         setClinicName("");
-//         setClinicPhoto("");
-//       }
-//     } catch (error) {
-//       setClinicName("");
-//       setClinicPhoto("");
-//     }
-//   };
 
 //   const [doctorId, setDoctorId] = useState(null);
 //   const [todayAppointments, setTodayAppointments] = useState([]);
@@ -89,13 +84,23 @@
 //   const [isVisitEnded, setIsVisitEnded] = useState(false);
 //   const [error, setError] = useState(null);
 //   const [editingDocumentId, setEditingDocumentId] = useState(null);
-
+//   const [whatsappReport, setWhatsappReport] = useState([]);
+//   const [selectedImage, setSelectedImage] = useState(null);
 //   const [showConfirmModal, setShowConfirmModal] = useState(false);
 //   const [confirmAction, setConfirmAction] = useState(null);
 
-//   const [selectedTodayAppointment, setSelectedTodayAppointment] = useState(null);
-//   const [selectedCompletedAppointment, setSelectedCompletedAppointment] = useState(null);
-//   const [selectedCanceledAppointment, setSelectedCanceledAppointment] = useState(null);
+//   const [selectedTodayAppointment, setSelectedTodayAppointment] =
+//     useState(null);
+//   const [selectedCompletedAppointment, setSelectedCompletedAppointment] =
+//     useState(null);
+//   const [selectedCanceledAppointment, setSelectedCanceledAppointment] =
+//     useState(null);
+//   const [selectedOnlineAppointment, setSelectedOnlineAppointment] =
+//     useState(null);
+//   const [selectedWalkinAppointment, setSelectedWalkinAppointment] =
+//     useState(null);
+//   const [selectedFollowupAppointment, setSelectedFollowupAppointment] =
+//     useState(null);
 
 //   const handleClose = () => setShowModal(false);
 //   const [modalContent, setModalContent] = useState("");
@@ -144,11 +149,13 @@
 //         setBookedAppointmentCount(data["Booked Appointments"]);
 //         setCanceledAppointmentsCount(data["Canceled Appointments"]);
 //         setCompletedAppointmentsCount(data["Completed Appointments"]);
+//         setBlockedAppointmentsCount(data["blocked_appointments"]);
+//         setAvailableAppointmentCount(data["available_appointments"]);
 //         setWalkInCount(data["Walk-In"]);
 //         setOnlineCount(data["Online"]);
 //         setFollowUpCount(data["Follow-Up"]);
 //       }
-//     } catch (error) { }
+//     } catch (error) {}
 //   };
 
 //   const fetchSlots = useCallback(
@@ -197,13 +204,36 @@
 //         params: { doctor_id: doctorId },
 //       });
 //       const appointments = response.data;
-//       const todayAppointments = appointments.filter((app) => !app.is_complete && !app.is_canceled);
-//       const completedAppointments = appointments.filter((app) => app.is_complete);
-//       const canceledAppointments = appointments.filter((app) => app.is_canceled);
+
+//       const todayAppointments = appointments.filter(
+//         (app) => !app.is_complete && !app.is_canceled
+//       );
+//       const completedAppointments = appointments.filter(
+//         (app) => app.is_complete
+//       );
+//       const canceledAppointments = appointments.filter(
+//         (app) => app.is_canceled
+//       );
+
+//       const onlineAppointments = appointments.filter(
+//         (app) => app.appointment_type === "online"
+//       );
+//       const walkinAppointments = appointments.filter(
+//         (app) => app.appointment_type === "walk-in"
+//       );
+//       const followupAppointments = appointments.filter(
+//         (app) => app.appointment_type === "follow-up"
+//       );
+
 //       setTodayAppointments(todayAppointments);
 //       setCompletedAppointments(completedAppointments);
 //       setCanceledAppointments(canceledAppointments);
+
+//       setOnlineAppointments(onlineAppointments);
+//       setWalkinAppointments(walkinAppointments);
+//       setFollowupAppointments(followupAppointments);
 //     } catch (error) {
+//       console.error("Failed to fetch appointments", error);
 //     }
 //   }, [doctorId]);
 
@@ -218,7 +248,7 @@
 //   useEffect(() => {
 //     fetchSlots();
 //     fetchAllAppointments();
-//     fetchClinicDetails();
+//     // fetchClinicDetails();
 //     fetchAppointmentCounts();
 //   }, [doctorId, currentDate]);
 
@@ -252,7 +282,11 @@
 //       }
 //     } catch (error) {
 //       setUploadedPrescription(null);
-//       setError(error.response?.data?.error || error.message || "An unexpected error occurred.");
+//       setError(
+//         error.response?.data?.error ||
+//           error.message ||
+//           "An unexpected error occurred."
+//       );
 //     }
 //   };
 
@@ -285,7 +319,9 @@
 //   const fetchPrescriptionData = async (patientId, appointmentId) => {
 //     setFetchError("");
 //     try {
-//       const response = await BaseUrl.get(`/patient/patientpriscription/?appointment_id=${appointmentId}`);
+//       const response = await BaseUrl.get(
+//         `/patient/patientpriscription/?appointment_id=${appointmentId}`
+//       );
 //       if (response.data.length > 0) {
 //         const prescriptions = response.data.map((prescription) => ({
 //           ...prescription,
@@ -318,7 +354,8 @@
 //       if (!documentId) {
 //         throw new Error("Document ID is required");
 //       }
-//       const response = await BaseUrl.get(`/patient/patientprescriptonfileView/`,
+//       const response = await BaseUrl.get(
+//         `/patient/patientprescriptonfileView/`,
 //         {
 //           params: { document_id: documentId },
 //           responseType: "blob",
@@ -334,10 +371,18 @@
 //         setShowPreviewModal(true);
 //         setError(null);
 //       } else {
-//         setError(error.response?.data?.error || error.message || "An unexpected error occurred.");
+//         setError(
+//           error.response?.data?.error ||
+//             error.message ||
+//             "An unexpected error occurred."
+//         );
 //       }
 //     } catch (error) {
-//       setError(error.response?.data?.error || error.message || "An unexpected error occurred.");
+//       setError(
+//         error.response?.data?.error ||
+//           error.message ||
+//           "An unexpected error occurred."
+//       );
 //     }
 //   };
 
@@ -623,8 +668,11 @@
 //   const handlePrescriptionSubmit = async () => {
 //     try {
 //       const hasExistingPrescriptions = prescriptionData.length > 0;
-//       const latestPrescription = hasExistingPrescriptions ? prescriptionData[prescriptionData.length - 1] : formPrescription;
-//       const isNewPrescription = !hasExistingPrescriptions || !latestPrescription.id;
+//       const latestPrescription = hasExistingPrescriptions
+//         ? prescriptionData[prescriptionData.length - 1]
+//         : formPrescription;
+//       const isNewPrescription =
+//         !hasExistingPrescriptions || !latestPrescription.id;
 //       const prescriptions = [
 //         {
 //           medicine_name: latestPrescription.medicine_name || "",
@@ -632,16 +680,16 @@
 //           comment: latestPrescription.comment || "",
 //           description: latestPrescription.description || "",
 //           appointment_id: selectedAppointmentId,
-//         }
+//         },
 //       ];
 //       const endpoint = "/patient/patientpriscription/";
 //       const response = isNewPrescription
 //         ? await BaseUrl.post(endpoint, prescriptions, {
-//           headers: { "Content-Type": "application/json" },
-//         })
+//             headers: { "Content-Type": "application/json" },
+//           })
 //         : await BaseUrl.put(endpoint, prescriptions, {
-//           headers: { "Content-Type": "application/json" },
-//         });
+//             headers: { "Content-Type": "application/json" },
+//           });
 
 //       if (response.status === 201 && response.data.success) {
 //         const successMessage =
@@ -677,7 +725,9 @@
 //       updateData.append("comment", prescriptionDataItem.comment);
 //       updateData.append("description", prescriptionDataItem.description);
 
-//       const response = await BaseUrl.put(`/patient/patientpriscription/`, updateData,
+//       const response = await BaseUrl.put(
+//         `/patient/patientpriscription/`,
+//         updateData,
 //         {
 //           headers: { "Content-Type": "multipart/form-data" },
 //         }
@@ -708,7 +758,8 @@
 //         params: { prescription_id: prescriptionId },
 //       });
 //       if (response.status === 200) {
-//         const successMessage = response.data.success || "Details have been successfully updated.";
+//         const successMessage =
+//           response.data.success || "Details have been successfully updated.";
 //         setSuccessMessage(successMessage);
 //         handleShow(successMessage);
 //         await fetchPrescriptionData(
@@ -728,8 +779,12 @@
 
 //   const handleFileUpload = async (event) => {
 //     const file = event.target.files[0];
-//     const formattedDate = selectedAppointmentDate ? new Date(selectedAppointmentDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0];
-//     const matchingAppointment = appointmentDetails.find((appointment) => appointment.appointment_date === formattedDate);
+//     const formattedDate = selectedAppointmentDate
+//       ? new Date(selectedAppointmentDate).toISOString().split("T")[0]
+//       : new Date().toISOString().split("T")[0];
+//     const matchingAppointment = appointmentDetails.find(
+//       (appointment) => appointment.appointment_date === formattedDate
+//     );
 //     const appointmentId = matchingAppointment.id;
 //     const formData = new FormData();
 //     formData.append("document_file", file);
@@ -737,7 +792,10 @@
 //     formData.append("document_date", formattedDate);
 
 //     try {
-//       const response = await BaseUrl.post("/patient/patientprescriptonfile/", formData);
+//       const response = await BaseUrl.post(
+//         "/patient/patientprescriptonfile/",
+//         formData
+//       );
 //       if (response.status === 201) {
 //         const successMessage =
 //           response.data.success || "Details have been successfully updated.";
@@ -749,18 +807,24 @@
 //         handleShow("Failed to upload Prescription files.");
 //       }
 //     } catch (error) {
-//       const errorMessage = error.response?.data?.error || "An error occurred during file upload.";
+//       const errorMessage =
+//         error.response?.data?.error || "An error occurred during file upload.";
 //       setErrorMessage(errorMessage);
 //       handleShow(errorMessage);
 //     }
 //   };
 
 //   const handleDeleteDocumentFile = async (documentId) => {
-//     const formattedDate = selectedAppointmentDate ? new Date(selectedAppointmentDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0];
-//     const matchingAppointment = appointmentDetails.find((appointment) => appointment.appointment_date === formattedDate);
+//     const formattedDate = selectedAppointmentDate
+//       ? new Date(selectedAppointmentDate).toISOString().split("T")[0]
+//       : new Date().toISOString().split("T")[0];
+//     const matchingAppointment = appointmentDetails.find(
+//       (appointment) => appointment.appointment_date === formattedDate
+//     );
 //     const appointmentId = matchingAppointment.id;
 //     try {
-//       const response = await BaseUrl.delete(`/patient/patientprescriptonfile/`,
+//       const response = await BaseUrl.delete(
+//         `/patient/patientprescriptonfile/`,
 //         {
 //           data: { document_id: documentId },
 //         }
@@ -777,7 +841,8 @@
 //       }
 //     } catch (error) {
 //       const errorMessage =
-//         error.response?.data?.error || "An error occurred during document deletion.";
+//         error.response?.data?.error ||
+//         "An error occurred during document deletion.";
 //       setErrorMessage(errorMessage);
 //       handleShow(errorMessage);
 //     }
@@ -788,7 +853,9 @@
 //     setSuccessMessage("");
 //     setErrorMessage("");
 //     try {
-//       const response = await BaseUrl.get(`/patient/patient/?patient_id=${patientId}&appointment_id=${appointmentId}`);
+//       const response = await BaseUrl.get(
+//         `/patient/patient/?patient_id=${patientId}&appointment_id=${appointmentId}`
+//       );
 //       if (response.status === 200) {
 //         setPatientDetails(response.data);
 //       } else {
@@ -845,7 +912,7 @@
 //                 value={patientDetails.name}
 //                 onChange={(e) => {
 //                   const inputValue = e.target.value;
-//                   const validInput = inputValue.replace(/[^a-zA-Z\s]/g, '');
+//                   const validInput = inputValue.replace(/[^a-zA-Z\s]/g, "");
 //                   setPatientDetails({ ...patientDetails, name: validInput });
 //                 }}
 //               />
@@ -861,7 +928,7 @@
 //                 value={patientDetails.age}
 //                 onChange={(e) => {
 //                   const inputValue = e.target.value;
-//                   const validInput = inputValue.replace(/[^0-9]/g, '');
+//                   const validInput = inputValue.replace(/[^0-9]/g, "");
 //                   setPatientDetails({ ...patientDetails, age: validInput });
 //                 }}
 //               />
@@ -894,8 +961,11 @@
 //                 value={patientDetails.mobile_number}
 //                 onChange={(e) => {
 //                   const inputValue = e.target.value;
-//                   const validInput = inputValue.replace(/[^0-9]/g, '');
-//                   setPatientDetails({ ...patientDetails, mobile_number: validInput });
+//                   const validInput = inputValue.replace(/[^0-9]/g, "");
+//                   setPatientDetails({
+//                     ...patientDetails,
+//                     mobile_number: validInput,
+//                   });
 //                 }}
 //               />
 //             </Form.Group>
@@ -992,7 +1062,8 @@
 //       const response = await BaseUrl.put(`/patient/patient/`, updateData);
 
 //       if (response.status === 200 || response.status === 201) {
-//         const successMessage = response.data.success || "Details have been successfully updated.";
+//         const successMessage =
+//           response.data.success || "Details have been successfully updated.";
 //         setSuccessMessage(successMessage);
 //         handleShow(successMessage);
 //       } else {
@@ -1275,7 +1346,8 @@
 //         : await BaseUrl.put(`/patient/vital/`, vitalRequestData);
 
 //       if (response.status === 201) {
-//         const successMessage = response.data.success || "Vitals have been successfully updated.";
+//         const successMessage =
+//           response.data.success || "Vitals have been successfully updated.";
 //         setSuccessMessage(successMessage);
 //         handleShow(successMessage);
 //         await fetchVitalsData(selectedAppointmentId);
@@ -1320,7 +1392,9 @@
 //       }
 //     } catch (error) {
 //       setSymptomsData([]);
-//       setFetchError(error.response?.data?.error || error.message || "An error occurred.");
+//       setFetchError(
+//         error.response?.data?.error || error.message || "An error occurred."
+//       );
 //     } finally {
 //       setLoading(false);
 //     }
@@ -1360,7 +1434,11 @@
 //         <Form inline className="mb-3">
 //           <Form.Group
 //             className="mb-0"
-//             style={{ display: "flex", alignItems: "center", position: "relative" }}
+//             style={{
+//               display: "flex",
+//               alignItems: "center",
+//               position: "relative",
+//             }}
 //           >
 //             <div className="mb-4 w-100">
 //               <div className="mb-3">
@@ -1381,7 +1459,11 @@
 //                   onChange={(e) => setSearchTerm(e.target.value)}
 //                   style={{ flex: 1, borderRadius: "0.25rem 0 0 0.25rem" }}
 //                 />
-//                 <Button variant="primary" onClick={handleSearch} style={{ flexShrink: 0, borderRadius: "0 0.25rem 0.25rem 0" }}>
+//                 <Button
+//                   variant="primary"
+//                   onClick={handleSearch}
+//                   style={{ flexShrink: 0, borderRadius: "0 0.25rem 0.25rem 0" }}
+//                 >
 //                   Search
 //                 </Button>
 //               </div>
@@ -1483,7 +1565,10 @@
 //                     type="text"
 //                     value={newSymptom.more_options}
 //                     onChange={(e) =>
-//                       setNewSymptom({ ...newSymptom, more_options: e.target.value })
+//                       setNewSymptom({
+//                         ...newSymptom,
+//                         more_options: e.target.value,
+//                       })
 //                     }
 //                   />
 //                 </Form.Group>
@@ -1588,7 +1673,11 @@
 //                   </Dropdown.Item>
 //                   <Dropdown.Item
 //                     onClick={() =>
-//                       handleRemoveSymptom(symptom.symptoms, symptom.appointment, index)
+//                       handleRemoveSymptom(
+//                         symptom.symptoms,
+//                         symptom.appointment,
+//                         index
+//                       )
 //                     }
 //                   >
 //                     Remove
@@ -1713,7 +1802,8 @@
 //         appointment: selectedAppointmentId,
 //       });
 //       if (response.status === 201) {
-//         const successMessage = response.data.success || "Details have been successfully updated.";
+//         const successMessage =
+//           response.data.success || "Details have been successfully updated.";
 //         setSuccessMessage(successMessage);
 //         handleShow(successMessage);
 //         const newSymptomData = {
@@ -1756,7 +1846,8 @@
 //         },
 //       });
 //       if (response.status === 200) {
-//         const successMessage = response.data.success || "Details have been successfully updated.";
+//         const successMessage =
+//           response.data.success || "Details have been successfully updated.";
 //         setSuccessMessage(successMessage);
 //         handleShow(successMessage);
 //         await fetchSymptomsData(appointmentId);
@@ -1772,7 +1863,10 @@
 //     }
 //   };
 
-//   const handleAppointmentDateClick = async (appointment_date, appointment_id) => {
+//   const handleAppointmentDateClick = async (
+//     appointment_date,
+//     appointment_id
+//   ) => {
 //     setSelectedAppointmentDate(appointment_date);
 //     setSelectedAppointmentId(appointment_id);
 //     if (displayedData === "vitals") {
@@ -1780,7 +1874,10 @@
 //     } else if (displayedData === "symptoms") {
 //       fetchSymptomsData(appointment_id);
 //     } else if (displayedData === "prescription") {
-//       await fetchPrescriptionData(selectedAppointment.patient_id, appointment_id);
+//       await fetchPrescriptionData(
+//         selectedAppointment.patient_id,
+//         appointment_id
+//       );
 //       await fetchUploadedPrescriptionDocument(appointment_id, appointment_date);
 //     } else if (displayedData === "patientDetails") {
 //       await fetchPatientDetails(selectedAppointment.patient_id, appointment_id);
@@ -1789,13 +1886,16 @@
 //     }
 //   };
 
+//   const [patientId, setPatientId] = useState(null);
+
 //   const handleDocumentsClick = async () => {
 //     setSelectedHeading("documents");
+
 //     if (selectedAppointmentId && formattedDate) {
 //       try {
 //         const formattedDate = selectedAppointmentDate
-//         ? new Date(selectedAppointmentDate).toISOString().split("T")[0]
-//         : new Date().toISOString().split("T")[0];
+//           ? new Date(selectedAppointmentDate).toISOString().split("T")[0]
+//           : new Date().toISOString().split("T")[0];
 
 //         const response = await BaseUrl.get(
 //           `/patient/patientdocumentusingappointmentid/`,
@@ -1806,9 +1906,14 @@
 //             },
 //           }
 //         );
+
 //         if (response.status === 200 && response.data.length > 0) {
 //           setDocumentsData(response.data);
 //           setDisplayedData("documents");
+//           if (response.data.length > 0) {
+//             const patientName = response.data[0].patient_name;
+//             await handleRecordView(patientId, patientName);
+//           }
 //         } else {
 //           setDocumentsData([]);
 //           setDisplayedData("documents");
@@ -1922,7 +2027,9 @@
 //       let response;
 //       if (editingDocumentId) {
 //         formDataToSend.append("document_id", editingDocumentId);
-//         response = await BaseUrl.patch(`/patient/patientdocumentusingappointmentid/`, formDataToSend,
+//         response = await BaseUrl.patch(
+//           `/patient/patientdocumentusingappointmentid/`,
+//           formDataToSend,
 //           {
 //             headers: {
 //               "Content-Type": "multipart/form-data",
@@ -1941,7 +2048,8 @@
 //         );
 //       }
 //       if (response.status === 201) {
-//         const successMessage = response.data.success || "Details have been successfully updated.";
+//         const successMessage =
+//           response.data.success || "Details have been successfully updated.";
 //         setSuccessMessage(successMessage);
 //         handleShow(successMessage);
 //         await handleDocumentsClick();
@@ -1959,7 +2067,8 @@
 
 //   const handleDeleteDocument = async (documentId) => {
 //     try {
-//       const response = await BaseUrl.delete(`/patient/patientdocumentusingappointmentid/`,
+//       const response = await BaseUrl.delete(
+//         `/patient/patientdocumentusingappointmentid/`,
 //         {
 //           data: { document_id: documentId },
 //           headers: {
@@ -1968,7 +2077,8 @@
 //         }
 //       );
 //       if (response.status === 204) {
-//         const successMessage = response.data.success || "Details have been successfully updated.";
+//         const successMessage =
+//           response.data.success || "Details have been successfully updated.";
 //         setSuccessMessage(successMessage);
 //         handleShow(successMessage);
 //         handleDocumentsClick();
@@ -1983,7 +2093,118 @@
 //     }
 //   };
 
+//   const handleRequestDocument = async (appointmentId) => {
+//     if (!appointmentId) {
+//       setErrorMessage(
+//         "Appointment ID is missing. Please select an appointment."
+//       );
+//       return;
+//     }
+
+//     try {
+//       // Prepare form data
+//       const formData = new FormData();
+//       formData.append("appointment_id", appointmentId);
+
+//       // Make the PUT request using BaseUrl
+//       const response = await BaseUrl.put(
+//         "/doctorappointment/askreport/",
+//         formData
+//       );
+
+//       if (response.status === 200) {
+//         const successMessage =
+//           response.data?.success || "Request successfully sent.";
+//         setSuccessMessage(successMessage);
+//         setErrorMessage("");
+//       } else {
+//         const errorMessage = response.data?.error || "Failed to send request.";
+//         setErrorMessage(errorMessage);
+//         setSuccessMessage("");
+//       }
+//     } catch (error) {
+//       const errorMessage =
+//         error.response?.data?.error ||
+//         "An error occurred. Please try again later.";
+//       setErrorMessage(errorMessage);
+//       setSuccessMessage("");
+//     }
+//   };
+
+//   const [showMore, setShowMore] = useState(false); // State to toggle "Show More"
+
+//   const handleRecordView = async (patientId, patientName) => {
+//     setLoading(true); // Start loading indicator
+
+//     try {
+//       // Decode token to get doctor_id
+//       const token = localStorage.getItem("token"); // Retrieve the token from localStorage
+//       const decodedToken = jwtDecode(token);
+//       const doctorId = decodedToken?.doctor_id;
+
+//       if (!doctorId) {
+//         setErrorMessage("Doctor ID not available. Please log in again.");
+//         return;
+//       }
+
+//       // API call
+//       const response = await BaseUrl.get(`/doctorappointment/whatsappreport/`, {
+//         params: {
+//           patient_id: patientId,
+//           doctor_id: doctorId,
+//           patient_name: patientDetails.name, // Include the patient name
+//         },
+//       });
+
+//       if (response.status === 200) {
+//         const reports = response.data?.reports || [];
+//         setWhatsappReport(reports); // Update state with fetched reports
+//         setSuccessMessage("Medical record fetched successfully.");
+//         setErrorMessage("");
+//       } else {
+//         setErrorMessage(
+//           response.data?.error || "Failed to fetch medical record."
+//         );
+//         setSuccessMessage("");
+//       }
+//     } catch (error) {
+//       setErrorMessage(error.response?.data?.error || "An error occurred.");
+//       setSuccessMessage("");
+//     } finally {
+//       setLoading(false); // Stop loading indicator
+//     }
+//   };
+
+//   const deleteRecord = async (id) => {
+//     try {
+//       const response = await BaseUrl.delete(
+//         "/doctorappointment/whatsappreport/",
+//         {
+//           data: { id },
+//         }
+//       );
+
+//       if (response.status === 200) {
+//         alert("Record deleted successfully");
+//         setWhatsappReport((prevPhotos) =>
+//           prevPhotos.filter((photo) => photo.id !== id)
+//         );
+//       } else {
+//         alert("Error deleting record");
+//       }
+//     } catch (error) {
+//       alert("Failed to delete record");
+//     }
+//   };
+
 //   const renderDocumentsData = () => {
+//     const visibleReports = showMore
+//       ? whatsappReport
+//       : whatsappReport.slice(0, 6);
+//     const visibleDocuments = showMore
+//       ? documentsData
+//       : documentsData.slice(0, 6);
+
 //     return (
 //       <div>
 //         {successMessage && (
@@ -2001,125 +2222,306 @@
 //             {fetchError}
 //           </div>
 //         )}
+
 //         <div className="d-flex justify-content-end">
-//           <Button className="btn btn-primary" onClick={() => toggleFormModal()}>
+//           <Button
+//             className="btn btn-primary me-2"
+//             onClick={() => toggleFormModal()}
+//           >
 //             Upload Documents
 //           </Button>
+//           <Button
+//             className="btn btn-primary me-2"
+//             onClick={() => handleRequestDocument(selectedAppointmentId)}
+//           >
+//             Request Document
+//           </Button>
+//           <Button
+//             style={{
+//               background: "#00DAF7",
+//               color: "#000",
+//               border: "none",
+//               borderRadius: "5px",
+//               padding: "10px 20px",
+//             }}
+//             onClick={() =>
+//               handleRecordView(
+//                 selectedAppointment?.patient_id,
+//                 selectedAppointment?.doctor_id,
+//                 selectedAppointment?.patient_name
+//               )
+//             }
+//           >
+//             <FaSyncAlt />
+//           </Button>
 //         </div>
-//         {documentsData.map((document) => (
-//           <div key={document.id} className="mb-3" style={{ cursor: "pointer" }}>
-//             <Row className="mt-3">
-//               <Col md={3}>
-//                 <Form.Group>
-//                   <Form.Label>
-//                     <strong>Document Name:</strong>
-//                   </Form.Label>
-//                   <Form.Control
-//                     type="text"
-//                     value={document.document_name}
-//                     readOnly
-//                   />
-//                 </Form.Group>
-//               </Col>
-//               <Col md={3}>
-//                 <Form.Group>
-//                   <Form.Label>
-//                     <strong>Document Date:</strong>
-//                   </Form.Label>
-//                   <Form.Control
-//                     type="text"
-//                     value={document.document_date}
-//                     readOnly
-//                   />
-//                 </Form.Group>
-//               </Col>
-//               <Col md={3}>
-//                 <Form.Group>
-//                   <Form.Label>
-//                     <strong>Document Type:</strong>
-//                   </Form.Label>
-//                   <Form.Control
-//                     type="text"
-//                     value={document.document_type}
-//                     readOnly
-//                   />
-//                 </Form.Group>
-//               </Col>
-//               <Col md={3}>
-//                 <Form.Group>
-//                   <Form.Label>
-//                     <strong>Patient Name:</strong>
-//                   </Form.Label>
-//                   <Form.Control
-//                     type="text"
-//                     value={document.patient_name}
-//                     readOnly
-//                   />
-//                 </Form.Group>
-//               </Col>
-//             </Row>
-//             <Row className="mt-3">
-//               <Col md={3}>
-//                 <Form.Group>
-//                   <Form.Label>
-//                     <strong>Uploaded By:</strong>
-//                   </Form.Label>
-//                   <Form.Control
-//                     type="text"
-//                     value={document.uploaded_by}
-//                     readOnly
-//                   />
-//                 </Form.Group>
-//               </Col>
-//               <Col md={3}>
-//                 <Form.Group>
-//                   <Form.Label>
-//                     <strong>Document File:</strong>
-//                   </Form.Label>
-//                   <Button
-//                     variant="primary"
-//                     onClick={() => viewDocument(document.id)}
-//                     style={{
-//                       backgroundColor: "#5c85d6",
-//                       borderColor: "#5c85d6",
-//                       borderRadius: "20px",
-//                       padding: "8px 16px",
-//                       transition: "background-color 0.3s, transform 0.3s",
-//                     }}
-//                     onMouseEnter={(e) =>
-//                       (e.currentTarget.style.backgroundColor = "#4c75c6")
-//                     }
-//                     onMouseLeave={(e) =>
-//                       (e.currentTarget.style.backgroundColor = "#5c85d6")
-//                     }
-//                     aria-label={`View document ${document.document_name}`}
-//                   >
-//                     View Document
-//                   </Button>
-//                 </Form.Group>
-//               </Col>
-//               <Col md={3} className="mt-4">
-//                 <DropdownButton
-//                   align="end"
-//                   drop="end"
-//                   title={<i className="bi bi-three-dots" />}
-//                   variant="secondary"
-//                   id={`dropdown-${document.id}`}
+
+//         {/* <h5 className = "mt-3" style={{ fontWeight: "700" }}>Uploaded by : Doctor</h5> */}
+
+//         {documentsData.length > 0 ? (
+//           <table className="table table-striped mt-4">
+//             <thead>
+//               <tr>
+//                 <th>Document Name</th>
+//                 <th>Document Date</th>
+//                 <th>Document Type</th>
+//                 <th>Patient Name</th>
+//                 <th>Document File</th>
+//                 <th>Actions</th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               {documentsData.map((document) => (
+//                 <tr key={document.id}>
+//                   <td>{document.document_name}</td>
+//                   <td>{document.document_date}</td>
+//                   <td>{document.document_type}</td>
+//                   <td>{document.patient_name}</td>
+//                   <td>
+//                     <Button
+//                       variant="primary"
+//                       onClick={() => viewDocument(document.id)}
+//                       style={{
+//                         backgroundColor: "#5c85d6",
+//                         borderColor: "#5c85d6",
+//                         borderRadius: "20px",
+//                         padding: "8px 16px",
+//                         transition: "background-color 0.3s, transform 0.3s",
+//                       }}
+//                       onMouseEnter={(e) =>
+//                         (e.currentTarget.style.backgroundColor = "#4c75c6")
+//                       }
+//                       onMouseLeave={(e) =>
+//                         (e.currentTarget.style.backgroundColor = "#5c85d6")
+//                       }
+//                       aria-label={`View document ${document.document_name}`}
+//                     >
+//                       View Document
+//                     </Button>
+//                   </td>
+//                   <td>
+//                     <DropdownButton
+//                       align="end"
+//                       drop="end"
+//                       title={<i className="bi bi-three-dots" />}
+//                       variant="secondary"
+//                       id={`dropdown-${document.id}`}
+//                     >
+//                       <Dropdown.Item onClick={() => toggleFormModal(document)}>
+//                         Modify
+//                       </Dropdown.Item>
+//                       <Dropdown.Item
+//                         onClick={() => handleDeleteDocument(document.id)}
+//                       >
+//                         Delete
+//                       </Dropdown.Item>
+//                     </DropdownButton>
+//                   </td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </table>
+//         ) : (
+//           <div className="text-center text-danger">
+//             <p>No documents available to display.</p>
+//           </div>
+//         )}
+
+//         <div className="d-flex flex-wrap justify-content-start">
+//           {visibleDocuments.map((document) => (
+//             <div key={document.id} className="p-2">
+//               <div
+//                 className="card"
+//                 style={{
+//                   width: "203px",
+//                   position: "relative",
+//                   marginBottom: "15px",
+//                 }}
+//               >
+//                 <div
+//                   style={{
+//                     height: "200px",
+//                     background: "#f3f3f3",
+//                     borderRadius: "5px",
+//                     display: "flex",
+//                     justifyContent: "center",
+//                     alignItems: "center",
+//                   }}
 //                 >
-//                   <Dropdown.Item onClick={() => toggleFormModal(document)}>
-//                     Modify
-//                   </Dropdown.Item>
-//                   <Dropdown.Item
+//                   {document.document_file ? (
+//                     <img
+//                       src={document.document_file} // Valid image URL
+//                       alt={`Uploaded by: ${document.uploaded_by}`}
+//                       style={{
+//                         objectFit: "cover",
+//                         width: "100%",
+//                         height: "90%",
+//                         borderRadius: "5px",
+//                         cursor: "pointer",
+//                         // border: "1px solid red", // Debugging border
+//                       }}
+//                       onClick={() => viewDocument(document.id)}
+//                     />
+//                   ) : (
+//                     <span>No Preview</span>
+//                   )}
+//                 </div>
+//                 <div
+//                   className="document-date"
+//                   style={{
+//                     position: "absolute",
+//                     bottom: "0",
+//                     left: "0",
+//                     backgroundColor: "rgba(0, 0, 0, 0.6)",
+//                     color: "white",
+//                     padding: "5px",
+//                     borderRadius: "5px",
+//                   }}
+//                 >
+//                   {new Intl.DateTimeFormat("en-GB").format(
+//                     new Date(document.document_date)
+//                   )}
+//                 </div>
+//                 <div className="card-body text-center">
+//                   <button
+//                     className="btn btn-danger btn-sm"
+//                     style={{
+//                       position: "absolute",
+//                       bottom: "0",
+//                       right: "10px",
+//                       background: "transparent",
+//                       border: "none",
+//                       cursor: "pointer",
+//                       color: "red",
+//                       fontSize: "24px",
+//                     }}
 //                     onClick={() => handleDeleteDocument(document.id)}
 //                   >
-//                     Delete
-//                   </Dropdown.Item>
-//                 </DropdownButton>
-//               </Col>
-//             </Row>
-//             <hr />
+//                     <FaTrash />
+//                   </button>
+//                 </div>
+//               </div>
+//             </div>
+//           ))}
+//         </div>
+
+//         {documentsData.length > 6 && (
+//           <div className="text-center mt-3">
+//             <Button
+//               className="btn btn-primary"
+//               onClick={() => setShowMore(!showMore)}
+//             >
+//               {showMore ? "Show Less" : "Show More"}
+//             </Button>
 //           </div>
-//         ))}
+//         )}
+//         <hr />
+
+//         <h5 style={{ fontWeight: "700" }}>Uploaded by : Patient</h5>
+
+//         <div>
+//           {visibleReports.length > 0 ? (
+//             <div className="d-flex flex-wrap justify-content-start">
+//               {visibleReports.map((report) => (
+//                 <div key={report.id} className="p-2">
+//                   <div
+//                     className="card"
+//                     style={{ width: "203px", position: "relative" }}
+//                   >
+//                     <img
+//                       src={report.report_file}
+//                       alt="WhatsApp Report"
+//                       style={{
+//                         objectFit: "cover",
+//                         height: "200px",
+//                         width: "100%",
+//                         borderRadius: "5px",
+//                         cursor: "pointer",
+//                       }}
+//                       onClick={() => setSelectedImage(report.report_file)}
+//                     />
+
+//                     {/* Display Date on the Image */}
+//                     <div
+//                       className="report-date"
+//                       style={{
+//                         position: "absolute",
+//                         bottom: "0",
+//                         left: "0",
+//                         backgroundColor: "rgba(0, 0, 0, 0.6)",
+//                         color: "white",
+//                         padding: "5px",
+//                         borderRadius: "5px",
+//                       }}
+//                     >
+//                       {new Intl.DateTimeFormat("en-GB").format(
+//                         new Date(report.date)
+//                       )}
+//                     </div>
+
+//                     {/* Delete Button */}
+//                     <div className="card-body text-center">
+//                       <button
+//                         className="btn btn-danger btn-sm"
+//                         style={{
+//                           position: "absolute",
+//                           bottom: "0",
+//                           right: "10px",
+//                           background: "transparent",
+//                           border: "none",
+//                           cursor: "pointer",
+//                           color: "red",
+//                           fontSize: "24px",
+//                         }}
+//                         onClick={() => deleteRecord(report.id)}
+//                       >
+//                         <FaTrash />
+//                       </button>
+//                     </div>
+//                   </div>
+//                 </div>
+//               ))}
+//             </div>
+//           ) : (
+//             <div className="text-center mt-4 text-danger">
+//               <p>No reports available to display.</p>
+//             </div>
+//           )}
+//         </div>
+
+//         {/* Show More Button */}
+//         {whatsappReport.length > 6 && (
+//           <div className="text-center mt-3">
+//             <Button
+//               className="btn btn-primary"
+//               onClick={() => setShowMore(!showMore)}
+//             >
+//               {showMore ? "Show Less" : "Show More"}
+//             </Button>
+//           </div>
+//         )}
+
+//         <Modal
+//           show={!!selectedImage}
+//           onHide={() => setSelectedImage(null)}
+//           centered
+//         >
+//           <Modal.Body style={{ padding: 0 }}>
+//             <img
+//               src={selectedImage}
+//               alt="Selected Medical Record"
+//               style={{
+//                 width: "100%",
+//                 borderRadius: "5px",
+//               }}
+//             />
+//           </Modal.Body>
+//           <Modal.Footer>
+//             <Button variant="secondary" onClick={() => setSelectedImage(null)}>
+//               Close
+//             </Button>
+//           </Modal.Footer>
+//         </Modal>
 //       </div>
 //     );
 //   };
@@ -2141,7 +2543,7 @@
 //       setPreviewFileType(fileType);
 //       setPreviewFileUrl(url);
 //       setShowPreviewModal(true);
-//     } catch (error) { }
+//     } catch (error) {}
 //   };
 
 //   const renderDocumentPreviewModal = () => (
@@ -2185,12 +2587,17 @@
 
 //   const handleEndVisit = async (appointmentId) => {
 //     try {
-//       const response = await BaseUrl.patch("/doctorappointment/completedappointment/", {
-//         appointment_id: appointmentId,
-//       });
+//       const response = await BaseUrl.patch(
+//         "/doctorappointment/completedappointment/",
+//         {
+//           appointment_id: appointmentId,
+//         }
+//       );
 
 //       if (response.status === 201 || response.status === 200) {
-//         const successMessage = response.data.success || "Appointment have been Completed sucessfully.";
+//         const successMessage =
+//           response.data.success ||
+//           "Appointment have been Completed sucessfully.";
 //         setSuccessMessage(successMessage);
 //         handleShow(successMessage);
 //         setIsVisitEnded(true);
@@ -2202,7 +2609,8 @@
 //         handleShow("Failed to update patient Prescription.");
 //       }
 //     } catch (error) {
-//       const errorMessage = error.response?.data?.error || "An unexpected error occurred.";
+//       const errorMessage =
+//         error.response?.data?.error || "An unexpected error occurred.";
 //       setErrorMessage(errorMessage);
 //       handleShow(errorMessage);
 //     }
@@ -2210,11 +2618,16 @@
 
 //   const handleCancelAppointment = async (appointmentId) => {
 //     try {
-//       const response = await BaseUrl.patch("/doctorappointment/canceledappointment/", {
-//         appointment_id: appointmentId,
-//       });
+//       const response = await BaseUrl.patch(
+//         "/doctorappointment/canceledappointment/",
+//         {
+//           appointment_id: appointmentId,
+//         }
+//       );
 //       if (response.status === 201 || response.status === 200) {
-//         const successMessage = response.data.success || "Appointment have been Canceled sucessfully.";
+//         const successMessage =
+//           response.data.success ||
+//           "Appointment have been Canceled sucessfully.";
 //         setSuccessMessage(successMessage);
 //         handleShow(successMessage);
 //         fetchSlots();
@@ -2225,7 +2638,8 @@
 //         handleShow("Failed to cancel the appointment.");
 //       }
 //     } catch (error) {
-//       const errorMessage = error.response?.data?.error || "An unexpected error occurred.";
+//       const errorMessage =
+//         error.response?.data?.error || "An unexpected error occurred.";
 //       setErrorMessage("Error canceling appointment: " + errorMessage);
 //       handleShow(errorMessage);
 //     }
@@ -2240,6 +2654,57 @@
 //     setShowConfirmModal(false);
 //   };
 
+//   // const handleAppointmentClick = async (slotOrAppointment, section) => {
+//   //   if (
+//   //     selectedAppointment &&
+//   //     selectedAppointment.appointment_id === slotOrAppointment.appointment_id
+//   //   ) {
+//   //     resetModalState();
+//   //     return;
+//   //   }
+//   //   resetModalState();
+//   //   setSelectedAppointment(slotOrAppointment);
+//   //   setSelectedAppointmentId(slotOrAppointment.appointment_id);
+//   //   setSelectedHeading("patientDetails");
+//   //   try {
+//   //     const patientId = slotOrAppointment.patient_id;
+//   //     setPatientId(patientId);
+//   //     const patientDetailsResponse = await BaseUrl.get(`/patient/patient/`, {
+//   //       params: {
+//   //         patient_id: slotOrAppointment.patient_id,
+//   //         appointment_id: slotOrAppointment.appointment_id,
+//   //       },
+//   //     });
+//   //     if (patientDetailsResponse.status === 200) {
+//   //       setPatientDetails(patientDetailsResponse.data);
+//   //       setDisplayedData("patientDetails");
+//   //     }
+//   //     const appointmentResponse = await BaseUrl.get(
+//   //       `/patientappointment/viewslot/`,
+//   //       {
+//   //         params: {
+//   //           patient_id: slotOrAppointment.patient_id,
+//   //           doctor_id: slotOrAppointment.doctor,
+//   //         },
+//   //       }
+//   //     );
+//   //     if (appointmentResponse.status === 200) {
+//   //       setAppointmentDetails(appointmentResponse.data.data);
+//   //     }
+//   //     if (section === "today") {
+//   //       setSelectedTodayAppointment(slotOrAppointment);
+//   //     } else if (section === "completed") {
+//   //       setSelectedCompletedAppointment(slotOrAppointment);
+//   //     } else if (section === "canceled") {
+//   //       setSelectedCanceledAppointment(slotOrAppointment);
+//   //     } else {
+//   //       console.warn(section);
+//   //     }
+//   //   } catch (error) {
+//   //     setErrorMessage();
+//   //   }
+//   // };
+
 //   const handleAppointmentClick = async (slotOrAppointment, section) => {
 //     if (
 //       selectedAppointment &&
@@ -2248,22 +2713,32 @@
 //       resetModalState();
 //       return;
 //     }
+
 //     resetModalState();
 //     setSelectedAppointment(slotOrAppointment);
 //     setSelectedAppointmentId(slotOrAppointment.appointment_id);
 //     setSelectedHeading("patientDetails");
+
 //     try {
+//       const patientId = slotOrAppointment.patient_id;
+//       setPatientId(patientId);
+
+//       // Fetch patient details
 //       const patientDetailsResponse = await BaseUrl.get(`/patient/patient/`, {
 //         params: {
 //           patient_id: slotOrAppointment.patient_id,
 //           appointment_id: slotOrAppointment.appointment_id,
 //         },
 //       });
+
 //       if (patientDetailsResponse.status === 200) {
 //         setPatientDetails(patientDetailsResponse.data);
 //         setDisplayedData("patientDetails");
 //       }
-//       const appointmentResponse = await BaseUrl.get(`/patientappointment/viewslot/`,
+
+//       // Fetch appointment slot details
+//       const appointmentResponse = await BaseUrl.get(
+//         `/patientappointment/viewslot/`,
 //         {
 //           params: {
 //             patient_id: slotOrAppointment.patient_id,
@@ -2271,22 +2746,44 @@
 //           },
 //         }
 //       );
+
 //       if (appointmentResponse.status === 200) {
 //         setAppointmentDetails(appointmentResponse.data.data);
 //       }
+
+//       // Section-specific selection
 //       if (section === "today") {
 //         setSelectedTodayAppointment(slotOrAppointment);
 //       } else if (section === "completed") {
 //         setSelectedCompletedAppointment(slotOrAppointment);
 //       } else if (section === "canceled") {
 //         setSelectedCanceledAppointment(slotOrAppointment);
+//       } else if (section === "online") {
+//         setSelectedOnlineAppointment(slotOrAppointment);
+//       } else if (section === "walk-in") {
+//         setSelectedWalkinAppointment(slotOrAppointment);
+//       } else if (section === "follow-up") {
+//         setSelectedFollowupAppointment(slotOrAppointment);
 //       } else {
-//         console.warn(section);
+//         console.warn("Unknown section:", section);
 //       }
+
 //     } catch (error) {
-//       setErrorMessage();
+//       setErrorMessage("Something went wrong while loading appointment data.");
+//       console.error(error);
 //     }
 //   };
+
+//   // const resetModalState = () => {
+//   //   setSelectedAppointment(null);
+//   //   setVitalsData([]);
+//   //   setDisplayedData(null);
+//   //   setSelectedAppointmentId(null);
+//   //   setSelectedAppointmentDate(null);
+//   //   setSelectedTodayAppointment(null);
+//   //   setSelectedCompletedAppointment(null);
+//   //   setSelectedCanceledAppointment(null);
+//   // };
 
 //   const resetModalState = () => {
 //     setSelectedAppointment(null);
@@ -2297,84 +2794,39 @@
 //     setSelectedTodayAppointment(null);
 //     setSelectedCompletedAppointment(null);
 //     setSelectedCanceledAppointment(null);
+//     setSelectedOnlineAppointment(null);
+//     setSelectedWalkinAppointment(null);
+//     setSelectedFollowupAppointment(null);
 //   };
 
-//   const [morningIndex, setMorningIndex] = useState(0);
-//   const [afternoonIndex, setAfternoonIndex] = useState(0);
-//   const [eveningIndex, setEveningIndex] = useState(0);
-//   const slotsPerPage = 4;
-
-//   const handleMorningPrevious = () => {
-//     setMorningIndex((prevIndex) => Math.max(prevIndex - 1, 0));
-//   };
-
-//   const handleMorningNext = () => {
-//     setMorningIndex((prevIndex) =>
-//       Math.min(prevIndex + 1, Math.ceil(morningSlots.length / slotsPerPage) - 1)
-//     );
-//   };
-
-//   const handleAfternoonPrevious = () => {
-//     setAfternoonIndex((prevIndex) => Math.max(prevIndex - 1, 0));
-//   };
-
-//   const handleAfternoonNext = () => {
-//     setAfternoonIndex((prevIndex) =>
-//       Math.min(
-//         prevIndex + 1,
-//         Math.ceil(afternoonSlots.length / slotsPerPage) - 1
-//       )
-//     );
-//   };
-
-//   const handleEveningPrevious = () => {
-//     setEveningIndex((prevIndex) => Math.max(prevIndex - 1, 0));
-//   };
-
-//   const handleEveningNext = () => {
-//     setEveningIndex((prevIndex) =>
-//       Math.min(prevIndex + 1, Math.ceil(eveningSlots.length / slotsPerPage) - 1)
-//     );
-//   };
-
-//   const renderSlotCards = (slots, index) => {
-//     const startIndex = index * slotsPerPage * 4;
-//     const endIndex = Math.min(startIndex + slotsPerPage * 4, slots.length);
-//     const displayedSlots = slots.slice(startIndex, endIndex);
+//   const renderSlotCards = (slots) => {
 //     const rows = [];
+
+//     const displayedSlots = slots.slice(0, 100); // Optional cap
+
 //     for (let i = 0; i < displayedSlots.length; i += 4) {
 //       const slotChunk = displayedSlots.slice(i, i + 4);
 //       rows.push(
 //         <Row key={i} className="mb-3">
 //           {slotChunk.map((slot, index) => {
 //             let cardStyle = {};
+
 //             if (slot.is_canceled) {
-//               cardStyle = {
-//                 backgroundColor: "#BC1B2E",
-//                 color: "#fff",
-//               };
+//               cardStyle = { backgroundColor: "#FF6767", color: "#fff" };
 //             } else if (slot.is_booked) {
-//               cardStyle = {
-//                 backgroundColor: "#229799",
-//                 color: "#fff",
-//               };
+//               cardStyle = { backgroundColor: "#1261AA", color: "#fff" };
 //             } else if (slot.is_blocked) {
-//               cardStyle = {
-//                 backgroundColor: "#CB6040",
-//                 color: "#fff",
-//               };
+//               cardStyle = { backgroundColor: "#F16215", color: "#fff" };
 //             } else {
-//               cardStyle = {
-//                 backgroundColor: "#16B12F",
-//                 color: "#fff",
-//               };
+//               cardStyle = { backgroundColor: "#0A9013", color: "#fff" };
 //             }
+
 //             return (
 //               <Col
 //                 key={index}
 //                 xs={12}
 //                 sm={6}
-//                 md={4}
+//                 md={6}
 //                 lg={3}
 //                 style={{ padding: "8px" }}
 //               >
@@ -2417,7 +2869,21 @@
 //         </Row>
 //       );
 //     }
-//     return rows;
+
+//     const isScrollable = displayedSlots.length > 16;
+
+//     return (
+//       <div
+//         style={{
+//           maxHeight: isScrollable ? "280px" : "auto",
+//           overflowY: isScrollable ? "auto" : "visible",
+//           overflowX: "hidden",
+//           paddingRight: "5px",
+//         }}
+//       >
+//         {rows}
+//       </div>
+//     );
 //   };
 
 //   const renderAppointmentDate = () => {
@@ -2433,7 +2899,10 @@
 //           }
 //           style={{
 //             cursor: "pointer",
-//             backgroundColor: selectedAppointmentId === appointment.id ? "#3795BD" : "transparent",
+//             backgroundColor:
+//               selectedAppointmentId === appointment.id
+//                 ? "#3795BD"
+//                 : "transparent",
 //             color: selectedAppointmentId === appointment.id ? "white" : "black",
 //             borderRadius: "5px",
 //             padding: "10px",
@@ -2449,47 +2918,164 @@
 //   };
 
 //   const renderCompletedAppointments = () => {
-//     const endIndex = Math.min(completedIndex + 4, completedAppointments.length);
-//     const displayedAppointments = completedAppointments.slice(
-//       completedIndex,
-//       endIndex
+//     return (
+//       <div className="appointment-grid">
+//         {completedAppointments.map((appointment, index) => (
+//           <Card
+//             key={index}
+//             className="p-3 shadow-sm"
+//             style={{
+//               backgroundColor: "#9ED14D",
+//               borderRadius: "12px",
+//               cursor: "pointer",
+//             }}
+//             onClick={() => handleAppointmentClick(appointment, "completed")}
+//           >
+//             <Card.Body className="text-center p-2">
+//               <Card.Title className="fw-bold mb-2" style={{ fontSize: "1rem" }}>
+//                 {appointment.appointment_slot}
+//               </Card.Title>
+//               <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+//                 <strong>Patient: </strong>
+//                 {appointment.booked_by}
+//               </Card.Text>
+//               <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+//                 <strong>Mobile no: </strong> {appointment.mobile_number}
+//               </Card.Text>
+//             </Card.Body>
+//           </Card>
+//         ))}
+//       </div>
 //     );
-//     return displayedAppointments.map((appointment, index) => (
-//       <Col key={index}>
-//         <Card
-//           className="mb-4 shadow-sm reception-card"
-//           style={{ backgroundColor: "#2CABC7", color: "#fff" }}
-//           onClick={() => handleAppointmentClick(appointment, "completed")}
-//         >
-//           <Card.Body>
-//             <Card.Title>{appointment.appointment_slot}</Card.Title>
-//             <Card.Text>Completed by: {appointment.doctor_name}</Card.Text>
-//           </Card.Body>
-//         </Card>
-//       </Col>
-//     ));
 //   };
 
 //   const renderCanceledAppointments = () => {
-//     const endIndex = Math.min(canceledIndex + 4, canceledAppointments.length);
-//     const displayedAppointments = canceledAppointments.slice(
-//       canceledIndex,
-//       endIndex
+//     return (
+//       <div className="appointment-grid">
+//         {canceledAppointments.map((appointment, index) => (
+//           <Card
+//             key={index}
+//             className="p-3 shadow-sm"
+//             style={{
+//               backgroundColor: "#FF6767",
+//               borderRadius: "12px",
+//               cursor: "pointer",
+//             }}
+//             onClick={() => handleAppointmentClick(appointment, "canceled")}
+//           >
+//             <Card.Body className="text-center p-2">
+//               <Card.Title className="fw-bold mb-2" style={{ fontSize: "1rem" }}>
+//                 {appointment.appointment_slot}
+//               </Card.Title>
+//               <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+//                 <strong>Patient: </strong>
+//                 {appointment.booked_by}
+//               </Card.Text>
+//               <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+//                 <strong>Mobile no: </strong> {appointment.mobile_number}
+//               </Card.Text>
+//             </Card.Body>
+//           </Card>
+//         ))}
+//       </div>
 //     );
-//     return displayedAppointments.map((appointment, index) => (
-//       <Col key={index}>
-//         <Card
-//           className="mb-4 shadow-sm reception-card"
-//           style={{ backgroundColor: "#BC1B2E", color: "#fff" }}
-//           onClick={() => handleAppointmentClick(appointment, "canceled")}
-//         >
-//           <Card.Body>
-//             <Card.Title>{appointment.appointment_slot}</Card.Title>
-//             <Card.Text>Canceled by: {appointment.doctor_name}</Card.Text>
-//           </Card.Body>
-//         </Card>
-//       </Col>
-//     ));
+//   };
+
+//   // const renderWalkinOnlineFollowupAppointments = (appointments, type) => {
+//   //   const colorMap = {
+//   //     online: "#AA56FF",
+//   //     "walk-in": "#BFAF18",
+//   //     "follow-up": "#12C81E",
+//   //   };
+
+//   //   return (
+//   //     <div className="appointment-grid">
+//   //       {appointments.map((appointment, index) => (
+//   //         <Card
+//   //           key={index}
+//   //           className="p-3 shadow-sm"
+//   //           style={{
+//   //             backgroundColor: colorMap[type],
+//   //             borderRadius: "12px",
+//   //             cursor: "pointer",
+//   //           }}
+//   //           onClick={() => handleAppointmentClick(appointment, type)}
+//   //         >
+//   //           <Card.Body className="text-center p-2">
+//   //             <Card.Title className="fw-bold mb-2" style={{ fontSize: "1rem" }}>
+//   //               {appointment.appointment_slot}
+//   //             </Card.Title>
+//   //             <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+//   //               <strong>Patient: </strong> {appointment.booked_by}
+//   //             </Card.Text>
+//   //             <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+//   //               <strong>Mobile no: </strong> {appointment.mobile_number}
+//   //             </Card.Text>
+//   //           </Card.Body>
+//   //         </Card>
+//   //       ))}
+//   //     </div>
+//   //   );
+//   // };
+
+//   const renderWalkinOnlineFollowupAppointments = (appointments, type) => {
+//     const colorMap = {
+//       online: "#AA56FF",
+//       "walk-in": "#BFAF18",
+//       "follow-up": "#12C81E",
+//     };
+
+//     // Determine selected state per type
+//     const selectedMap = {
+//       online: selectedOnlineAppointment,
+//       "walk-in": selectedWalkinAppointment,
+//       "follow-up": selectedFollowupAppointment,
+//     };
+
+//     const selected = selectedMap[type];
+
+//     return (
+//       <div className="appointment-grid">
+//         {appointments.map((appointment, index) => {
+//           const isSelected =
+//             selected &&
+//             selected.appointment_id === appointment.appointment_id;
+
+//           return (
+//             <Card
+//               key={index}
+//               className={`p-3 shadow-sm ${isSelected ? "border border-dark" : ""}`}
+//               style={{
+//                 backgroundColor: colorMap[type],
+//                 borderRadius: "12px",
+//                 cursor: "pointer",
+//                 boxShadow: isSelected
+//                   ? "0 0 10px rgba(0,0,0,0.2)"
+//                   : "0 2px 4px rgba(0,0,0,0.1)",
+//                 transform: isSelected ? "scale(1.02)" : "none",
+//                 transition: "all 0.2s ease-in-out",
+//               }}
+//               onClick={() => handleAppointmentClick(appointment, type)}
+//             >
+//               <Card.Body className="text-center p-2">
+//                 <Card.Title
+//                   className="fw-bold mb-2"
+//                   style={{ fontSize: "1rem" }}
+//                 >
+//                   {appointment.appointment_slot}
+//                 </Card.Title>
+//                 <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+//                   <strong>Patient: </strong> {appointment.booked_by}
+//                 </Card.Text>
+//                 <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+//                   <strong>Mobile no: </strong> {appointment.mobile_number}
+//                 </Card.Text>
+//               </Card.Body>
+//             </Card>
+//           );
+//         })}
+//       </div>
+//     );
 //   };
 
 //   const renderSelectedAppointmentDetails = () => {
@@ -2502,9 +3088,11 @@
 //         style={{
 //           position: "relative",
 //           backgroundColor: "#F4F6F9",
-//           padding: "20px 20px 40px 20px",
+//           padding: "20px",
 //           borderRadius: "10px",
 //           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+//           overflowX: "auto",
+//           whiteSpace: "nowrap",
 //         }}
 //       >
 //         <button
@@ -2591,10 +3179,19 @@
 //                     cursor: "pointer",
 //                     padding: "5px 10px",
 //                     borderRadius: "5px",
-//                     border: selectedHeading === "patientDetails" ? "2px solid #3795BD" : "2px solid transparent",
-//                     backgroundColor: selectedHeading === "patientDetails" ? "#d1e9f6" : "transparent",
+//                     border:
+//                       selectedHeading === "patientDetails"
+//                         ? "2px solid #3795BD"
+//                         : "2px solid transparent",
+//                     backgroundColor:
+//                       selectedHeading === "patientDetails"
+//                         ? "#d1e9f6"
+//                         : "transparent",
 //                     color: "#007bff",
-//                     boxShadow: selectedHeading === "patientDetails" ? "0 2px 4px rgba(0, 0, 0, 0.1)" : "none",
+//                     boxShadow:
+//                       selectedHeading === "patientDetails"
+//                         ? "0 2px 4px rgba(0, 0, 0, 0.1)"
+//                         : "none",
 //                     display: "inline",
 //                   }}
 //                 >
@@ -2609,10 +3206,17 @@
 //                     cursor: "pointer",
 //                     padding: "5px 10px",
 //                     borderRadius: "5px",
-//                     border: selectedHeading === "vitals" ? "2px solid #3795BD" : "2px solid transparent",
-//                     backgroundColor: selectedHeading === "vitals" ? "#d1e9f6" : "transparent",
+//                     border:
+//                       selectedHeading === "vitals"
+//                         ? "2px solid #3795BD"
+//                         : "2px solid transparent",
+//                     backgroundColor:
+//                       selectedHeading === "vitals" ? "#d1e9f6" : "transparent",
 //                     color: "#007bff",
-//                     boxShadow: selectedHeading === "vitals" ? "0 2px 4px rgba(0, 0, 0, 0.1)" : "none",
+//                     boxShadow:
+//                       selectedHeading === "vitals"
+//                         ? "0 2px 4px rgba(0, 0, 0, 0.1)"
+//                         : "none",
 //                     display: "inline",
 //                   }}
 //                 >
@@ -2627,10 +3231,19 @@
 //                     cursor: "pointer",
 //                     padding: "5px 10px",
 //                     borderRadius: "5px",
-//                     border: selectedHeading === "symptoms" ? "2px solid #3795BD" : "2px solid transparent",
-//                     backgroundColor: selectedHeading === "symptoms" ? "#d1e9f6" : "transparent",
+//                     border:
+//                       selectedHeading === "symptoms"
+//                         ? "2px solid #3795BD"
+//                         : "2px solid transparent",
+//                     backgroundColor:
+//                       selectedHeading === "symptoms"
+//                         ? "#d1e9f6"
+//                         : "transparent",
 //                     color: "#007bff",
-//                     boxShadow: selectedHeading === "symptoms" ? "0 2px 4px rgba(0, 0, 0, 0.1)" : "none",
+//                     boxShadow:
+//                       selectedHeading === "symptoms"
+//                         ? "0 2px 4px rgba(0, 0, 0, 0.1)"
+//                         : "none",
 //                     display: "inline",
 //                   }}
 //                 >
@@ -2646,10 +3259,19 @@
 //                     padding: "5px 10px",
 //                     paddingRight: "32px",
 //                     borderRadius: "5px",
-//                     border: selectedHeading === "prescription" ? "2px solid #3795BD" : "2px solid transparent",
-//                     backgroundColor: selectedHeading === "prescription" ? "#d1e9f6" : "transparent",
+//                     border:
+//                       selectedHeading === "prescription"
+//                         ? "2px solid #3795BD"
+//                         : "2px solid transparent",
+//                     backgroundColor:
+//                       selectedHeading === "prescription"
+//                         ? "#d1e9f6"
+//                         : "transparent",
 //                     color: "#007bff",
-//                     boxShadow: selectedHeading === "prescription" ? "0 2px 4px rgba(0, 0, 0, 0.1)" : "none",
+//                     boxShadow:
+//                       selectedHeading === "prescription"
+//                         ? "0 2px 4px rgba(0, 0, 0, 0.1)"
+//                         : "none",
 //                     display: "inline",
 //                   }}
 //                 >
@@ -2664,10 +3286,19 @@
 //                     cursor: "pointer",
 //                     padding: "5px 10px",
 //                     borderRadius: "5px",
-//                     border: selectedHeading === "documents" ? "2px solid #3795BD" : "2px solid transparent",
-//                     backgroundColor: selectedHeading === "documents" ? "#d1e9f6" : "transparent",
+//                     border:
+//                       selectedHeading === "documents"
+//                         ? "2px solid #3795BD"
+//                         : "2px solid transparent",
+//                     backgroundColor:
+//                       selectedHeading === "documents"
+//                         ? "#d1e9f6"
+//                         : "transparent",
 //                     color: "#007bff",
-//                     boxShadow: selectedHeading === "documents" ? "0 2px 4px rgba(0, 0, 0, 0.1)" : "none",
+//                     boxShadow:
+//                       selectedHeading === "documents"
+//                         ? "0 2px 4px rgba(0, 0, 0, 0.1)"
+//                         : "none",
 //                     display: "inline",
 //                   }}
 //                 >
@@ -2699,60 +3330,183 @@
 //     );
 //   };
 
-//   const renderAppointments = () => {
-//     const endIndex = Math.min(currentIndex + 4, todayAppointments.length);
-//     const displayedAppointments = todayAppointments.slice(
-//       currentIndex,
-//       endIndex
-//     );
-//     return displayedAppointments.map((appointment, index) => (
-//       <Col key={index}>
-//         <Card
-//           className={`mb-4 shadow-sm reception-card ${selectedAppointment && selectedAppointment.appointment_id === appointment.appointment_id ? "selected-slot" : ""}`}
-//           onClick={() => handleAppointmentClick(appointment, "today")}
-//           style={{
-//             border: selectedAppointment && selectedAppointment.appointment_id === appointment.appointment_id ? "2px solid #3795BD" : "none",
-//             cursor: "pointer",
-//             backgroundColor: appointment.appointment_type === "follow-up" ? "#FB8369" : "#2D9CED",
-//           }}
-//         >
-//           <Card.Body>
-//             <Card.Title>{appointment.appointment_slot}</Card.Title>
-//             <Card.Text>Patient: {appointment.booked_by}</Card.Text>
-//           </Card.Body>
-//         </Card>
-//       </Col>
-//     ));
-//   };
-//   return (
-//     <div className="doctor-container" style={{ backgroundColor: "#D7EAF0" }}>
-//       <header className="mb-2 mt-4 reception-header d-flex flex-column flex-md-row justify-content-between align-items-center text-center text-md-start">
-//         {clinicName && clinicPhoto && (
-//           <>
-//             <Col xs={12} md="auto">
-//               <img
-//                 src={clinicPhoto}
-//                 className="left-logo img-fluid"
-//                 alt="Clinic Logo"
-//               />
-//             </Col>
-//             <Col xs={12} md="auto" className="flex-grow-1">
-//               <h1 className="text-center" style={{ color: "#0174BE" }}>
-//                 Welcome to {clinicName}
-//               </h1>
-//             </Col>
-//           </>
-//         )}
-//       </header>
+//   // const renderAppointments = () => {
+//   //   const endIndex = Math.min(currentIndex + 4, todayAppointments.length);
+//   //   const displayedAppointments = todayAppointments.slice(
+//   //     currentIndex,
+//   //     endIndex
+//   //   );
+//   //   return displayedAppointments.map((appointment, index) => (
+//   //     <Col key={index}>
+//   //       <Card
+//   //         className={`mb-4 shadow-sm ${selectedAppointment && selectedAppointment.appointment_id === appointment.appointment_id ? "selected-slot" : ""}`}
+//   //         onClick={() => handleAppointmentClick(appointment, "today")}
+//   //         style={{
+//   //           border:
+//   //             selectedAppointment &&
+//   //             selectedAppointment.appointment_id === appointment.appointment_id
+//   //               ? "2px solid #3795BD"
+//   //               : "none",
+//   //           cursor: "pointer",
+//   //           backgroundColor:
+//   //             appointment.appointment_type === "follow-up"
+//   //               ? "#8AFE91"
+//   //               : "#FFBA4B",
+//   //         }}
+//   //       >
+//   //         <Card.Body>
+//   //           <Card.Title>{appointment.appointment_slot}</Card.Title>
+//   //           <Card.Text>Patient: {appointment.booked_by}</Card.Text>
+//   //         </Card.Body>
+//   //       </Card>
+//   //     </Col>
+//   //   ));
+//   // };
 
-//       <div className="d-flex justify-content-center align-items-center mt-2">
+//   const renderAppointments = () => {
+//     return (
+//       <div className="appointment-grid">
+//         {todayAppointments.map((appointment, index) => (
+//           <Card
+//             key={index}
+//             className={`p-3 shadow-sm ${
+//               selectedAppointment &&
+//               selectedAppointment.appointment_id === appointment.appointment_id
+//                 ? "selected-slot"
+//                 : ""
+//             }`}
+//             onClick={() => handleAppointmentClick(appointment, "today")}
+//             style={{
+//               border:
+//                 selectedAppointment &&
+//                 selectedAppointment.appointment_id ===
+//                   appointment.appointment_id
+//                   ? "2px solid #3795BD"
+//                   : "none",
+//               borderRadius: "12px",
+//               cursor: "pointer",
+//               backgroundColor:
+//                 appointment.appointment_type === "follow-up"
+//                   ? "#8AFE91"
+//                   : "#FFBA4B",
+//             }}
+//           >
+//             <Card.Body className="text-center p-2">
+//               <Card.Title className="fw-bold mb-2" style={{ fontSize: "1rem" }}>
+//                 {appointment.appointment_slot}
+//               </Card.Title>
+//               <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+//                 <strong>Patient Name:</strong> {appointment.booked_by}
+//               </Card.Text>
+//               <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+//                 <strong>Contact No.:</strong> {appointment.mobile_number}
+//               </Card.Text>
+//             </Card.Body>
+//           </Card>
+//         ))}
+//       </div>
+//     );
+//   };
+
+//   const [showSlots, setShowSlots] = useState(true);
+//   const [bookedAppointment, setBookedAppointment] = useState(false);
+//   const [completedAppointment, setCompletedAppointment] = useState(false);
+//   const [canceledAppointment, setCanceledAppointment] = useState(false);
+//   const [onlineAppointment, setOnlineAppointment] = useState(false);
+//   const [walkinAppointment, setWalkinappointment] = useState(false);
+//   const [followupAppointment, setFollowupAppointment] = useState(false);
+
+//   const [onlineAppointments, setOnlineAppointments] = useState([]);
+//   const [walkinAppointments, setWalkinAppointments] = useState([]);
+//   const [followupAppointments, setFollowupAppointments] = useState([]);
+
+//   const handleTotalSlotClick = () => {
+//     setShowSlots(!showSlots);
+//     setBookedAppointment(false);
+//     setCompletedAppointment(false);
+//     setCanceledAppointment(false);
+//     setOnlineAppointment(false);
+//     setWalkinappointment(false);
+//     setFollowupAppointment(false);
+//   };
+
+//   const handleBookedAppointmentClick = () => {
+//     setBookedAppointment(!bookedAppointment);
+//     setShowSlots(false);
+//     setCompletedAppointment(false);
+//     setCanceledAppointment(false);
+//     setOnlineAppointment(false);
+//     setWalkinappointment(false);
+//     setFollowupAppointment(false);
+//   };
+
+//   const handleCompletedAppointmentClick = () => {
+//     setCompletedAppointment(!completedAppointment);
+//     setBookedAppointment(false);
+//     setShowSlots(false);
+//     setCanceledAppointment(false);
+//     setOnlineAppointment(false);
+//     setWalkinappointment(false);
+//     setFollowupAppointment(false);
+//   };
+
+//   const handleCanceledAppointmentClick = () => {
+//     setCanceledAppointment(!canceledAppointment);
+//     setCompletedAppointment(false);
+//     setBookedAppointment(false);
+//     setShowSlots(false);
+//     setOnlineAppointment(false);
+//     setWalkinappointment(false);
+//     setFollowupAppointment(false);
+//   };
+
+//   const handleOnlineAppointmentClick = () => {
+//     setOnlineAppointment(!onlineAppointment);
+//     setShowSlots(false);
+//     setBookedAppointment(false);
+//     setCompletedAppointment(false);
+//     setCanceledAppointment(false);
+//     setWalkinappointment(false);
+//     setFollowupAppointment(false);
+//   };
+
+//   const handleWalkinAppointmentClick = () => {
+//     setWalkinappointment(!walkinAppointment);
+//     setShowSlots(false);
+//     setBookedAppointment(false);
+//     setCompletedAppointment(false);
+//     setCanceledAppointment(false);
+//     setOnlineAppointment(false);
+//     setFollowupAppointment(false);
+//   };
+
+//   const handleFollowupAppointmentClick = () => {
+//     setFollowupAppointment(!followupAppointment);
+//     setShowSlots(false);
+//     setBookedAppointment(false);
+//     setCompletedAppointment(false);
+//     setCanceledAppointment(false);
+//     setOnlineAppointment(false);
+//     setWalkinappointment(false);
+//   };
+
+//   const getCardStyle = (isActive) => ({
+//     backgroundColor: isActive ? "#E8F4FD" : "white",
+//     borderRadius: "8px",
+//     cursor: "pointer",
+//     border: isActive ? "2px solid #0F518F" : "2px solid #DCD7C9",
+//   });
+
+//   return (
+//     <div className="doctor-container pt-5">
+//       <div className="d-flex justify-content-center align-items-center">
 //         <button
 //           className="btn btn-outline-primary me-3"
 //           onClick={handlePreviousDate}
 //         >
 //           &larr;
 //         </button>
-//         <h4 className="text-center">{formattedDate}</h4>
+//         <h5 className="text-center">{formattedDate}</h5>
 //         <button
 //           className="btn btn-outline-primary ms-3"
 //           onClick={handleNextDate}
@@ -2761,72 +3515,274 @@
 //         </button>
 //       </div>
 
-//       <Row className="text-center mt-4">
+//       <Row className="text-center mt-4 me-4 ms-4">
 //         <Col>
-//           <Card.Body>
-//             <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
-//               Appointments
-//             </Card.Title>
-//             <Card.Text style={{ fontWeight: "700" }}>
-//               {totalAppointments}
-//             </Card.Text>
-//           </Card.Body>
+//           <Card
+//             className="shadow-sm mb-4"
+//             onClick={handleTotalSlotClick}
+//             style={getCardStyle(showSlots)}
+//           >
+//             <Card.Body>
+//               <div className="d-flex align-items-center justify-content-center">
+//                 <img
+//                   src={slotcreated}
+//                   alt="Slot Created"
+//                   style={{ width: "30px", marginRight: "20px" }}
+//                 />
+//                 <div>
+//                   <h5
+//                     style={{
+//                       fontWeight: "700",
+//                       fontSize: "14px",
+//                       color: "#0F518F",
+//                     }}
+//                   >
+//                     Slots <br /> Created
+//                   </h5>
+//                   <p
+//                     style={{
+//                       fontWeight: "700",
+//                       fontSize: "14px",
+//                       color: "#0F518F",
+//                     }}
+//                   >
+//                     {totalAppointments}
+//                   </p>
+//                 </div>
+//               </div>
+//             </Card.Body>
+//           </Card>
 //         </Col>
+
 //         <Col>
-//           <Card.Body>
-//             <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
-//               Booked
-//             </Card.Title>
-//             <Card.Text style={{ fontWeight: "700" }}>
-//               {bookedAppointmentCount}
-//             </Card.Text>
-//           </Card.Body>
+//           <Card
+//             className="shadow-sm mb-4"
+//             onClick={handleBookedAppointmentClick}
+//             style={getCardStyle(bookedAppointment)}
+//           >
+//             <Card.Body>
+//               <div className="d-flex align-items-center justify-content-center">
+//                 <img
+//                   src={booked}
+//                   alt="Slot Created"
+//                   style={{ width: "30px", marginRight: "20px" }}
+//                 />
+//                 <div>
+//                   <h5
+//                     style={{
+//                       fontWeight: "700",
+//                       fontSize: "14px",
+//                       color: "#0F518F",
+//                     }}
+//                   >
+//                     Booked <br /> Appointments
+//                   </h5>
+//                   <p
+//                     style={{
+//                       fontWeight: "700",
+//                       fontSize: "14px",
+//                       color: "#0F518F",
+//                     }}
+//                   >
+//                     {bookedAppointmentCount}
+//                   </p>
+//                 </div>
+//               </div>
+//             </Card.Body>
+//           </Card>
 //         </Col>
+
 //         <Col>
-//           <Card.Body>
-//             <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
-//               Completed
-//             </Card.Title>
-//             <Card.Text style={{ fontWeight: "700" }}>
-//               {completedAppointmentsCount}
-//             </Card.Text>
-//           </Card.Body>
+//           <Card
+//             className="shadow-sm mb-4"
+//             onClick={handleCompletedAppointmentClick}
+//             style={getCardStyle(completedAppointment)}
+//           >
+//             <Card.Body>
+//               <div className="d-flex align-items-center justify-content-center">
+//                 <img
+//                   src={completed}
+//                   alt="Slot Created"
+//                   style={{ width: "30px", marginRight: "20px" }}
+//                 />
+//                 <div>
+//                   <h5
+//                     style={{
+//                       fontWeight: "700",
+//                       fontSize: "14px",
+//                       color: "#0F518F",
+//                     }}
+//                   >
+//                     Completed <br /> Appointments
+//                   </h5>
+//                   <p
+//                     style={{
+//                       fontWeight: "700",
+//                       fontSize: "14px",
+//                       color: "#0F518F",
+//                     }}
+//                   >
+//                     {completedAppointmentsCount}
+//                   </p>
+//                 </div>
+//               </div>
+//             </Card.Body>
+//           </Card>
 //         </Col>
+
 //         <Col>
-//           <Card.Body>
-//             <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
-//               Canceled
-//             </Card.Title>
-//             <Card.Text style={{ fontWeight: "700" }}>
-//               {canceledAppointmentsCount}
-//             </Card.Text>
-//           </Card.Body>
+//           <Card
+//             className="shadow-sm mb-4"
+//             onClick={handleCanceledAppointmentClick}
+//             style={getCardStyle(canceledAppointment)}
+//           >
+//             <Card.Body>
+//               <div className="d-flex align-items-center justify-content-center">
+//                 <img
+//                   src={canceled}
+//                   alt="Slot Created"
+//                   style={{ width: "30px", marginRight: "20px" }}
+//                 />
+//                 <div>
+//                   <h5
+//                     style={{
+//                       fontWeight: "700",
+//                       fontSize: "14px",
+//                       color: "#0F518F",
+//                     }}
+//                   >
+//                     Canceled <br /> Appointments
+//                   </h5>
+//                   <p
+//                     style={{
+//                       fontWeight: "700",
+//                       fontSize: "14px",
+//                       color: "#0F518F",
+//                     }}
+//                   >
+//                     {canceledAppointmentsCount}
+//                   </p>
+//                 </div>
+//               </div>
+//             </Card.Body>
+//           </Card>
 //         </Col>
+
 //         <Col>
-//           <Card.Body>
-//             <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
-//               Online
-//             </Card.Title>
-//             <Card.Text style={{ fontWeight: "700" }}>{onlineCount}</Card.Text>
-//           </Card.Body>
+//           <Card
+//             className="shadow-sm mb-4"
+//             onClick={handleOnlineAppointmentClick}
+//             style={getCardStyle(onlineAppointment)}
+//           >
+//             <Card.Body>
+//               <div className="d-flex align-items-center justify-content-center">
+//                 <img
+//                   src={online}
+//                   alt="Slot Created"
+//                   style={{ width: "30px", marginRight: "20px" }}
+//                 />
+//                 <div>
+//                   <h5
+//                     style={{
+//                       fontWeight: "700",
+//                       fontSize: "14px",
+//                       color: "#0F518F",
+//                     }}
+//                   >
+//                     Online <br /> Appointments
+//                   </h5>
+//                   <p
+//                     style={{
+//                       fontWeight: "700",
+//                       fontSize: "14px",
+//                       color: "#0F518F",
+//                     }}
+//                   >
+//                     {onlineCount}
+//                   </p>
+//                 </div>
+//               </div>
+//             </Card.Body>
+//           </Card>
 //         </Col>
+
 //         <Col>
-//           <Card.Body>
-//             <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
-//               Walk-Ins
-//             </Card.Title>
-//             <Card.Text style={{ fontWeight: "700" }}>{walkInCount}</Card.Text>
-//           </Card.Body>
+//           <Card
+//             className="shadow-sm mb-4"
+//             onClick={handleWalkinAppointmentClick}
+//             style={getCardStyle(walkinAppointment)}
+//           >
+//             <Card.Body>
+//               <div className="d-flex align-items-center justify-content-center">
+//                 <img
+//                   src={walkin}
+//                   alt="Slot Created"
+//                   style={{ width: "30px", marginRight: "20px" }}
+//                 />
+//                 <div>
+//                   <h5
+//                     style={{
+//                       fontWeight: "700",
+//                       fontSize: "14px",
+//                       color: "#0F518F",
+//                     }}
+//                   >
+//                     Walk-In <br /> Appointments
+//                   </h5>
+//                   <p
+//                     style={{
+//                       fontWeight: "700",
+//                       fontSize: "14px",
+//                       color: "#0F518F",
+//                     }}
+//                   >
+//                     {walkInCount}
+//                   </p>
+//                 </div>
+//               </div>
+//             </Card.Body>
+//           </Card>
 //         </Col>
+
 //         <Col>
-//           <Card.Body>
-//             <Card.Title style={{ fontSize: "18px", fontWeight: "700" }}>
-//               Follow-Ups
-//             </Card.Title>
-//             <Card.Text style={{ fontWeight: "700" }}>{followUpCount}</Card.Text>
-//           </Card.Body>
+//           <Card
+//             className="shadow-sm mb-4"
+//             onClick={handleFollowupAppointmentClick}
+//             style={getCardStyle(followupAppointment)}
+//           >
+//             <Card.Body>
+//               <div className="d-flex align-items-center justify-content-center">
+//                 <img
+//                   src={followup}
+//                   alt="Slot Created"
+//                   style={{ width: "30px", marginRight: "20px" }}
+//                 />
+//                 <div>
+//                   <h5
+//                     style={{
+//                       fontWeight: "700",
+//                       fontSize: "14px",
+//                       color: "#0F518F",
+//                     }}
+//                   >
+//                     Follow-Up <br /> Appointments
+//                   </h5>
+//                   <p
+//                     style={{
+//                       fontWeight: "700",
+//                       fontSize: "14px",
+//                       color: "#0F518F",
+//                     }}
+//                   >
+//                     {followUpCount}
+//                   </p>
+//                 </div>
+//               </div>
+//             </Card.Body>
+//           </Card>
 //         </Col>
 //       </Row>
+
 //       <hr />
 
 //       <div className="new">
@@ -2860,286 +3816,419 @@
 //         }
 //       `}</style>
 
-//         <div className="legend">
-//           <div>
-//             <span
-//               className="legend-dot"
-//               style={{ backgroundColor: "#16B12F" }}
-//             ></span>
-//             <span className="legend-text">Available</span>
-//           </div>
-//           <div>
-//             <span
-//               className="legend-dot"
-//               style={{ backgroundColor: "#229799" }}
-//             ></span>
-//             <span className="legend-text">Booked</span>
-//           </div>
-//           <div>
-//             <span
-//               className="legend-dot"
-//               style={{ backgroundColor: "#CB6040" }}
-//             ></span>
-//             <span className="legend-text">Blocked</span>
-//           </div>
-//           <div>
-//             <span
-//               className="legend-dot"
-//               style={{ backgroundColor: "#BC1B2E" }}
-//             ></span>
-//             <span className="legend-text">Canceled</span>
-//           </div>
-//         </div>
+//         {showSlots && (
+//           <>
+//             {/* <Row className="p-3">
+//               <Col>
+//                 <Card className="text-center" style={{ borderRadius: "5px" }}>
+//                   <Card.Body>
+//                     <h5 style={{ color: "#16B12F", fontWeight: "bold" }}>
+//                       Available: 3
+//                     </h5>
+//                   </Card.Body>
+//                 </Card>
+//               </Col>
 
-//         <Row>
-//           <Col className="ms-4">
-//             <div className="d-flex justify-content-between align-items-center mb-2">
-//               {morningSlots.length > 16 && (
-//                 <Button
-//                   variant="outline-primary"
-//                   onClick={handleMorningPrevious}
-//                   disabled={morningIndex === 0}
-//                 >
-//                   <BsChevronLeft />
-//                 </Button>
-//               )}
-//               <h5 className="text-center flex-grow-1 mb-0">Morning</h5>
-//               {morningSlots.length > 16 && (
-//                 <Button
-//                   variant="outline-primary"
-//                   onClick={handleMorningNext}
-//                   disabled={
-//                     morningIndex >=
-//                     Math.ceil(morningSlots.length / (slotsPerPage * 4)) - 1
-//                   }
-//                 >
-//                   <BsChevronRight />
-//                 </Button>
-//               )}
+//               <Col>
+//                 <Card className="text-center" style={{ borderRadius: "5px" }}>
+//                   <Card.Body>
+//                     <h5 style={{ color: "#229799", fontWeight: "bold" }}>
+//                       Booked: 12
+//                     </h5>
+//                   </Card.Body>
+//                 </Card>
+//               </Col>
+
+//               <Col>
+//                 <Card className="text-center" style={{ borderRadius: "5px" }}>
+//                   <Card.Body>
+//                     <h5 style={{ color: "#CB6040", fontWeight: "bold" }}>
+//                       Blocked: 1
+//                     </h5>
+//                   </Card.Body>
+//                 </Card>
+//               </Col>
+
+//               <Col>
+//                 <Card className="text-center" style={{ borderRadius: "5px" }}>
+//                   <Card.Body>
+//                     <h5 style={{ color: "#BC1B2E", fontWeight: "bold" }}>
+//                       Canceled: 2
+//                     </h5>
+//                   </Card.Body>
+//                 </Card>
+//               </Col>
+//             </Row> */}
+
+//             <div
+//               className="d-flex justify-content-center align-items-center border rounded shadow-sm mx-auto text-sm"
+//               style={{
+//                 width: "fit-content",
+//                 fontSize: "1.2rem",
+//                 margin: "10px auto",
+//               }}
+//             >
+//               <div
+//                 className="px-4 py-2 border-end fw-semibold"
+//                 style={{ color: "#0A9013" }}
+//               >
+//                 Available: {availableAppointmentsCount}
+//               </div>
+//               <div
+//                 className="px-4 py-2 border-end fw-semibold"
+//                 style={{ color: "#1261AA" }}
+//               >
+//                 Booked: {bookedAppointmentCount}
+//               </div>
+//               <div
+//                 className="px-4 py-2 border-end fw-semibold"
+//                 style={{ color: "#F16215" }}
+//               >
+//                 Blocked: {blockedAppointmentsCount}
+//               </div>
+//               <div
+//                 className="px-4 py-2 border-end fw-semibold"
+//                 style={{ color: "#FF6767" }}
+//               >
+//                 Canceled: {canceledAppointmentsCount}
+//               </div>
 //             </div>
-//             {morningSlots.length > 0 ? (
-//               renderSlotCards(morningSlots, morningIndex)
-//             ) : (
-//               <p className="text-center text-danger mt-4">
-//                 Slots are not available in the morning.
-//               </p>
-//             )}
-//           </Col>
-//           <Col className="ms-4">
-//             <div className="d-flex justify-content-between align-items-center mb-2">
-//               {afternoonSlots.length > 16 && (
-//                 <Button
-//                   variant="outline-primary"
-//                   onClick={handleAfternoonPrevious}
-//                   disabled={afternoonIndex === 0}
-//                 >
-//                   <BsChevronLeft />
-//                 </Button>
-//               )}
-//               <h5 className="text-center flex-grow-1 mb-0">Afternoon</h5>
-//               {afternoonSlots.length > 16 && (
-//                 <Button
-//                   variant="outline-primary"
-//                   onClick={handleAfternoonNext}
-//                   disabled={
-//                     afternoonIndex >=
-//                     Math.ceil(afternoonSlots.length / (slotsPerPage * 4)) - 1
-//                   }
-//                 >
-//                   <BsChevronRight />
-//                 </Button>
-//               )}
-//             </div>
-//             {afternoonSlots.length > 0 ? (
-//               renderSlotCards(afternoonSlots, afternoonIndex)
-//             ) : (
-//               <p className="text-center text-danger mt-4">
-//                 Slots are not available in the afternoon.
-//               </p>
-//             )}
-//           </Col>
-//           <Col className="ms-4">
-//             <div className="d-flex justify-content-between align-items-center mb-2">
-//               {eveningSlots.length > 16 && (
-//                 <Button
-//                   variant="outline-primary"
-//                   onClick={handleEveningPrevious}
-//                   disabled={eveningIndex === 0}
-//                 >
-//                   <BsChevronLeft />
-//                 </Button>
-//               )}
-//               <h5 className="text-center flex-grow-1 mb-0">Evening</h5>
-//               {eveningSlots.length > 16 && (
-//                 <Button
-//                   variant="outline-primary"
-//                   onClick={handleEveningNext}
-//                   disabled={
-//                     eveningIndex >=
-//                     Math.ceil(eveningSlots.length / (slotsPerPage * 4)) - 1
-//                   }
-//                 >
-//                   <BsChevronRight />
-//                 </Button>
-//               )}
-//             </div>
-//             {eveningSlots.length > 0 ? (
-//               renderSlotCards(eveningSlots, eveningIndex)
-//             ) : (
-//               <p className="text-center text-danger mt-4">
-//                 Slots are not available in the evening.
-//               </p>
-//             )}
-//           </Col>
-//         </Row>
-//         <hr />
+
+//             <Row className="p-3">
+//               <Col>
+//                 <h5 className="text-center mb-3">Morning</h5>
+//                 {morningSlots.length > 0 ? (
+//                   renderSlotCards(morningSlots)
+//                 ) : (
+//                   <p style={{ color: "red", textAlign: "center" }}>
+//                     Slots are not available
+//                   </p>
+//                 )}
+//               </Col>
+//               <Col>
+//                 <h5 className="text-center mb-3">Afternoon</h5>
+//                 {afternoonSlots.length > 0 ? (
+//                   renderSlotCards(afternoonSlots)
+//                 ) : (
+//                   <p style={{ color: "red", textAlign: "center" }}>
+//                     Slots are not available
+//                   </p>
+//                 )}
+//               </Col>
+//               <Col>
+//                 <h5 className="text-center mb-3">Evening</h5>
+//                 {eveningSlots.length > 0 ? (
+//                   renderSlotCards(eveningSlots)
+//                 ) : (
+//                   <p style={{ color: "red", textAlign: "center" }}>
+//                     Slots are not available
+//                   </p>
+//                 )}
+//               </Col>
+//             </Row>
+//             <hr />
+//           </>
+//         )}
 //       </div>
 
-//       <h3 className="text-center">Today's Appointments</h3>
-//       <div className="legend">
-//         <div>
-//           <span
-//             className="legend-dot"
-//             style={{ backgroundColor: "#2D9CED" }}
-//           ></span>
-//           <span className="legend-text">New Appointment</span>
-//         </div>
-//         <div>
-//           <span
-//             className="legend-dot"
-//             style={{ backgroundColor: "#FB8369" }}
-//           ></span>
-//           <span className="legend-text">Follow-Up</span>
-//         </div>
-//       </div>
-//       <Row className="mb-4 text-center align-items-center justify-content-center appointment-list">
-//         {todayAppointments.length > 4 && currentIndex > 0 && (
-//           <Col xs="auto">
-//             <Button
-//               variant="outline-primary"
-//               onClick={handlePrevious}
-//               disabled={currentIndex === 0}
-//             >
-//               <BsChevronLeft />
-//             </Button>
-//           </Col>
-//         )}
-//         {todayAppointments.length > 0 ? (
-//           renderAppointments()
-//         ) : (
-//           <Col xs="auto" className="d-flex justify-content-center mt-3">
+//       {bookedAppointment && (
+//         <>
+//           <div
+//             className="d-flex justify-content-center align-items-center border rounded shadow-sm mx-auto text-sm"
+//             style={{
+//               width: "fit-content",
+//               fontSize: "1.2rem",
+//               margin: "10px auto",
+//             }}
+//           >
 //             <div
-//               className="alert alert-danger p-2"
-//               style={{ maxWidth: "350px", display: "inline-block" }}
-//               role="alert"
+//               className="px-4 py-2 border-end fw-semibold"
+//               style={{ color: "#FF7F50" }}
 //             >
-//               {"No appointments available for today."}
+//               New Appointments: ---
 //             </div>
-//           </Col>
-//         )}
-//         {todayAppointments.length > 4 &&
-//           currentIndex < todayAppointments.length - 4 && (
-//             <Col xs="auto">
-//               <Button
-//                 variant="outline-primary"
-//                 onClick={handleNext}
-//                 disabled={currentIndex >= todayAppointments.length - 4}
-//               >
-//                 <BsChevronRight />
-//               </Button>
-//             </Col>
-//           )}
-//       </Row>
-//       {selectedTodayAppointment &&
-//         renderSelectedAppointmentDetails(selectedTodayAppointment)}
-//       <hr />
+//             <div className="px-4 py-2 fw-semibold" style={{ color: "#1ABC9C" }}>
+//               Follow-Ups: {followUpCount}
+//             </div>
+//           </div>
 
-//       <h3 className="text-center">Completed Appointments</h3>
-//       <Row className="mb-4 text-center align-items-center justify-content-center">
-//         {completedAppointments.length > 4 && completedIndex > 0 && (
-//           <Col xs="auto">
-//             <Button
-//               variant="outline-primary"
-//               onClick={handleCompletedPrevious}
-//               disabled={completedIndex === 0}
-//             >
-//               <BsChevronLeft />
-//             </Button>
-//           </Col>
-//         )}
-//         {completedAppointments.length > 0 ? (
-//           renderCompletedAppointments()
-//         ) : (
-//           <Col xs="auto" className="d-flex justify-content-center mt-3">
-//             <div
-//               className="alert alert-danger p-2"
-//               style={{ maxWidth: "350px", display: "inline-block" }}
-//               role="alert"
-//             >
-//               {"No completed appointments available."}
-//             </div>
-//           </Col>
-//         )}
-//         {completedAppointments.length > 4 &&
-//           completedIndex < completedAppointments.length - 4 && (
-//             <Col xs="auto">
-//               <Button
-//                 variant="outline-primary"
-//                 onClick={handleCompletedNext}
-//                 disabled={completedIndex >= completedAppointments.length - 4}
+//           {todayAppointments.length > 0 ? (
+//             renderAppointments()
+//           ) : (
+//             <div className="d-flex justify-content-center mt-3">
+//               <div
+//                 className="alert alert-danger p-2"
+//                 style={{ maxWidth: "350px", display: "inline-block" }}
+//                 role="alert"
 //               >
-//                 <BsChevronRight />
-//               </Button>
-//             </Col>
+//                 {"No appointments available for today."}
+//               </div>
+//             </div>
 //           )}
-//       </Row>
-//       {selectedCompletedAppointment &&
-//         renderSelectedAppointmentDetails(selectedCompletedAppointment)}
-//       <hr />
 
-//       <h3 className="text-center">Canceled Appointments</h3>
-//       <Row className="mb-4 text-center align-items-center justify-content-center">
-//         {canceledAppointments.length > 4 && canceledIndex > 0 && (
-//           <Col xs="auto">
-//             <Button
-//               variant="outline-primary"
-//               onClick={handleCanceledPrevious}
-//               disabled={canceledIndex === 0}
-//             >
-//               <BsChevronLeft />
-//             </Button>
-//           </Col>
-//         )}
-//         {canceledAppointments.length > 0 ? (
-//           renderCanceledAppointments()
-//         ) : (
-//           <Col xs="auto" className="d-flex justify-content-center mt-3">
+//           {selectedTodayAppointment &&
+//             renderSelectedAppointmentDetails(selectedTodayAppointment)}
+
+//           {/* <hr /> */}
+//         </>
+//       )}
+
+//       {completedAppointment && (
+//         <>
+//           <div
+//             className="d-flex justify-content-center align-items-center border rounded shadow-sm mx-auto text-sm"
+//             style={{
+//               width: "fit-content",
+//               fontSize: "1.2rem",
+//               margin: "10px auto",
+//             }}
+//           >
 //             <div
-//               className="alert alert-danger p-2"
-//               style={{ maxWidth: "350px", display: "inline-block" }}
-//               role="alert"
+//               className="px-4 py-2 border-end fw-semibold"
+//               style={{ color: "#80C116" }}
 //             >
-//               {"No canceled appointments available."}
+//               Completed Appointments: {completedAppointmentsCount}
 //             </div>
-//           </Col>
-//         )}
-//         {canceledAppointments.length > 4 &&
-//           canceledIndex < canceledAppointments.length - 4 && (
-//             <Col xs="auto">
-//               <Button
-//                 variant="outline-primary"
-//                 onClick={handleCanceledNext}
-//                 disabled={canceledIndex >= canceledAppointments.length - 4}
-//               >
-//                 <BsChevronRight />
-//               </Button>
-//             </Col>
-//           )}
-//       </Row>
+//           </div>
+//           <Row className="mb-4 text-center align-items-center justify-content-center">
+//             {completedAppointments.length > 4 && completedIndex > 0 && (
+//               <Col xs="auto">
+//                 <Button
+//                   variant="outline-primary"
+//                   onClick={handleCompletedPrevious}
+//                   disabled={completedIndex === 0}
+//                 >
+//                   <BsChevronLeft />
+//                 </Button>
+//               </Col>
+//             )}
+//             {completedAppointments.length > 0 ? (
+//               renderCompletedAppointments()
+//             ) : (
+//               <Col xs="auto" className="d-flex justify-content-center mt-3">
+//                 <div
+//                   className="alert alert-danger p-2"
+//                   style={{ maxWidth: "350px", display: "inline-block" }}
+//                   role="alert"
+//                 >
+//                   {"No completed appointments available."}
+//                 </div>
+//               </Col>
+//             )}
+//             {completedAppointments.length > 4 &&
+//               completedIndex < completedAppointments.length - 4 && (
+//                 <Col xs="auto">
+//                   <Button
+//                     variant="outline-primary"
+//                     onClick={handleCompletedNext}
+//                     disabled={
+//                       completedIndex >= completedAppointments.length - 4
+//                     }
+//                   >
+//                     <BsChevronRight />
+//                   </Button>
+//                 </Col>
+//               )}
+//           </Row>
+//           {selectedCompletedAppointment &&
+//             renderSelectedAppointmentDetails(selectedCompletedAppointment)}
+//           {/* <hr /> */}
+//         </>
+//       )}
+
+//       {canceledAppointment && (
+//         <>
+//           <div
+//             className="d-flex justify-content-center align-items-center border rounded shadow-sm mx-auto text-sm"
+//             style={{
+//               width: "fit-content",
+//               fontSize: "1.2rem",
+//               margin: "10px auto",
+//             }}
+//           >
+//             <div
+//               className="px-4 py-2 border-end fw-semibold"
+//               style={{ color: "#FF3535" }}
+//             >
+//               Canceled Appointments: {canceledAppointmentsCount}
+//             </div>
+//           </div>
+//           <Row className="mb-4 text-center align-items-center justify-content-center">
+//             {canceledAppointments.length > 4 && canceledIndex > 0 && (
+//               <Col xs="auto">
+//                 <Button
+//                   variant="outline-primary"
+//                   onClick={handleCanceledPrevious}
+//                   disabled={canceledIndex === 0}
+//                 >
+//                   <BsChevronLeft />
+//                 </Button>
+//               </Col>
+//             )}
+//             {canceledAppointments.length > 0 ? (
+//               renderCanceledAppointments()
+//             ) : (
+//               <Col xs="auto" className="d-flex justify-content-center mt-3">
+//                 <div
+//                   className="alert alert-danger p-2"
+//                   style={{ maxWidth: "350px", display: "inline-block" }}
+//                   role="alert"
+//                 >
+//                   {"No canceled appointments available."}
+//                 </div>
+//               </Col>
+//             )}
+//             {canceledAppointments.length > 4 &&
+//               canceledIndex < canceledAppointments.length - 4 && (
+//                 <Col xs="auto">
+//                   <Button
+//                     variant="outline-primary"
+//                     onClick={handleCanceledNext}
+//                     disabled={canceledIndex >= canceledAppointments.length - 4}
+//                   >
+//                     <BsChevronRight />
+//                   </Button>
+//                 </Col>
+//               )}
+//           </Row>
+//         </>
+//       )}
 //       {selectedCanceledAppointment &&
 //         renderSelectedAppointmentDetails(selectedCanceledAppointment)}
 
-//   <Modal
+//       {/* {onlineAppointment && (
+//         <>
+//          <div
+//             className="d-flex justify-content-center align-items-center border rounded shadow-sm mx-auto text-sm"
+//             style={{
+//               width: "fit-content",
+//               fontSize: "1.2rem",
+//               margin: "10px auto",
+//             }}
+//           >
+//             <div
+//               className="px-4 py-2 border-end fw-semibold"
+//               style={{ color: "#AA56FF" }}
+//             >
+//               Online Appointments:
+//             </div>
+//           </div>
+//         </>
+//       )}
+
+//       {walkinAppointment && (
+//         <>
+//          <div
+//             className="d-flex justify-content-center align-items-center border rounded shadow-sm mx-auto text-sm"
+//             style={{
+//               width: "fit-content",
+//               fontSize: "1.2rem",
+//               margin: "10px auto",
+//             }}
+//           >
+//             <div
+//               className="px-4 py-2 border-end fw-semibold"
+//               style={{ color: "#BFAF18" }}
+//             >
+//               Walk-in Appointments:
+//             </div>
+//           </div>
+//         </>
+//       )}
+
+//       {followupAppointment && (
+//         <>
+//           <div
+//             className="d-flex justify-content-center align-items-center border rounded shadow-sm mx-auto text-sm"
+//             style={{
+//               width: "fit-content",
+//               fontSize: "1.2rem",
+//               margin: "10px auto",
+//             }}
+//           >
+//             <div
+//               className="px-4 py-2 border-end fw-semibold"
+//               style={{ color: "#12C81E" }}
+//             >
+//               Follow-up Appointments:
+//             </div>
+//           </div>
+//         </>
+//       )} */}
+
+//       {onlineAppointment && (
+//         <>
+//           <div
+//             className="d-flex justify-content-center align-items-center border rounded shadow-sm mx-auto text-sm"
+//             style={{
+//               width: "fit-content",
+//               fontSize: "1.2rem",
+//               margin: "10px auto",
+//             }}
+//           >
+//             <div
+//               className="px-4 py-2 border-end fw-semibold"
+//               style={{ color: "#AA56FF" }}
+//             >
+//               Online Appointments: {onlineCount}
+//             </div>
+//           </div>
+//           {renderWalkinOnlineFollowupAppointments(onlineAppointments, "online")}
+//         </>
+//       )}
+// {selectedOnlineAppointment && renderSelectedAppointmentDetails()}
+
+//       {walkinAppointment && (
+//         <>
+//           <div
+//             className="d-flex justify-content-center align-items-center border rounded shadow-sm mx-auto text-sm"
+//             style={{
+//               width: "fit-content",
+//               fontSize: "1.2rem",
+//               margin: "10px auto",
+//             }}
+//           >
+//             <div
+//               className="px-4 py-2 border-end fw-semibold"
+//               style={{ color: "#BFAF18" }}
+//             >
+//               Walk-in Appointments: {walkInCount}
+//             </div>
+//           </div>
+//           {renderWalkinOnlineFollowupAppointments(
+//             walkinAppointments,
+//             "walk-in"
+//           )}
+//         </>
+//       )}
+//       {selectedWalkinAppointment && renderSelectedAppointmentDetails()}
+
+//       {followupAppointment && (
+//         <>
+//           <div
+//             className="d-flex justify-content-center align-items-center border rounded shadow-sm mx-auto text-sm"
+//             style={{
+//               width: "fit-content",
+//               fontSize: "1.2rem",
+//               margin: "10px auto",
+//             }}
+//           >
+//             <div
+//               className="px-4 py-2 border-end fw-semibold"
+//               style={{ color: "#12C81E" }}
+//             >
+//               Follow-up Appointments:  {followUpCount}
+//             </div>
+//           </div>
+//           {renderWalkinOnlineFollowupAppointments(
+//             followupAppointments,
+//             "follow-up"
+//           )}
+//         </>
+//       )}
+//      {selectedFollowupAppointment && renderSelectedAppointmentDetails()}
+
+//       <Modal
 //         show={showCompletedModal}
 //         onHide={() => setShowCompletedModal(false)}
 //       >
@@ -3187,7 +4276,10 @@
 //             <>
 //               <p>
 //                 <strong>Appointment Date:</strong>{" "}
-//                 {format(new Date(selectedAppointment.appointment_date), "dd/MM/yyyy")}
+//                 {format(
+//                   new Date(selectedAppointment.appointment_date),
+//                   "dd/MM/yyyy"
+//                 )}
 //               </p>
 //               <p>
 //                 <strong>Appointment Slot:</strong>{" "}
@@ -3219,7 +4311,10 @@
 //         <Modal.Body>
 //           <p>
 //             Are you sure you want to{" "}
-//             {confirmAction === "endVisit" ? "end this visit" : "cancel this appointment"} ?
+//             {confirmAction === "endVisit"
+//               ? "end this visit"
+//               : "cancel this appointment"}{" "}
+//             ?
 //           </p>
 //         </Modal.Body>
 //         <Modal.Footer>
@@ -3238,7 +4333,11 @@
 //       <Modal show={showFormModal} onHide={toggleFormModal} centered>
 //         <Modal.Header closeButton>
 //           <Modal.Title>
-//             {isPrescriptionDocs ? "Upload Document Files" : editingRecordId ? "Edit Medical Record" : "Upload Medical Record"}
+//             {isPrescriptionDocs
+//               ? "Upload Document Files"
+//               : editingRecordId
+//                 ? "Edit Medical Record"
+//                 : "Upload Medical Record"}
 //           </Modal.Title>
 //         </Modal.Header>
 //         <Modal.Body>
@@ -3280,7 +4379,9 @@
 //               <div className="d-flex">
 //                 <Button
 //                   variant={
-//                     formData.document_type === "report" ? "primary" : "outline-primary"
+//                     formData.document_type === "report"
+//                       ? "primary"
+//                       : "outline-primary"
 //                   }
 //                   className="me-2"
 //                   onClick={() =>
@@ -3291,7 +4392,9 @@
 //                 </Button>
 //                 <Button
 //                   variant={
-//                     formData.document_type === "invoice" ? "primary" : "outline-primary"
+//                     formData.document_type === "invoice"
+//                       ? "primary"
+//                       : "outline-primary"
 //                   }
 //                   onClick={() =>
 //                     setFormData({ ...formData, document_type: "invoice" })
@@ -3380,51 +4483,30 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FaSyncAlt } from "react-icons/fa";
+import slotcreated from "../../images/slotcreated.png";
+import booked from "../../images/booked.png";
+import completed from "../../images/completed.png";
+import canceled from "../../images/canceled.png";
+import online from "../../images/online.png";
+import walkin from "../../images/walkin.png";
+import followup from "../../images/followup.png";
+import Sidebar from "./Sidebar";
 
 const DoctorHome = () => {
   const [totalAppointments, setTotalAppointments] = useState();
   const [bookedAppointmentCount, setBookedAppointmentCount] = useState();
+  const [availableAppointmentsCount, setAvailableAppointmentCount] = useState();
   const [completedAppointmentsCount, setCompletedAppointmentsCount] =
     useState();
   const [canceledAppointmentsCount, setCanceledAppointmentsCount] = useState();
+  const [blockedAppointmentsCount, setBlockedAppointmentsCount] = useState();
   const [walkInCount, setWalkInCount] = useState();
   const [onlineCount, setOnlineCount] = useState();
   const [followUpCount, setFollowUpCount] = useState();
 
-  const [clinicPhoto, setClinicPhoto] = useState(null);
-  const [clinicName, setClinicName] = useState();
-  const mobileNumber = useState(null);
   const [loading, setLoading] = useState(false);
   const isPrescriptionDocs = useState(false);
   const editingRecordId = useState(null);
-
-  const fetchClinicDetails = async () => {
-    try {
-      const response = await BaseUrl.get(`/doctor/opddays/`, {
-        params: {
-          doctor_id: doctorId,
-          mobile_number: mobileNumber,
-        },
-      });
-      if (response.status === 200 && response.data.length > 0) {
-        const data = response.data[0];
-        setClinicName(data.clinic_name);
-
-        if (data.doc_file) {
-          const fullImageUrl = `${BaseUrl.defaults.baseURL}${data.doc_file}`;
-          setClinicPhoto(fullImageUrl);
-        } else {
-          setClinicPhoto("");
-        }
-      } else {
-        setClinicName("");
-        setClinicPhoto("");
-      }
-    } catch (error) {
-      setClinicName("");
-      setClinicPhoto("");
-    }
-  };
 
   const [doctorId, setDoctorId] = useState(null);
   const [todayAppointments, setTodayAppointments] = useState([]);
@@ -3466,6 +4548,7 @@ const DoctorHome = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const [selectedTodayAppointment, setSelectedTodayAppointment] =
     useState(null);
@@ -3473,6 +4556,19 @@ const DoctorHome = () => {
     useState(null);
   const [selectedCanceledAppointment, setSelectedCanceledAppointment] =
     useState(null);
+  const [selectedOnlineAppointment, setSelectedOnlineAppointment] =
+    useState(null);
+  const [selectedWalkinAppointment, setSelectedWalkinAppointment] =
+    useState(null);
+  const [selectedFollowupAppointment, setSelectedFollowupAppointment] =
+    useState(null);
+
+  const [selectedMenu, setSelectedMenu] = useState("Dashboard");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const handleMenuClick = (menu) => {
+    setSelectedMenu(menu);
+  };
 
   const handleClose = () => setShowModal(false);
   const [modalContent, setModalContent] = useState("");
@@ -3521,6 +4617,8 @@ const DoctorHome = () => {
         setBookedAppointmentCount(data["Booked Appointments"]);
         setCanceledAppointmentsCount(data["Canceled Appointments"]);
         setCompletedAppointmentsCount(data["Completed Appointments"]);
+        setBlockedAppointmentsCount(data["blocked_appointments"]);
+        setAvailableAppointmentCount(data["available_appointments"]);
         setWalkInCount(data["Walk-In"]);
         setOnlineCount(data["Online"]);
         setFollowUpCount(data["Follow-Up"]);
@@ -3568,26 +4666,67 @@ const DoctorHome = () => {
     [doctorId, currentDate]
   );
 
-  const fetchAllAppointments = useCallback(async () => {
-    try {
-      const response = await BaseUrl.get(`/reception/allappointments/`, {
-        params: { doctor_id: doctorId },
-      });
-      const appointments = response.data;
-      const todayAppointments = appointments.filter(
-        (app) => !app.is_complete && !app.is_canceled
-      );
-      const completedAppointments = appointments.filter(
-        (app) => app.is_complete
-      );
-      const canceledAppointments = appointments.filter(
-        (app) => app.is_canceled
-      );
-      setTodayAppointments(todayAppointments);
-      setCompletedAppointments(completedAppointments);
-      setCanceledAppointments(canceledAppointments);
-    } catch (error) {}
-  }, [doctorId]);
+  const fetchAllAppointments = useCallback(
+    async (date = currentDate) => {
+      try {
+        const formattedDate = format(date, "yyyy-MM-dd");
+        const response = await BaseUrl.get(`/reception/allappointments/`, {
+          params: { doctor_id: doctorId, date: formattedDate },
+        });
+
+        // Check if the response status is 200
+        if (response.status === 200) {
+          const appointments = response.data;
+
+          const todayAppointments = appointments.filter(
+            (app) => !app.is_complete && !app.is_canceled
+          );
+          const completedAppointments = appointments.filter(
+            (app) => app.is_complete
+          );
+          const canceledAppointments = appointments.filter(
+            (app) => app.is_canceled
+          );
+
+          const onlineAppointments = appointments.filter(
+            (app) => app.appointment_type === "online"
+          );
+          const walkinAppointments = appointments.filter(
+            (app) => app.appointment_type === "walk-in"
+          );
+          const followupAppointments = appointments.filter(
+            (app) => app.appointment_type === "follow-up"
+          );
+
+          setTodayAppointments(todayAppointments);
+          setCompletedAppointments(completedAppointments);
+          setCanceledAppointments(canceledAppointments);
+
+          setOnlineAppointments(onlineAppointments);
+          setWalkinAppointments(walkinAppointments);
+          setFollowupAppointments(followupAppointments);
+        } else {
+          // If response status is not 200, clear all appointments
+          setTodayAppointments([]);
+          setCompletedAppointments([]);
+          setCanceledAppointments([]);
+          setOnlineAppointments([]);
+          setWalkinAppointments([]);
+          setFollowupAppointments([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch appointments", error);
+        // In case of an error, clear all appointments
+        setTodayAppointments([]);
+        setCompletedAppointments([]);
+        setCanceledAppointments([]);
+        setOnlineAppointments([]);
+        setWalkinAppointments([]);
+        setFollowupAppointments([]);
+      }
+    },
+    [doctorId, currentDate]
+  );
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -3598,10 +4737,11 @@ const DoctorHome = () => {
   }, []);
 
   useEffect(() => {
-    fetchSlots();
-    fetchAllAppointments();
-    fetchClinicDetails();
-    fetchAppointmentCounts();
+    if (doctorId) {
+      fetchSlots();
+      fetchAllAppointments();
+      fetchAppointmentCounts();
+    }
   }, [doctorId, currentDate]);
 
   const handlePreviousDate = () => {
@@ -3742,7 +4882,7 @@ const DoctorHome = () => {
     const hasPrescriptions = prescriptionData && prescriptionData.length > 0;
     return (
       <div style={{ padding: "20px" }}>
-        {successMessage && (
+        {/* {successMessage && (
           <div className="alert alert-success text-center" role="alert">
             {successMessage}
           </div>
@@ -3756,7 +4896,7 @@ const DoctorHome = () => {
           <div className="alert alert-danger text-center" role="alert">
             {fetchError}
           </div>
-        )}
+        )} */}
         {hasPrescriptions ? (
           prescriptionData.map((result, index) => (
             <div key={result.id} className="mb-3 position-relative">
@@ -4237,7 +5377,7 @@ const DoctorHome = () => {
   const renderPatientDetails = () => {
     return (
       <div>
-        {successMessage && (
+        {/* {successMessage && (
           <div className="alert alert-success text-center" role="alert">
             {successMessage}
           </div>
@@ -4251,7 +5391,7 @@ const DoctorHome = () => {
           <div className="alert alert-danger text-center" role="alert">
             {fetchError}
           </div>
-        )}
+        )} */}
 
         <Row className="mt-3">
           <Col md={3}>
@@ -4513,7 +5653,7 @@ const DoctorHome = () => {
   const renderVitalsData = () => {
     return (
       <div style={{ padding: "20px" }}>
-        {vitalsSuccessMessage && (
+        {/* {vitalsSuccessMessage && (
           <div className="alert alert-success text-center" role="alert">
             {vitalsSuccessMessage}
           </div>
@@ -4522,7 +5662,7 @@ const DoctorHome = () => {
           <div className="alert alert-danger text-center" role="alert">
             {vitalsErrorMessage}
           </div>
-        )}
+        )} */}
         <Row>
           <Col md={3}>
             <Form.Group controlId="formBasicTemperature">
@@ -4766,7 +5906,7 @@ const DoctorHome = () => {
   const renderSymptomsData = () => {
     return (
       <div>
-        {loading && <div className="loader">Loading...</div>}
+        {/* {loading && <div className="loader">Loading...</div>}
         {successMessage && (
           <div className="alert alert-success text-center" role="alert">
             {successMessage}
@@ -4781,7 +5921,7 @@ const DoctorHome = () => {
           <div className="alert alert-danger text-center" role="alert">
             {fetchError}
           </div>
-        )}
+        )} */}
 
         <Form inline className="mb-3">
           <Form.Group
@@ -5238,8 +6378,11 @@ const DoctorHome = () => {
     }
   };
 
+  const [patientId, setPatientId] = useState(null);
+
   // const handleDocumentsClick = async () => {
   //   setSelectedHeading("documents");
+  //   await handleRecordView(selectedAppointmentId);
   //   if (selectedAppointmentId && formattedDate) {
   //     try {
   //       const formattedDate = selectedAppointmentDate
@@ -5255,6 +6398,7 @@ const DoctorHome = () => {
   //           },
   //         }
   //       );
+
   //       if (response.status === 200 && response.data.length > 0) {
   //         setDocumentsData(response.data);
   //         setDisplayedData("documents");
@@ -5277,17 +6421,20 @@ const DoctorHome = () => {
   //   }
   // };
 
-  const [patientId, setPatientId] = useState(null);
-
   const handleDocumentsClick = async () => {
     setSelectedHeading("documents");
 
     if (selectedAppointmentId && formattedDate) {
       try {
+        await handleRecordView(selectedAppointmentId);
         const formattedDate = selectedAppointmentDate
           ? new Date(selectedAppointmentDate).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0];
 
+        if (isNaN(new Date(selectedAppointmentDate))) {
+          setError("Invalid date provided.");
+          return;
+        }
         const response = await BaseUrl.get(
           `/patient/patientdocumentusingappointmentid/`,
           {
@@ -5297,14 +6444,10 @@ const DoctorHome = () => {
             },
           }
         );
-
+        
         if (response.status === 200 && response.data.length > 0) {
           setDocumentsData(response.data);
           setDisplayedData("documents");
-          if (response.data.length > 0) {
-            const patientName = response.data[0].patient_name;
-            await handleRecordView(patientId, patientName);
-          }
         } else {
           setDocumentsData([]);
           setDisplayedData("documents");
@@ -5524,330 +6667,61 @@ const DoctorHome = () => {
 
   const [showMore, setShowMore] = useState(false); // State to toggle "Show More"
 
-  const handleRecordView = async (patientId, patientName) => {
-    setLoading(true); // Start loading indicator
+  const handleRecordView = async () => {
+    setLoading(true);
 
     try {
-      // Decode token to get doctor_id
-      const token = localStorage.getItem("token"); // Retrieve the token from localStorage
-      const decodedToken = jwtDecode(token);
-      const doctorId = decodedToken?.doctor_id;
-
-      if (!doctorId) {
-        setErrorMessage("Doctor ID not available. Please log in again.");
-        return;
-      }
-
-      // API call
       const response = await BaseUrl.get(`/doctorappointment/whatsappreport/`, {
         params: {
-          patient_id: patientId,
-          doctor_id: doctorId,
-          patient_name: patientDetails.name, // Include the patient name
+          appointment_id: selectedAppointmentId,
         },
       });
 
       if (response.status === 200) {
-        const reports = response.data?.reports || [];
-        setWhatsappReport(reports); // Update state with fetched reports
-        setSuccessMessage("Medical record fetched successfully.");
-        setErrorMessage("");
+        const reports = response.data?.webhook_data || [];
+        setWhatsappReport(reports);
       } else {
         setErrorMessage(
           response.data?.error || "Failed to fetch medical record."
         );
-        setSuccessMessage("");
       }
     } catch (error) {
       setErrorMessage(error.response?.data?.error || "An error occurred.");
-      setSuccessMessage("");
     } finally {
-      setLoading(false); // Stop loading indicator
+      setLoading(false);
     }
   };
 
-  const deleteRecord = async (id) => {
+  const deleteRecord = async (appointmentId) => {
     try {
+      setLoading(true);
+
+      // Create a FormData object to send the ID as a form parameter
+      const formData = new FormData();
+      formData.append("id", appointmentId);
+
+      // Send DELETE request with form data as the body
       const response = await BaseUrl.delete(
         "/doctorappointment/whatsappreport/",
         {
-          data: { id },
+          data: formData, // Send the form data in the body
         }
       );
 
-      if (response.status === 200) {
-        alert("Record deleted successfully");
-        setWhatsappReport((prevPhotos) =>
-          prevPhotos.filter((photo) => photo.id !== id)
+      if (response.status === 200 || response.status === 400) {
+        handleRecordView();
+        setWhatsappReport((prevReports) =>
+          prevReports.filter(
+            (report) => report.appointment_id !== appointmentId
+          )
         );
-      } else {
-        alert("Error deleting record");
       }
     } catch (error) {
       alert("Failed to delete record");
+    } finally {
+      setLoading(false);
     }
   };
-
-  // const renderDocumentsData = () => {
-  //   const visibleReports = showMore
-  //     ? whatsappReport
-  //     : whatsappReport.slice(0, 6);
-
-  //   return (
-  //     <div>
-  //       {successMessage && (
-  //         <div className="alert alert-success text-center" role="alert">
-  //           {successMessage}
-  //         </div>
-  //       )}
-  //       {errorMessage && (
-  //         <div className="alert alert-danger text-center" role="alert">
-  //           {errorMessage}
-  //         </div>
-  //       )}
-  //       {fetchError && (
-  //         <div className="alert alert-danger text-center" role="alert">
-  //           {fetchError}
-  //         </div>
-  //       )}
-
-  //       <div className="d-flex justify-content-end">
-  //         <Button
-  //           className="btn btn-primary me-2"
-  //           onClick={() => toggleFormModal()}
-  //         >
-  //           Upload Documents
-  //         </Button>
-  //         <Button
-  //           className="btn btn-primary me-2"
-  //           onClick={() => handleRequestDocument(selectedAppointmentId)}
-  //         >
-  //           Request Document
-  //         </Button>
-  //         <Button
-  //           style={{
-  //             background: "#00DAF7",
-  //             color: "#000",
-  //             border: "none",
-  //             borderRadius: "5px",
-  //             padding: "10px 20px",
-  //           }}
-  //           onClick={() =>
-  //             handleRecordView(
-  //               selectedAppointment?.patient_id,
-  //               selectedAppointment?.doctor_id,
-  //               selectedAppointment?.patient_name
-  //             )
-  //           }
-  //         >
-  //           <FaSyncAlt />
-  //         </Button>
-  //       </div>
-
-  //       {documentsData.map((document) => (
-  //         <div key={document.id} className="mb-3" style={{ cursor: "pointer" }}>
-  //           <Row className="mt-3">
-  //             <Col md={2}>
-  //               <Form.Group>
-  //                 <Form.Label>
-  //                   <strong>Document Name:</strong>
-  //                 </Form.Label>
-  //                 <Form.Control
-  //                   type="text"
-  //                   value={document.document_name}
-  //                   readOnly
-  //                 />
-  //               </Form.Group>
-  //             </Col>
-  //             <Col md={2}>
-  //               <Form.Group>
-  //                 <Form.Label>
-  //                   <strong>Document Date:</strong>
-  //                 </Form.Label>
-  //                 <Form.Control
-  //                   type="text"
-  //                   value={document.document_date}
-  //                   readOnly
-  //                 />
-  //               </Form.Group>
-  //             </Col>
-  //             <Col md={2}>
-  //               <Form.Group>
-  //                 <Form.Label>
-  //                   <strong>Document Type:</strong>
-  //                 </Form.Label>
-  //                 <Form.Control
-  //                   type="text"
-  //                   value={document.document_type}
-  //                   readOnly
-  //                 />
-  //               </Form.Group>
-  //             </Col>
-  //             <Col md={2}>
-  //               <Form.Group>
-  //                 <Form.Label>
-  //                   <strong>Patient Name:</strong>
-  //                 </Form.Label>
-  //                 <Form.Control
-  //                   type="text"
-  //                   value={document.patient_name}
-  //                   readOnly
-  //                 />
-  //               </Form.Group>
-  //             </Col>
-  //             <Col md={2}>
-  //               <Form.Group>
-  //                 <Form.Label>
-  //                   <strong>Document File:</strong>
-  //                 </Form.Label>
-  //                 <Button
-  //                   variant="primary"
-  //                   onClick={() => viewDocument(document.id)}
-  //                   style={{
-  //                     backgroundColor: "#5c85d6",
-  //                     borderColor: "#5c85d6",
-  //                     borderRadius: "20px",
-  //                     padding: "8px 16px",
-  //                     transition: "background-color 0.3s, transform 0.3s",
-  //                   }}
-  //                   onMouseEnter={(e) =>
-  //                     (e.currentTarget.style.backgroundColor = "#4c75c6")
-  //                   }
-  //                   onMouseLeave={(e) =>
-  //                     (e.currentTarget.style.backgroundColor = "#5c85d6")
-  //                   }
-  //                   aria-label={`View document ${document.document_name}`}
-  //                 >
-  //                   View Document
-  //                 </Button>
-  //               </Form.Group>
-  //             </Col>
-  //             <Col md={1} className="mt-4">
-  //               <DropdownButton
-  //                 align="end"
-  //                 drop="end"
-  //                 title={<i className="bi bi-three-dots" />}
-  //                 variant="secondary"
-  //                 id={`dropdown-${document.id}`}
-  //               >
-  //                 <Dropdown.Item onClick={() => toggleFormModal(document)}>
-  //                   Modify
-  //                 </Dropdown.Item>
-  //                 <Dropdown.Item
-  //                   onClick={() => handleDeleteDocument(document.id)}
-  //                 >
-  //                   Delete
-  //                 </Dropdown.Item>
-  //               </DropdownButton>
-  //             </Col>
-  //           </Row>
-
-  //           <hr />
-  //         </div>
-  //       ))}
-
-  //       <div className="d-flex flex-wrap justify-content-start">
-  //         {visibleReports.map((report) => (
-  //           <div key={report.id} className="p-3">
-  //             <div
-  //               className="card"
-  //               style={{ width: "199px", position: "relative" }}
-  //             >
-  //               <img
-  //                 src={report.report_file}
-  //                 alt="WhatsApp Report"
-  //                 style={{
-  //                   objectFit: "cover",
-  //                   height: "200px", // Increased height
-  //                   width: "100%", // Full width
-  //                   borderRadius: "5px",
-  //                   cursor: "pointer",
-  //                 }}
-  //                 onClick={() => setSelectedImage(report.report_file)}
-  //               />
-
-  //               {/* Display Date on the Image */}
-  //               <div
-  //                 className="report-date"
-  //                 style={{
-  //                   position: "absolute",
-  //                   bottom: "0",
-  //                   left: "0",
-  //                   backgroundColor: "rgba(0, 0, 0, 0.6)",
-  //                   color: "white",
-  //                   padding: "5px",
-  //                   borderRadius: "5px",
-  //                 }}
-  //               >
-  //                 {new Intl.DateTimeFormat("en-GB").format(
-  //                   new Date(report.date || report.document_date)
-  //                 )}
-  //               </div>
-
-  //               {/* Delete Button */}
-  //               <div className="card-body text-center">
-  //                 <button
-  //                   className="btn btn-danger btn-sm"
-  //                   style={{
-  //                     position: "absolute",
-  //                     bottom: "0",
-  //                     right: "10px",
-  //                     background: "transparent",
-  //                     border: "none",
-  //                     cursor: "pointer",
-  //                     color: "red",
-  //                     fontSize: "24px",
-  //                   }}
-  //                   onClick={() => deleteRecord(report.id)}
-  //                 >
-  //                   <FaTrash />
-  //                 </button>
-  //               </div>
-  //             </div>
-  //           </div>
-  //         ))}
-  //       </div>
-
-  //       {/* Show More Button */}
-  //       {whatsappReport.length > 6 && (
-  //         <div className="text-center mt-3">
-  //           <Button
-  //             className="btn btn-primary"
-  //             onClick={() => setShowMore(!showMore)}
-  //           >
-  //             {showMore ? "Show Less" : "Show More"}
-  //           </Button>
-  //         </div>
-  //       )}
-
-  //       <Modal
-  //         show={!!selectedImage}
-  //         onHide={() => setSelectedImage(null)}
-  //         centered
-  //       >
-  //         <Modal.Body style={{ padding: 0 }}>
-  //           <img
-  //             src={selectedImage}
-  //             alt="Selected Medical Record"
-  //             style={{
-  //               width: "100%",
-  //               borderRadius: "5px",
-  //             }}
-  //           />
-  //         </Modal.Body>
-  //         <Modal.Footer>
-  //           <Button variant="secondary" onClick={() => setSelectedImage(null)}>
-  //             Close
-  //           </Button>
-  //         </Modal.Footer>
-  //       </Modal>
-  //     </div>
-  //   );
-  // };
-
-
-
-
 
   const renderDocumentsData = () => {
     const visibleReports = showMore
@@ -5859,7 +6733,7 @@ const DoctorHome = () => {
 
     return (
       <div>
-        {successMessage && (
+        {/* {successMessage && (
           <div className="alert alert-success text-center" role="alert">
             {successMessage}
           </div>
@@ -5873,7 +6747,7 @@ const DoctorHome = () => {
           <div className="alert alert-danger text-center" role="alert">
             {fetchError}
           </div>
-        )}
+        )} */}
 
         <div className="d-flex justify-content-end">
           <Button
@@ -6075,25 +6949,147 @@ const DoctorHome = () => {
           {visibleReports.length > 0 ? (
             <div className="d-flex flex-wrap justify-content-start">
               {visibleReports.map((report) => (
-                <div key={report.id} className="p-2">
+                <div key={report.message_uuid} className="p-2">
                   <div
                     className="card"
                     style={{ width: "203px", position: "relative" }}
                   >
-                    <img
-                      src={report.report_file}
-                      alt="WhatsApp Report"
-                      style={{
-                        objectFit: "cover",
-                        height: "200px",
-                        width: "100%",
-                        borderRadius: "5px",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => setSelectedImage(report.report_file)}
-                    />
+                    {/* Media Preview */}
+                    {(() => {
+                      const type = report.content_type;
 
-                    {/* Display Date on the Image */}
+                      if (type === "image") {
+                        return (
+                          <img
+                            src={report.url}
+                            alt="WhatsApp Report"
+                            style={{
+                              objectFit: "cover",
+                              height: "200px",
+                              width: "100%",
+                              borderRadius: "5px",
+                              cursor: "pointer",
+                            }}
+                            onClick={() =>
+                              setSelectedFile({
+                                type: "image",
+                                url: report.url,
+                              })
+                            }
+                          />
+                        );
+                      } else if (type === "video") {
+                        return (
+                          // <video
+                          //   muted
+                          //   preload="metadata"
+                          //   style={{
+                          //     objectFit: "cover",
+                          //     height: "200px",
+                          //     width: "100%",
+                          //     borderRadius: "5px",
+                          //     cursor: "pointer",
+                          //   }}
+                          //   onClick={() =>
+                          //     setSelectedFile({
+                          //       type: "video",
+                          //       url: report.url,
+                          //     })
+                          //   }
+                          //   onMouseOver={(e) => e.target.play()}
+                          //   onMouseOut={(e) => {
+                          //     e.target.pause();
+                          //     e.target.currentTime = 0;
+                          //   }}
+                          // >
+                          //   <source src={report.url} type="video/mp4" />
+                          //   Your browser does not support the video tag.
+                          // </video>
+
+                          <video
+  muted
+  preload="metadata"
+  style={{
+    objectFit: "cover",
+    height: "200px",
+    width: "100%",
+    borderRadius: "5px",
+    cursor: "pointer",
+  }}
+  onClick={() =>
+    setSelectedFile({
+      type: "video",
+      url: report.url,
+    })
+  }
+  onMouseOver={(e) => {
+    if (e.target.paused) {
+      e.target.play();
+    }
+  }}
+  onMouseOut={(e) => {
+    if (!e.target.paused) {
+      e.target.pause();
+      e.target.currentTime = 0; 
+    }
+  }}
+>
+  <source src={report.url} type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
+
+                        );
+                      }
+                     else if (type === "file") {
+                      return (
+                        <div style={{ position: "relative" }}>
+                          <iframe
+                            src={`${report.url}#page=1&zoom=85`}
+                            title="PDF Preview"
+                            style={{
+                              height: "200px",
+                              width: "100%",
+                              border: "none",
+                              borderRadius: "5px",
+                              pointerEvents: "none",
+                            }}
+                          />
+                          <div
+                            onClick={() => setSelectedFile({ type: "pdf", url: report.url })}
+                            style={{
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                              height: "200px",
+                              width: "100%",
+                              cursor: "pointer",
+                            }}
+                          />
+                        </div>
+                      );
+                    }
+                    
+                      else {
+                        return (
+                          <div
+                            style={{
+                              height: "200px",
+                              width: "100%",
+                              borderRadius: "5px",
+                              border: "1px solid #ccc",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: "#999",
+                            }}
+                          >
+                            Unsupported file
+                          </div>
+                        );
+                      }
+                    })()}
+
+                    {/* Optional Date */}
                     <div
                       className="report-date"
                       style={{
@@ -6104,11 +7100,11 @@ const DoctorHome = () => {
                         color: "white",
                         padding: "5px",
                         borderRadius: "5px",
+                        fontSize: "12px",
                       }}
                     >
-                      {new Intl.DateTimeFormat("en-GB").format(
-                        new Date(report.date)
-                      )}
+                      {/* Uncomment if needed */}
+                      {/* {new Intl.DateTimeFormat("en-GB").format(new Date(report.received_at))} */}
                     </div>
 
                     {/* Delete Button */}
@@ -6177,8 +7173,6 @@ const DoctorHome = () => {
       </div>
     );
   };
-
-  
 
   const [previewFileType, setPreviewFileType] = useState(null);
   const [previewFileUrl, setPreviewFileUrl] = useState(null);
@@ -6316,23 +7310,30 @@ const DoctorHome = () => {
       resetModalState();
       return;
     }
+
     resetModalState();
     setSelectedAppointment(slotOrAppointment);
     setSelectedAppointmentId(slotOrAppointment.appointment_id);
     setSelectedHeading("patientDetails");
+
     try {
       const patientId = slotOrAppointment.patient_id;
       setPatientId(patientId);
+
+      // Fetch patient details
       const patientDetailsResponse = await BaseUrl.get(`/patient/patient/`, {
         params: {
           patient_id: slotOrAppointment.patient_id,
           appointment_id: slotOrAppointment.appointment_id,
         },
       });
+
       if (patientDetailsResponse.status === 200) {
         setPatientDetails(patientDetailsResponse.data);
         setDisplayedData("patientDetails");
       }
+
+      // Fetch appointment slot details
       const appointmentResponse = await BaseUrl.get(
         `/patientappointment/viewslot/`,
         {
@@ -6342,20 +7343,30 @@ const DoctorHome = () => {
           },
         }
       );
+
       if (appointmentResponse.status === 200) {
         setAppointmentDetails(appointmentResponse.data.data);
       }
+
+      // Section-specific selection
       if (section === "today") {
         setSelectedTodayAppointment(slotOrAppointment);
       } else if (section === "completed") {
         setSelectedCompletedAppointment(slotOrAppointment);
       } else if (section === "canceled") {
         setSelectedCanceledAppointment(slotOrAppointment);
+      } else if (section === "online") {
+        setSelectedOnlineAppointment(slotOrAppointment);
+      } else if (section === "walk-in") {
+        setSelectedWalkinAppointment(slotOrAppointment);
+      } else if (section === "follow-up") {
+        setSelectedFollowupAppointment(slotOrAppointment);
       } else {
-        console.warn(section);
+        console.warn("Unknown section:", section);
       }
     } catch (error) {
-      setErrorMessage();
+      setErrorMessage("Something went wrong while loading appointment data.");
+      console.error(error);
     }
   };
 
@@ -6368,84 +7379,39 @@ const DoctorHome = () => {
     setSelectedTodayAppointment(null);
     setSelectedCompletedAppointment(null);
     setSelectedCanceledAppointment(null);
+    setSelectedOnlineAppointment(null);
+    setSelectedWalkinAppointment(null);
+    setSelectedFollowupAppointment(null);
   };
 
-  const [morningIndex, setMorningIndex] = useState(0);
-  const [afternoonIndex, setAfternoonIndex] = useState(0);
-  const [eveningIndex, setEveningIndex] = useState(0);
-  const slotsPerPage = 4;
-
-  const handleMorningPrevious = () => {
-    setMorningIndex((prevIndex) => Math.max(prevIndex - 1, 0));
-  };
-
-  const handleMorningNext = () => {
-    setMorningIndex((prevIndex) =>
-      Math.min(prevIndex + 1, Math.ceil(morningSlots.length / slotsPerPage) - 1)
-    );
-  };
-
-  const handleAfternoonPrevious = () => {
-    setAfternoonIndex((prevIndex) => Math.max(prevIndex - 1, 0));
-  };
-
-  const handleAfternoonNext = () => {
-    setAfternoonIndex((prevIndex) =>
-      Math.min(
-        prevIndex + 1,
-        Math.ceil(afternoonSlots.length / slotsPerPage) - 1
-      )
-    );
-  };
-
-  const handleEveningPrevious = () => {
-    setEveningIndex((prevIndex) => Math.max(prevIndex - 1, 0));
-  };
-
-  const handleEveningNext = () => {
-    setEveningIndex((prevIndex) =>
-      Math.min(prevIndex + 1, Math.ceil(eveningSlots.length / slotsPerPage) - 1)
-    );
-  };
-
-  const renderSlotCards = (slots, index) => {
-    const startIndex = index * slotsPerPage * 4;
-    const endIndex = Math.min(startIndex + slotsPerPage * 4, slots.length);
-    const displayedSlots = slots.slice(startIndex, endIndex);
+  const renderSlotCards = (slots) => {
     const rows = [];
+
+    const displayedSlots = slots.slice(0, 100); // Optional cap
+
     for (let i = 0; i < displayedSlots.length; i += 4) {
       const slotChunk = displayedSlots.slice(i, i + 4);
       rows.push(
         <Row key={i} className="mb-3">
           {slotChunk.map((slot, index) => {
             let cardStyle = {};
+
             if (slot.is_canceled) {
-              cardStyle = {
-                backgroundColor: "#BC1B2E",
-                color: "#fff",
-              };
+              cardStyle = { backgroundColor: "#FF6767", color: "#fff" };
             } else if (slot.is_booked) {
-              cardStyle = {
-                backgroundColor: "#229799",
-                color: "#fff",
-              };
+              cardStyle = { backgroundColor: "#1261AA", color: "#fff" };
             } else if (slot.is_blocked) {
-              cardStyle = {
-                backgroundColor: "#CB6040",
-                color: "#fff",
-              };
+              cardStyle = { backgroundColor: "#F16215", color: "#fff" };
             } else {
-              cardStyle = {
-                backgroundColor: "#16B12F",
-                color: "#fff",
-              };
+              cardStyle = { backgroundColor: "#0A9013", color: "#fff" };
             }
+
             return (
               <Col
                 key={index}
                 xs={12}
                 sm={6}
-                md={4}
+                md={6}
                 lg={3}
                 style={{ padding: "8px" }}
               >
@@ -6488,7 +7454,21 @@ const DoctorHome = () => {
         </Row>
       );
     }
-    return rows;
+
+    const isScrollable = displayedSlots.length > 16;
+
+    return (
+      <div
+        style={{
+          maxHeight: isScrollable ? "280px" : "auto",
+          overflowY: isScrollable ? "auto" : "visible",
+          overflowX: "hidden",
+          paddingRight: "5px",
+        }}
+      >
+        {rows}
+      </div>
+    );
   };
 
   const renderAppointmentDate = () => {
@@ -6523,47 +7503,126 @@ const DoctorHome = () => {
   };
 
   const renderCompletedAppointments = () => {
-    const endIndex = Math.min(completedIndex + 4, completedAppointments.length);
-    const displayedAppointments = completedAppointments.slice(
-      completedIndex,
-      endIndex
+    return (
+      <div className="appointment-grid">
+        {completedAppointments.map((appointment, index) => (
+          <Card
+            key={index}
+            className="p-3 shadow-sm"
+            style={{
+              backgroundColor: "#9ED14D",
+              borderRadius: "12px",
+              cursor: "pointer",
+            }}
+            onClick={() => handleAppointmentClick(appointment, "completed")}
+          >
+            <Card.Body className="text-center p-2">
+              <Card.Title className="fw-bold mb-2" style={{ fontSize: "1rem" }}>
+                {appointment.appointment_slot}
+              </Card.Title>
+              <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+                <strong>Patient: </strong>
+                {appointment.booked_by}
+              </Card.Text>
+              <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+                <strong>Mobile no: </strong> {appointment.mobile_number}
+              </Card.Text>
+            </Card.Body>
+          </Card>
+        ))}
+      </div>
     );
-    return displayedAppointments.map((appointment, index) => (
-      <Col key={index} className="p-4">
-        <Card
-          className="mb-2 shadow-sm reception-card"
-          style={{ backgroundColor: "#2CABC7", color: "#fff", cursor: "pointer" }}
-          onClick={() => handleAppointmentClick(appointment, "completed")}
-        >
-          <Card.Body>
-            <Card.Title>{appointment.appointment_slot}</Card.Title>
-            <Card.Text>Completed by: {appointment.doctor_name}</Card.Text>
-          </Card.Body>
-        </Card>
-      </Col>
-    ));
   };
 
   const renderCanceledAppointments = () => {
-    const endIndex = Math.min(canceledIndex + 4, canceledAppointments.length);
-    const displayedAppointments = canceledAppointments.slice(
-      canceledIndex,
-      endIndex
+    return (
+      <div className="appointment-grid">
+        {canceledAppointments.map((appointment, index) => (
+          <Card
+            key={index}
+            className="p-3 shadow-sm"
+            style={{
+              backgroundColor: "#FF6767",
+              borderRadius: "12px",
+              cursor: "pointer",
+            }}
+            onClick={() => handleAppointmentClick(appointment, "canceled")}
+          >
+            <Card.Body className="text-center p-2">
+              <Card.Title className="fw-bold mb-2" style={{ fontSize: "1rem" }}>
+                {appointment.appointment_slot}
+              </Card.Title>
+              <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+                <strong>Patient: </strong>
+                {appointment.booked_by}
+              </Card.Text>
+              <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+                <strong>Mobile no: </strong> {appointment.mobile_number}
+              </Card.Text>
+            </Card.Body>
+          </Card>
+        ))}
+      </div>
     );
-    return displayedAppointments.map((appointment, index) => (
-      <Col key={index} className="p-4">
-        <Card
-          className="mb-4 shadow-sm reception-card"
-          style={{ backgroundColor: "#BC1B2E", color: "#fff", cursor: "pointer" }}
-          onClick={() => handleAppointmentClick(appointment, "canceled")}
-        >
-          <Card.Body>
-            <Card.Title>{appointment.appointment_slot}</Card.Title>
-            <Card.Text>Canceled by: {appointment.doctor_name}</Card.Text>
-          </Card.Body>
-        </Card>
-      </Col>
-    ));
+  };
+
+  const renderWalkinOnlineFollowupAppointments = (appointments, type) => {
+    const colorMap = {
+      online: "#E9A5F1",
+      "walk-in": "#BFAF18",
+      "follow-up": "#8AFE91",
+    };
+
+    // Determine selected state per type
+    const selectedMap = {
+      online: selectedOnlineAppointment,
+      "walk-in": selectedWalkinAppointment,
+      "follow-up": selectedFollowupAppointment,
+    };
+
+    const selected = selectedMap[type];
+
+    return (
+      <div className="appointment-grid">
+        {appointments.map((appointment, index) => {
+          const isSelected =
+            selected && selected.appointment_id === appointment.appointment_id;
+
+          return (
+            <Card
+              key={index}
+              className={`p-3 shadow-sm ${isSelected ? "border border-dark" : ""}`}
+              style={{
+                backgroundColor: colorMap[type],
+                borderRadius: "12px",
+                cursor: "pointer",
+                boxShadow: isSelected
+                  ? "0 0 10px rgba(0,0,0,0.2)"
+                  : "0 2px 4px rgba(0,0,0,0.1)",
+                transform: isSelected ? "scale(1.02)" : "none",
+                transition: "all 0.2s ease-in-out",
+              }}
+              onClick={() => handleAppointmentClick(appointment, type)}
+            >
+              <Card.Body className="text-center p-2">
+                <Card.Title
+                  className="fw-bold mb-2"
+                  style={{ fontSize: "1rem" }}
+                >
+                  {appointment.appointment_slot}
+                </Card.Title>
+                <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+                  <strong>Patient: </strong> {appointment.booked_by}
+                </Card.Text>
+                <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+                  <strong>Mobile no: </strong> {appointment.mobile_number}
+                </Card.Text>
+              </Card.Body>
+            </Card>
+          );
+        })}
+      </div>
+    );
   };
 
   const renderSelectedAppointmentDetails = () => {
@@ -6579,8 +7638,8 @@ const DoctorHome = () => {
           padding: "20px",
           borderRadius: "10px",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-           overflowX: "auto", 
-           whiteSpace: "nowrap"
+          overflowX: "auto",
+          whiteSpace: "nowrap",
         }}
       >
         <button
@@ -6819,110 +7878,439 @@ const DoctorHome = () => {
   };
 
   const renderAppointments = () => {
-    const endIndex = Math.min(currentIndex + 4, todayAppointments.length);
-    const displayedAppointments = todayAppointments.slice(
-      currentIndex,
-      endIndex
-    );
-    return displayedAppointments.map((appointment, index) => (
-      <Col key={index}>
-        <Card
-          className={`mb-4 shadow-sm ${selectedAppointment && selectedAppointment.appointment_id === appointment.appointment_id ? "selected-slot" : ""}`}
-          onClick={() => handleAppointmentClick(appointment, "today")}
-          style={{
-            border:
+    return (
+      <div className="appointment-grid">
+        {todayAppointments.map((appointment, index) => (
+          <Card
+            key={index}
+            className={`p-3 shadow-sm ${
               selectedAppointment &&
               selectedAppointment.appointment_id === appointment.appointment_id
-                ? "2px solid #3795BD"
-                : "none",
-            cursor: "pointer",
-            backgroundColor:
-              appointment.appointment_type === "follow-up"
-                ? "#FB8369"
-                : "#2D9CED",
-          }}
-        >
-          <Card.Body>
-            <Card.Title>{appointment.appointment_slot}</Card.Title>
-            <Card.Text>Patient: {appointment.booked_by}</Card.Text>
-          </Card.Body>
-        </Card>
-      </Col>
-    ));
+                ? "selected-slot"
+                : ""
+            }`}
+            onClick={() => handleAppointmentClick(appointment, "today")}
+            style={{
+              border:
+                selectedAppointment &&
+                selectedAppointment.appointment_id ===
+                  appointment.appointment_id
+                  ? "2px solid #3795BD"
+                  : "none",
+              borderRadius: "12px",
+              cursor: "pointer",
+              backgroundColor:
+                appointment.appointment_type === "follow-up"
+                  ? "#8AFE91"
+                  : "#FFBA4B",
+            }}
+          >
+            <Card.Body className="text-center p-2">
+              <Card.Title className="fw-bold mb-2" style={{ fontSize: "1rem" }}>
+                {appointment.appointment_slot}
+              </Card.Title>
+              <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+                <strong>Patient Name:</strong> {appointment.booked_by}
+              </Card.Text>
+              <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+                <strong>Contact No.:</strong> {appointment.mobile_number}
+              </Card.Text>
+            </Card.Body>
+          </Card>
+        ))}
+      </div>
+    );
   };
 
+  const [showSlots, setShowSlots] = useState(true);
+  const [bookedAppointment, setBookedAppointment] = useState(false);
+  const [completedAppointment, setCompletedAppointment] = useState(false);
+  const [canceledAppointment, setCanceledAppointment] = useState(false);
+  const [onlineAppointment, setOnlineAppointment] = useState(false);
+  const [walkinAppointment, setWalkinappointment] = useState(false);
+  const [followupAppointment, setFollowupAppointment] = useState(false);
+
+  const [onlineAppointments, setOnlineAppointments] = useState([]);
+  const [walkinAppointments, setWalkinAppointments] = useState([]);
+  const [followupAppointments, setFollowupAppointments] = useState([]);
+
+  const handleTotalSlotClick = () => {
+    setShowSlots(!showSlots);
+    setBookedAppointment(false);
+    setCompletedAppointment(false);
+    setCanceledAppointment(false);
+    setOnlineAppointment(false);
+    setWalkinappointment(false);
+    setFollowupAppointment(false);
+  };
+
+  const handleBookedAppointmentClick = () => {
+    setBookedAppointment(!bookedAppointment);
+    setShowSlots(false);
+    setCompletedAppointment(false);
+    setCanceledAppointment(false);
+    setOnlineAppointment(false);
+    setWalkinappointment(false);
+    setFollowupAppointment(false);
+  };
+
+  const handleCompletedAppointmentClick = () => {
+    setCompletedAppointment(!completedAppointment);
+    setBookedAppointment(false);
+    setShowSlots(false);
+    setCanceledAppointment(false);
+    setOnlineAppointment(false);
+    setWalkinappointment(false);
+    setFollowupAppointment(false);
+  };
+
+  const handleCanceledAppointmentClick = () => {
+    setCanceledAppointment(!canceledAppointment);
+    setCompletedAppointment(false);
+    setBookedAppointment(false);
+    setShowSlots(false);
+    setOnlineAppointment(false);
+    setWalkinappointment(false);
+    setFollowupAppointment(false);
+  };
+
+  const handleOnlineAppointmentClick = () => {
+    setOnlineAppointment(!onlineAppointment);
+    setShowSlots(false);
+    setBookedAppointment(false);
+    setCompletedAppointment(false);
+    setCanceledAppointment(false);
+    setWalkinappointment(false);
+    setFollowupAppointment(false);
+  };
+
+  const handleWalkinAppointmentClick = () => {
+    setWalkinappointment(!walkinAppointment);
+    setShowSlots(false);
+    setBookedAppointment(false);
+    setCompletedAppointment(false);
+    setCanceledAppointment(false);
+    setOnlineAppointment(false);
+    setFollowupAppointment(false);
+  };
+
+  const handleFollowupAppointmentClick = () => {
+    setFollowupAppointment(!followupAppointment);
+    setShowSlots(false);
+    setBookedAppointment(false);
+    setCompletedAppointment(false);
+    setCanceledAppointment(false);
+    setOnlineAppointment(false);
+    setWalkinappointment(false);
+  };
+
+  const getCardStyle = (isActive) => ({
+    backgroundColor: isActive ? "#E8F4FD" : "white",
+    borderRadius: "8px",
+    cursor: "pointer",
+    border: isActive ? "2px solid #0F518F" : "2px solid #DCD7C9",
+  });
+
   return (
-    <div className="doctor-container" style={{ backgroundColor: "#D7EAF0" }}>
-      <header className="reception-header d-flex flex-column flex-md-row justify-content-between align-items-center text-center text-md-start">
-        {clinicName && clinicPhoto && (
-          <>
-            <Col xs={12} md="auto">
-              <img
-                src={clinicPhoto}
-                className="left-logo img-fluid"
-                alt="Clinic Logo"
-              />
-            </Col>
-            <Col xs={12} md="auto" className="flex-grow-1 mt-5 mb-5">
-              <h1 className="text-center" style={{ color: "#0174BE" }}>
-                Welcome to {clinicName}
-              </h1>
-            </Col>
-          </>
-        )}
-      </header>
+    <div
+      className="d-flex doctor-container"
+      style={{ height: "calc(100vh - 80px)" }}
+    >
+      <Sidebar
+        selectedMenu={selectedMenu}
+        handleMenuClick={handleMenuClick}
+        isSidebarCollapsed={isSidebarCollapsed}
+        setIsSidebarCollapsed={setIsSidebarCollapsed}
+      />
+      <main className="flex-1 p-4 overflow-y-auto">
+        <div className="d-flex justify-content-center align-items-center">
+          <button
+            className="btn btn-outline-primary me-3"
+            onClick={handlePreviousDate}
+          >
+            &larr;
+          </button>
+          <h5 className="text-center">{formattedDate}</h5>
+          <button
+            className="btn btn-outline-primary ms-3"
+            onClick={handleNextDate}
+          >
+            &rarr;
+          </button>
+        </div>
 
-      <div className="d-flex justify-content-center align-items-center">
-        <button
-          className="btn btn-outline-primary me-3"
-          onClick={handlePreviousDate}
-        >
-          &larr;
-        </button>
-        <h5 className="text-center">{formattedDate}</h5>
-        <button
-          className="btn btn-outline-primary ms-3"
-          onClick={handleNextDate}
-        >
-          &rarr;
-        </button>
-      </div>
+        <Row className="text-center mt-4 me-4 ms-4">
+          <Col>
+            <Card
+              className="shadow-sm mb-4"
+              onClick={handleTotalSlotClick}
+              style={getCardStyle(showSlots)}
+            >
+              <Card.Body>
+                <div className="d-flex align-items-center justify-content-center">
+                  <img
+                    src={slotcreated}
+                    alt="Slot Created"
+                    style={{ width: "30px", marginRight: "20px" }}
+                  />
+                  <div>
+                    <h5
+                      style={{
+                        fontWeight: "700",
+                        fontSize: "14px",
+                        color: "#0F518F",
+                      }}
+                    >
+                      Slots <br /> Created
+                    </h5>
+                    <p
+                      style={{
+                        fontWeight: "700",
+                        fontSize: "14px",
+                        color: "#0F518F",
+                      }}
+                    >
+                      {totalAppointments}
+                    </p>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
 
-      <Row className="text-center mt-4">
-        <Col>
-          <h5 style={{ fontWeight: "700", fontSize: "16px" }}>Appointments</h5>
-          <p style={{ fontWeight: "700", fontSize: "16px" }}>{totalAppointments}</p>
-        </Col>
-        <Col>
-          <h5 style={{ fontWeight: "700", fontSize: "16px" }}>Booked</h5>
-          <p style={{ fontWeight: "700", fontSize: "16px" }}>{bookedAppointmentCount}</p>
-        </Col>
-        <Col>
-          <h5 style={{ fontWeight: "700", fontSize: "16px" }}>Completed</h5>
-          <p style={{ fontWeight: "700", fontSize: "16px" }}>{completedAppointmentsCount}</p>
-        </Col>
-        <Col>
-          <h5 style={{ fontWeight: "700", fontSize: "16px" }}>Canceled</h5>
-          <p style={{ fontWeight: "700", fontSize: "16px" }}>{canceledAppointmentsCount}</p>
-        </Col>
-        <Col>
-          <h5 style={{ fontWeight: "700", fontSize: "16px" }}>Online</h5>
-          <p style={{ fontWeight: "700", fontSize: "16px" }}>{onlineCount}</p>
-        </Col>
-        <Col>
-          <h5 style={{ fontWeight: "700", fontSize: "16px" }}>Walk-Ins</h5>
-          <p style={{ fontWeight: "700", fontSize: "16px" }}>{walkInCount}</p>
-        </Col>
-        <Col>
-          <h5 style={{ fontWeight: "700", fontSize: "16px" }}>Follow-Ups</h5>
-          <p style={{ fontWeight: "700", fontSize: "16px" }}>{followUpCount}</p>
-        </Col>
-      </Row>
+          <Col>
+            <Card
+              className="shadow-sm mb-4"
+              onClick={handleBookedAppointmentClick}
+              style={getCardStyle(bookedAppointment)}
+            >
+              <Card.Body>
+                <div className="d-flex align-items-center justify-content-center">
+                  <img
+                    src={booked}
+                    alt="Slot Created"
+                    style={{ width: "30px", marginRight: "20px" }}
+                  />
+                  <div>
+                    <h5
+                      style={{
+                        fontWeight: "700",
+                        fontSize: "14px",
+                        color: "#0F518F",
+                      }}
+                    >
+                      Booked <br /> Appointments
+                    </h5>
+                    <p
+                      style={{
+                        fontWeight: "700",
+                        fontSize: "14px",
+                        color: "#0F518F",
+                      }}
+                    >
+                      {bookedAppointmentCount}
+                    </p>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
 
-      <hr />
+          <Col>
+            <Card
+              className="shadow-sm mb-4"
+              onClick={handleCompletedAppointmentClick}
+              style={getCardStyle(completedAppointment)}
+            >
+              <Card.Body>
+                <div className="d-flex align-items-center justify-content-center">
+                  <img
+                    src={completed}
+                    alt="Slot Created"
+                    style={{ width: "30px", marginRight: "20px" }}
+                  />
+                  <div>
+                    <h5
+                      style={{
+                        fontWeight: "700",
+                        fontSize: "14px",
+                        color: "#0F518F",
+                      }}
+                    >
+                      Completed <br /> Appointments
+                    </h5>
+                    <p
+                      style={{
+                        fontWeight: "700",
+                        fontSize: "14px",
+                        color: "#0F518F",
+                      }}
+                    >
+                      {completedAppointmentsCount}
+                    </p>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
 
-      <div className="new">
-        <style>{`
+          <Col>
+            <Card
+              className="shadow-sm mb-4"
+              onClick={handleCanceledAppointmentClick}
+              style={getCardStyle(canceledAppointment)}
+            >
+              <Card.Body>
+                <div className="d-flex align-items-center justify-content-center">
+                  <img
+                    src={canceled}
+                    alt="Slot Created"
+                    style={{ width: "30px", marginRight: "20px" }}
+                  />
+                  <div>
+                    <h5
+                      style={{
+                        fontWeight: "700",
+                        fontSize: "14px",
+                        color: "#0F518F",
+                      }}
+                    >
+                      Canceled <br /> Appointments
+                    </h5>
+                    <p
+                      style={{
+                        fontWeight: "700",
+                        fontSize: "14px",
+                        color: "#0F518F",
+                      }}
+                    >
+                      {canceledAppointmentsCount}
+                    </p>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          <Col>
+            <Card
+              className="shadow-sm mb-4"
+              onClick={handleOnlineAppointmentClick}
+              style={getCardStyle(onlineAppointment)}
+            >
+              <Card.Body>
+                <div className="d-flex align-items-center justify-content-center">
+                  <img
+                    src={online}
+                    alt="Slot Created"
+                    style={{ width: "30px", marginRight: "20px" }}
+                  />
+                  <div>
+                    <h5
+                      style={{
+                        fontWeight: "700",
+                        fontSize: "14px",
+                        color: "#0F518F",
+                      }}
+                    >
+                      Online <br /> Appointments
+                    </h5>
+                    <p
+                      style={{
+                        fontWeight: "700",
+                        fontSize: "14px",
+                        color: "#0F518F",
+                      }}
+                    >
+                      {onlineCount}
+                    </p>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          <Col>
+            <Card
+              className="shadow-sm mb-4"
+              onClick={handleWalkinAppointmentClick}
+              style={getCardStyle(walkinAppointment)}
+            >
+              <Card.Body>
+                <div className="d-flex align-items-center justify-content-center">
+                  <img
+                    src={walkin}
+                    alt="Slot Created"
+                    style={{ width: "30px", marginRight: "20px" }}
+                  />
+                  <div>
+                    <h5
+                      style={{
+                        fontWeight: "700",
+                        fontSize: "14px",
+                        color: "#0F518F",
+                      }}
+                    >
+                      Walk-In <br /> Appointments
+                    </h5>
+                    <p
+                      style={{
+                        fontWeight: "700",
+                        fontSize: "14px",
+                        color: "#0F518F",
+                      }}
+                    >
+                      {walkInCount}
+                    </p>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          <Col>
+            <Card
+              className="shadow-sm mb-4"
+              onClick={handleFollowupAppointmentClick}
+              style={getCardStyle(followupAppointment)}
+            >
+              <Card.Body>
+                <div className="d-flex align-items-center justify-content-center">
+                  <img
+                    src={followup}
+                    alt="Slot Created"
+                    style={{ width: "30px", marginRight: "20px" }}
+                  />
+                  <div>
+                    <h5
+                      style={{
+                        fontWeight: "700",
+                        fontSize: "14px",
+                        color: "#0F518F",
+                      }}
+                    >
+                      Follow-Up <br /> Appointments
+                    </h5>
+                    <p
+                      style={{
+                        fontWeight: "700",
+                        fontSize: "14px",
+                        color: "#0F518F",
+                      }}
+                    >
+                      {followUpCount} 
+                    </p>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
+        <hr />
+
+        <div className="new">
+          <style>{`
         .legend {
           display: flex;
           justify-content: center;
@@ -6952,509 +8340,651 @@ const DoctorHome = () => {
         }
       `}</style>
 
-        <div className="legend">
-          <div>
-            <span
-              className="legend-dot"
-              style={{ backgroundColor: "#16B12F" }}
-            ></span>
-            <span className="legend-text">Available</span>
-          </div>
-          <div>
-            <span
-              className="legend-dot"
-              style={{ backgroundColor: "#229799" }}
-            ></span>
-            <span className="legend-text">Booked</span>
-          </div>
-          <div>
-            <span
-              className="legend-dot"
-              style={{ backgroundColor: "#CB6040" }}
-            ></span>
-            <span className="legend-text">Blocked</span>
-          </div>
-          <div>
-            <span
-              className="legend-dot"
-              style={{ backgroundColor: "#BC1B2E" }}
-            ></span>
-            <span className="legend-text">Canceled</span>
-          </div>
-        </div>
-
-        <Row className="p-3">
-          <Col>
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              {morningSlots.length > 16 && (
-                <Button
-                  variant="outline-primary"
-                  onClick={handleMorningPrevious}
-                  disabled={morningIndex === 0}
-                >
-                  <BsChevronLeft />
-                </Button>
-              )}
-              <h5 className="text-center flex-grow-1 mb-0">Morning</h5>
-              {morningSlots.length > 16 && (
-                <Button
-                  variant="outline-primary"
-                  onClick={handleMorningNext}
-                  disabled={
-                    morningIndex >=
-                    Math.ceil(morningSlots.length / (slotsPerPage * 4)) - 1
-                  }
-                >
-                  <BsChevronRight />
-                </Button>
-              )}
-            </div>
-            {morningSlots.length > 0 ? (
-              renderSlotCards(morningSlots, morningIndex)
-            ) : (
-              <p className="text-center text-danger mt-4">
-                Slots are not available in the morning.
-              </p>
-            )}
-          </Col>
-          <Col >
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              {afternoonSlots.length > 16 && (
-                <Button
-                  variant="outline-primary"
-                  onClick={handleAfternoonPrevious}
-                  disabled={afternoonIndex === 0}
-                >
-                  <BsChevronLeft />
-                </Button>
-              )}
-              <h5 className="text-center flex-grow-1 mb-0">Afternoon</h5>
-              {afternoonSlots.length > 16 && (
-                <Button
-                  variant="outline-primary"
-                  onClick={handleAfternoonNext}
-                  disabled={
-                    afternoonIndex >=
-                    Math.ceil(afternoonSlots.length / (slotsPerPage * 4)) - 1
-                  }
-                >
-                  <BsChevronRight />
-                </Button>
-              )}
-            </div>
-            {afternoonSlots.length > 0 ? (
-              renderSlotCards(afternoonSlots, afternoonIndex)
-            ) : (
-              <p className="text-center text-danger mt-4">
-                Slots are not available in the afternoon.
-              </p>
-            )}
-          </Col>
-          <Col >
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              {eveningSlots.length > 16 && (
-                <Button
-                  variant="outline-primary"
-                  onClick={handleEveningPrevious}
-                  disabled={eveningIndex === 0}
-                >
-                  <BsChevronLeft />
-                </Button>
-              )}
-              <h5 className="text-center flex-grow-1 mb-0">Evening</h5>
-              {eveningSlots.length > 16 && (
-                <Button
-                  variant="outline-primary"
-                  onClick={handleEveningNext}
-                  disabled={
-                    eveningIndex >=
-                    Math.ceil(eveningSlots.length / (slotsPerPage * 4)) - 1
-                  }
-                >
-                  <BsChevronRight />
-                </Button>
-              )}
-            </div>
-            {eveningSlots.length > 0 ? (
-              renderSlotCards(eveningSlots, eveningIndex)
-            ) : (
-              <p className="text-center text-danger mt-4">
-                Slots are not available in the evening.
-              </p>
-            )}
-          </Col>
-        </Row>
-        <hr />
-      </div>
-
-      <h3 className="text-center">Today's Appointments</h3>
-      <div className="legend">
-        <div>
-          <span
-            className="legend-dot"
-            style={{ backgroundColor: "#2D9CED" }}
-          ></span>
-          <span className="legend-text">New Appointment</span>
-        </div>
-        <div>
-          <span
-            className="legend-dot"
-            style={{ backgroundColor: "#FB8369" }}
-          ></span>
-          <span className="legend-text">Follow-Up</span>
-        </div>
-      </div>
-
-        <Row className="mb-4 p-2 text-center align-items-center justify-content-center">
-          {todayAppointments.length > 4 && currentIndex > 0 && (
-            <Col xs="auto">
-              <Button
-                variant="outline-primary"
-                onClick={handlePrevious}
-                disabled={currentIndex === 0}
-              >
-                <BsChevronLeft />
-              </Button>
-            </Col>
-          )}
-          {todayAppointments.length > 0 ? (
-            renderAppointments()
-          ) : (
-            <Col xs="auto" className="d-flex justify-content-center mt-3">
+          {showSlots && (
+            <>
               <div
-                className="alert alert-danger p-2"
-                style={{ maxWidth: "350px", display: "inline-block" }}
-                role="alert"
+                className="d-flex justify-content-center align-items-center border rounded shadow-sm mx-auto text-sm"
+                style={{
+                  width: "fit-content",
+                  fontSize: "1.2rem",
+                  margin: "10px auto",
+                }}
               >
-                {"No appointments available for today."}
-              </div>
-            </Col>
-          )}
-          {todayAppointments.length > 4 &&
-            currentIndex < todayAppointments.length - 4 && (
-              <Col xs="auto">
-                <Button
-                  variant="outline-primary"
-                  onClick={handleNext}
-                  disabled={currentIndex >= todayAppointments.length - 4}
+                <div
+                  className="px-4 py-2 border-end fw-semibold"
+                  style={{ color: "#0A9013" }}
                 >
-                  <BsChevronRight />
-                </Button>
-              </Col>
+                  Available: {availableAppointmentsCount}
+                </div>
+                <div
+                  className="px-4 py-2 border-end fw-semibold"
+                  style={{ color: "#1261AA" }}
+                >
+                  Booked: {bookedAppointmentCount}
+                </div>
+                <div
+                  className="px-4 py-2 border-end fw-semibold"
+                  style={{ color: "#F16215" }}
+                >
+                  Blocked: {blockedAppointmentsCount}
+                </div>
+                <div
+                  className="px-4 py-2 border-end fw-semibold"
+                  style={{ color: "#FF6767" }}
+                >
+                  Canceled: {canceledAppointmentsCount}
+                </div>
+              </div>
+
+              <Row className="p-3">
+                <Col>
+                  <h5 className="text-center mb-3">Morning</h5>
+                  {morningSlots.length > 0 ? (
+                    renderSlotCards(morningSlots)
+                  ) : (
+                    <p style={{ color: "red", textAlign: "center" }}>
+                      Slots are not available
+                    </p>
+                  )}
+                </Col>
+                <Col>
+                  <h5 className="text-center mb-3">Afternoon</h5>
+                  {afternoonSlots.length > 0 ? (
+                    renderSlotCards(afternoonSlots)
+                  ) : (
+                    <p style={{ color: "red", textAlign: "center" }}>
+                      Slots are not available
+                    </p>
+                  )}
+                </Col>
+                <Col>
+                  <h5 className="text-center mb-3">Evening</h5>
+                  {eveningSlots.length > 0 ? (
+                    renderSlotCards(eveningSlots)
+                  ) : (
+                    <p style={{ color: "red", textAlign: "center" }}>
+                      Slots are not available
+                    </p>
+                  )}
+                </Col>
+              </Row>
+              <hr />
+            </>
+          )}
+        </div>
+
+        {bookedAppointment && (
+          <>
+            <div
+              className="d-flex justify-content-center align-items-center border rounded shadow-sm mx-auto text-sm"
+              style={{
+                width: "fit-content",
+                fontSize: "1.2rem",
+                margin: "10px auto",
+              }}
+            >
+              <div
+                className="px-4 py-2 border-end fw-semibold"
+                style={{ color: "#FF7F50" }}
+              >
+                New Appointments: ---
+              </div>
+              <div
+                className="px-4 py-2 fw-semibold"
+                style={{ color: "#1ABC9C" }}
+              >
+                Follow-Ups: {followUpCount}
+              </div>
+            </div>
+
+            {todayAppointments.length > 0 ? (
+              renderAppointments()
+            ) : (
+              <div className="d-flex justify-content-center mt-3">
+                <div
+                  className="alert alert-danger p-2"
+                  style={{ maxWidth: "350px", display: "inline-block" }}
+                  role="alert"
+                >
+                  {"No appointments available"}
+                </div>
+              </div>
             )}
-        </Row>
-      {selectedTodayAppointment &&
-        renderSelectedAppointmentDetails(selectedTodayAppointment)}
-      <hr />
 
-      <h3 className="text-center">Completed Appointments</h3>
-      <Row className="mb-4 text-center align-items-center justify-content-center">
-        {completedAppointments.length > 4 && completedIndex > 0 && (
-          <Col xs="auto">
-            <Button
-              variant="outline-primary"
-              onClick={handleCompletedPrevious}
-              disabled={completedIndex === 0}
-            >
-              <BsChevronLeft />
-            </Button>
-          </Col>
+            {selectedTodayAppointment &&
+              renderSelectedAppointmentDetails(selectedTodayAppointment)}
+
+            {/* <hr /> */}
+          </>
         )}
-        {completedAppointments.length > 0 ? (
-          renderCompletedAppointments()
-        ) : (
-          <Col xs="auto" className="d-flex justify-content-center mt-3">
+
+        {completedAppointment && (
+          <>
             <div
-              className="alert alert-danger p-2"
-              style={{ maxWidth: "350px", display: "inline-block" }}
-              role="alert"
+              className="d-flex justify-content-center align-items-center border rounded shadow-sm mx-auto text-sm"
+              style={{
+                width: "fit-content",
+                fontSize: "1.2rem",
+                margin: "10px auto",
+              }}
             >
-              {"No completed appointments available."}
-            </div>
-          </Col>
-        )}
-        {completedAppointments.length > 4 &&
-          completedIndex < completedAppointments.length - 4 && (
-            <Col xs="auto">
-              <Button
-                variant="outline-primary"
-                onClick={handleCompletedNext}
-                disabled={completedIndex >= completedAppointments.length - 4}
+              <div
+                className="px-4 py-2 border-end fw-semibold"
+                style={{ color: "#80C116" }}
               >
-                <BsChevronRight />
-              </Button>
-            </Col>
-          )}
-      </Row>
-      {selectedCompletedAppointment &&
-        renderSelectedAppointmentDetails(selectedCompletedAppointment)}
-      <hr />
-
-      <h3 className="text-center">Canceled Appointments</h3>
-      <Row className="mb-4 text-center align-items-center justify-content-center">
-        {canceledAppointments.length > 4 && canceledIndex > 0 && (
-          <Col xs="auto">
-            <Button
-              variant="outline-primary"
-              onClick={handleCanceledPrevious}
-              disabled={canceledIndex === 0}
-            >
-              <BsChevronLeft />
-            </Button>
-          </Col>
-        )}
-        {canceledAppointments.length > 0 ? (
-          renderCanceledAppointments()
-        ) : (
-          <Col xs="auto" className="d-flex justify-content-center mt-3">
-            <div
-              className="alert alert-danger p-2"
-              style={{ maxWidth: "350px", display: "inline-block" }}
-              role="alert"
-            >
-              {"No canceled appointments available."}
-            </div>
-          </Col>
-        )}
-        {canceledAppointments.length > 4 &&
-          canceledIndex < canceledAppointments.length - 4 && (
-            <Col xs="auto">
-              <Button
-                variant="outline-primary"
-                onClick={handleCanceledNext}
-                disabled={canceledIndex >= canceledAppointments.length - 4}
-              >
-                <BsChevronRight />
-              </Button>
-            </Col>
-          )}
-      </Row>
-      {selectedCanceledAppointment &&
-        renderSelectedAppointmentDetails(selectedCanceledAppointment)}
-
-      <Modal
-        show={showCompletedModal}
-        onHide={() => setShowCompletedModal(false)}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Completed Appointment Details</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedAppointment && (
-            <>
-              <p>
-                <strong>Appointment Date:</strong>{" "}
-                {format(
-                  new Date(selectedAppointment.appointment_date),
-                  "dd/MM/yyyy"
-                )}
-              </p>
-              <p>
-                <strong>Appointment Slot:</strong>{" "}
-                {selectedAppointment.appointment_slot}
-              </p>
-              <p>
-                <strong>Booked By:</strong> {selectedAppointment.booked_by}
-              </p>
-              <p>
-                <strong>Doctor Name:</strong> {selectedAppointment.doctor_name}
-              </p>
-              <p>
-                <strong>Mobile Number:</strong>{" "}
-                {selectedAppointment.mobile_number}
-              </p>
-            </>
-          )}
-        </Modal.Body>
-      </Modal>
-
-      <Modal
-        show={showCanceledModal}
-        onHide={() => setShowCanceledModal(false)}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Canceled Appointment Details</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedAppointment && (
-            <>
-              <p>
-                <strong>Appointment Date:</strong>{" "}
-                {format(
-                  new Date(selectedAppointment.appointment_date),
-                  "dd/MM/yyyy"
-                )}
-              </p>
-              <p>
-                <strong>Appointment Slot:</strong>{" "}
-                {selectedAppointment.appointment_slot}
-              </p>
-              <p>
-                <strong>Booked By:</strong> {selectedAppointment.booked_by}
-              </p>
-              <p>
-                <strong>Doctor Name:</strong> {selectedAppointment.doctor_name}
-              </p>
-              <p>
-                <strong>Mobile Number:</strong>{" "}
-                {selectedAppointment.mobile_number}
-              </p>
-            </>
-          )}
-        </Modal.Body>
-      </Modal>
-
-      <Modal
-        show={showConfirmModal}
-        onHide={() => setShowConfirmModal(false)}
-        centered
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Action</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>
-            Are you sure you want to{" "}
-            {confirmAction === "endVisit"
-              ? "end this visit"
-              : "cancel this appointment"}{" "}
-            ?
-          </p>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setShowConfirmModal(false)}
-          >
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleConfirmAction}>
-            Confirm
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      <Modal show={showFormModal} onHide={toggleFormModal} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {isPrescriptionDocs
-              ? "Upload Document Files"
-              : editingRecordId
-                ? "Edit Medical Record"
-                : "Upload Medical Record"}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group controlId="documentName">
-              <Form.Label>Document Name</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter document name"
-                value={formData.document_name}
-                onChange={(e) =>
-                  setFormData({ ...formData, document_name: e.target.value })
-                }
-              />
-            </Form.Group>
-            <Form.Group controlId="patientName">
-              <Form.Label>Patient Name</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter patient name"
-                value={formData.patient_name}
-                onChange={(e) =>
-                  setFormData({ ...formData, patient_name: e.target.value })
-                }
-              />
-            </Form.Group>
-            <Form.Group controlId="documentDate">
-              <Form.Label>Document Date</Form.Label>
-              <Form.Control
-                type="date"
-                value={formData.document_date}
-                onChange={(e) =>
-                  setFormData({ ...formData, document_date: e.target.value })
-                }
-              />
-            </Form.Group>
-            <Form.Group controlId="documentType">
-              <Form.Label>Document Type</Form.Label>
-              <div className="d-flex">
-                <Button
-                  variant={
-                    formData.document_type === "report"
-                      ? "primary"
-                      : "outline-primary"
-                  }
-                  className="me-2"
-                  onClick={() =>
-                    setFormData({ ...formData, document_type: "report" })
-                  }
-                >
-                  <FontAwesomeIcon icon={faFileAlt} /> Report
-                </Button>
-                <Button
-                  variant={
-                    formData.document_type === "invoice"
-                      ? "primary"
-                      : "outline-primary"
-                  }
-                  onClick={() =>
-                    setFormData({ ...formData, document_type: "invoice" })
-                  }
-                >
-                  <FontAwesomeIcon icon={faReceipt} /> Invoice
-                </Button>
+                Completed Appointments: {completedAppointmentsCount}
               </div>
-            </Form.Group>
-            <Form.Group controlId="documentFile">
-              <Form.Label>Document File</Form.Label>
-              <div className="file-input">
-                <input
-                  type="file"
-                  id="fileInput"
-                  onChange={handleFileSelect}
-                  style={{ display: "none" }}
-                />
-                <Button onClick={handleAddFileClick}>Add a File</Button>
-                {selectedFiles.map((file, index) => (
-                  <div key={index} className="selected-file">
-                    <span>{file.name}</span>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => handleDeleteFile(index)}
-                    >
-                      <FontAwesomeIcon icon={faTimesSolid} />
-                    </Button>
+            </div>
+            <Row className="mb-4 text-center align-items-center justify-content-center">
+              {completedAppointments.length > 4 && completedIndex > 0 && (
+                <Col xs="auto">
+                  <Button
+                    variant="outline-primary"
+                    onClick={handleCompletedPrevious}
+                    disabled={completedIndex === 0}
+                  >
+                    <BsChevronLeft />
+                  </Button>
+                </Col>
+              )}
+              {completedAppointments.length > 0 ? (
+                renderCompletedAppointments()
+              ) : (
+                <Col xs="auto" className="d-flex justify-content-center mt-3">
+                  <div
+                    className="alert alert-danger p-2"
+                    style={{ maxWidth: "350px", display: "inline-block" }}
+                    role="alert"
+                  >
+                    {"No completed appointments available."}
                   </div>
-                ))}
-              </div>
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={toggleFormModal}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSave}>
-            {editingRecordId ? "Update" : "Save"}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+                </Col>
+              )}
+              {completedAppointments.length > 4 &&
+                completedIndex < completedAppointments.length - 4 && (
+                  <Col xs="auto">
+                    <Button
+                      variant="outline-primary"
+                      onClick={handleCompletedNext}
+                      disabled={
+                        completedIndex >= completedAppointments.length - 4
+                      }
+                    >
+                      <BsChevronRight />
+                    </Button>
+                  </Col>
+                )}
+            </Row>
+            {selectedCompletedAppointment &&
+              renderSelectedAppointmentDetails(selectedCompletedAppointment)}
+            {/* <hr /> */}
+          </>
+        )}
 
-      <Modal show={showModal} onHide={handleClose} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Action Status</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>{modalContent}</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
+        {canceledAppointment && (
+          <>
+            <div
+              className="d-flex justify-content-center align-items-center border rounded shadow-sm mx-auto text-sm"
+              style={{
+                width: "fit-content",
+                fontSize: "1.2rem",
+                margin: "10px auto",
+              }}
+            >
+              <div
+                className="px-4 py-2 border-end fw-semibold"
+                style={{ color: "#FF3535" }}
+              >
+                Canceled Appointments: {canceledAppointmentsCount}
+              </div>
+            </div>
+            <Row className="mb-4 text-center align-items-center justify-content-center">
+              {canceledAppointments.length > 4 && canceledIndex > 0 && (
+                <Col xs="auto">
+                  <Button
+                    variant="outline-primary"
+                    onClick={handleCanceledPrevious}
+                    disabled={canceledIndex === 0}
+                  >
+                    <BsChevronLeft />
+                  </Button>
+                </Col>
+              )}
+              {canceledAppointments.length > 0 ? (
+                renderCanceledAppointments()
+              ) : (
+                <Col xs="auto" className="d-flex justify-content-center mt-3">
+                  <div
+                    className="alert alert-danger p-2"
+                    style={{ maxWidth: "350px", display: "inline-block" }}
+                    role="alert"
+                  >
+                    {"No canceled appointments available."}
+                  </div>
+                </Col>
+              )}
+              {canceledAppointments.length > 4 &&
+                canceledIndex < canceledAppointments.length - 4 && (
+                  <Col xs="auto">
+                    <Button
+                      variant="outline-primary"
+                      onClick={handleCanceledNext}
+                      disabled={
+                        canceledIndex >= canceledAppointments.length - 4
+                      }
+                    >
+                      <BsChevronRight />
+                    </Button>
+                  </Col>
+                )}
+            </Row>
+          </>
+        )}
+        {selectedCanceledAppointment &&
+          renderSelectedAppointmentDetails(selectedCanceledAppointment)}
+
+        {onlineAppointment && (
+          <>
+            <div
+              className="d-flex justify-content-center align-items-center border rounded shadow-sm mx-auto text-sm"
+              style={{
+                width: "fit-content",
+                fontSize: "1.2rem",
+                margin: "10px auto",
+              }}
+            >
+              <div
+                className="px-4 py-2 border-end fw-semibold"
+                style={{ color: "#AA56FF" }}
+              >
+                Online Appointments: {onlineCount}
+              </div>
+            </div>
+            {renderWalkinOnlineFollowupAppointments(
+              onlineAppointments,
+              "online"
+            )}
+          </>
+        )}
+        {selectedOnlineAppointment && renderSelectedAppointmentDetails()}
+
+        {walkinAppointment && (
+          <>
+            <div
+              className="d-flex justify-content-center align-items-center border rounded shadow-sm mx-auto text-sm"
+              style={{
+                width: "fit-content",
+                fontSize: "1.2rem",
+                margin: "10px auto",
+              }}
+            >
+              <div
+                className="px-4 py-2 border-end fw-semibold"
+                style={{ color: "#BFAF18" }}
+              >
+                Walk-in Appointments: {walkInCount}
+              </div>
+            </div>
+            {renderWalkinOnlineFollowupAppointments(
+              walkinAppointments,
+              "walk-in"
+            )}
+          </>
+        )}
+        {selectedWalkinAppointment && renderSelectedAppointmentDetails()}
+
+        {followupAppointment && (
+          <>
+            <div
+              className="d-flex justify-content-center align-items-center border rounded shadow-sm mx-auto text-sm"
+              style={{
+                width: "fit-content",
+                fontSize: "1.2rem",
+                margin: "10px auto",
+              }}
+            >
+              <div
+                className="px-4 py-2 border-end fw-semibold"
+                style={{ color: "#12C81E" }}
+              >
+                Follow-up Appointments: {followUpCount}
+              </div>
+            </div>
+            {renderWalkinOnlineFollowupAppointments(
+              followupAppointments,
+              "follow-up"
+            )}
+          </>
+        )}
+        {selectedFollowupAppointment && renderSelectedAppointmentDetails()}
+
+        {/* {onlineAppointment && (
+        <h1 className="text-center">
+              Online Appointments
+        </h1>
+      )}
+      {selectedOnlineAppointment && renderSelectedAppointmentDetails()}
+
+      {walkinAppointment && (
+       <h1 className="text-center">
+              Walk-in Appointments
+        </h1>
+      )}
+      {selectedWalkinAppointment && renderSelectedAppointmentDetails()}
+
+      {followupAppointment && (
+        <h1 className="text-center">
+              Follow-up Appointments
+        </h1>
+      )}
+      {selectedFollowupAppointment && renderSelectedAppointmentDetails()} */}
+
+        <Modal
+          show={showCompletedModal}
+          onHide={() => setShowCompletedModal(false)}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Completed Appointment Details</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {selectedAppointment && (
+              <>
+                <p>
+                  <strong>Appointment Date:</strong>{" "}
+                  {format(
+                    new Date(selectedAppointment.appointment_date),
+                    "dd/MM/yyyy"
+                  )}
+                </p>
+                <p>
+                  <strong>Appointment Slot:</strong>{" "}
+                  {selectedAppointment.appointment_slot}
+                </p>
+                <p>
+                  <strong>Booked By:</strong> {selectedAppointment.booked_by}
+                </p>
+                <p>
+                  <strong>Doctor Name:</strong>{" "}
+                  {selectedAppointment.doctor_name}
+                </p>
+                <p>
+                  <strong>Mobile Number:</strong>{" "}
+                  {selectedAppointment.mobile_number}
+                </p>
+              </>
+            )}
+          </Modal.Body>
+        </Modal>
+
+        <Modal
+          show={showCanceledModal}
+          onHide={() => setShowCanceledModal(false)}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Canceled Appointment Details</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {selectedAppointment && (
+              <>
+                <p>
+                  <strong>Appointment Date:</strong>{" "}
+                  {format(
+                    new Date(selectedAppointment.appointment_date),
+                    "dd/MM/yyyy"
+                  )}
+                </p>
+                <p>
+                  <strong>Appointment Slot:</strong>{" "}
+                  {selectedAppointment.appointment_slot}
+                </p>
+                <p>
+                  <strong>Booked By:</strong> {selectedAppointment.booked_by}
+                </p>
+                <p>
+                  <strong>Doctor Name:</strong>{" "}
+                  {selectedAppointment.doctor_name}
+                </p>
+                <p>
+                  <strong>Mobile Number:</strong>{" "}
+                  {selectedAppointment.mobile_number}
+                </p>
+              </>
+            )}
+          </Modal.Body>
+        </Modal>
+
+        <Modal
+          show={showConfirmModal}
+          onHide={() => setShowConfirmModal(false)}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Confirm Action</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>
+              Are you sure you want to{" "}
+              {confirmAction === "endVisit"
+                ? "end this visit"
+                : "cancel this appointment"}{" "}
+              ?
+            </p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowConfirmModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleConfirmAction}>
+              Confirm
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal show={showFormModal} onHide={toggleFormModal} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>
+              {isPrescriptionDocs
+                ? "Upload Document Files"
+                : editingRecordId
+                  ? "Edit Medical Record"
+                  : "Upload Medical Record"}
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <Form.Group controlId="documentName">
+                <Form.Label>Document Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter document name"
+                  value={formData.document_name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, document_name: e.target.value })
+                  }
+                />
+              </Form.Group>
+              <Form.Group controlId="patientName">
+                <Form.Label>Patient Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter patient name"
+                  value={formData.patient_name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, patient_name: e.target.value })
+                  }
+                />
+              </Form.Group>
+              <Form.Group controlId="documentDate">
+                <Form.Label>Document Date</Form.Label>
+                <Form.Control
+                  type="date"
+                  value={formData.document_date}
+                  onChange={(e) =>
+                    setFormData({ ...formData, document_date: e.target.value })
+                  }
+                />
+              </Form.Group>
+              <Form.Group controlId="documentType">
+                <Form.Label>Document Type</Form.Label>
+                <div className="d-flex">
+                  <Button
+                    variant={
+                      formData.document_type === "report"
+                        ? "primary"
+                        : "outline-primary"
+                    }
+                    className="me-2"
+                    onClick={() =>
+                      setFormData({ ...formData, document_type: "report" })
+                    }
+                  >
+                    <FontAwesomeIcon icon={faFileAlt} /> Report
+                  </Button>
+                  <Button
+                    variant={
+                      formData.document_type === "invoice"
+                        ? "primary"
+                        : "outline-primary"
+                    }
+                    onClick={() =>
+                      setFormData({ ...formData, document_type: "invoice" })
+                    }
+                  >
+                    <FontAwesomeIcon icon={faReceipt} /> Invoice
+                  </Button>
+                </div>
+              </Form.Group>
+              <Form.Group controlId="documentFile">
+                <Form.Label>Document File</Form.Label>
+                <div className="file-input">
+                  <input
+                    type="file"
+                    id="fileInput"
+                    onChange={handleFileSelect}
+                    style={{ display: "none" }}
+                  />
+                  <Button onClick={handleAddFileClick}>Add a File</Button>
+                  {selectedFiles.map((file, index) => (
+                    <div key={index} className="selected-file">
+                      <span>{file.name}</span>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleDeleteFile(index)}
+                      >
+                        <FontAwesomeIcon icon={faTimesSolid} />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={toggleFormModal}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleSave}>
+              {editingRecordId ? "Update" : "Save"}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal show={showModal} onHide={handleClose} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Action Status</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>{modalContent}</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleClose}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal
+          show={!!selectedFile}
+          onHide={() => setSelectedFile(null)}
+          centered
+          size="lg"
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>
+              {selectedFile?.type === "image" && "Image Preview"}
+              {selectedFile?.type === "video" && "Video Preview"}
+              {selectedFile?.type === "pdf" && "PDF Preview"}
+            </Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body
+            style={{
+              padding: 0,
+              height: selectedFile?.type === "image" ? "400px" : "auto", // Fixed height for images
+              width: selectedFile?.type === "image" ? "100%" : "auto", // Fixed width for images
+              overflow: "hidden", // Prevent overflow if the image is too large
+              display: "flex",
+              justifyContent: "center", // Center image horizontally
+              alignItems: "center", // Center image vertically
+            }}
+          >
+            {selectedFile?.type === "image" && (
+              <img
+                src={selectedFile.url}
+                alt="Preview"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain", // Ensure image scales within the fixed container
+                  borderRadius: "5px",
+                }}
+              />
+            )}
+
+            {selectedFile?.type === "video" && (
+              <video
+                src={selectedFile.url}
+                controls
+                autoPlay
+                style={{
+                  width: "100%",
+                  borderRadius: "5px",
+                }}
+              />
+            )}
+
+            {selectedFile?.type === "pdf" && (
+              <iframe
+                src={selectedFile.url}
+                title="PDF"
+                style={{
+                  width: "100%",
+                  height: "600px",
+                  border: "none",
+                }}
+              />
+            )}
+          </Modal.Body>
+
+          {selectedFile?.type === "pdf" && (
+            <Modal.Footer className="d-flex justify-content-between">
+              <Button variant="secondary" onClick={() => setSelectedFile(null)}>
+        Close
+      </Button>
+            </Modal.Footer>
+          )}
+
+          {selectedFile?.type !== "pdf" && (
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setSelectedFile(null)}>
+                Close
+              </Button>
+            </Modal.Footer>
+          )}
+        </Modal>
+      </main>
     </div>
   );
 };

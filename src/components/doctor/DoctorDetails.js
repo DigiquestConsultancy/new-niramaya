@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import BaseUrl from "../../api/BaseUrl";
 import { jwtDecode } from "jwt-decode";
@@ -8,6 +7,7 @@ import styled from "styled-components";
 import Loader from "react-js-loader";
 import { FaTrash } from "react-icons/fa";
 import { Table, Button, Modal } from "react-bootstrap";
+import Sidebar from "./Sidebar";
 
 const LoaderWrapper = styled.div`
   display: flex;
@@ -184,6 +184,13 @@ const DoctorDetails = () => {
   const [modalMessage, setModalMessage] = useState("");
   const [modalType, setModalType] = useState(""); // "success" or "error"
 
+  const [selectedMenu, setSelectedMenu] = useState("Doctor Details");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const handleMenuClick = (menu) => {
+    setSelectedMenu(menu);
+  };
+
   const updateProgress = async () => {
     setSuccessMessage("");
     setErrorMessage("");
@@ -252,7 +259,7 @@ const DoctorDetails = () => {
   // Loader control for address and OPD
   const [loadingAddress, setLoadingAddress] = useState(false);
   const [loadingOpd, setLoadingOpd] = useState(false);
-  const [loadingTimings, setLoadingTimings] = useState(false); 
+  const [loadingTimings, setLoadingTimings] = useState(false);
 
   const fetchDoctorDetails = async () => {
     setSuccessMessage("");
@@ -284,8 +291,7 @@ const DoctorDetails = () => {
       }
     } catch (error) {
       console.error(error);
-    }
-    finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -317,8 +323,7 @@ const DoctorDetails = () => {
       window.open(fileUrl, "_blank");
     } catch (error) {
       alert("Unable to fetch document.");
-    }
-    finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -356,8 +361,7 @@ const DoctorDetails = () => {
       setErrorMessage(
         error.response?.data?.error || "Error fetching qualifications."
       );
-    }
-    finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -422,7 +426,7 @@ const DoctorDetails = () => {
         setIsOpdComplete(true);
         calculateProgress();
 
-fetchOpdTimings(opdIds[0]);
+        fetchOpdTimings(opdIds[0]);
         setShowOpdTimings(true);
       }
     } catch (error) {
@@ -717,8 +721,7 @@ fetchOpdTimings(opdIds[0]);
         error.response?.data?.error || "Error updating qualifications."
       );
       setSuccessMessage("");
-    }
-    finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -950,20 +953,19 @@ fetchOpdTimings(opdIds[0]);
   //   }
   // };
 
-
   //Success msg are displaying
   //Success msg are displaying
 
   const handleSaveTimings = async () => {
     setLoadingTimings(true);
-  
+
     try {
       const promises = opdData.opd_timings.map((timing) => {
         const formData = new FormData();
         formData.append("opd_id", opdId);
         formData.append("start_time", timing.start_time);
         formData.append("end_time", timing.end_time);
-  
+
         if (timing.time_id) {
           formData.append("time_id", timing.time_id);
           return BaseUrl.put(`/doctor/timeopd/?opd_id=${opdId}`, formData);
@@ -973,14 +975,13 @@ fetchOpdTimings(opdIds[0]);
       });
       await fetchOpdTimings(opdId);
       const responses = await Promise.all(promises);
-  
+
       responses.forEach((response) => {
-        setSuccessMessage(response.data.success); 
+        setSuccessMessage(response.data.success);
       });
-      
+
       setShowModal(true);
       setModalType("success");
-      
     } catch (error) {
       console.error(error.response?.data?.error || "An error occurred.");
       setShowModal(true);
@@ -989,7 +990,7 @@ fetchOpdTimings(opdIds[0]);
     } finally {
       setLoadingTimings(false);
     }
-  };  
+  };
 
   const handleOpdTimingChange = (index, field, value) => {
     const updatedTimings = opdData.opd_timings.map((timing, i) =>
@@ -1817,12 +1818,19 @@ fetchOpdTimings(opdIds[0]);
 
   return (
     <div
+      className="d-flex"
       style={{
-        backgroundColor: "#D7EAF0", 
-        minHeight: "200vh", 
+        backgroundColor: "#D7EAF0",
         fontFamily: "sans-serif",
+        height: "calc(100vh - 80px)"
       }}
     >
+      <Sidebar
+        selectedMenu={selectedMenu}
+        handleMenuClick={handleMenuClick}
+        isSidebarCollapsed={isSidebarCollapsed}
+        setIsSidebarCollapsed={setIsSidebarCollapsed}
+      />
       {loading && (
         <LoaderWrapper>
           <LoaderImage>
@@ -1837,7 +1845,7 @@ fetchOpdTimings(opdIds[0]);
         </LoaderWrapper>
       )}
       <div
-        className="container mt-5"
+        className="container mt-5 overflow-y-auto"
         style={{ backgroundColor: "#D7EAF0", fontFamily: "sans-serif" }}
       >
         <TabWrapper style={{ marginBottom: "0", paddingBottom: "0" }}>
@@ -1879,17 +1887,6 @@ fetchOpdTimings(opdIds[0]);
 };
 
 export default DoctorDetails;
-
-
-
-
-
-
-
-
-
-
-
 
 // import React, { useState, useEffect } from "react";
 // import BaseUrl from "../../api/BaseUrl";
@@ -4350,20 +4347,6 @@ export default DoctorDetails;
 
 // export default DoctorDetails;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // import React, { useState, useEffect } from "react";
 // import BaseUrl from "../../api/BaseUrl";
 // import { jwtDecode } from "jwt-decode";
@@ -4808,78 +4791,78 @@ export default DoctorDetails;
 //     }
 //   };
 
-  // const fetchOpdDetails = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const token = localStorage.getItem("token");
-  //     const decodedToken = jwtDecode(token);
-  //     const doctor_id = decodedToken.doctor_id;
+//   const fetchOpdDetails = async () => {
+//     setLoading(true);
+//     try {
+//       const token = localStorage.getItem("token");
+//       const decodedToken = jwtDecode(token);
+//       const doctor_id = decodedToken.doctor_id;
 
-  //     const opdResponse = await BaseUrl.get(
-  //       `/doctor/opddays/?doctor_id=${doctor_id}`
-  //     );
-  //     const opdDetails = opdResponse.data;
+//       const opdResponse = await BaseUrl.get(
+//         `/doctor/opddays/?doctor_id=${doctor_id}`
+//       );
+//       const opdDetails = opdResponse.data;
 
-  //     if (opdDetails.length > 0) {
-  //       setOpdData({
-  //         ...opdData,
-  //         clinic_name: opdDetails[0].clinic_name,
-  //         start_day: opdDetails[0].start_day,
-  //         end_day: opdDetails[0].end_day,
-  //         consultation_fee: opdDetails[0].consultation_fee,
-  //         doc_file: opdDetails[0].doc_file,
-  //         countrySpecificFees: [], // Clear this initially to update below
-  //       });
+//       if (opdDetails.length > 0) {
+//         setOpdData({
+//           ...opdData,
+//           clinic_name: opdDetails[0].clinic_name,
+//           start_day: opdDetails[0].start_day,
+//           end_day: opdDetails[0].end_day,
+//           consultation_fee: opdDetails[0].consultation_fee,
+//           doc_file: opdDetails[0].doc_file,
+//           countrySpecificFees: [], // Clear this initially to update below
+//         });
 
-  //       setClinicPicPreview(
-  //         `${BaseUrl.defaults.baseURL}${opdDetails[0].doc_file}`
-  //       );
-  //       const opdId = opdDetails[0].id;
-  //       setOpdId(opdId);
+//         setClinicPicPreview(
+//           `${BaseUrl.defaults.baseURL}${opdDetails[0].doc_file}`
+//         );
+//         const opdId = opdDetails[0].id;
+//         setOpdId(opdId);
 
-  //       // Fetch OPD timings immediately after fetching OPD details
-  //       await fetchOpdTimings(opdId);
-  //     }
+//         // Fetch OPD timings immediately after fetching OPD details
+//         await fetchOpdTimings(opdId);
+//       }
 
-  //     const feeResponse = await BaseUrl.get(
-  //       `/doctor/fee/?doctor_id=${doctor_id}`
-  //     );
-  //     const feeData = feeResponse.data;
-  //     setCountryId(feeResponse.data.id);
+//       const feeResponse = await BaseUrl.get(
+//         `/doctor/fee/?doctor_id=${doctor_id}`
+//       );
+//       const feeData = feeResponse.data;
+//       setCountryId(feeResponse.data.id);
 
-  //     const countrySpecificFees = Array.isArray(feeData) ? feeData : [];
+//       const countrySpecificFees = Array.isArray(feeData) ? feeData : [];
 
-  //     // Check if "Others" is present in the fee data
-  //     const othersFee = countrySpecificFees.find(
-  //       (fee) => fee.country === "Others"
-  //     );
+//       // Check if "Others" is present in the fee data
+//       const othersFee = countrySpecificFees.find(
+//         (fee) => fee.country === "Others"
+//       );
 
-  //     // If "Others" exists, set its details and check the checkbox
-  //     if (othersFee) {
-  //       setOpdData((prevData) => ({
-  //         ...prevData,
-  //         otherCountryFeeChecked: true, // Checkbox should be checked
-  //         otherCountryFeeCurrency: othersFee.currency,
-  //         otherCountryFeeAmount: othersFee.consultation_fee,
-  //         countrySpecificFees: countrySpecificFees.filter(
-  //           (fee) => fee.country !== "Others"
-  //         ), // Exclude "Others" from the list
-  //       }));
-  //     } else {
-  //       setOpdData((prevData) => ({
-  //         ...prevData,
-  //         otherCountryFeeChecked: false, // Checkbox should be unchecked
-  //         otherCountryFeeCurrency: "",
-  //         otherCountryFeeAmount: "",
-  //         countrySpecificFees: countrySpecificFees,
-  //       }));
-  //     }
-  //   } catch (error) {
-  //     setErrorMessage("Failed to fetch OPD details or consultation fees.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+//       // If "Others" exists, set its details and check the checkbox
+//       if (othersFee) {
+//         setOpdData((prevData) => ({
+//           ...prevData,
+//           otherCountryFeeChecked: true, // Checkbox should be checked
+//           otherCountryFeeCurrency: othersFee.currency,
+//           otherCountryFeeAmount: othersFee.consultation_fee,
+//           countrySpecificFees: countrySpecificFees.filter(
+//             (fee) => fee.country !== "Others"
+//           ), // Exclude "Others" from the list
+//         }));
+//       } else {
+//         setOpdData((prevData) => ({
+//           ...prevData,
+//           otherCountryFeeChecked: false, // Checkbox should be unchecked
+//           otherCountryFeeCurrency: "",
+//           otherCountryFeeAmount: "",
+//           countrySpecificFees: countrySpecificFees,
+//         }));
+//       }
+//     } catch (error) {
+//       setErrorMessage("Failed to fetch OPD details or consultation fees.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
 
 //   const fetchOpdTimings = async (opdId) => {
 //     setLoadingTimings(true);
@@ -5351,7 +5334,7 @@ export default DoctorDetails;
 //   const handleSaveCountry = async (index) => {
 //     const fee = opdData.countrySpecificFees[index];
 //     const isExisting = fee.id;
-  
+
 //     try {
 //       if (isExisting) {
 //         // Update existing fee
@@ -5377,10 +5360,10 @@ export default DoctorDetails;
 //       console.error(error);
 //     }
 //   };
-  
+
 //   const handleSaveOthersCountry = async () => {
 //     const { otherCountryFeeCurrency, otherCountryFeeAmount } = opdData;
-  
+
 //     if (otherCountryFeeCurrency && otherCountryFeeAmount) {
 //       try {
 //         await BaseUrl.post("/doctor/fee/", {
@@ -5397,7 +5380,6 @@ export default DoctorDetails;
 //       console.error("Please fill out all fields for the Others fee.");
 //     }
 //   };
-  
 
 //   const handleDeleteCountryFee = async (index) => {
 //     const fee = opdData.countrySpecificFees[index];

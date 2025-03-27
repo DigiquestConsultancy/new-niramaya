@@ -6,6 +6,7 @@ import styled from "styled-components";
 import Loader from "react-js-loader";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
+import Sidebar from "./Sidebar";
 
 const LoaderWrapper = styled.div`
   display: flex;
@@ -74,6 +75,13 @@ const AddClinic = () => {
   });
   const [doctorId, setDoctorId] = useState("");
   const [errors, setErrors] = useState({});
+
+  const [selectedMenu, setSelectedMenu] = useState("Dashboard");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const handleMenuClick = (menu) => {
+    setSelectedMenu(menu);
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -276,13 +284,18 @@ const AddClinic = () => {
   };
 
   return (
-    <div
+    <div className="d-flex"
       style={{
         backgroundColor: "#D7EAF0",
-        minHeight: "150vh",
-        paddingTop: "20px",
+        // height: "calc(100vh - 56px)"
       }}
     >
+       <Sidebar
+              selectedMenu={selectedMenu}
+              handleMenuClick={handleMenuClick}
+              isSidebarCollapsed={isSidebarCollapsed}
+              setIsSidebarCollapsed={setIsSidebarCollapsed}
+            />
       <div
         className="container mt-5"
         style={{
@@ -315,7 +328,7 @@ const AddClinic = () => {
               Mobile Number:
             </label>
             <div className="col-sm-8">
-              {/* <PhoneInput
+              <PhoneInput
                 id="mobile_number"
                 name="mobile_number"
                 placeholder="Enter mobile number"
@@ -323,16 +336,16 @@ const AddClinic = () => {
                 value={mobileNumber} 
                 onChange={setMobileNumber}
                 required
-              /> */}
+              />
 
-              <input
+              {/* <input
                 // type="number"
                 placeholder="Please Enter Mobile Number"
                 className="form-control"
                 id="mobileNumber"
                 value={mobileNumber}
                 onChange={(e) => setMobileNumber(e.target.value)}
-              />
+              /> */}
             </div>
             <div className="col-sm-1">
               <button

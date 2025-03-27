@@ -4,6 +4,7 @@ import { useParams, useHistory } from "react-router-dom";
 import Loader from "react-js-loader";
 import styled from "styled-components";
 import { Modal, Button } from "react-bootstrap";
+import Sidebar from "./Sidebar";
 
 const LoaderWrapper = styled.div`
   display: flex;
@@ -67,6 +68,13 @@ const ClinicDetails = () => {
   const [successMessage, setSuccessMessage] = useState(""); // Display success message from backend
   const [detailsExist, setDetailsExist] = useState(false);
   const history = useHistory();
+
+  const [selectedMenu, setSelectedMenu] = useState("Dashboard");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const handleMenuClick = (menu) => {
+    setSelectedMenu(menu);
+  };
 
   const fetchClinicDetail = useCallback(async () => {
     setLoading(true);
@@ -191,217 +199,219 @@ const ClinicDetails = () => {
   };
 
   return (
-    <div
-      className="container-fluid"
-      style={{
-        backgroundColor: "#D7EAF0",
-        minHeight: "150vh",
-        padding: "20px",
-        fontFamily: "sans-serif",
-        fontSize: "16px",
-      }}
-    >
-      {loading && (
-        <LoaderWrapper>
-          <LoaderImage>
-            <Loader
-              type="spinner-circle"
-              bgColor={"#0091A5"}
-              color={"#0091A5"}
-              title={"Loading..."}
-              size={100}
-            />
-          </LoaderImage>
-        </LoaderWrapper>
-      )}
-
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>{successMessage ? "Success" : "Error"}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {successMessage && (
-            <div className="alert alert-success text-center" role="alert">
-              {successMessage}
-            </div>
-          )}
-          {errorMessage && (
-            <div className="alert alert-danger text-center" role="alert">
-              {errorMessage}
-            </div>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      <form
-        className="p-4 shadow"
-        onSubmit={handleSubmit}
-        style={{
-          backgroundColor: "#f9f9f9",
-          borderRadius: "8px",
-          marginTop: "20px",
-        }}
-      >
-        <h2 style={{ marginBottom: "30px" }}>Clinic Details</h2>
-        {/* Display success message from backend */}
-        {successMessage && (
-          <div className="alert alert-success">{successMessage}</div>
+    <div className=" d-flex">
+      <Sidebar
+        selectedMenu={selectedMenu}
+        handleMenuClick={handleMenuClick}
+        isSidebarCollapsed={isSidebarCollapsed}
+        setIsSidebarCollapsed={setIsSidebarCollapsed}
+      />
+      <main className="p-4">
+        {loading && (
+          <LoaderWrapper>
+            <LoaderImage>
+              <Loader
+                type="spinner-circle"
+                bgColor={"#0091A5"}
+                color={"#0091A5"}
+                title={"Loading..."}
+                size={100}
+              />
+            </LoaderImage>
+          </LoaderWrapper>
         )}
 
-        <div className="d-flex align-items-center mb-4">
-          <ProfilePicCircle
-            onClick={() => document.getElementById("profilePicInput").click()}
-          >
-            <span>+</span>
-          </ProfilePicCircle>
-          <input
-            id="profilePicInput"
-            type="file"
-            accept="image/*"
-            style={{ display: "none" }}
-            onChange={handleProfilePicChange}
-          />
-          {profilePicPreview && (
-            <ProfilePicPreview src={profilePicPreview} alt="Profile Preview" />
+        <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>{successMessage ? "Success" : "Error"}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {successMessage && (
+              <div className="alert alert-success text-center" role="alert">
+                {successMessage}
+              </div>
+            )}
+            {errorMessage && (
+              <div className="alert alert-danger text-center" role="alert">
+                {errorMessage}
+              </div>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <form
+          className="p-4 shadow"
+          onSubmit={handleSubmit}
+          style={{
+            backgroundColor: "#f9f9f9",
+            borderRadius: "8px",
+            marginTop: "20px",
+          }}
+        >
+          <h2 style={{ marginBottom: "30px" }}>Clinic Details</h2>
+          {/* Display success message from backend */}
+          {successMessage && (
+            <div className="alert alert-success">{successMessage}</div>
           )}
-        </div>
 
-        <div className="row mb-4">
-          <div className="col-md-4">
-            <label>Name</label>
-            <span className="text-danger">*</span>
-            <input
-              type="text"
-              className="form-control"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="col-md-4">
-            <label>Mobile</label>
-            <span className="text-danger">*</span>
-            <input
-              type="number"
-              className="form-control"
-              name="mobile_number"
-              value={formData.mobile_number} // Display mobile number from backend
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="col-md-4">
-            <label>Gender</label>
-            <span className="text-danger">*</span>
-            <select
-              className="form-select"
-              name="gender"
-              value={formData.gender}
-              onChange={handleChange}
-              required
+          <div className="d-flex align-items-center mb-4">
+            <ProfilePicCircle
+              onClick={() => document.getElementById("profilePicInput").click()}
             >
-              <option value="">Select Gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
+              <span>+</span>
+            </ProfilePicCircle>
+            <input
+              id="profilePicInput"
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={handleProfilePicChange}
+            />
+            {profilePicPreview && (
+              <ProfilePicPreview
+                src={profilePicPreview}
+                alt="Profile Preview"
+              />
+            )}
           </div>
-        </div>
 
-        <div className="row mb-4">
-          <div className="col-md-4">
-            <label>Age</label>
-            <span className="text-danger">*</span>
-            <input
-              type="number"
-              className="form-control"
-              name="age"
-              value={formData.age}
-              onChange={handleChange}
-              required
-            />
+          <div className="row mb-4">
+            <div className="col-md-4">
+              <label>Name</label>
+              <span className="text-danger">*</span>
+              <input
+                type="text"
+                className="form-control"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="col-md-4">
+              <label>Mobile</label>
+              <span className="text-danger">*</span>
+              <input
+                type="number"
+                className="form-control"
+                name="mobile_number"
+                value={formData.mobile_number} // Display mobile number from backend
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="col-md-4">
+              <label>Gender</label>
+              <span className="text-danger">*</span>
+              <select
+                className="form-select"
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
           </div>
-          <div className="col-md-4">
-            <label>Date of Birth</label>
-            <input
-              type="date"
-              className="form-control"
-              name="date_of_birth"
-              value={formData.date_of_birth}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="col-md-4">
-            <label>Specialization</label>
-            <span className="text-danger">*</span>
-            <input
-              type="text"
-              className="form-control"
-              name="specialization"
-              value={formData.specialization}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
 
-        <div className="row mb-4">
-          <div className="col-md-4">
-            <label>Qualification</label>
-            <span className="text-danger">*</span>
-            <input
-              type="text"
-              className="form-control"
-              name="qualification"
-              value={formData.qualification}
-              onChange={handleChange}
-              required
-            />
+          <div className="row mb-4">
+            <div className="col-md-4">
+              <label>Age</label>
+              <span className="text-danger">*</span>
+              <input
+                type="number"
+                className="form-control"
+                name="age"
+                value={formData.age}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="col-md-4">
+              <label>Date of Birth</label>
+              <input
+                type="date"
+                className="form-control"
+                name="date_of_birth"
+                value={formData.date_of_birth}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="col-md-4">
+              <label>Specialization</label>
+              <span className="text-danger">*</span>
+              <input
+                type="text"
+                className="form-control"
+                name="specialization"
+                value={formData.specialization}
+                onChange={handleChange}
+                required
+              />
+            </div>
           </div>
-          <div className="col-md-4">
-            <label>Address</label>
-            <span className="text-danger">*</span>
-            <input
-              type="text"
-              className="form-control"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
 
-        <div className="d-flex justify-content-end">
-          <button
-            type="submit"
-            className="btn"
-            style={{
-              backgroundColor: "#199fd9",
-              color: "#f1f8dc",
-              fontFamily: "sans-serif",
-              fontWeight: "500",
-              marginRight: "10px",
-            }}
-          >
-            Update
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => history.goBack()}
-            style={{ fontFamily: "sans-serif", fontWeight: "500" }}
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+          <div className="row mb-4">
+            <div className="col-md-4">
+              <label>Qualification</label>
+              <span className="text-danger">*</span>
+              <input
+                type="text"
+                className="form-control"
+                name="qualification"
+                value={formData.qualification}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="col-md-4">
+              <label>Address</label>
+              <span className="text-danger">*</span>
+              <input
+                type="text"
+                className="form-control"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="d-flex justify-content-end">
+            <button
+              type="submit"
+              className="btn"
+              style={{
+                backgroundColor: "#199fd9",
+                color: "#f1f8dc",
+                fontFamily: "sans-serif",
+                fontWeight: "500",
+                marginRight: "10px",
+              }}
+            >
+              Update
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => history.goBack()}
+              style={{ fontFamily: "sans-serif", fontWeight: "500" }}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </main>
     </div>
   );
 };

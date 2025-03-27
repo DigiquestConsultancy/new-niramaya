@@ -6,6 +6,7 @@ import styled from "styled-components";
 import Loader from "react-js-loader";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
+import Sidebar from "./Sidebar";
 
 const LoaderWrapper = styled.div`
   display: flex;
@@ -74,6 +75,13 @@ const AddReception = () => {
   const [errors, setErrors] = useState({});
   const [doctorId, setDoctorId] = useState("");
  
+  const [selectedMenu, setSelectedMenu] = useState("Dashboard");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const handleMenuClick = (menu) => {
+    setSelectedMenu(menu);
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -303,13 +311,17 @@ const AddReception = () => {
     return formErrors;
   };
   return (
-    <div
+    <div className="d-flex"
       style={{
         backgroundColor: "#D7EAF0",
-        minHeight: "150vh",
-        paddingTop: "20px",
       }}
     >
+       <Sidebar
+              selectedMenu={selectedMenu}
+              handleMenuClick={handleMenuClick}
+              isSidebarCollapsed={isSidebarCollapsed}
+              setIsSidebarCollapsed={setIsSidebarCollapsed}
+            />
       <div
         className="container mt-5"
         style={{

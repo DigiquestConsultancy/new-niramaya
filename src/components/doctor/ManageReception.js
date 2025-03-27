@@ -4,26 +4,23 @@ import { jwtDecode } from "jwt-decode";
 import { useHistory } from "react-router-dom";
 import Loader from "react-js-loader";
 import styled from "styled-components";
+import Sidebar from "./Sidebar";
 
 const LoaderWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: rgba(255, 255, 255, 0.7); /* Slightly opaque background */
+  background-color: rgba(255, 255, 255, 0.7);
   position: fixed;
   width: 100%;
   top: 0;
   left: 0;
-  z-index: 9999; /* Make sure loader is above all content */
+  z-index: 9999;
 `;
 
 const LoaderImage = styled.div`
   width: 400px;
-`;
-
-const BlurredContent = styled.div`
-  filter: blur(5px); /* Apply blur to content */
 `;
 
 const ManageReception = () => {
@@ -34,6 +31,13 @@ const ManageReception = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const history = useHistory();
+
+  const [selectedMenu, setSelectedMenu] = useState("Dashboard");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const handleMenuClick = (menu) => {
+    setSelectedMenu(menu);
+  };
 
   const fetchReceptionDetails = useCallback(async () => {
     setLoading(true);
@@ -123,7 +127,14 @@ const ManageReception = () => {
   };
 
   return (
-    <>
+    <div className="d-flex">
+      <Sidebar
+        selectedMenu={selectedMenu}
+        handleMenuClick={handleMenuClick}
+        isSidebarCollapsed={isSidebarCollapsed}
+        setIsSidebarCollapsed={setIsSidebarCollapsed}
+      />
+
       {loading && (
         <LoaderWrapper>
           <LoaderImage>
@@ -139,152 +150,140 @@ const ManageReception = () => {
       )}
 
       {/* Apply the blur effect only when loading */}
-      <div
-        className="container-fluid"
-        style={{
-          backgroundColor: "#D7EAF0",
-          padding: "20px",
-          fontFamily: "sans-serif",
-          minHeight: "100vh",
-          position: "relative",
-        }}
-      >
-        <BlurredContent style={{ filter: loading ? "blur(5px)" : "none" }}>
-          <div
-            className="d-flex justify-content-between align-items-center flex-wrap"
-            style={{ marginBottom: "20px" }}
+      <div className="container-fluid p-4">
+        <div
+          className="d-flex justify-content-between align-items-center flex-wrap"
+          style={{ marginBottom: "20px" }}
+        >
+          <h1
+            style={{
+              fontFamily: "sans-serif",
+              color: "#0C1187",
+              textAlign: "center",
+              fontSize: "40px",
+              width: "100%",
+              fontWeight: "500",
+            }}
           >
-            <h1
-              style={{
-                fontFamily: "sans-serif",
-                color: "#0C1187",
-                textAlign: "center",
-                fontSize: "40px",
-                width: "100%",
-                fontWeight: "500",
-              }}
-            >
-              Reception Details
-            </h1>
-            <button
-              type="button"
-              className="btn"
-              style={{
-                backgroundColor: "#024CAA",
-                color: "#f1f8dc",
-                fontFamily: "sans-serif",
-                fontSize: "16px",
-                marginLeft: "auto",
-              }}
-              onClick={() => history.push("/doctor/addreception")}
-            >
-              Add Reception
-            </button>
-          </div>
+            Reception Details
+          </h1>
+          <button
+            type="button"
+            className="btn"
+            style={{
+              backgroundColor: "#024CAA",
+              color: "#f1f8dc",
+              fontFamily: "sans-serif",
+              fontSize: "16px",
+              marginLeft: "auto",
+            }}
+            onClick={() => history.push("/doctor/addreception")}
+          >
+            Add Reception
+          </button>
+        </div>
 
-          <div className="table-responsive" style={{ overflowX: "auto" }}>
-            <table
-              className="table table-striped"
-              style={{
-                width: "100%",
-                textAlign: "center",
-                fontFamily: "sans-serif",
-                fontSize: "16px",
-                whiteSpace: "nowrap",
-                tableLayout: "fixed",
-                borderRadius: "10px",
-              }}
-            >
-              <thead style={{ backgroundColor: "#0091A5", color: "#fff" }}>
-                <tr>
-                  <th style={tableHeadingStyle}>Mobile Number</th>
-                  <th style={tableHeadingStyle}>Name</th>
-                  <th style={tableHeadingStyle}>Gender</th>
-                  <th style={tableHeadingStyle}>Specialization</th>
-                  <th style={tableHeadingStyle}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentReceptionDetails.length > 0 ? (
-                  currentReceptionDetails.map((detail) => (
-                    <tr key={detail.reception_id}>
-                      <td>{detail.mobile_number}</td>
-                      <td>{detail.name}</td>
-                      <td>{detail.gender}</td>
-                      <td>{detail.specialization}</td>
-                      <td className="d-flex" style={{ gap: "5px" }}>
-                        <button
-                          className="btn me-2"
-                          style={viewButtonStyle}
-                          onClick={() => handleViewDetails(detail.reception_id)}
-                        >
-                          Details
-                        </button>
-                        <button
-                          className="btn btn-danger"
-                          style={removeButtonStyle}
-                          onClick={() => handleRemove(detail.reception_id)}
-                        >
-                          Remove
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="5" style={{ textAlign: "center" }}>
-                      {errorMessage && (
-                        <div className="alert alert-danger">{errorMessage}</div>
-                      )}
-                      {successMessage && (
-                        <div className="alert alert-success">
-                          {successMessage}
-                        </div>
-                      )}
+        <div className="table-responsive" style={{ overflowX: "auto" }}>
+          <table
+            className="table table-striped"
+            style={{
+              width: "100%",
+              textAlign: "center",
+              fontFamily: "sans-serif",
+              fontSize: "16px",
+              whiteSpace: "nowrap",
+              tableLayout: "fixed",
+              borderRadius: "10px",
+            }}
+          >
+            <thead style={{ backgroundColor: "#0091A5", color: "#fff" }}>
+              <tr>
+                <th style={tableHeadingStyle}>Mobile Number</th>
+                <th style={tableHeadingStyle}>Name</th>
+                <th style={tableHeadingStyle}>Gender</th>
+                <th style={tableHeadingStyle}>Specialization</th>
+                <th style={tableHeadingStyle}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentReceptionDetails.length > 0 ? (
+                currentReceptionDetails.map((detail) => (
+                  <tr key={detail.reception_id}>
+                    <td>{detail.mobile_number}</td>
+                    <td>{detail.name}</td>
+                    <td>{detail.gender}</td>
+                    <td>{detail.specialization}</td>
+                    <td className="d-flex" style={{ gap: "5px" }}>
+                      <button
+                        className="btn me-2"
+                        style={viewButtonStyle}
+                        onClick={() => handleViewDetails(detail.reception_id)}
+                      >
+                        Details
+                      </button>
+                      <button
+                        className="btn btn-danger"
+                        style={removeButtonStyle}
+                        onClick={() => handleRemove(detail.reception_id)}
+                      >
+                        Remove
+                      </button>
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: "center" }}>
+                    {errorMessage && (
+                      <div className="alert alert-danger">{errorMessage}</div>
+                    )}
+                    {successMessage && (
+                      <div className="alert alert-success">
+                        {successMessage}
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-          <div
-            className="d-flex justify-content-center mt-4"
-            style={{ position: "absolute", bottom: "20px", width: "100%" }}
+        <div
+          className="d-flex justify-content-center mt-4"
+          style={{ position: "absolute", bottom: "20px", width: "100%" }}
+        >
+          <button
+            className="btn btn-secondary mx-1"
+            onClick={handlePrevPage}
+            disabled={currentPage === 1}
           >
-            <button
-              className="btn btn-secondary mx-1"
-              onClick={handlePrevPage}
-              disabled={currentPage === 1}
-            >
-              ←
-            </button>
-            {Array.from(
-              { length: Math.ceil(receptionDetails.length / itemsPerPage) },
-              (_, index) => (
-                <button
-                  key={index}
-                  className={`btn ${currentPage === index + 1 ? "btn-primary" : "btn-secondary"} mx-1`}
-                  onClick={() => handlePageChange(index + 1)}
-                >
-                  {index + 1}
-                </button>
-              )
-            )}
-            <button
-              className="btn btn-secondary mx-1"
-              onClick={handleNextPage}
-              disabled={
-                currentPage ===
-                Math.ceil(receptionDetails.length / itemsPerPage)
-              }
-            >
-              →
-            </button>
-          </div>
-        </BlurredContent>
+            ←
+          </button>
+          {Array.from(
+            { length: Math.ceil(receptionDetails.length / itemsPerPage) },
+            (_, index) => (
+              <button
+                key={index}
+                className={`btn ${currentPage === index + 1 ? "btn-primary" : "btn-secondary"} mx-1`}
+                onClick={() => handlePageChange(index + 1)}
+              >
+                {index + 1}
+              </button>
+            )
+          )}
+          <button
+            className="btn btn-secondary mx-1"
+            onClick={handleNextPage}
+            disabled={
+              currentPage === Math.ceil(receptionDetails.length / itemsPerPage)
+            }
+          >
+            →
+          </button>
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 
@@ -326,7 +325,7 @@ const mediaStyles = `
     }
     button {
       font-size: 14px !important;
-      width: auto !important; /* Ensure buttons are not full-width */
+      width: auto !important; 
       margin-bottom: 5px !important;
     }
     table {
@@ -344,7 +343,7 @@ const mediaStyles = `
     }
     button {
       font-size: 12px !important;
-      width: auto !important; /* Ensure buttons stay in a row */
+      width: auto !important; 
     }
     table {
       table-layout: auto !important;

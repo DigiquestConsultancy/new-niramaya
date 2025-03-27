@@ -4,6 +4,7 @@ import { useParams, useHistory } from "react-router-dom";
 import Loader from "react-js-loader";
 import styled from "styled-components";
 import { Modal, Button } from "react-bootstrap";
+import Sidebar from "./Sidebar";
 
 const LoaderWrapper = styled.div`
   display: flex;
@@ -66,6 +67,13 @@ const ReceptionDetails = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [detailsExist, setDetailsExist] = useState(false);
   const history = useHistory();
+
+  const [selectedMenu, setSelectedMenu] = useState("Dashboard");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const handleMenuClick = (menu) => {
+    setSelectedMenu(menu);
+  };
 
   const fetchReceptionDetail = useCallback(async () => {
     setLoading(true);
@@ -203,16 +211,16 @@ const ReceptionDetails = () => {
 
   return (
     <div
-      className="container-fluid"
-      style={{
-        backgroundColor: "#D7EAF0",
-        minHeight: "150vh",
-        padding: "20px",
-        fontFamily: "sans-serif",
-        fontSize: "16px",
-        width: "100%",
-      }}
+      className="d-flex"
+      style={{height: "calc(100vh - 80px)" }}
     >
+       <Sidebar
+              selectedMenu={selectedMenu}
+              handleMenuClick={handleMenuClick}
+              isSidebarCollapsed={isSidebarCollapsed}
+              setIsSidebarCollapsed={setIsSidebarCollapsed}
+            />
+            <main className="p-4">
       {loading && (
         <LoaderWrapper>
           <LoaderImage>
@@ -414,6 +422,7 @@ const ReceptionDetails = () => {
           </button>
         </div>
       </form>
+      </main>
     </div>
   );
 };

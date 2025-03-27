@@ -14,7 +14,7 @@ const PaymentModal = ({ show, onHide, onSuccess, patientId }) => {
     // Initialize Cashfree SDK
     useEffect(() => {
         const initializeSDK = async () => {
-            cashfree = await load({ mode: "sandbox" });
+            cashfree = await load({ mode: "production" });
         };
         initializeSDK();
     }, []);
@@ -52,7 +52,7 @@ const PaymentModal = ({ show, onHide, onSuccess, patientId }) => {
  
         try {
             if (!cashfree) {
-                cashfree = await load({ mode: "sandbox" });
+                cashfree = await load({ mode: "production" });
             }
             await cashfree.checkout(checkoutOptions);
             console.log("Redirected to Cashfree for payment.");

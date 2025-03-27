@@ -1,0 +1,385 @@
+
+.hero-section {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  color: white;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+.hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-content {
+  margin-left: 15%;
+  max-width: 500px;
+  margin-top: -130px; /* Reduced top margin */
+
+}
+
+.sub-heading {
+  font-size: 25px; /* Increased */
+  font-weight: 500;
+  color: blue;
+}
+
+h1 {
+  font-size: 53px; /* Increased */
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.description {
+  font-size: 16px; /* Increased */
+  margin-bottom: 20px;
+}
+
+.appointment-btn {
+  background-color: black;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.emergency-contact {
+  position: absolute;
+  bottom: 20px;
+  left: 15%;
+  display: flex;
+  align-items: center;
+  background-color: #1e3551;
+  padding: 15px;
+  border-radius: 5px;
+}
+
+.phone-icon {
+  font-size: 24px;
+  margin-right: 10px;
+}
+
+/* .about-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px 10%;
+  background-color: #f4f4f4;
+} */
+.about-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px 10%; /* Consistent horizontal padding */
+  background-color: #f4f4f4;
+}
+
+.about-image img {
+  width: 100%;
+  height: auto;
+  max-width: 550px;
+}
+
+.about-content {
+  max-width: 550px;
+  margin-left: 50px;
+  padding: 20px;
+}
+
+.about-content h4{
+  color: rgb(24, 108, 235);
+}
+.about-content h2, .about-content h5 {
+  color: #1e3551;
+}
+
+.about-content p {
+  margin-bottom: 10px;
+}
+
+.service-icons {
+  display: flex;
+  justify-content: start;
+  margin-top: 20px;
+  size: 35px;
+}
+
+.service-item {
+  align-items: center;
+  margin-right: 20px;
+}
+
+.service-item .icon {
+  font-size: 32px; /* Increased from 24px to 32px */
+  margin-right: 10px;
+  color: #4054b2; 
+}
+/* service section */
+.service-section .container {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 20px 10%; 
+  text-align: center;
+}
+.service-section h2 {
+  color: #1e3551;
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+.service-section p {
+  margin-bottom: 20px;
+  color: #666;
+  font-size: 16px;
+}
+
+.service-card {
+  flex: 0 0 calc(33.333% - 20px); /* Adjust the width to factor in the margin */
+  margin: 10px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.service-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+}
+
+.service-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+.full-width-image-with-form {
+  position: relative;
+  width: 100%;
+  height: auto;
+}
+
+.full-bg-image {
+  width: 100%;
+  height: 750px;
+  object-fit: cover; /* Ensures the image covers the area */
+}
+
+.form-overlay {
+  position: absolute;
+  top: 25%;
+  right: 10%;
+  width: 35%; /* Adjust the width as necessary */
+  background: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+  padding: 20px;
+  box-shadow: -5px 0 8px rgba(0, 0, 0, 0.2); 
+  border-radius: 10px;
+}
+
+.form-overlay h2, .form-overlay p {
+  margin-bottom: 15px;
+}
+
+.form-overlay form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-overlay input,
+.form-overlay select,
+.form-overlay textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.form-overlay button {
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.doctor-slider-section {
+  padding: 45px 10%;
+  background-color: #f9f9f9;
+  text-align: center;
+  margin: 0 auto;
+  max-width: 1500px;
+}
+
+
+.doctor-card {
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  background: white;
+  border-radius: 10px;
+  max-width: 310px; /* Reduced the size */
+  margin: 15px; /* Added margin for spacing */
+}
+
+.doctor-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 50%; /* Optional: makes the image round */
+}
+
+.doctor-card h4, .doctor-card p {
+  margin: 5px 0;
+}
+.faq-section {
+  padding: 50px 10%;
+  background-color: #f9f9f9;
+  display: flex;
+  justify-content: center;
+}
+
+.faq-container {
+  max-width: 1200px; /* Match with other sections */
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 50px;
+}
+
+/* Left Side - FAQ Content */
+.faq-content {
+  flex: 1;
+  max-width: 550px;
+}
+
+.faq-content h2 {
+  color: #3878c7;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.faq-item {
+  border-bottom: 1px solid #ddd;
+  padding: 15px 0;
+}
+
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.faq-answer {
+  margin-top: 10px;
+  color: #555;
+}
+
+/* Right Side - FAQ Image */
+.faq-image {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.faq-image img {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 10px;
+}
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .hero-content {
+    margin-left: 5%;
+    text-align: left;
+  }
+
+  .hero-content h1 {
+    font-size: 28px;
+  }
+
+  .appointment-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  .emergency-contact {
+    left: 5%;
+    padding: 10px;
+  }
+
+  .phone-icon {
+    font-size: 18px;
+  }
+}
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .about-section {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .about-image, .about-content {
+    max-width: 100%;
+  }
+
+  .about-content {
+    margin-left: 0;
+    margin-top: 20px;
+  }
+
+  .service-icons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .service-item {
+    margin-bottom: 10px;
+  }
+}
+@media (max-width: 768px) {
+  .service-card {
+    flex: 0 0 100%; 
+  }
+}
+@media (max-width: 768px) {
+  .form-overlay {
+    width: 90%; 
+    right: 5%; 
+  }
+
+  .text-overlay {
+    font-size: 14px;
+    padding: 10px 0; 
+  }
+}
+@media (max-width: 1024px) {
+  .faq-container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .faq-content {
+    max-width: 100%;
+    text-align: center;
+  }
+
+  .faq-image img {
+    max-width: 80%;
+  }
+}
