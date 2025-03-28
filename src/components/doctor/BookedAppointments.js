@@ -7451,6 +7451,10 @@ import styled from "styled-components";
 import Loader from "react-js-loader";
 import { FaSyncAlt } from "react-icons/fa";
 import { BsPrinterFill } from "react-icons/bs";
+import { LuZoomIn } from "react-icons/lu";
+import { LuZoomOut } from "react-icons/lu";
+import { FaArrowRotateRight } from "react-icons/fa6";
+import { IoMdDownload } from "react-icons/io";
 
 const LoaderWrapper = styled.div`
   display: flex;
@@ -7550,6 +7554,9 @@ const DoctorBookedAppointment = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastVariant, setToastVariant] = useState("success");
+  
+  const [rotation, setRotation] = useState(0);
+  const [zoom, setZoom] = useState(1);
 
   useEffect(() => {
     const token = localStorage.getItem("patient_token");
@@ -7569,6 +7576,31 @@ const DoctorBookedAppointment = () => {
       setLoading(false);
     }
   }, []);
+
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(selectedFile.url, {
+        mode: 'cors', // If your server allows CORS
+      });
+  
+      if (!response.ok) throw new Error("Failed to fetch file");
+  
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const filename = `image-${new Date().toISOString().replace(/[:.]/g, "-")}.jpg`;
+  
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Download failed. File may not be accessible or supported for download.");
+    }
+  };
 
   const fetchMedicalRecords = async (appointment_id) => {
     try {
@@ -8071,26 +8103,42 @@ const DoctorBookedAppointment = () => {
           ) {
             setSelectedSymptoms(symptomsResponse.value.data);
           } 
+          // if (patientName) {
+          //   const medicalRecordsPromise = BaseUrl.get(
+          //     `/doctorappointment/whatsappreport/?appointment_id=${appointment_id}`
+          //   );
+          //   const resultdoc = await Promise.allSettled([medicalRecordsPromise]);
+          //   const medicalRecordsResponse = resultdoc[0];
+          //   if (
+          //     medicalRecordsResponse.status === "fulfilled" &&
+          //     medicalRecordsResponse.value.status === 200
+          //   ) {
+          //     setWhatsappReport(medicalRecordsResponse.value.data.reports);
+          //   } 
+          // } 
+
           if (patientName) {
-            const medicalRecordsPromise = BaseUrl.get(
-              `/doctorappointment/whatsappreport/`,
-              {
-                params: {
-                  patient_id: details.patient_id,
-                  doctor_id: doctorId,
-                  patient_name: patientName,
-                },
+            try {
+              const medicalRecordsResponse = await BaseUrl.get(
+                `/doctorappointment/whatsappreport/?appointment_id=${appointment_id}`
+              );
+              if (medicalRecordsResponse.status === 200) {
+                const reports = medicalRecordsResponse.data?.webhook_data || [];
+                setWhatsappReport(reports);
+                setSuccessMessage("Medical records fetched successfully.");
+                setErrorMessage(""); 
+              } else {
+                setErrorMessage(medicalRecordsResponse.data?.error || "Failed to fetch medical records.");
+                setSuccessMessage("");
               }
-            );
-            const resultdoc = await Promise.allSettled([medicalRecordsPromise]);
-            const medicalRecordsResponse = resultdoc[0];
-            if (
-              medicalRecordsResponse.status === "fulfilled" &&
-              medicalRecordsResponse.value.status === 200
-            ) {
-              setWhatsappReport(medicalRecordsResponse.value.data.reports);
-            } 
-          } 
+            } catch (error) {
+              setErrorMessage(error?.message || "An unexpected error occurred.");
+              setSuccessMessage("");
+            }
+          }
+          
+
+        
         };
         await fetchDataForPatient();
       } catch (error) {
@@ -8917,18 +8965,15 @@ const DoctorBookedAppointment = () => {
     }
   };
 
-  const handleRecordView = async (patientId) => {
+  const handleRecordView = async () => {
     try {
       setLoading(true);
+      const appointmentId = expandedAppointmentId;
       const response = await BaseUrl.get(`/doctorappointment/whatsappreport/`, {
-        params: {
-          patient_id: patientId,
-          doctor_id: doctorId,
-          patient_name: formDetails.name,
-        },
+        params: { appointment_id: appointmentId },
       });
       if (response.status === 200) {
-        const reports = response.data?.reports || [];
+        const reports = response.data?.webhook_data || [];
         setWhatsappReport(reports);
         setSuccessMessage("Medical record fetched successfully.");
         setErrorMessage("");
@@ -8944,23 +8989,24 @@ const DoctorBookedAppointment = () => {
     }
   };
 
-  const deleteRecord = async (id) => {
+  const deleteRecord = async (appointmentId) => {
     try {
       setLoading(true);
-      const response = await BaseUrl.delete(
-        "/doctorappointment/whatsappreport/",
-        {
-          data: { id },
-        }
-      );
-
-      if (response.status === 200) {
-        alert("Record deleted successfully");
-        setWhatsappReport((prevPhotos) =>
-          prevPhotos.filter((photo) => photo.id !== id)
+  
+      // Create a FormData object to send the ID as a form parameter
+      const formData = new FormData();
+      formData.append("id", appointmentId);
+  
+      // Send DELETE request with form data as the body
+      const response = await BaseUrl.delete('/doctorappointment/whatsappreport/', {
+        data: formData, // Send the form data in the body
+      });
+  
+      if (response.status === 200 || response.status === 400) {
+        handleRecordView();
+        setWhatsappReport((prevReports) =>
+          prevReports.filter((report) => report.appointment_id !== appointmentId)
         );
-      } else {
-        alert("Error deleting record");
       }
     } catch (error) {
       alert("Failed to delete record");
@@ -8968,6 +9014,7 @@ const DoctorBookedAppointment = () => {
       setLoading(false);
     }
   };
+  
 
   const groupedAppointments = appointments.reduce((acc, appointment) => {
     const date = new Date(appointment.appointment_date);
@@ -9199,7 +9246,7 @@ const DoctorBookedAppointment = () => {
                   marginRight: "0.2rem",
                 }}
               ></span>
-              <span>(Booked by patient)</span>
+              <span>Booked by patient</span>
             </span>
 
             <span
@@ -9220,7 +9267,7 @@ const DoctorBookedAppointment = () => {
                   marginRight: "0.2rem",
                 }}
               ></span>
-              <span>(Booked by Clinic)</span>
+              <span>Booked by Clinic</span>
             </span>
 
             <span
@@ -9241,7 +9288,7 @@ const DoctorBookedAppointment = () => {
                   marginRight: "0.2rem",
                 }}
               ></span>
-              <span>(Completed)</span>
+              <span>Completed</span>
             </span>
 
             <span
@@ -9262,7 +9309,7 @@ const DoctorBookedAppointment = () => {
                   marginRight: "0.2rem",
                 }}
               ></span>
-              <span>(Canceled)</span>
+              <span>Canceled</span>
             </span>
           </span>
 
@@ -9295,78 +9342,80 @@ const DoctorBookedAppointment = () => {
                     className="mb-5 p-3"
                   >
                     <Card>
-                      <Card.Header
-                        style={{
-                          background: appointment.is_complete
-                            ? "#D1F7D7"
-                            : appointment.is_canceled
-                              ? "#F8D7DA"
-                              : appointment.is_patient
-                                ? "#F5ECD5"
-                                : "#D7EAF0",
-                          color: "#003366",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        <div className="d-flex flex-column w-100">
-                          {/* First Row: Case ID */}
-                          <div className="row text-center">
-                            <div className="col-12">
-                              <span>Case ID:</span>{" "}
-                              {appointment.uhid}
-                            </div>
-                          </div>
+                    <Card.Header
+  style={{
+    background: appointment.is_complete
+      ? "#D1F7D7"
+      : appointment.is_canceled
+      ? "#F8D7DA"
+      : appointment.is_patient
+      ? "#F5ECD5"
+      : "#D7EAF0",
+    color: "#003366",
+    fontWeight: "bold",
+  }}
+>
+  <div className="d-flex flex-column w-100">
+    {/* First Row: Case ID */}
+    <div className="row text-center">
+      <div className="col-12" style={{ fontSize: "14px" }}>
+        <span>Case ID:</span> {appointment.uhid}
+      </div>
+    </div>
 
-                          <div className="row align-items-center mt-2 responsive-toggles">
-                            <div className="col-6 d-flex align-items-center toggle-item">
-                              <span className="me-1">End Visit</span>
-                              <label className="form-check form-switch">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id="endVisitSwitch"
-                                  style={{
-                                    cursor: "pointer",
-                                    alignItems: "center",
-                                  }}
-                                  onChange={() => {
-                                    setConfirmAction("endVisit");
-                                    setShowConfirmModal(true);
-                                    setSelectedAppointment(appointment);
-                                  }}
-                                  disabled={
-                                    appointment.is_complete ||
-                                    appointment.is_canceled
-                                  }
-                                  checked={appointment.is_complete}
-                                />
-                              </label>
-                            </div>
+    {/* Second Row: Toggle buttons in a line */}
+    <div className="row align-items-center mt-2">
+      <div className="col-12 d-flex justify-content-between align-items-center">
+        {/* End Visit Toggle */}
+        <div className="d-flex align-items-center">
+          <span className="me-1" style={{ fontSize: "12px" }}>
+            End Visit
+          </span>
+          <label className="form-check form-switch">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              id="endVisitSwitch"
+              style={{
+                cursor: "pointer",
+                alignItems: "center",
+              }}
+              onChange={() => {
+                setConfirmAction("endVisit");
+                setShowConfirmModal(true);
+                setSelectedAppointment(appointment);
+              }}
+              disabled={appointment.is_complete || appointment.is_canceled}
+              checked={appointment.is_complete}
+            />
+          </label>
+        </div>
 
-                            <div className="col-6 d-flex align-items-center toggle-item">
-                              <span className="me-1">Cancel</span>
-                              <label className="form-check form-switch">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id="cancelSwitch"
-                                  style={{ cursor: "pointer" }}
-                                  onChange={() => {
-                                    setConfirmAction("cancelAppointment");
-                                    setShowConfirmModal(true);
-                                    setSelectedAppointment(appointment);
-                                  }}
-                                  disabled={
-                                    appointment.is_canceled ||
-                                    appointment.is_complete
-                                  }
-                                  checked={appointment.is_canceled}
-                                />
-                              </label>
-                            </div>
-                          </div>
-                        </div>
-                      </Card.Header>
+        {/* Cancel Toggle */}
+        <div className="d-flex align-items-center">
+          <span className="ms-2 me-1" style={{ fontSize: "12px" }}>
+            Cancel
+          </span>
+          <label className="form-check form-switch">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              id="cancelSwitch"
+              style={{ cursor: "pointer" }}
+              onChange={() => {
+                setConfirmAction("cancelAppointment");
+                setShowConfirmModal(true);
+                setSelectedAppointment(appointment);
+              }}
+              disabled={appointment.is_canceled || appointment.is_complete}
+              checked={appointment.is_canceled}
+            />
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</Card.Header>
 
                       <Card.Body
                         style={{
@@ -9389,14 +9438,17 @@ const DoctorBookedAppointment = () => {
                           }
                           style={{ cursor: "pointer" }}
                         >
-                          <p>
+                          <p style={{fontSize: "14px"}}>
                             <strong>Time Slot:</strong>{" "}
                             {appointment.appointment_slot}
                           </p>
-                          <p>
+                          <p style={{fontSize: "14px"}}>
                             <strong>Booked By:</strong> {appointment.booked_by}
                           </p>
-                          <p>
+                          <p style={{fontSize: "14px"}}>
+                            <strong>Mobile no:</strong> {appointment.mobile_number}
+                          </p>
+                          <p style={{fontSize: "14px"}}>
                             <strong>Status:</strong> {appointment.status}
                           </p>
                         </div>
@@ -9729,6 +9781,7 @@ const DoctorBookedAppointment = () => {
                             </td>
                           </tr>
                         )}
+
                         {showSymptomsForm &&
                           expandedAppointmentId ===
                             appointment.appointment_id && (
@@ -11300,132 +11353,390 @@ const DoctorBookedAppointment = () => {
                                       )}
                                     </div>
                                     <div>
-                                      <div>
-                                        <div
-                                          className="mt-5 mb-4 ms-2"
-                                          style={{
-                                            display: "flex",
-                                            flexWrap: "wrap",
-                                            gap: "20px",
-                                            justifyContent: "left",
-                                          }}
-                                        >
-                                          {photosToShow.map((record, index) => (
-                                            <div
-                                              key={index}
+                                        <div>
+                                          {/* <div
+                                            className="mt-5 mb-4 ms-2"
+                                            style={{
+                                              display: "flex",
+                                              flexWrap: "wrap",
+                                              gap: "20px",
+                                              justifyContent: "left",
+                                            }}
+                                          >
+                                            {whatsappReport.map(
+                                              (record, index) => (
+                                                <div
+                                                  key={index}
+                                                  style={{
+                                                    background: "#ffffff",
+                                                    borderRadius: "8px",
+                                                    padding: "10px",
+                                                    textAlign: "center",
+                                                    width: "280px",
+                                                    height: "350px",
+                                                    boxShadow:
+                                                      "0 2px 4px rgba(0, 0, 0, 0.1)",
+                                                    position: "relative",
+                                                  }}
+                                                >
+                                                  {record.url ? (
+                                                    (() => {
+                                                      const type =
+                                                        record.content_type;
+
+                                                      if (type === "image") {
+                                                        return (
+                                                          <img
+                                                            src={record.url}
+                                                            alt="WhatsApp Report"
+                                                            style={{
+                                                              width: "100%",
+                                                              height: "280px",
+                                                              borderRadius:
+                                                                "5px",
+                                                              objectFit:
+                                                                "cover",
+                                                              marginBottom:
+                                                                "10px",
+                                                              cursor: "pointer",
+                                                            }}
+                                                            onClick={() =>
+                                                              setSelectedImage(
+                                                                record.url
+                                                              )
+                                                            }
+                                                          />
+                                                        );
+                                                      } else if (
+                                                        type === "video"
+                                                      ) {
+                                                        return (
+                                                          <video
+                                                            muted
+                                                            preload="metadata"
+                                                            style={{
+                                                              width: "100%",
+                                                              height: "280px",
+                                                              borderRadius:
+                                                                "5px",
+                                                              objectFit:
+                                                                "cover",
+                                                              marginBottom:
+                                                                "10px",
+                                                            }}
+                                                            onMouseOver={(e) =>
+                                                              e.target.play()
+                                                            }
+                                                            onMouseOut={(e) => {
+                                                              e.target.pause();
+                                                              e.target.currentTime = 0;
+                                                            }}
+                                                          >
+                                                            <source
+                                                              src={record.url}
+                                                              type="video/mp4"
+                                                            />
+                                                            Your browser does
+                                                            not support the
+                                                            video tag.
+                                                          </video>
+                                                        );
+                                                      } else if (
+                                                        type === "file"
+                                                      ) {
+                                                        return (
+                                                          <iframe
+                                                            src={`${record.url}#page=1&zoom=85`}
+                                                            title="PDF Preview"
+                                                            style={{
+                                                              width: "100%",
+                                                              height: "280px",
+                                                              borderRadius:
+                                                                "5px",
+                                                              border: "none",
+                                                              marginBottom:
+                                                                "10px",
+                                                            }}
+                                                          />
+                                                        );
+                                                      } else {
+                                                        return (
+                                                          <div
+                                                            style={{
+                                                              width: "100%",
+                                                              height: "280px",
+                                                              display: "flex",
+                                                              justifyContent:
+                                                                "center",
+                                                              alignItems:
+                                                                "center",
+                                                              border:
+                                                                "1px solid #ccc",
+                                                              borderRadius:
+                                                                "5px",
+                                                              marginBottom:
+                                                                "10px",
+                                                              color: "#666",
+                                                            }}
+                                                          >
+                                                            Unsupported file
+                                                            type
+                                                          </div>
+                                                        );
+                                                      }
+                                                    })()
+                                                  ) : (
+                                                    <p>No media available</p>
+                                                  )}
+
+                                                  <p
+                                                    style={{
+                                                      fontSize: "20px",
+                                                      color: "#000",
+                                                      margin: 0,
+                                                      textAlign: "left",
+                                                    }}
+                                                  >
+                                                    {new Date(
+                                                      record.received_at
+                                                    ).toDateString()}
+                                                  </p>
+                                                  <button
+                                                    style={{
+                                                      position: "absolute",
+                                                      bottom: "10px",
+                                                      right: "10px",
+                                                      background: "transparent",
+                                                      border: "none",
+                                                      cursor: "pointer",
+                                                      color: "red",
+                                                      fontSize: "24px",
+                                                    }}
+                                                    onClick={() =>
+                                                      deleteRecord(record.id)
+                                                    }
+                                                  >
+                                                    <FaTrash />
+                                                  </button>
+                                                </div>
+                                              )
+                                            )}
+                                          </div> */}
+
+<div
+className="mt-5 mb-4 ms-2"
+style={{
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "20px",
+  justifyContent: "left",
+}}>
+  {whatsappReport.length > 0 ? (
+    <div className="d-flex flex-wrap justify-content-start">
+      {whatsappReport.map((report) => (
+        <div key={report.message_uuid} className="p-2">
+          <div className="card" style={{ width: "203px", position: "relative" }}>
+            {/* Media Preview */}
+            {(() => {
+              const type = report.content_type;
+
+              if (type === "image") {
+                return (
+                  <img
+                    src={report.url}
+                    alt="WhatsApp Report"
+                    style={{
+                      objectFit: "cover",
+                      height: "200px",
+                      width: "100%",
+                      borderRadius: "5px",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => setSelectedFile({ type: "image", url: report.url })}
+                  />
+                );
+              } else if (type === "video") {
+                return (
+                  <video
+                  muted
+                  preload="metadata"
+                  style={{
+                    objectFit: "cover",
+                    height: "200px",
+                    width: "100%",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() =>
+                    setSelectedFile({
+                      type: "video",
+                      url: report.url,
+                    })
+                  }
+                  onMouseOver={(e) => {
+                    if (e.target.paused) {
+                      e.target.play();
+                    }
+                  }}
+                  // onMouseOut={(e) => {
+                  //   if (!e.target.paused) {
+                  //     e.target.pause();
+                  //     e.target.currentTime = 0; 
+                  //   }
+                  // }}
+                >
+                  <source src={report.url} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+                
+                );
+              }  else if (type === "file") {
+                return (
+                  <div style={{ position: "relative" }}>
+                    <iframe
+                      src={`${report.url}#page=1&zoom=85`}
+                      title="PDF Preview"
+                      style={{
+                        height: "200px",
+                        width: "100%",
+                        border: "none",
+                        borderRadius: "5px",
+                        pointerEvents: "none",
+                      }}
+                    />
+                    <div
+                      onClick={() => setSelectedFile({ type: "pdf", url: report.url })}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        height: "200px",
+                        width: "100%",
+                        cursor: "pointer",
+                      }}
+                    />
+                  </div>
+                );
+              }
+              else {
+                return (
+                  <div
+                    style={{
+                      height: "200px",
+                      width: "100%",
+                      borderRadius: "5px",
+                      border: "1px solid #ccc",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#999",
+                    }}
+                  >
+                    Unsupported file
+                  </div>
+                );
+              }
+            })()}
+
+            {/* Optional Date */}
+            <div
+              className="report-date"
+              style={{
+                position: "absolute",
+                bottom: "0",
+                left: "0",
+                backgroundColor: "rgba(0, 0, 0, 0.6)",
+                color: "white",
+                padding: "5px",
+                borderRadius: "5px",
+                fontSize: "12px",
+              }}
+            >
+              {/* Uncomment if needed */}
+              {/* {new Intl.DateTimeFormat("en-GB").format(new Date(report.received_at))} */}
+            </div>
+
+            {/* Delete Button */}
+            <div className="card-body text-center">
+              <button
+                className="btn btn-danger btn-sm"
+                style={{
+                  position: "absolute",
+                  bottom: "0",
+                  right: "10px",
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "red",
+                  fontSize: "24px",
+                }}
+                onClick={() => deleteRecord(report.id)}
+              >
+                <FaTrash />
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div className="text-center mt-4 text-danger">
+      <p>No reports available to display.</p>
+    </div>
+  )}
+</div>
+
+                                          {whatsappReport.length > 6 && (
+                                            <Button
                                               style={{
-                                                background: "#ffffff",
-                                                borderRadius: "8px",
-                                                padding: "10px",
-                                                textAlign: "center",
-                                                width: "280px",
-                                                height: "350px",
-                                                boxShadow:
-                                                  "0 2px 4px rgba(0, 0, 0, 0.1)",
-                                                position: "relative",
+                                                background: "#00DAF7",
+                                                color: "#000",
+                                                border: "none",
+                                                borderRadius: "5px",
+                                                padding: "10px 20px",
+                                                marginTop: "20px",
+                                                display: "block",
+                                                marginLeft: "auto",
+                                                marginRight: "auto",
                                               }}
+                                              onClick={() =>
+                                                setShowMore(!showMore)
+                                              }
                                             >
-                                              <img
-                                                src={record.report_file}
-                                                alt="Medical Record"
-                                                style={{
-                                                  width: "100%",
-                                                  height: "280px",
-                                                  borderRadius: "5px",
-                                                  objectFit: "cover",
-                                                  marginBottom: "10px",
-                                                  cursor: "pointer",
-                                                }}
-                                                onClick={() =>
-                                                  setSelectedImage(
-                                                    record.report_file
-                                                  )
-                                                }
-                                              />
-                                              <p
-                                                style={{
-                                                  fontSize: "20px",
-                                                  color: "#000",
-                                                  margin: 0,
-                                                  textAlign: "left",
-                                                }}
-                                              >
-                                                {new Date(
-                                                  record.date
-                                                ).toDateString()}
-                                              </p>
-                                              <button
-                                                style={{
-                                                  position: "absolute",
-                                                  bottom: "10px",
-                                                  right: "10px",
-                                                  background: "transparent",
-                                                  border: "none",
-                                                  cursor: "pointer",
-                                                  color: "red",
-                                                  fontSize: "24px",
-                                                }}
-                                                onClick={() =>
-                                                  deleteRecord(record.id)
-                                                }
-                                              >
-                                                <FaTrash />
-                                              </button>
-                                            </div>
-                                          ))}
+                                              {showMore
+                                                ? "Show Less"
+                                                : "Show More"}
+                                            </Button>
+                                          )}
                                         </div>
 
-                                        {whatsappReport.length > 6 && (
-                                          <Button
-                                            style={{
-                                              background: "#00DAF7",
-                                              color: "#000",
-                                              border: "none",
-                                              borderRadius: "5px",
-                                              padding: "10px 20px",
-                                              marginTop: "20px",
-                                              display: "block",
-                                              marginLeft: "auto",
-                                              marginRight: "auto",
-                                            }}
-                                            onClick={() =>
-                                              setShowMore(!showMore)
-                                            }
-                                          >
-                                            {showMore
-                                              ? "Show Less"
-                                              : "Show More"}
-                                          </Button>
-                                        )}
+                                        <Modal
+                                          show={!!selectedImage}
+                                          onHide={() => setSelectedImage(null)}
+                                          centered
+                                        >
+                                          <Modal.Body style={{ padding: 0 }}>
+                                            <img
+                                              src={selectedImage}
+                                              alt="Selected Medical Record"
+                                              style={{
+                                                width: "100%",
+                                                borderRadius: "5px",
+                                              }}
+                                            />
+                                          </Modal.Body>
+                                          <Modal.Footer>
+                                            <Button
+                                              variant="secondary"
+                                              onClick={() =>
+                                                setSelectedImage(null)
+                                              }
+                                            >
+                                              Close
+                                            </Button>
+                                          </Modal.Footer>
+                                        </Modal>
                                       </div>
-
-                                      <Modal
-                                        show={!!selectedImage}
-                                        onHide={() => setSelectedImage(null)}
-                                        centered
-                                      >
-                                        <Modal.Body style={{ padding: 0 }}>
-                                          <img
-                                            src={selectedImage}
-                                            alt="Selected Medical Record"
-                                            style={{
-                                              width: "100%",
-                                              borderRadius: "5px",
-                                            }}
-                                          />
-                                        </Modal.Body>
-                                        <Modal.Footer>
-                                          <Button
-                                            variant="secondary"
-                                            onClick={() =>
-                                              setSelectedImage(null)
-                                            }
-                                          >
-                                            Close
-                                          </Button>
-                                        </Modal.Footer>
-                                      </Modal>
-                                    </div>
                                   </Card.Body>
                                 </Card>
                               </td>
@@ -11533,6 +11844,122 @@ const DoctorBookedAppointment = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <Modal
+          show={!!selectedFile}
+          onHide={() => setSelectedFile(null)}
+          centered
+          size="lg"
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>
+              {selectedFile?.type === "image" && "Image Preview"}
+              {selectedFile?.type === "video" && "Video Preview"}
+              {selectedFile?.type === "pdf" && "PDF Preview"}
+            </Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body
+            style={{
+              padding: 0,
+              height: selectedFile?.type === "image" ? "400px" : "auto", // Fixed height for images
+              width: selectedFile?.type === "image" ? "100%" : "auto", // Fixed width for images
+              overflow: "hidden", // Prevent overflow if the image is too large
+              display: "flex",
+              justifyContent: "center", // Center image horizontally
+              alignItems: "center", // Center image vertically
+            }}
+          >
+           {selectedFile?.type === "image" && (
+    <div
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        overflow: zoom > 1 ? "auto" : "hidden", // Show scrollbar if zoom is applied (image overflows)
+      }}
+    >
+      <img
+        src={selectedFile.url}
+        alt="Preview"
+        style={{
+          maxWidth: "none", // Allow image to exceed container width
+          maxHeight: "none", // Allow image to exceed container height
+          objectFit: "contain",
+          borderRadius: "5px",
+          transform: `rotate(${rotation}deg) scale(${zoom})`,
+          transition: "transform 0.3s ease",
+        }}
+      />
+    </div>
+  )}
+
+
+            {selectedFile?.type === "video" && (
+              <video
+                src={selectedFile.url}
+                controls
+                autoPlay
+                style={{
+                  width: "100%",
+                  borderRadius: "5px",
+                }}
+              />
+            )}
+
+            {selectedFile?.type === "pdf" && (
+              <iframe
+                src={selectedFile.url}
+                title="PDF"
+                style={{
+                  width: "100%",
+                  height: "600px",
+                  border: "none",
+                }}
+              />
+            )}
+          </Modal.Body>
+
+          {selectedFile?.type === "image" && (
+  <Modal.Footer className="d-flex justify-content-between align-items-center">
+    <div>
+      <Button variant="outline" className="me-2 border bg-black text-white" onClick={() => setZoom((z) => z + 0.1)}><LuZoomIn /></Button>
+      <Button variant="outline" className="me-2 border bg-black text-white" onClick={() => setZoom((z) => Math.max(0.1, z - 0.1))}><LuZoomOut /></Button>
+      <Button variant="primary" className="me-2" onClick={() => setRotation((r) => r + 90)}><FaArrowRotateRight /></Button>
+      <Button variant="success" onClick={handleDownload}>
+  <IoMdDownload />
+</Button>
+
+    </div>
+    <Button variant="secondary" onClick={() => {
+      setSelectedFile(null);
+      setZoom(1);
+      setRotation(0);
+    }}>
+      Close
+    </Button>
+  </Modal.Footer>
+)}
+
+          {selectedFile?.type === "pdf" && (
+            <Modal.Footer className="d-flex justify-content-between">
+              <Button variant="secondary" onClick={() => setSelectedFile(null)}>
+                Close
+              </Button>
+            </Modal.Footer>
+          )}
+{/* 
+          {selectedFile?.type !== "pdf" && (
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setSelectedFile(null)}>
+                Close
+              </Button>
+            </Modal.Footer>
+          )} */}
+        </Modal>
 
       <ToastContainer position="top-end" className="p-3">
         <Toast

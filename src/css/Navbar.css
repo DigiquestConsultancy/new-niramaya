@@ -1,41 +1,7 @@
-/* .navbar {
-    background-color: #0e3a47;
-}
-.navbar-collapse {
-  transition: max-height 0.3s ease;
-}
-
-.navbar-collapse.show {
-  max-height: 500px;
-}
-
-.navbar-toggler-icon {
-  color: white;
-}
-
-.navbar-nav .nav-link,
-.navbar-nav .nav-item .dropdown-toggle {
-  font-size: 1.2rem;
-  color: white;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.dropdown-item:hover {
-  color: white;
-}
-
-img {
-    border-radius: 50%;
-} */
-
-
-
-
-
 
 .navbar {
   background-color: #0e3a47;
+  /* background-color: #0b441c; */
 }
 
 .navbar-collapse {

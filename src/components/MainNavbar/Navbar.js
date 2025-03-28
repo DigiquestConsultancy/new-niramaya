@@ -5,7 +5,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 import Container from 'react-bootstrap/Container';
 import Company from '../../images/logo.jpg';
-import '../../css/Navbar.css';
+// import '../../css/Navbar.css';
  
 const CustomNavbar = () => {
     const location = useLocation();

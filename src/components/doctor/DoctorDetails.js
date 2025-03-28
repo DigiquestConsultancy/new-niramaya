@@ -4808,78 +4808,78 @@ export default DoctorDetails;
 //     }
 //   };
 
-  // const fetchOpdDetails = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const token = localStorage.getItem("token");
-  //     const decodedToken = jwtDecode(token);
-  //     const doctor_id = decodedToken.doctor_id;
+//   const fetchOpdDetails = async () => {
+//     setLoading(true);
+//     try {
+//       const token = localStorage.getItem("token");
+//       const decodedToken = jwtDecode(token);
+//       const doctor_id = decodedToken.doctor_id;
 
-  //     const opdResponse = await BaseUrl.get(
-  //       `/doctor/opddays/?doctor_id=${doctor_id}`
-  //     );
-  //     const opdDetails = opdResponse.data;
+//       const opdResponse = await BaseUrl.get(
+//         `/doctor/opddays/?doctor_id=${doctor_id}`
+//       );
+//       const opdDetails = opdResponse.data;
 
-  //     if (opdDetails.length > 0) {
-  //       setOpdData({
-  //         ...opdData,
-  //         clinic_name: opdDetails[0].clinic_name,
-  //         start_day: opdDetails[0].start_day,
-  //         end_day: opdDetails[0].end_day,
-  //         consultation_fee: opdDetails[0].consultation_fee,
-  //         doc_file: opdDetails[0].doc_file,
-  //         countrySpecificFees: [], // Clear this initially to update below
-  //       });
+//       if (opdDetails.length > 0) {
+//         setOpdData({
+//           ...opdData,
+//           clinic_name: opdDetails[0].clinic_name,
+//           start_day: opdDetails[0].start_day,
+//           end_day: opdDetails[0].end_day,
+//           consultation_fee: opdDetails[0].consultation_fee,
+//           doc_file: opdDetails[0].doc_file,
+//           countrySpecificFees: [], // Clear this initially to update below
+//         });
 
-  //       setClinicPicPreview(
-  //         `${BaseUrl.defaults.baseURL}${opdDetails[0].doc_file}`
-  //       );
-  //       const opdId = opdDetails[0].id;
-  //       setOpdId(opdId);
+//         setClinicPicPreview(
+//           `${BaseUrl.defaults.baseURL}${opdDetails[0].doc_file}`
+//         );
+//         const opdId = opdDetails[0].id;
+//         setOpdId(opdId);
 
-  //       // Fetch OPD timings immediately after fetching OPD details
-  //       await fetchOpdTimings(opdId);
-  //     }
+//         // Fetch OPD timings immediately after fetching OPD details
+//         await fetchOpdTimings(opdId);
+//       }
 
-  //     const feeResponse = await BaseUrl.get(
-  //       `/doctor/fee/?doctor_id=${doctor_id}`
-  //     );
-  //     const feeData = feeResponse.data;
-  //     setCountryId(feeResponse.data.id);
+//       const feeResponse = await BaseUrl.get(
+//         `/doctor/fee/?doctor_id=${doctor_id}`
+//       );
+//       const feeData = feeResponse.data;
+//       setCountryId(feeResponse.data.id);
 
-  //     const countrySpecificFees = Array.isArray(feeData) ? feeData : [];
+//       const countrySpecificFees = Array.isArray(feeData) ? feeData : [];
 
-  //     // Check if "Others" is present in the fee data
-  //     const othersFee = countrySpecificFees.find(
-  //       (fee) => fee.country === "Others"
-  //     );
+//       // Check if "Others" is present in the fee data
+//       const othersFee = countrySpecificFees.find(
+//         (fee) => fee.country === "Others"
+//       );
 
-  //     // If "Others" exists, set its details and check the checkbox
-  //     if (othersFee) {
-  //       setOpdData((prevData) => ({
-  //         ...prevData,
-  //         otherCountryFeeChecked: true, // Checkbox should be checked
-  //         otherCountryFeeCurrency: othersFee.currency,
-  //         otherCountryFeeAmount: othersFee.consultation_fee,
-  //         countrySpecificFees: countrySpecificFees.filter(
-  //           (fee) => fee.country !== "Others"
-  //         ), // Exclude "Others" from the list
-  //       }));
-  //     } else {
-  //       setOpdData((prevData) => ({
-  //         ...prevData,
-  //         otherCountryFeeChecked: false, // Checkbox should be unchecked
-  //         otherCountryFeeCurrency: "",
-  //         otherCountryFeeAmount: "",
-  //         countrySpecificFees: countrySpecificFees,
-  //       }));
-  //     }
-  //   } catch (error) {
-  //     setErrorMessage("Failed to fetch OPD details or consultation fees.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+//       // If "Others" exists, set its details and check the checkbox
+//       if (othersFee) {
+//         setOpdData((prevData) => ({
+//           ...prevData,
+//           otherCountryFeeChecked: true, // Checkbox should be checked
+//           otherCountryFeeCurrency: othersFee.currency,
+//           otherCountryFeeAmount: othersFee.consultation_fee,
+//           countrySpecificFees: countrySpecificFees.filter(
+//             (fee) => fee.country !== "Others"
+//           ), // Exclude "Others" from the list
+//         }));
+//       } else {
+//         setOpdData((prevData) => ({
+//           ...prevData,
+//           otherCountryFeeChecked: false, // Checkbox should be unchecked
+//           otherCountryFeeCurrency: "",
+//           otherCountryFeeAmount: "",
+//           countrySpecificFees: countrySpecificFees,
+//         }));
+//       }
+//     } catch (error) {
+//       setErrorMessage("Failed to fetch OPD details or consultation fees.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
 
 //   const fetchOpdTimings = async (opdId) => {
 //     setLoadingTimings(true);
