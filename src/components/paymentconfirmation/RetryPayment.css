@@ -1,0 +1,99 @@
+
+.niramaya-404-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f9f9f9;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.niramaya-404-container {
+  max-width: 600px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.niramaya-404-logo {
+  max-width: 150px;
+  margin-bottom: 20px;
+}
+
+.niramaya-404-heading {
+  font-size: 5rem;
+  color: #d32f2f;
+  margin: 0;
+}
+
+.niramaya-404-subheading {
+  font-size: 2rem;
+  color: #333;
+  margin: 10px 0;
+}
+
+.niramaya-404-message {
+  color: #555;
+  margin: 10px 0 20px;
+}
+
+.niramaya-404-actions {
+  margin: 20px 0;
+}
+
+.niramaya-home-btn,
+.niramaya-contact-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 5px;
+  font-size: 1rem;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.niramaya-home-btn {
+  background-color: #00897b;
+}
+
+.niramaya-contact-btn {
+  background-color: #d32f2f;
+}
+
+.niramaya-home-btn:hover {
+  background-color: #00695c;
+}
+
+.niramaya-contact-btn:hover {
+  background-color: #b71c1c;
+}
+
+.niramaya-404-search {
+  margin-top: 20px;
+}
+
+.niramaya-search-input {
+  padding: 10px;
+  width: calc(100% - 90px);
+  max-width: 400px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.niramaya-search-btn {
+  padding: 10px 20px;
+  background-color: #00897b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.niramaya-search-btn:hover {
+  background-color: #00695c;
+}

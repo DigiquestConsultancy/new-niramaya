@@ -40,8 +40,8 @@ const Sidebar = ({ selectedMenu, handleMenuClick }) => {
     { name: "Booked Appointment", path: "/doctor/bookedappointment" },
   ];
   const paymentItems = [
-    { name: "Payment History", path: "doctor/paymenthistory" },
-    { name: "Billing", path: "doctor/paymenthistory" },
+    { name: "Payment History", path: "/doctor/paymenthistory" },
+    { name: "Billing", path: "/doctor/paymenthistory" },
   ];
   const templates = [
     { name: "Manage Templates", path: "/doctor/managetemplates" },

@@ -104,8 +104,8 @@ const PaymentConfirmation = () => {
             <>
               <h2 className="text-danger">Payment Failed</h2>
               <p className="text-muted">{errorMessage}</p>
-              <Button variant="danger" className="mt-3" onClick={() => history.push("/retry-payment")}>
-                Retry Payment
+              <Button variant="danger" className="mt-3" onClick={() => history.push("/")}>
+                Go to Dashboard
               </Button>
             </>
           )}

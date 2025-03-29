@@ -4483,6 +4483,10 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FaSyncAlt } from "react-icons/fa";
+import { LuZoomIn } from "react-icons/lu";
+import { LuZoomOut } from "react-icons/lu";
+import { FaArrowRotateRight } from "react-icons/fa6";
+import { IoMdDownload } from "react-icons/io";
 import slotcreated from "../../images/slotcreated.png";
 import booked from "../../images/booked.png";
 import completed from "../../images/completed.png";
@@ -4568,6 +4572,36 @@ const DoctorHome = () => {
 
   const handleMenuClick = (menu) => {
     setSelectedMenu(menu);
+  };
+
+  const [rotation, setRotation] = useState(0);
+  const [zoom, setZoom] = useState(1);
+
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(selectedFile.url, {
+        mode: "cors", // If your server allows CORS
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch file");
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const filename = `image-${new Date().toISOString().replace(/[:.]/g, "-")}.jpg`;
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert(
+        "Download failed. File may not be accessible or supported for download."
+      );
+    }
   };
 
   const handleClose = () => setShowModal(false);
@@ -6444,7 +6478,7 @@ const DoctorHome = () => {
             },
           }
         );
-        
+
         if (response.status === 200 && response.data.length > 0) {
           setDocumentsData(response.data);
           setDisplayedData("documents");
@@ -7007,69 +7041,70 @@ const DoctorHome = () => {
                           // </video>
 
                           <video
-  muted
-  preload="metadata"
-  style={{
-    objectFit: "cover",
-    height: "200px",
-    width: "100%",
-    borderRadius: "5px",
-    cursor: "pointer",
-  }}
-  onClick={() =>
-    setSelectedFile({
-      type: "video",
-      url: report.url,
-    })
-  }
-  onMouseOver={(e) => {
-    if (e.target.paused) {
-      e.target.play();
-    }
-  }}
-  onMouseOut={(e) => {
-    if (!e.target.paused) {
-      e.target.pause();
-      e.target.currentTime = 0; 
-    }
-  }}
->
-  <source src={report.url} type="video/mp4" />
-  Your browser does not support the video tag.
-</video>
-
-                        );
-                      }
-                     else if (type === "file") {
-                      return (
-                        <div style={{ position: "relative" }}>
-                          <iframe
-                            src={`${report.url}#page=1&zoom=85`}
-                            title="PDF Preview"
+                            muted
+                            preload="metadata"
                             style={{
+                              objectFit: "cover",
                               height: "200px",
                               width: "100%",
-                              border: "none",
                               borderRadius: "5px",
-                              pointerEvents: "none",
-                            }}
-                          />
-                          <div
-                            onClick={() => setSelectedFile({ type: "pdf", url: report.url })}
-                            style={{
-                              position: "absolute",
-                              top: 0,
-                              left: 0,
-                              height: "200px",
-                              width: "100%",
                               cursor: "pointer",
                             }}
-                          />
-                        </div>
-                      );
-                    }
-                    
-                      else {
+                            onClick={() =>
+                              setSelectedFile({
+                                type: "video",
+                                url: report.url,
+                              })
+                            }
+                            onMouseOver={(e) => {
+                              if (e.target.paused) {
+                                e.target.play();
+                              }
+                            }}
+                            // onMouseOut={(e) => {
+                            //   if (!e.target.paused) {
+                            //     e.target.pause();
+                            //     e.target.currentTime = 0;
+                            //   }
+                            // }}
+                          >
+                            <source src={report.url} type="video/mp4" />
+                            Your browser does not support the video tag.
+                          </video>
+                        );
+                      } else if (type === "file") {
+                        return (
+                          <div style={{ position: "relative" }}>
+                            <iframe
+                              src={`${report.url}#page=1&zoom=85`}
+                              title="PDF Preview"
+                              style={{
+                                height: "200px",
+                                width: "100%",
+                                border: "none",
+                                borderRadius: "5px",
+                                pointerEvents: "none",
+                              }}
+                            />
+                            <div
+                              onClick={() =>
+                                setSelectedFile({
+                                  type: "pdf",
+                                  url: report.url,
+                                })
+                              }
+                              style={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                height: "200px",
+                                width: "100%",
+                                cursor: "pointer",
+                              }}
+                            />
+                          </div>
+                        );
+                      } else {
                         return (
                           <div
                             style={{
@@ -7525,6 +7560,10 @@ const DoctorHome = () => {
                 {appointment.booked_by}
               </Card.Text>
               <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+                <strong>UHID: </strong>
+                {appointment.uhid}
+              </Card.Text>
+              <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
                 <strong>Mobile no: </strong> {appointment.mobile_number}
               </Card.Text>
             </Card.Body>
@@ -7555,6 +7594,10 @@ const DoctorHome = () => {
               <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
                 <strong>Patient: </strong>
                 {appointment.booked_by}
+              </Card.Text>
+              <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+                <strong>UHID: </strong>
+                {appointment.uhid}
               </Card.Text>
               <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
                 <strong>Mobile no: </strong> {appointment.mobile_number}
@@ -7613,6 +7656,10 @@ const DoctorHome = () => {
                 </Card.Title>
                 <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
                   <strong>Patient: </strong> {appointment.booked_by}
+                </Card.Text>
+                <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+                  <strong>UHID: </strong>
+                  {appointment.uhid}
                 </Card.Text>
                 <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
                   <strong>Mobile no: </strong> {appointment.mobile_number}
@@ -7911,6 +7958,10 @@ const DoctorHome = () => {
               </Card.Title>
               <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
                 <strong>Patient Name:</strong> {appointment.booked_by}
+              </Card.Text>
+              <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
+                <strong>UHID: </strong>
+                {appointment.uhid}
               </Card.Text>
               <Card.Text className="mb-1" style={{ fontSize: "0.9rem" }}>
                 <strong>Contact No.:</strong> {appointment.mobile_number}
@@ -8298,7 +8349,7 @@ const DoctorHome = () => {
                         color: "#0F518F",
                       }}
                     >
-                      {followUpCount} 
+                      {followUpCount}
                     </p>
                   </div>
                 </div>
@@ -8425,15 +8476,31 @@ const DoctorHome = () => {
             >
               <div
                 className="px-4 py-2 border-end fw-semibold"
+                style={{ color: "#80C116" }}
+              >
+                Booked Appointments: {bookedAppointmentCount}
+              </div>
+            </div>
+
+            <div
+              className="d-flex justify-content-center align-items-center border rounded shadow-sm mx-auto text-sm"
+              style={{
+                width: "fit-content",
+                fontSize: "1.2rem",
+                margin: "10px auto",
+              }}
+            >
+              <div
+                className="px-4 py-2 border-end fw-semibold"
                 style={{ color: "#FF7F50" }}
               >
-                New Appointments: ---
+                New Appointments
               </div>
               <div
                 className="px-4 py-2 fw-semibold"
                 style={{ color: "#1ABC9C" }}
               >
-                Follow-Ups: {followUpCount}
+                Follow-Ups
               </div>
             </div>
 
@@ -8931,16 +8998,30 @@ const DoctorHome = () => {
             }}
           >
             {selectedFile?.type === "image" && (
-              <img
-                src={selectedFile.url}
-                alt="Preview"
+              <div
                 style={{
+                  position: "relative",
                   width: "100%",
                   height: "100%",
-                  objectFit: "contain", // Ensure image scales within the fixed container
-                  borderRadius: "5px",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  overflow: zoom > 1 ? "auto" : "hidden", // Show scrollbar if zoom is applied (image overflows)
                 }}
-              />
+              >
+                <img
+                  src={selectedFile.url}
+                  alt="Preview"
+                  style={{
+                    maxWidth: "none", // Allow image to exceed container width
+                    maxHeight: "none", // Allow image to exceed container height
+                    objectFit: "contain",
+                    borderRadius: "5px",
+                    transform: `rotate(${rotation}deg) scale(${zoom})`,
+                    transition: "transform 0.3s ease",
+                  }}
+                />
+              </div>
             )}
 
             {selectedFile?.type === "video" && (
@@ -8968,21 +9049,62 @@ const DoctorHome = () => {
             )}
           </Modal.Body>
 
-          {selectedFile?.type === "pdf" && (
-            <Modal.Footer className="d-flex justify-content-between">
-              <Button variant="secondary" onClick={() => setSelectedFile(null)}>
-        Close
-      </Button>
+          {selectedFile?.type === "image" && (
+            <Modal.Footer className="d-flex justify-content-between align-items-center">
+              <div>
+                <Button
+                  variant="outline"
+                  className="me-2 border bg-black text-white"
+                  onClick={() => setZoom((z) => z + 0.1)}
+                >
+                  <LuZoomIn />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="me-2 border bg-black text-white"
+                  onClick={() => setZoom((z) => Math.max(0.1, z - 0.1))}
+                >
+                  <LuZoomOut />
+                </Button>
+                <Button
+                  variant="primary"
+                  className="me-2"
+                  onClick={() => setRotation((r) => r + 90)}
+                >
+                  <FaArrowRotateRight />
+                </Button>
+                <Button variant="success" onClick={handleDownload}>
+                  <IoMdDownload />
+                </Button>
+              </div>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setSelectedFile(null);
+                  setZoom(1);
+                  setRotation(0);
+                }}
+              >
+                Close
+              </Button>
             </Modal.Footer>
           )}
 
-          {selectedFile?.type !== "pdf" && (
-            <Modal.Footer>
+          {selectedFile?.type === "pdf" && (
+            <Modal.Footer className="d-flex justify-content-between">
               <Button variant="secondary" onClick={() => setSelectedFile(null)}>
                 Close
               </Button>
             </Modal.Footer>
           )}
+          {/* 
+              {selectedFile?.type !== "pdf" && (
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={() => setSelectedFile(null)}>
+                    Close
+                  </Button>
+                </Modal.Footer>
+              )} */}
         </Modal>
       </main>
     </div>

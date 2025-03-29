@@ -19,8 +19,7 @@ const Footer = () => {
             </div>
             <div>
               <p>
-                Dr. Dinesh Chandra is a dedicated pediatrician committed to supporting
-                your child's health through every stage of their early life.
+              We provide expert Homoeopathic treatments and personalized healthcare solutions to ensure a healthy life. Our doctors are here to guide you through your recovery with the best treatment options.
               </p>
             </div>
             <div>
@@ -53,13 +52,13 @@ const Footer = () => {
           <Col md={3}>
             <h5>Contact Us</h5>
             <p>
-              <strong>Phone:</strong> +91 96963 89966
+              <strong>Phone:</strong> +91 9236185711
             </p>
             <p>
-              <strong>Email:</strong> drchandrahospitalgkp@gmail.com
+              <strong>Email:</strong> niramayaforyou@gmail.com
             </p>
             <p>
-              <strong>Address:</strong> Near SBI Regional Office, Buddhi Vihar Commercial, Taramandal, Gorakhpur
+              <strong>Address:</strong> 0230 B Civil Lines 2 Bilandpur near DIG Bunglow, Gorakhpur, Uttar Pradesh, India, 273001
             </p>
           </Col>
         </Row>

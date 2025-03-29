@@ -28,6 +28,11 @@ import styled from "styled-components";
 import Loader from "react-js-loader";
 import { FaSyncAlt } from "react-icons/fa";
 import { BsPrinterFill } from "react-icons/bs";
+import { LuZoomIn } from "react-icons/lu";
+import { LuZoomOut } from "react-icons/lu";
+import { FaArrowRotateRight } from "react-icons/fa6";
+import { IoMdDownload } from "react-icons/io";
+
 import Sidebar from "./Sidebar";
 
 const LoaderWrapper = styled.div`
@@ -129,6 +134,9 @@ const DoctorBookedAppointment = () => {
   const [toastMessage, setToastMessage] = useState("");
   const [toastVariant, setToastVariant] = useState("success");
 
+  const [rotation, setRotation] = useState(0);
+  const [zoom, setZoom] = useState(1);
+
   const [selectedMenu, setSelectedMenu] = useState("Dashboard");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
@@ -154,6 +162,33 @@ const DoctorBookedAppointment = () => {
       setLoading(false);
     }
   }, []);
+
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(selectedFile.url, {
+        mode: "cors", // If your server allows CORS
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch file");
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const filename = `image-${new Date().toISOString().replace(/[:.]/g, "-")}.jpg`;
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert(
+        "Download failed. File may not be accessible or supported for download."
+      );
+    }
+  };
 
   const fetchMedicalRecords = async (appointment_id) => {
     try {
@@ -658,12 +693,22 @@ const DoctorBookedAppointment = () => {
               const medicalRecordsResponse = await BaseUrl.get(
                 `/doctorappointment/whatsappreport/?appointment_id=${appointment_id}`
               );
+
               if (medicalRecordsResponse.status === 200) {
                 const reports = medicalRecordsResponse.data?.webhook_data || [];
+
+                if (reports.length === 0) {
+                  setWhatsappReport([]);
+                  setSuccessMessage("");
+                  setErrorMessage(""); // No need to show anything
+                  return;
+                }
+
                 setWhatsappReport(reports);
                 setSuccessMessage("Medical records fetched successfully.");
                 setErrorMessage("");
               } else {
+                setWhatsappReport([]);
                 setErrorMessage(
                   medicalRecordsResponse.data?.error ||
                     "Failed to fetch medical records."
@@ -671,6 +716,7 @@ const DoctorBookedAppointment = () => {
                 setSuccessMessage("");
               }
             } catch (error) {
+              setWhatsappReport([]);
               setErrorMessage(
                 error?.message || "An unexpected error occurred."
               );
@@ -1510,18 +1556,27 @@ const DoctorBookedAppointment = () => {
       const response = await BaseUrl.get(`/doctorappointment/whatsappreport/`, {
         params: { appointment_id: appointmentId },
       });
+
       if (response.status === 200) {
         const reports = response.data?.webhook_data || [];
+        if (reports.length === 0) {
+          setWhatsappReport([]);
+          setSuccessMessage("");
+          setErrorMessage("");
+          return;
+        }
         setWhatsappReport(reports);
         setSuccessMessage("Medical record fetched successfully.");
         setErrorMessage("");
       } else {
-        setErrorMessage(response.data?.error);
+        setErrorMessage(response.data?.error || "Something went wrong.");
         setSuccessMessage("");
+        setWhatsappReport([]);
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.error);
+      setErrorMessage(error.response?.data?.error || "Something went wrong.");
       setSuccessMessage("");
+      setWhatsappReport([]);
     } finally {
       setLoading(false);
     }
@@ -1921,62 +1976,67 @@ const DoctorBookedAppointment = () => {
                               </div>
                             </div>
 
-                            <div className="row align-items-center mt-2 responsive-toggles">
-                              <div className="col-6 d-flex align-items-center toggle-item">
-                                <span
-                                  className="ms-1"
-                                  style={{ fontSize: "12px" }}
-                                >
-                                  End Visit
-                                </span>
-                                <label className="form-check form-switch">
-                                  <input
-                                    className="form-check-input"
-                                    type="checkbox"
-                                    id="endVisitSwitch"
-                                    style={{
-                                      cursor: "pointer",
-                                      alignItems: "center",
-                                    }}
-                                    onChange={() => {
-                                      setConfirmAction("endVisit");
-                                      setShowConfirmModal(true);
-                                      setSelectedAppointment(appointment);
-                                    }}
-                                    disabled={
-                                      appointment.is_complete ||
-                                      appointment.is_canceled
-                                    }
-                                    checked={appointment.is_complete}
-                                  />
-                                </label>
-                              </div>
+                            {/* Second Row: Toggle buttons in a line */}
+                            <div className="row align-items-center mt-2">
+                              <div className="col-12 d-flex justify-content-between align-items-center">
+                                {/* End Visit Toggle */}
+                                <div className="d-flex align-items-center">
+                                  <span
+                                    className="me-1"
+                                    style={{ fontSize: "12px" }}
+                                  >
+                                    End Visit
+                                  </span>
+                                  <label className="form-check form-switch">
+                                    <input
+                                      className="form-check-input"
+                                      type="checkbox"
+                                      id="endVisitSwitch"
+                                      style={{
+                                        cursor: "pointer",
+                                        alignItems: "center",
+                                      }}
+                                      onChange={() => {
+                                        setConfirmAction("endVisit");
+                                        setShowConfirmModal(true);
+                                        setSelectedAppointment(appointment);
+                                      }}
+                                      disabled={
+                                        appointment.is_complete ||
+                                        appointment.is_canceled
+                                      }
+                                      checked={appointment.is_complete}
+                                    />
+                                  </label>
+                                </div>
 
-                              <div className="col-6 d-flex align-items-center toggle-item">
-                                <span
-                                  className="me-1"
-                                  style={{ fontSize: "12px" }}
-                                >
-                                  Cancel
-                                </span>
-                                <label className="form-check form-switch">
-                                  <input
-                                    className="form-check-input"
-                                    type="checkbox"
-                                    id="cancelSwitch"
-                                    style={{ cursor: "pointer" }}
-                                    onChange={() => {
-                                      setConfirmAction("cancelAppointment");
-                                      setShowConfirmModal(true);
-                                      setSelectedAppointment(appointment);
-                                    }}
-                                    disabled={
-                                      appointment.is_canceled ||
-                                      appointment.is_complete
-                                    }
-                                    checked={appointment.is_canceled}
-                                  />
-                                </label>
+                                {/* Cancel Toggle */}
+                                <div className="d-flex align-items-center">
+                                  <span
+                                    className="ms-2 me-1"
+                                    style={{ fontSize: "12px" }}
+                                  >
+                                    Cancel
+                                  </span>
+                                  <label className="form-check form-switch">
+                                    <input
+                                      className="form-check-input"
+                                      type="checkbox"
+                                      id="cancelSwitch"
+                                      style={{ cursor: "pointer" }}
+                                      onChange={() => {
+                                        setConfirmAction("cancelAppointment");
+                                        setShowConfirmModal(true);
+                                        setSelectedAppointment(appointment);
+                                      }}
+                                      disabled={
+                                        appointment.is_canceled ||
+                                        appointment.is_complete
+                                      }
+                                      checked={appointment.is_canceled}
+                                    />
+                                  </label>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -4016,51 +4076,6 @@ const DoctorBookedAppointment = () => {
                                                             type === "video"
                                                           ) {
                                                             return (
-                                                              // <video
-                                                              //   muted
-                                                              //   preload="metadata"
-                                                              //   style={{
-                                                              //     objectFit:
-                                                              //       "cover",
-                                                              //     height:
-                                                              //       "200px",
-                                                              //     width: "100%",
-                                                              //     borderRadius:
-                                                              //       "5px",
-                                                              //     cursor:
-                                                              //       "pointer",
-                                                              //   }}
-                                                              //   onClick={() =>
-                                                              //     setSelectedFile(
-                                                              //       {
-                                                              //         type: "video",
-                                                              //         url: report.url,
-                                                              //       }
-                                                              //     )
-                                                              //   }
-                                                              //   onMouseOver={(
-                                                              //     e
-                                                              //   ) =>
-                                                              //     e.target.play()
-                                                              //   }
-                                                              //   onMouseOut={(
-                                                              //     e
-                                                              //   ) => {
-                                                              //     e.target.pause();
-                                                              //     e.target.currentTime = 0;
-                                                              //   }}
-                                                              // >
-                                                              //   <source
-                                                              //     src={
-                                                              //       report.url
-                                                              //     }
-                                                              //     type="video/mp4"
-                                                              //   />
-                                                              //   Your browser
-                                                              //   does not support
-                                                              //   the video tag.
-                                                              // </video>
-
                                                               <video
                                                                 muted
                                                                 preload="metadata"
@@ -4085,25 +4100,15 @@ const DoctorBookedAppointment = () => {
                                                                 }
                                                                 onMouseOver={(
                                                                   e
-                                                                ) => {
-                                                                  if (
-                                                                    e.target
-                                                                      .paused
-                                                                  ) {
-                                                                    e.target.play();
-                                                                  }
-                                                                }}
-                                                                onMouseOut={(
-                                                                  e
-                                                                ) => {
-                                                                  if (
-                                                                    !e.target
-                                                                      .paused
-                                                                  ) {
-                                                                    e.target.pause();
-                                                                    e.target.currentTime = 0;
-                                                                  }
-                                                                }}
+                                                                ) =>
+                                                                  e.target.play()
+                                                                }
+                                                                // onMouseOut={(
+                                                                //   e
+                                                                // ) => {
+                                                                //   e.target.pause();
+                                                                //   e.target.currentTime = 0;
+                                                                // }}
                                                               >
                                                                 <source
                                                                   src={
@@ -4115,6 +4120,61 @@ const DoctorBookedAppointment = () => {
                                                                 does not support
                                                                 the video tag.
                                                               </video>
+
+                                                              // <video
+                                                              //   muted
+                                                              //   preload="metadata"
+                                                              //   style={{
+                                                              //     objectFit:
+                                                              //       "cover",
+                                                              //     height:
+                                                              //       "200px",
+                                                              //     width: "100%",
+                                                              //     borderRadius:
+                                                              //       "5px",
+                                                              //     cursor:
+                                                              //       "pointer",
+                                                              //   }}
+                                                              //   onClick={() =>
+                                                              //     setSelectedFile(
+                                                              //       {
+                                                              //         type: "video",
+                                                              //         url: report.url,
+                                                              //       }
+                                                              //     )
+                                                              //   }
+                                                              //   onMouseOver={(
+                                                              //     e
+                                                              //   ) => {
+                                                              //     if (
+                                                              //       e.target
+                                                              //         .paused
+                                                              //     ) {
+                                                              //       e.target.play();
+                                                              //     }
+                                                              //   }}
+                                                              //   onMouseOut={(
+                                                              //     e
+                                                              //   ) => {
+                                                              //     if (
+                                                              //       !e.target
+                                                              //         .paused
+                                                              //     ) {
+                                                              //       e.target.pause();
+                                                              //       e.target.currentTime = 0;
+                                                              //     }
+                                                              //   }}
+                                                              // >
+                                                              //   <source
+                                                              //     src={
+                                                              //       report.url
+                                                              //     }
+                                                              //     type="video/mp4"
+                                                              //   />
+                                                              //   Your browser
+                                                              //   does not support
+                                                              //   the video tag.
+                                                              // </video>
                                                             );
                                                           } else if (
                                                             type === "file"
@@ -4447,25 +4507,39 @@ const DoctorBookedAppointment = () => {
           <Modal.Body
             style={{
               padding: 0,
-              height: selectedFile?.type === "image" ? "400px" : "auto", // Fixed height for images
-              width: selectedFile?.type === "image" ? "100%" : "auto", // Fixed width for images
-              overflow: "hidden", // Prevent overflow if the image is too large
+              height: selectedFile?.type === "image" ? "400px" : "auto",
+              width: selectedFile?.type === "image" ? "100%" : "auto", 
+              overflow: "hidden", 
               display: "flex",
-              justifyContent: "center", // Center image horizontally
-              alignItems: "center", // Center image vertically
+              justifyContent: "center",
+              alignItems: "center", 
             }}
           >
             {selectedFile?.type === "image" && (
-              <img
-                src={selectedFile.url}
-                alt="Preview"
+              <div
                 style={{
+                  position: "relative",
                   width: "100%",
                   height: "100%",
-                  objectFit: "contain", // Ensure image scales within the fixed container
-                  borderRadius: "5px",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  overflow: zoom > 1 ? "auto" : "hidden", 
                 }}
-              />
+              >
+                <img
+                  src={selectedFile.url}
+                  alt="Preview"
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: "100%", 
+                    objectFit: "cover",
+                    borderRadius: "5px",
+                    transform: `rotate(${rotation}deg) scale(${zoom})`,
+                    transition: "transform 0.3s ease",
+                  }}
+                />
+              </div>
             )}
 
             {selectedFile?.type === "video" && (
@@ -4493,6 +4567,47 @@ const DoctorBookedAppointment = () => {
             )}
           </Modal.Body>
 
+          {selectedFile?.type === "image" && (
+            <Modal.Footer className="d-flex justify-content-between align-items-center">
+              <div>
+                <Button
+                  variant="outline"
+                  className="me-2 border bg-black text-white"
+                  onClick={() => setZoom((z) => z + 0.1)}
+                >
+                  <LuZoomIn />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="me-2 border bg-black text-white"
+                  onClick={() => setZoom((z) => Math.max(0.1, z - 0.1))}
+                >
+                  <LuZoomOut />
+                </Button>
+                <Button
+                  variant="primary"
+                  className="me-2"
+                  onClick={() => setRotation((r) => r + 90)}
+                >
+                  <FaArrowRotateRight />
+                </Button>
+                <Button variant="success" onClick={handleDownload}>
+                  <IoMdDownload />
+                </Button>
+              </div>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setSelectedFile(null);
+                  setZoom(1);
+                  setRotation(0);
+                }}
+              >
+                Close
+              </Button>
+            </Modal.Footer>
+          )}
+
           {selectedFile?.type === "pdf" && (
             <Modal.Footer className="d-flex justify-content-between">
               <Button variant="secondary" onClick={() => setSelectedFile(null)}>
@@ -4500,14 +4615,14 @@ const DoctorBookedAppointment = () => {
               </Button>
             </Modal.Footer>
           )}
-
+          {/* 
           {selectedFile?.type !== "pdf" && (
             <Modal.Footer>
               <Button variant="secondary" onClick={() => setSelectedFile(null)}>
                 Close
               </Button>
             </Modal.Footer>
-          )}
+          )} */}
         </Modal>
       </main>
     </Container>

@@ -396,6 +396,7 @@ import StaticHome from "./components/static-pages/HomePage";
 import Patientbookappointment from "./components/Patientbookappointment/Patientbookappointment";
 import Checkout from "./components/checkout/checkout";
 import Paymentconfiramation from "./components/paymentconfirmation/PaymentConfirmation";
+import RetryPayment from "./components/paymentconfirmation/RetryPayment"
 
 function App() {
   const [userType, setUserType] = useState(null);
@@ -443,6 +444,7 @@ function App() {
             <Route exact path="/restricted" component={RestrictedPage} />
             {/* Static Pages */}
             <Route exact path="/" component={StaticHome} />
+            {/* <Route exact path="*" element={RetryPayment}/> */}
             {/* Static Pages */}
             <Route
               exact

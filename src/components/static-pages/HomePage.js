@@ -123,7 +123,7 @@ const HomePage = () => {
           <FaPhoneAlt className="phone-icon" />
           <div>
             <p>Get Emergency Service At 24/7</p>
-            <h4>+8 (123) 456 789 12</h4>
+            <h4>+91 9236185711</h4>
           </div>
         </div>
       </div>
@@ -192,21 +192,7 @@ const HomePage = () => {
               <h3>Surgical Operation</h3>
               <p>Description of Surgical Operations...</p>
             </div>
-            <div className="service-card">
-              <img src={serviceImage4} alt="Service 4" />
-              <h3>Service 4</h3>
-              <p>Description of Service 4...</p>
-            </div>
-            <div className="service-card">
-              <img src={serviceImage5} alt="Service 5" />
-              <h3>Service 5</h3>
-              <p>Description of Service 5...</p>
-            </div>
-            <div className="service-card">
-              <img src={serviceImage6} alt="Service 6" />
-              <h3>Service 6</h3>
-              <p>Description of Service 6...</p>
-            </div>
+            
           </div>
         </div>
       </div>

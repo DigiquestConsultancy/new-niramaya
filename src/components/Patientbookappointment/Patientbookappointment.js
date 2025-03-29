@@ -1490,7 +1490,7 @@ const BookAppointment = () => {
     evening: [],
   });
 
-  const doctorId = 3;
+  const doctorId = 13;
 
   useEffect(() => {
     loadAvailableDates();

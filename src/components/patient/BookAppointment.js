@@ -1860,7 +1860,7 @@ const BookAppointment = () => {
       await cashfree.checkout({
         paymentSessionId,
         // returnUrl: "http://localhost:3000/patientbookappointment",
-        returnUrl: "https://niramayahomoeopathy.com/patientbookappointment",
+        returnUrl: "https://advanceclinic.niramayahomoeopathy.com/patientbookappointment",
       });
 
       await pollPaymentStatus();

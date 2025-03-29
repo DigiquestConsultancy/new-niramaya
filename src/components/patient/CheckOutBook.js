@@ -157,7 +157,7 @@ const Checkout = () => {
       const cashfree = await load({ mode: "production" });
       await cashfree.checkout({
         paymentSessionId,
-        returnUrl: "https://www.niramayahomoeopathy.com/patientbookappointment",
+        returnUrl: "https://www.advanceclinic.niramayahomoeopathy.com/patientbookappointment",
       });
 
       await pollPaymentStatus();
