@@ -725,10 +725,6 @@
 
 // export default AppointmentSlot;
 
-
-
-
-
 import React, { useState, useEffect } from "react";
 import BaseUrl from "../../api/BaseUrl";
 import { jwtDecode } from "jwt-decode";
@@ -1230,7 +1226,7 @@ const AppointmentSlot = () => {
           <span className="legend-text">Canceled</span>
         </div>
       </div>
-      
+
       <div className="row">
         {Object.keys(groupedSlots).map((date, dateIndex) => {
           const totalSlots = groupedSlots[date].length;
@@ -1292,7 +1288,9 @@ const AppointmentSlot = () => {
                       <div className="card-body text-center p-2">
                         {/* Row 1: Switch */}
                         <div className="d-flex justify-content-center align-items-center mb-2">
-                          <span style={{fontSize: "1rem", fontWeight: "600"}}>Unblock</span>
+                          <span style={{ fontSize: "1rem", fontWeight: "600" }}>
+                            Unblock
+                          </span>
                           <label className="switch ms-2 me-2">
                             <input
                               type="checkbox"
@@ -1307,7 +1305,9 @@ const AppointmentSlot = () => {
                             />
                             <span className="slider round"></span>
                           </label>
-                          <span style={{fontSize: "1rem", fontWeight: "600"}}>Block</span>
+                          <span style={{ fontSize: "1rem", fontWeight: "600" }}>
+                            Block
+                          </span>
                         </div>
 
                         {/* Row 2: Slot and Status */}
@@ -1365,7 +1365,8 @@ const AppointmentSlot = () => {
                             color: "#555",
                           }}
                         >
-                          Doctor: {slot.booked_by || "N/A"}
+                          Doctor:{" "}
+                          {slot.is_booked ? slot.doctor || "N/A" : "N/A"}
                         </div>
                       </div>
                     </div>
