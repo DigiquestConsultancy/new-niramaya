@@ -7432,13 +7432,13 @@ const DoctorHome = () => {
             let cardStyle = {};
 
             if (slot.is_canceled) {
-              cardStyle = { backgroundColor: "#FF6767", color: "#fff" };
+              cardStyle = { backgroundColor: "#D76C82", color: "#fff" };
             } else if (slot.is_booked) {
-              cardStyle = { backgroundColor: "#1261AA", color: "#fff" };
+              cardStyle = { backgroundColor: "#155E95", color: "#fff" };
             } else if (slot.is_blocked) {
-              cardStyle = { backgroundColor: "#F16215", color: "#fff" };
+              cardStyle = { backgroundColor: "#D98324", color: "#fff" };
             } else {
-              cardStyle = { backgroundColor: "#0A9013", color: "#fff" };
+              cardStyle = { backgroundColor: "#3E7B27", color: "#fff" };
             }
 
             return (
@@ -7545,7 +7545,7 @@ const DoctorHome = () => {
             key={index}
             className="p-3 shadow-sm"
             style={{
-              backgroundColor: "#9ED14D",
+              backgroundColor: "#7ED4AD",
               borderRadius: "12px",
               cursor: "pointer",
             }}
@@ -7581,7 +7581,7 @@ const DoctorHome = () => {
             key={index}
             className="p-3 shadow-sm"
             style={{
-              backgroundColor: "#FF6767",
+              backgroundColor: "#D76C82",
               borderRadius: "12px",
               cursor: "pointer",
             }}
@@ -7613,7 +7613,7 @@ const DoctorHome = () => {
     const colorMap = {
       online: "#E9A5F1",
       "walk-in": "#BFAF18",
-      "follow-up": "#8AFE91",
+      "follow-up": "#89AC46",
     };
 
     // Determine selected state per type
@@ -7948,7 +7948,7 @@ const DoctorHome = () => {
               cursor: "pointer",
               backgroundColor:
                 appointment.appointment_type === "follow-up"
-                  ? "#8AFE91"
+                  ? "#89AC46"
                   : "#FFBA4B",
             }}
           >
@@ -8065,7 +8065,7 @@ const DoctorHome = () => {
   return (
     <div
       className="d-flex doctor-container"
-      style={{ height: "calc(100vh - 80px)" }}
+      style={{ height: "calc(100vh - 60px)" }}
     >
       <Sidebar
         selectedMenu={selectedMenu}
@@ -8403,25 +8403,25 @@ const DoctorHome = () => {
               >
                 <div
                   className="px-4 py-2 border-end fw-semibold"
-                  style={{ color: "#0A9013" }}
+                  style={{ color: "#3E7B27" }}
                 >
                   Available: {availableAppointmentsCount}
                 </div>
                 <div
                   className="px-4 py-2 border-end fw-semibold"
-                  style={{ color: "#1261AA" }}
+                  style={{ color: "#155E95" }}
                 >
                   Booked: {bookedAppointmentCount}
                 </div>
                 <div
                   className="px-4 py-2 border-end fw-semibold"
-                  style={{ color: "#F16215" }}
+                  style={{ color: "#D98324" }}
                 >
                   Blocked: {blockedAppointmentsCount}
                 </div>
                 <div
                   className="px-4 py-2 border-end fw-semibold"
-                  style={{ color: "#FF6767" }}
+                  style={{ color: "#D76C82" }}
                 >
                   Canceled: {canceledAppointmentsCount}
                 </div>
@@ -8498,7 +8498,7 @@ const DoctorHome = () => {
               </div>
               <div
                 className="px-4 py-2 fw-semibold"
-                style={{ color: "#1ABC9C" }}
+                style={{ color: "#89AC46" }}
               >
                 Follow-Ups
               </div>
@@ -8537,7 +8537,7 @@ const DoctorHome = () => {
             >
               <div
                 className="px-4 py-2 border-end fw-semibold"
-                style={{ color: "#80C116" }}
+                style={{ color: "#7ED4AD" }}
               >
                 Completed Appointments: {completedAppointmentsCount}
               </div>
@@ -8600,7 +8600,7 @@ const DoctorHome = () => {
             >
               <div
                 className="px-4 py-2 border-end fw-semibold"
-                style={{ color: "#FF3535" }}
+                style={{ color: "#D76C82" }}
               >
                 Canceled Appointments: {canceledAppointmentsCount}
               </div>
@@ -8712,7 +8712,7 @@ const DoctorHome = () => {
             >
               <div
                 className="px-4 py-2 border-end fw-semibold"
-                style={{ color: "#12C81E" }}
+                style={{ color: "#89AC46" }}
               >
                 Follow-up Appointments: {followUpCount}
               </div>

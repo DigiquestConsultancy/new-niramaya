@@ -4507,7 +4507,7 @@ const DoctorBookedAppointment = () => {
           <Modal.Body
             style={{
               padding: 0,
-              height: selectedFile?.type === "image" ? "400px" : "auto",
+              height: selectedFile?.type === "image" ? "80vh" : "auto",
               width: selectedFile?.type === "image" ? "100%" : "auto", 
               overflow: "hidden", 
               display: "flex",
@@ -4515,32 +4515,42 @@ const DoctorBookedAppointment = () => {
               alignItems: "center", 
             }}
           >
-            {selectedFile?.type === "image" && (
-              <div
-                style={{
-                  position: "relative",
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  overflow: zoom > 1 ? "auto" : "hidden", 
-                }}
-              >
-                <img
-                  src={selectedFile.url}
-                  alt="Preview"
-                  style={{
-                    maxWidth: "100%",
-                    maxHeight: "100%", 
-                    objectFit: "cover",
-                    borderRadius: "5px",
-                    transform: `rotate(${rotation}deg) scale(${zoom})`,
-                    transition: "transform 0.3s ease",
-                  }}
-                />
-              </div>
-            )}
+           {selectedFile?.type === "image" && (
+  <div
+    style={{
+      position: "relative",
+      width: "100%",
+      height: "100%",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      overflow: zoom > 1 ? "auto" : "hidden",
+      cursor: zoom > 1 ? "zoom-out" : "zoom-in",
+    }}
+    onWheel={(e) => {
+      e.preventDefault();
+      if (e.deltaY < 0) {
+        setZoom((z) => Math.min(z + 0.1, 5)); // zoom in
+      } else {
+        setZoom((z) => Math.max(0.1, z - 0.1)); // zoom out
+      }
+    }}
+  >
+    <img
+      src={selectedFile.url}
+      alt="Preview"
+      style={{
+        maxWidth: "100%",
+        maxHeight: "100%",
+        objectFit: "cover",
+        borderRadius: "5px",
+        transform: `rotate(${rotation}deg) scale(${zoom})`,
+        transition: "transform 0.3s ease",
+      }}
+    />
+  </div>
+)}
+
 
             {selectedFile?.type === "video" && (
               <video
@@ -4548,7 +4558,9 @@ const DoctorBookedAppointment = () => {
                 controls
                 autoPlay
                 style={{
-                  width: "100%",
+                  height: selectedFile?.type === "video" ? "80vh" : "auto",
+                  width: selectedFile?.type === "video" ? "100%" : "auto", 
+                  // width: "100%",
                   borderRadius: "5px",
                 }}
               />
@@ -4570,7 +4582,7 @@ const DoctorBookedAppointment = () => {
           {selectedFile?.type === "image" && (
             <Modal.Footer className="d-flex justify-content-between align-items-center">
               <div>
-                <Button
+                {/* <Button
                   variant="outline"
                   className="me-2 border bg-black text-white"
                   onClick={() => setZoom((z) => z + 0.1)}
@@ -4583,7 +4595,7 @@ const DoctorBookedAppointment = () => {
                   onClick={() => setZoom((z) => Math.max(0.1, z - 0.1))}
                 >
                   <LuZoomOut />
-                </Button>
+                </Button> */}
                 <Button
                   variant="primary"
                   className="me-2"

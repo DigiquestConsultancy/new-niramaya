@@ -153,10 +153,20 @@ const ClinicDetails = () => {
     e.preventDefault();
     const dataToSubmit = new FormData();
     Object.keys(formData).forEach((key) => {
-      if (key !== "profile_pic") {
-        dataToSubmit.append(key, formData[key]);
+      let value = formData[key];
+    
+      if (key === "date_of_birth") {
+        if (value) {
+          // Ensure proper YYYY-MM-DD format
+          const formattedDOB = new Date(value).toISOString().split("T")[0];
+          dataToSubmit.append("date_of_birth", formattedDOB);
+        }
+        // If empty, skip appending it entirely
+      } else if (key !== "profile_pic") {
+        dataToSubmit.append(key, value);
       }
     });
+    
     if (formData.profile_pic instanceof File) {
       dataToSubmit.append("profile_pic", formData.profile_pic);
     }
@@ -198,6 +208,16 @@ const ClinicDetails = () => {
     }
   };
 
+  useEffect(() => {
+      if (successMessage) {
+        const timer = setTimeout(() => {
+          setSuccessMessage("");
+        }, 3000); // 3 seconds
+    
+        return () => clearTimeout(timer); // Cleanup in case component unmounts early
+      }
+    }, [successMessage]);
+    
   return (
     <div className=" d-flex">
       <Sidebar
@@ -221,29 +241,6 @@ const ClinicDetails = () => {
           </LoaderWrapper>
         )}
 
-        <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>{successMessage ? "Success" : "Error"}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {successMessage && (
-              <div className="alert alert-success text-center" role="alert">
-                {successMessage}
-              </div>
-            )}
-            {errorMessage && (
-              <div className="alert alert-danger text-center" role="alert">
-                {errorMessage}
-              </div>
-            )}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal>
-
         <form
           className="p-4 shadow"
           onSubmit={handleSubmit}
@@ -256,8 +253,19 @@ const ClinicDetails = () => {
           <h2 style={{ marginBottom: "30px" }}>Clinic Details</h2>
           {/* Display success message from backend */}
           {successMessage && (
-            <div className="alert alert-success">{successMessage}</div>
-          )}
+  <span
+    className="alert alert-success"
+    style={{
+      position: "fixed",
+      top: "20px",
+      left: "50%",
+      transform: "translateX(-50%)",
+      zIndex: 99999,
+    }}
+  >
+    {successMessage}
+  </span>
+)}
 
           <div className="d-flex align-items-center mb-4">
             <ProfilePicCircle

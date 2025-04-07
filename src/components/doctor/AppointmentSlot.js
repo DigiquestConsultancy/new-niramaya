@@ -1213,28 +1213,28 @@ const AppointmentSlot = () => {
           <div>
             <span
               className="legend-dot"
-              style={{ backgroundColor: "#F16215" }}
+              style={{ backgroundColor: "#D98324" }}
             ></span>
             <span className="legend-text">Blocked</span>
           </div>
           <div>
             <span
               className="legend-dot"
-              style={{ backgroundColor: "#1261AA" }}
+              style={{ backgroundColor: "#155E95" }}
             ></span>
             <span className="legend-text">Booked</span>
           </div>
           <div>
             <span
               className="legend-dot"
-              style={{ backgroundColor: "#0A9013" }}
+              style={{ backgroundColor: "#3E7B27" }}
             ></span>
             <span className="legend-text">Available</span>
           </div>
           <div>
             <span
               className="legend-dot"
-              style={{ backgroundColor: "#FF6767" }}
+              style={{ backgroundColor: "#D76C82" }}
             ></span>
             <span className="legend-text">Canceled</span>
           </div>
@@ -1261,12 +1261,12 @@ const AppointmentSlot = () => {
                         style={{
                           color: "#fff",
                           backgroundColor: slot.is_blocked
-                            ? "#F16215"
+                            ? "#D98324"
                             : slot.is_canceled
-                              ? "#FF6767"
+                              ? "#D76C82"
                               : slot.is_booked
-                                ? "#1261AA"
-                                : "#0A9013",
+                                ? "#155E95"
+                                : "#3E7B27",
                         }}
                       >
                         {/* <div className="card-body text-center">

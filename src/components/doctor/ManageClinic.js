@@ -5,13 +5,16 @@ import { useHistory } from "react-router-dom";
 import Loader from "react-js-loader";
 import styled from "styled-components";
 import Sidebar from "./Sidebar";
+import { Modal } from "react-bootstrap";
+import { MdDelete } from "react-icons/md";
+import { FaEye } from "react-icons/fa";
 
 const LoaderWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: rgba(255, 255, 255, 0.7); 
+  background-color: rgba(255, 255, 255, 0.7);
   position: fixed;
   width: 100%;
   top: 0;
@@ -19,8 +22,87 @@ const LoaderWrapper = styled.div`
   z-index: 9999;
 `;
 
-const LoaderImage = styled.div`
-  width: 400px;
+const Container = styled.div`
+  padding: 2rem;
+  width: 100%;
+`;
+
+const Title = styled.h1`
+  font-family: sans-serif;
+  color: #0c1187;
+  font-size: 2.5rem;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 1.5rem;
+`;
+
+const TableWrapper = styled.div`
+  overflow-x: auto;
+`;
+
+const StyledTable = styled.table`
+  width: 100%;
+  text-align: center;
+  font-family: sans-serif;
+  font-size: 1rem;
+  white-space: nowrap;
+  border-radius: 10px;
+  overflow: hidden;
+
+  th {
+    background-color: #0091a5;
+    color: #fff;
+    font-weight: bold;
+    padding: 1rem;
+    font-size: 1.1rem;
+  }
+
+  td {
+    padding: 0.75rem;
+    vertical-align: middle;
+  }
+
+  tbody tr:nth-child(odd) {
+    background-color: #f6f6f6;
+  }
+
+  tbody tr:hover {
+    background-color: #e9f7fa;
+  }
+`;
+
+const Button = styled.button`
+  font-family: sans-serif;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+
+  &.view {
+    background-color: #024caa;
+    color: #f1f8dc;
+  }
+
+  &.delete {
+    background-color: #bc1b2e;
+    color: #fff;
+  }
+
+  &.add {
+    background-color: #024caa;
+    color: #f1f8dc;
+    margin-left: auto;
+  }
+
+  &.page {
+    margin: 0 5px;
+  }
+`;
+
+const Message = styled.div`
+  margin: 1rem 0;
+  text-align: center;
 `;
 
 const ManageClinic = () => {
@@ -30,10 +112,24 @@ const ManageClinic = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [targetClinicId, setTargetClinicId] = useState(null);
   const history = useHistory();
 
-  const [selectedMenu, setSelectedMenu] = useState("Dashboard");
+  const [selectedMenu, setSelectedMenu] = useState("Manage Clinic");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const showTimedMessage = (type, msg) => {
+    if (type === "success") {
+      setSuccessMessage(msg);
+    } else {
+      setErrorMessage(msg);
+    }
+    setTimeout(() => {
+      setSuccessMessage("");
+      setErrorMessage("");
+    }, 3000);
+  };
 
   const handleMenuClick = (menu) => {
     setSelectedMenu(menu);
@@ -61,7 +157,7 @@ const ManageClinic = () => {
         throw new Error("");
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.error || "");
+      showTimedMessage("error", error.response?.data?.error || "");
     } finally {
       setLoading(false);
     }
@@ -75,30 +171,30 @@ const ManageClinic = () => {
     history.push(`/doctor/manageclinic/details/${clinic_id}`);
   };
 
-  const handleRemove = async (clinic_id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this clinic?"
-    );
-    if (!confirmDelete) {
-      return;
-    }
+  const confirmDelete = (clinic_id) => {
+    setTargetClinicId(clinic_id);
+    setShowConfirmModal(true);
+  };
 
+  const handleConfirmDelete = async () => {
     try {
       setLoading(true);
       const response = await BaseUrl.delete(`/clinic/details/`, {
-        data: { clinic_ids: [clinic_id] },
+        data: { clinic_ids: [targetClinicId] },
       });
       if (response.status === 200) {
-        setSuccessMessage(response.data.success);
+        showTimedMessage("success", response.data.success);
         setClinicDetails(
-          clinicDetails.filter((detail) => detail.clinic_id !== clinic_id)
+          clinicDetails.filter((detail) => detail.clinic_id !== targetClinicId)
         );
       } else {
         throw new Error("");
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.error || "");
+      showTimedMessage("error", error.response?.data?.error || "");
     } finally {
+      setShowConfirmModal(false);
+      setTargetClinicId(null);
       setLoading(false);
     }
   };
@@ -125,9 +221,7 @@ const ManageClinic = () => {
   };
 
   return (
-    <div
-      className="d-flex"
-    >
+    <div className="d-flex">
       <Sidebar
         selectedMenu={selectedMenu}
         handleMenuClick={handleMenuClick}
@@ -137,7 +231,7 @@ const ManageClinic = () => {
       <main className="p-4">
         {loading && (
           <LoaderWrapper>
-            <LoaderImage>
+            <Loader>
               <Loader
                 type="spinner-circle"
                 bgColor={"#0091A5"}
@@ -145,13 +239,11 @@ const ManageClinic = () => {
                 title={"Loading..."}
                 size={100}
               />
-            </LoaderImage>
+            </Loader>
           </LoaderWrapper>
         )}
 
-        <div
-          className="d-flex justify-content-between align-items-center flex-wrap"
-        >
+        <div className="d-flex justify-content-between align-items-center flex-wrap">
           <h1
             style={{
               fontFamily: "sans-serif",
@@ -164,42 +256,23 @@ const ManageClinic = () => {
           >
             Clinic Details
           </h1>
-          <button
-            type="button"
-            className="btn"
-            style={{
-              backgroundColor: "#024CAA",
-              color: "#f1f8dc",
-              fontFamily: "sans-serif",
-              fontSize: "16px",
-              marginLeft: "auto",
-            }}
+          <Button
+            className="add"
             onClick={() => history.push("/doctor/manageclinic/addclinic")}
           >
             Add Clinic
-          </button>
+          </Button>
         </div>
 
-        <div className="table-responsive" style={{ overflowX: "auto" }}>
-          <table
-            className="table table-striped"
-            style={{
-              width: "100%",
-              textAlign: "center",
-              fontFamily: "sans-serif",
-              fontSize: "16px",
-              whiteSpace: "nowrap",
-              tableLayout: "fixed",
-              borderRadius: "10px",
-            }}
-          >
+        <TableWrapper>
+          <StyledTable>
             <thead>
               <tr>
-                <th style={tableHeadingStyle}>Mobile Number</th>
-                <th style={tableHeadingStyle}>Name</th>
-                <th style={tableHeadingStyle}>Gender</th>
-                <th style={tableHeadingStyle}>Specialization</th>
-                <th style={tableHeadingStyle}>Actions</th>
+                <th>Mobile Number</th>
+                <th>Name</th>
+                <th>Gender</th>
+                <th>Specialization</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -210,21 +283,25 @@ const ManageClinic = () => {
                     <td>{detail.name}</td>
                     <td>{detail.gender}</td>
                     <td>{detail.specialization}</td>
-                    <td className="d-flex" style={{ gap: "5px" }}>
-                      <button
-                        className="btn me-2"
-                        style={viewButtonStyle}
-                        onClick={() => handleViewDetails(detail.clinic_id)}
-                      >
-                        Details
-                      </button>
-                      <button
-                        className="btn btn-danger"
-                        style={removeButtonStyle}
-                        onClick={() => handleRemove(detail.clinic_id)}
-                      >
-                        Remove
-                      </button>
+                    <td>
+                      <span onClick={() => handleViewDetails(detail.clinic_id)}>
+                        <FaEye
+                          style={{
+                            fontSize: "24px",
+                            color: "blue",
+                            cursor: "pointer",
+                          }}
+                        />
+                      </span>{" "}
+                      <span onClick={() => confirmDelete(detail.clinic_id)}>
+                        <MdDelete
+                          style={{
+                            fontSize: "24px",
+                            color: "red",
+                            cursor: "pointer",
+                          }}
+                        />
+                      </span>
                     </td>
                   </tr>
                 ))
@@ -243,8 +320,31 @@ const ManageClinic = () => {
                 </tr>
               )}
             </tbody>
-          </table>
-        </div>
+          </StyledTable>
+        </TableWrapper>
+
+        {/* Confirmation Modal */}
+        <Modal
+          show={showConfirmModal}
+          onHide={() => setShowConfirmModal(false)}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Confirm Deletion</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>Are you sure you want to delete this clinic?</Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowConfirmModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleConfirmDelete}>
+              Delete
+            </Button>
+          </Modal.Footer>
+        </Modal>
 
         {/* Pagination */}
         <div
@@ -308,45 +408,5 @@ const removeButtonStyle = {
   fontFamily: "sans-serif",
   fontSize: "16px",
 };
-
-const mediaStyles = `
-  @media (max-width: 768px) {
-    h1 {
-      font-size: 24px !important;
-    }
-    th {
-      font-size: 16px !important;
-    }
-    td {
-      font-size: 14px !important;
-      padding: 10px !important;
-    }
-    button {
-      font-size: 14px !important;
-      width: auto !important; 
-      margin-bottom: 5px !important;
-    }
-    table {
-      table-layout: auto !important;
-    }
-  }
- 
-  @media (max-width: 576px) {
-    h1 {
-      font-size: 20px !important;
-    }
-    th, td {
-      font-size: 12px !important;
-      padding: 8px !important;
-    }
-    button {
-      font-size: 12px !important;
-      width: auto !important; 
-    }
-    table {
-      table-layout: auto !important;
-    }
-  }
-`;
 
 export default ManageClinic;

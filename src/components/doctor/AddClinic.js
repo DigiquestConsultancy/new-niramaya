@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useHistory } from "react-router-dom";
 import BaseUrl from "../../api/BaseUrl";
 import { jwtDecode } from "jwt-decode";
 import { Modal, Button, Form } from "react-bootstrap";
@@ -49,6 +50,7 @@ const ProfilePicPreview = styled.img`
 `;
 
 const AddClinic = () => {
+  const history = useHistory();
   const [mobileNumber, setMobileNumber] = useState("");
   const [verificationStatus, setVerificationStatus] = useState("");
   const [otp, setOtp] = useState(new Array(6).fill(""));
@@ -286,7 +288,7 @@ const AddClinic = () => {
   return (
     <div className="d-flex"
       style={{
-        backgroundColor: "#D7EAF0",
+        // backgroundColor: "#D7EAF0",
         // height: "calc(100vh - 56px)"
       }}
     >
@@ -298,12 +300,25 @@ const AddClinic = () => {
             />
       <div
         className="container mt-5"
-        style={{
-          backgroundColor: "white",
-          borderRadius: "8px",
-          padding: "20px",
-        }}
+        // style={{
+        //   backgroundColor: "white",
+        //   borderRadius: "8px",
+        //   padding: "20px",
+        // }}
       >
+
+<span
+          className="px-3 py-2"
+          onClick={() => history.push("/doctor/manageclinic")}
+          style={{
+            cursor: "pointer",
+            backgroundColor: "#57B4BA",
+            color: "white",
+            borderRadius: "10px",
+          }}
+        >
+          Back
+        </span>
         <h2 style={{ color: "#0174BE" }} className="mb-5 text-center">
           Add Clinic
         </h2>

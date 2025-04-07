@@ -753,9 +753,9 @@
 //           className={`collapse navbar-collapse ${navbarOpen ? "show" : ""}`}
 //           id="navbarNav"
 //         >
-//           <ul className="navbar-nav mr-auto d-none d-lg-flex">
-//             {userType === "doctor" && (
-//               <>
+// <ul className="navbar-nav mr-auto d-none d-lg-flex">
+//   {userType === "doctor" && (
+//     <>
 //                 <li className="nav-item mr-3 font-weight-bold">
 //                   <Link
 //                     className="nav-link"
@@ -870,9 +870,9 @@
 //                     </Link>
 //                   </div>
 //                 </li>
-//               </>
-//             )}
-//           </ul>
+//     </>
+//   )}
+// </ul>
 
 //           <ul className="navbar-nav mr-auto d-none d-lg-flex">
 //             {userType === "clinic" && (
@@ -2150,8 +2150,14 @@ const DoctorNavbar = () => {
   }, []);
 
   return (
-    <nav className="navbar navbar-expand-lg sticky-top" style={{backgroundColor: "#FFF", boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)"}}>
-      <div className="container-fluid" >
+    <nav
+      className="navbar navbar-expand-lg sticky-top"
+      style={{
+        backgroundColor: "#FFF",
+        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+      }}
+    >
+      <div className="container-fluid">
         <button
           className="navbar-toggler"
           type="button"
@@ -2168,26 +2174,35 @@ const DoctorNavbar = () => {
           className={`collapse navbar-collapse ${navbarOpen ? "show" : ""}`}
           id="navbarNav"
         >
-            {clinicName && clinicPhoto && (
-              <header className="d-flex  flex-md-row align-items-center text-md-start">
-                <Col xs={12} md="auto">
-                  <img
-                    src={clinicPhoto}
-                    style={{
-                      height: "4rem",
-                      width: "4rem",
-                      borderRadius: "50%"
-                    }}
-                    alt="Clinic Logo"
-                  />
-                </Col>
-                <Col xs={12} md="auto" className="flex-grow-1">
-                  <h3 className="text-center" style={{ color: "#0F518F", fontWeight: "bold" }}>
-                    {clinicName}
-                  </h3>
-                </Col>
-              </header>
+          <ul className="navbar-nav mr-auto d-none d-lg-flex">
+            {userType === "doctor" && (
+              <>
+                {clinicName && clinicPhoto && (
+                  <header className="d-flex  flex-md-row align-items-center text-md-start">
+                    <Col xs={12} md="auto">
+                      <img
+                        src={clinicPhoto}
+                        style={{
+                          height: "4rem",
+                          width: "4rem",
+                          borderRadius: "50%",
+                        }}
+                        alt="Clinic Logo"
+                      />
+                    </Col>
+                    <Col xs={12} md="auto" className="flex-grow-1">
+                      <h3
+                        className="text-center"
+                        style={{ color: "#0F518F", fontWeight: "bold" }}
+                      >
+                        {clinicName}
+                      </h3>
+                    </Col>
+                  </header>
+                )}
+              </>
             )}
+          </ul>
 
           <ul className="navbar-nav mr-auto d-none d-lg-flex">
             {userType === "clinic" && (
@@ -2326,9 +2341,17 @@ const DoctorNavbar = () => {
             <li className="nav-item" ref={profileDropdownRef}>
               <div className="d-flex align-items-center">
                 <span>
-                  <IoNotifications style={{height: "2rem", width: "2rem", marginRight: "1rem", cursor: "pointer", color: "black"}}/>
+                  <IoNotifications
+                    style={{
+                      height: "2rem",
+                      width: "2rem",
+                      marginRight: "1rem",
+                      cursor: "pointer",
+                      color: "black",
+                    }}
+                  />
                 </span>
-                <span onClick={toggleProfileDropdown} >
+                <span onClick={toggleProfileDropdown}>
                   <ProfileIcon />
                 </span>
               </div>

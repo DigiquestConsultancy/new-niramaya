@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useHistory } from "react-router-dom";
 import BaseUrl from "../../api/BaseUrl";
 import { jwtDecode } from "jwt-decode";
 import { Modal, Button, Form } from "react-bootstrap";
@@ -20,11 +21,11 @@ const LoaderWrapper = styled.div`
   left: 0;
   z-index: 9999;
 `;
- 
+
 const LoaderImage = styled.div`
   width: 400px;
 `;
- 
+
 const ProfilePicCircle = styled.div`
   width: 150px;
   height: 150px;
@@ -39,7 +40,7 @@ const ProfilePicCircle = styled.div`
   margin-bottom: 10px;
   position: relative;
 `;
- 
+
 const ProfilePicPreview = styled.img`
   width: 150px;
   height: 150px;
@@ -47,8 +48,9 @@ const ProfilePicPreview = styled.img`
   object-fit: cover;
   margin-left: 20px;
 `;
- 
+
 const AddReception = () => {
+  const history = useHistory();
   const [mobileNumber, setMobileNumber] = useState("");
   const [verificationStatus, setVerificationStatus] = useState("");
   const [otp, setOtp] = useState(new Array(6).fill(""));
@@ -74,8 +76,8 @@ const AddReception = () => {
   });
   const [errors, setErrors] = useState({});
   const [doctorId, setDoctorId] = useState("");
- 
-  const [selectedMenu, setSelectedMenu] = useState("Dashboard");
+
+  const [selectedMenu, setSelectedMenu] = useState("Add Reception");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const handleMenuClick = (menu) => {
@@ -93,7 +95,7 @@ const AddReception = () => {
       }
     }
   }, []);
- 
+
   const handleVerify = async () => {
     setLoading(true);
     setMessage(""); // Clear any previous message
@@ -101,7 +103,7 @@ const AddReception = () => {
       const response = await BaseUrl.get(
         `/reception/register/?mobile_number=${mobileNumber}`
       );
- 
+
       if (response.status === 200) {
         setVerificationStatus(response.data.success);
         setMessage(response.data.success);
@@ -120,19 +122,19 @@ const AddReception = () => {
       setLoading(false);
     }
   };
- 
+
   const handleOtpChange = (index, value) => {
     if (!/^\d*$/.test(value)) return;
- 
+
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
- 
+
     if (value.length === 1 && index < 5) {
       inputRefs.current[index + 1].focus();
     }
   };
- 
+
   const handleVerifyOtp = async () => {
     setLoading(true);
     try {
@@ -163,7 +165,7 @@ const AddReception = () => {
       setLoading(false);
     }
   };
- 
+
   const handleProfilePicChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -175,7 +177,7 @@ const AddReception = () => {
       reader.readAsDataURL(file);
     }
   };
- 
+
   const handleResendOtp = async () => {
     try {
       const response = await BaseUrl.get(
@@ -185,20 +187,18 @@ const AddReception = () => {
         setMessage(response.data.success);
         setMessageType("success");
         setOtp(new Array(6).fill(""));
-        inputRefs.current[0].focus();
-        setShowMessageModal(true);
+        inputRefs.current[0]?.focus();
       }
     } catch (error) {
       setMessage(error.response?.data?.error || "OTP resend failed");
       setMessageType("error");
-      // setShowMessageModal(true);
     }
   };
- 
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let newValue = value;
- 
+
     if (name === "name") {
       newValue = value.replace(/[^a-zA-Z\s.]/g, "");
     } else if (name === "qualification" || name === "specialization") {
@@ -206,9 +206,9 @@ const AddReception = () => {
     } else if (name === "age") {
       newValue = value.replace(/[^0-9]/g, "");
     }
- 
+
     setFormData({ ...formData, [name]: newValue });
- 
+
     let newErrors = { ...errors };
     switch (name) {
       case "name":
@@ -259,25 +259,25 @@ const AddReception = () => {
       default:
         break;
     }
- 
+
     setErrors(newErrors);
   };
- 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const formErrors = validateForm(); 
+    const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
-      setLoading(false); 
+      setLoading(false);
       return;
     }
- 
+
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
       data.append(key, formData[key]);
     });
- 
+
     try {
       const response = await BaseUrl.post("/reception/details/", data, {
         headers: {
@@ -299,37 +299,44 @@ const AddReception = () => {
       setShowMessageModal(true);
     }
   };
- 
+
   const validateForm = () => {
     let formErrors = {};
     if (!formData.name) formErrors.name = "Name is required";
     if (!formData.gender) formErrors.gender = "Gender is required";
     if (!formData.qualification)
       formErrors.qualification = "Qualification is required";
-    if (!formData.address) formErrors.address = "Address is required"; 
+    if (!formData.address) formErrors.address = "Address is required";
     if (!formData.age) formErrors.age = "Age is required";
     return formErrors;
   };
   return (
-    <div className="d-flex"
-      style={{
-        backgroundColor: "#D7EAF0",
-      }}
+    <div
+      className="d-flex"
+      // style={{
+      //   backgroundColor: "#D7EAF0",
+      // }}
     >
-       <Sidebar
-              selectedMenu={selectedMenu}
-              handleMenuClick={handleMenuClick}
-              isSidebarCollapsed={isSidebarCollapsed}
-              setIsSidebarCollapsed={setIsSidebarCollapsed}
-            />
-      <div
-        className="container mt-5"
-        style={{
-          backgroundColor: "white",
-          borderRadius: "8px",
-          padding: "20px",
-        }}
-      >
+      <Sidebar
+        selectedMenu={selectedMenu}
+        handleMenuClick={handleMenuClick}
+        isSidebarCollapsed={isSidebarCollapsed}
+        setIsSidebarCollapsed={setIsSidebarCollapsed}
+      />
+      <div className="container mt-5">
+        <span
+          className="px-3 py-2"
+          onClick={() => history.push("/doctor/managereception")}
+          style={{
+            cursor: "pointer",
+            backgroundColor: "#57B4BA",
+            color: "white",
+            borderRadius: "10px",
+          }}
+        >
+          Back
+        </span>
+
         <h2 style={{ color: "#0174BE" }} className="mb-5 text-center">
           Add Reception
         </h2>
@@ -346,20 +353,20 @@ const AddReception = () => {
             </LoaderImage>
           </LoaderWrapper>
         )}
- 
+
         {!showDetailsForm && (
           <div className="form-group row">
             <label htmlFor="mobileNumber" className="col-sm-2 col-form-label">
               Mobile Number:
             </label>
             <div className="col-sm-8">
-            <PhoneInput
+              <PhoneInput
                 id="mobile_number"
                 name="mobile_number"
                 placeholder="Enter mobile number"
-                defaultCountry="IN" 
+                defaultCountry="IN"
                 value={mobileNumber}
-                onChange={setMobileNumber} 
+                onChange={setMobileNumber}
                 required
               />
             </div>
@@ -374,7 +381,7 @@ const AddReception = () => {
             </div>
           </div>
         )}
- 
+
         {showDetailsForm && (
           <Form
             onSubmit={handleSubmit}
@@ -520,7 +527,7 @@ const AddReception = () => {
             </Button>
           </Form>
         )}
- 
+
         <Modal
           show={showOtpModal}
           onHide={() => setShowOtpModal(false)}
@@ -575,7 +582,7 @@ const AddReception = () => {
             </div>
           </Modal.Body>
         </Modal>
- 
+
         <Modal
           show={showMessageModal}
           onHide={() => setShowMessageModal(false)}
@@ -608,5 +615,5 @@ const AddReception = () => {
     </div>
   );
 };
- 
+
 export default AddReception;
