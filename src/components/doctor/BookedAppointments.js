@@ -4269,7 +4269,7 @@ const DoctorBookedAppointment = () => {
                                                           }}
                                                         >
                                                           {/* Uncomment if needed */}
-                                                          {/* {new Intl.DateTimeFormat("en-GB").format(new Date(report.received_at))} */}
+                                                          {new Intl.DateTimeFormat("en-GB").format(new Date(report.received_at))}
                                                         </div>
 
                                                         {/* Delete Button */}

@@ -6715,11 +6715,13 @@ const DoctorHome = () => {
         const reports = response.data?.webhook_data || [];
         setWhatsappReport(reports);
       } else {
+        setWhatsappReport([]);
         setErrorMessage(
           response.data?.error || "Failed to fetch medical record."
         );
       }
     } catch (error) {
+      setWhatsappReport([]);
       setErrorMessage(error.response?.data?.error || "An error occurred.");
     } finally {
       setLoading(false);
@@ -6743,6 +6745,7 @@ const DoctorHome = () => {
       );
 
       if (response.status === 200 || response.status === 400) {
+        setWhatsappReport([]);
         handleRecordView();
         setWhatsappReport((prevReports) =>
           prevReports.filter(
@@ -6752,6 +6755,7 @@ const DoctorHome = () => {
       }
     } catch (error) {
       alert("Failed to delete record");
+      setWhatsappReport([]);
     } finally {
       setLoading(false);
     }
@@ -7139,7 +7143,7 @@ const DoctorHome = () => {
                       }}
                     >
                       {/* Uncomment if needed */}
-                      {/* {new Intl.DateTimeFormat("en-GB").format(new Date(report.received_at))} */}
+                      {new Intl.DateTimeFormat("en-GB").format(new Date(report.received_at))}
                     </div>
 
                     {/* Delete Button */}
@@ -8064,8 +8068,8 @@ const DoctorHome = () => {
 
   return (
     <div
-      className="d-flex doctor-container"
-      style={{ height: "calc(100vh - 60px)" }}
+      className="d-flex"
+      style={{ height: "calc(100vh - 4rem)" }}
     >
       <Sidebar
         selectedMenu={selectedMenu}
@@ -8073,7 +8077,7 @@ const DoctorHome = () => {
         isSidebarCollapsed={isSidebarCollapsed}
         setIsSidebarCollapsed={setIsSidebarCollapsed}
       />
-      <main className="flex-1 p-4 overflow-y-auto">
+      <main className="flex-1 p-4 ">
         <div className="d-flex justify-content-center align-items-center">
           <button
             className="btn btn-outline-primary me-3"
@@ -8972,140 +8976,152 @@ const DoctorHome = () => {
           </Modal.Footer>
         </Modal>
 
-        <Modal
-          show={!!selectedFile}
-          onHide={() => setSelectedFile(null)}
-          centered
-          size="lg"
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>
-              {selectedFile?.type === "image" && "Image Preview"}
-              {selectedFile?.type === "video" && "Video Preview"}
-              {selectedFile?.type === "pdf" && "PDF Preview"}
-            </Modal.Title>
-          </Modal.Header>
-
-          <Modal.Body
+          <Modal
+                  show={!!selectedFile}
+                  onHide={() => setSelectedFile(null)}
+                  centered
+                  size="lg"
+                >
+                  <Modal.Header closeButton>
+                    <Modal.Title>
+                      {selectedFile?.type === "image" && "Image Preview"}
+                      {selectedFile?.type === "video" && "Video Preview"}
+                      {selectedFile?.type === "pdf" && "PDF Preview"}
+                    </Modal.Title>
+                  </Modal.Header>
+        
+                  <Modal.Body
+                    style={{
+                      padding: 0,
+                      height: selectedFile?.type === "image" ? "80vh" : "auto",
+                      width: selectedFile?.type === "image" ? "100%" : "auto", 
+                      overflow: "hidden", 
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center", 
+                    }}
+                  >
+                   {selectedFile?.type === "image" && (
+          <div
             style={{
-              padding: 0,
-              height: selectedFile?.type === "image" ? "400px" : "auto", // Fixed height for images
-              width: selectedFile?.type === "image" ? "100%" : "auto", // Fixed width for images
-              overflow: "hidden", // Prevent overflow if the image is too large
+              position: "relative",
+              width: "100%",
+              height: "100%",
               display: "flex",
-              justifyContent: "center", // Center image horizontally
-              alignItems: "center", // Center image vertically
+              justifyContent: "center",
+              alignItems: "center",
+              overflow: zoom > 1 ? "auto" : "hidden",
+              cursor: zoom > 1 ? "zoom-out" : "zoom-in",
+            }}
+            onWheel={(e) => {
+              e.preventDefault();
+              if (e.deltaY < 0) {
+                setZoom((z) => Math.min(z + 0.1, 5)); // zoom in
+              } else {
+                setZoom((z) => Math.max(0.1, z - 0.1)); // zoom out
+              }
             }}
           >
-            {selectedFile?.type === "image" && (
-              <div
-                style={{
-                  position: "relative",
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  overflow: zoom > 1 ? "auto" : "hidden", // Show scrollbar if zoom is applied (image overflows)
-                }}
-              >
-                <img
-                  src={selectedFile.url}
-                  alt="Preview"
-                  style={{
-                    maxWidth: "none", // Allow image to exceed container width
-                    maxHeight: "none", // Allow image to exceed container height
-                    objectFit: "contain",
-                    borderRadius: "5px",
-                    transform: `rotate(${rotation}deg) scale(${zoom})`,
-                    transition: "transform 0.3s ease",
-                  }}
-                />
-              </div>
-            )}
-
-            {selectedFile?.type === "video" && (
-              <video
-                src={selectedFile.url}
-                controls
-                autoPlay
-                style={{
-                  width: "100%",
-                  borderRadius: "5px",
-                }}
-              />
-            )}
-
-            {selectedFile?.type === "pdf" && (
-              <iframe
-                src={selectedFile.url}
-                title="PDF"
-                style={{
-                  width: "100%",
-                  height: "600px",
-                  border: "none",
-                }}
-              />
-            )}
-          </Modal.Body>
-
-          {selectedFile?.type === "image" && (
-            <Modal.Footer className="d-flex justify-content-between align-items-center">
-              <div>
-                <Button
-                  variant="outline"
-                  className="me-2 border bg-black text-white"
-                  onClick={() => setZoom((z) => z + 0.1)}
-                >
-                  <LuZoomIn />
-                </Button>
-                <Button
-                  variant="outline"
-                  className="me-2 border bg-black text-white"
-                  onClick={() => setZoom((z) => Math.max(0.1, z - 0.1))}
-                >
-                  <LuZoomOut />
-                </Button>
-                <Button
-                  variant="primary"
-                  className="me-2"
-                  onClick={() => setRotation((r) => r + 90)}
-                >
-                  <FaArrowRotateRight />
-                </Button>
-                <Button variant="success" onClick={handleDownload}>
-                  <IoMdDownload />
-                </Button>
-              </div>
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setSelectedFile(null);
-                  setZoom(1);
-                  setRotation(0);
-                }}
-              >
-                Close
-              </Button>
-            </Modal.Footer>
-          )}
-
-          {selectedFile?.type === "pdf" && (
-            <Modal.Footer className="d-flex justify-content-between">
-              <Button variant="secondary" onClick={() => setSelectedFile(null)}>
-                Close
-              </Button>
-            </Modal.Footer>
-          )}
-          {/* 
-              {selectedFile?.type !== "pdf" && (
-                <Modal.Footer>
-                  <Button variant="secondary" onClick={() => setSelectedFile(null)}>
-                    Close
-                  </Button>
-                </Modal.Footer>
-              )} */}
-        </Modal>
+            <img
+              src={selectedFile.url}
+              alt="Preview"
+              style={{
+                maxWidth: "100%",
+                maxHeight: "100%",
+                objectFit: "cover",
+                borderRadius: "5px",
+                transform: `rotate(${rotation}deg) scale(${zoom})`,
+                transition: "transform 0.3s ease",
+              }}
+            />
+          </div>
+        )}
+        
+        
+                    {selectedFile?.type === "video" && (
+                      <video
+                        src={selectedFile.url}
+                        controls
+                        autoPlay
+                        style={{
+                          height: selectedFile?.type === "video" ? "80vh" : "auto",
+                          width: selectedFile?.type === "video" ? "100%" : "auto", 
+                          // width: "100%",
+                          borderRadius: "5px",
+                        }}
+                      />
+                    )}
+        
+                    {selectedFile?.type === "pdf" && (
+                      <iframe
+                        src={selectedFile.url}
+                        title="PDF"
+                        style={{
+                          width: "100%",
+                          height: "600px",
+                          border: "none",
+                        }}
+                      />
+                    )}
+                  </Modal.Body>
+        
+                  {selectedFile?.type === "image" && (
+                    <Modal.Footer className="d-flex justify-content-between align-items-center">
+                      <div>
+                        {/* <Button
+                          variant="outline"
+                          className="me-2 border bg-black text-white"
+                          onClick={() => setZoom((z) => z + 0.1)}
+                        >
+                          <LuZoomIn />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="me-2 border bg-black text-white"
+                          onClick={() => setZoom((z) => Math.max(0.1, z - 0.1))}
+                        >
+                          <LuZoomOut />
+                        </Button> */}
+                        <Button
+                          variant="primary"
+                          className="me-2"
+                          onClick={() => setRotation((r) => r + 90)}
+                        >
+                          <FaArrowRotateRight />
+                        </Button>
+                        <Button variant="success" onClick={handleDownload}>
+                          <IoMdDownload />
+                        </Button>
+                      </div>
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          setSelectedFile(null);
+                          setZoom(1);
+                          setRotation(0);
+                        }}
+                      >
+                        Close
+                      </Button>
+                    </Modal.Footer>
+                  )}
+        
+                  {selectedFile?.type === "pdf" && (
+                    <Modal.Footer className="d-flex justify-content-between">
+                      <Button variant="secondary" onClick={() => setSelectedFile(null)}>
+                        Close
+                      </Button>
+                    </Modal.Footer>
+                  )}
+                  {/* 
+                  {selectedFile?.type !== "pdf" && (
+                    <Modal.Footer>
+                      <Button variant="secondary" onClick={() => setSelectedFile(null)}>
+                        Close
+                      </Button>
+                    </Modal.Footer>
+                  )} */}
+                </Modal>
       </main>
     </div>
   );

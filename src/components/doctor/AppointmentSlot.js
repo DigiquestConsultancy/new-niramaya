@@ -725,6 +725,17 @@
 
 // export default AppointmentSlot;
 
+
+
+
+
+
+
+
+
+
+
+
 import React, { useState, useEffect } from "react";
 import BaseUrl from "../../api/BaseUrl";
 import { jwtDecode } from "jwt-decode";
@@ -1384,7 +1395,8 @@ const AppointmentSlot = () => {
                               color: "#fff",
                             }}
                           >
-                            Doctor: {slot.booked_by || "N/A"}
+                            Doctor:{" "}
+                            {slot.is_booked ? slot.doctor || "N/A" : "N/A"}
                           </div>
                         </div>
                       </div>

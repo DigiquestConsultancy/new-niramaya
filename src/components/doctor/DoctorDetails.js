@@ -2600,35 +2600,54 @@ const [addressErrorMessage, setAddressErrorMessage] = useState("");
     }, 10000);
   };
 
-  const updateQualifications = async (doctor_id) => {
-    setSuccessMessage("");
-    setErrorMessage("");
+  const handleAddQualification = () => {
+    const qualificationValue = newQualification.trim();
+    if (!qualificationValue) return;
+
+    // If the qualification is manually entered, create a dynamic ID
+    const id = isNaN(qualificationValue) ? generateDynamicId() : parseInt(qualificationValue, 10);
+    
+    // Add new qualification (either selected or manually entered)
+    setFormData((prev) => ({
+      ...prev,
+      qualification: [...prev.qualification, id],
+    }));
+
+    // Reset the input
+    setNewQualification("");
+  };
+
+  
+  const updateQualifications = async (e) => {
+    e.preventDefault();
     try {
-      setLoading(true);
-      const qualificationsToUpdate = qualifications.map((qual) => ({
-        id: qual.value,
-        is_selected: formData.qualification.includes(qual.value),
+      const qualificationsToUpdate = formData.qualification.map((qual) => ({
+        id: qual, // Directly use the ID for each qualification
+        is_selected: true, // Assuming the qualification is selected
       }));
 
-      const response = await BaseUrl.put(`/doctor/qualifications/`, {
-        doctor_id: doctor_id,
-        qualifications: qualificationsToUpdate,
+      // Send updated qualifications to the server
+      const response = await fetch("/doctor/qualifications/", {
+        method: "PUT",
+        body: JSON.stringify({
+          qualifications: qualificationsToUpdate,
+        }),
       });
 
-      if (response.status === 200) {
-        setSuccessMessage("");
-        setErrorMessage("");
-        fetchQualifications();
+      if (response.ok) {
+        alert("Qualifications updated successfully!");
+      } else {
+        setErrorMessage("Failed to update qualifications.");
       }
     } catch (error) {
-      setErrorMessage(
-        error.response?.data?.error || "Error updating qualifications."
-      );
-      setSuccessMessage("");
-    } finally {
-      setLoading(false);
+      setErrorMessage("Error updating qualifications.");
     }
   };
+  
+  // Example of a dynamic ID generator function
+  const generateDynamicId = () => Date.now();
+  const [newQualification, setNewQualification] = useState("");
+  
 
   // const updateQualifications = async (doctor_id) => {
   //   try {
@@ -3078,7 +3097,7 @@ const [addressErrorMessage, setAddressErrorMessage] = useState("");
           <label>Qualification</label>
           <span className="text-danger">*</span>
 
-          <Select
+          {/* <Select
             isMulti
             closeMenuOnSelect={false}
             hideSelectedOptions={false}
@@ -3089,9 +3108,9 @@ const [addressErrorMessage, setAddressErrorMessage] = useState("");
             )}
             onChange={handleQualificationChange}
             className={formErrors.qualification ? "is-invalid" : ""}
-          />
+          /> */}
 
-          {/* <CreatableSelect
+          <CreatableSelect
   isMulti
   closeMenuOnSelect={false}
   hideSelectedOptions={false}
@@ -3131,7 +3150,7 @@ const [addressErrorMessage, setAddressErrorMessage] = useState("");
     }
   }}
   className={formErrors.qualification ? "is-invalid" : ""}
-/> */}
+/>
 
           {formErrors.qualification && (
             <p className="text-danger">{formErrors.qualification}</p>
