@@ -102,14 +102,14 @@ function ManageTemplates() {
   };
 
   return (
-    <div className="d-flex" style={{ backgroundColor: "#D9EAFD" }}>
+    <div className="d-flex" style={{  height: "calc(100vh - 4rem)", overflowY: "hidden" }}>
       <Sidebar
         selectedMenu={selectedMenu}
         handleMenuClick={handleMenuClick}
         isSidebarCollapsed={isSidebarCollapsed}
         setIsSidebarCollapsed={setIsSidebarCollapsed}
       />
-      <main className="pt-3">
+      <main className="pt-4 overflow-y-auto flex-1">
         <h2 className="text-center">Please upload your template</h2>
         <p className="text-center text-danger font-weight-bold">
           (*Please upload Header and Footer of Height = 450px and Width =

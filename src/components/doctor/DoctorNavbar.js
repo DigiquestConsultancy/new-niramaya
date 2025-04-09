@@ -2183,8 +2183,8 @@ const DoctorNavbar = () => {
                       <img
                         src={clinicPhoto}
                         style={{
-                          height: "4rem",
-                          width: "4rem",
+                          height: "3rem",
+                          width: "3rem",
                           borderRadius: "50%",
                         }}
                         alt="Clinic Logo"

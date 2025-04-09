@@ -568,7 +568,7 @@ const ManageReception = () => {
   const totalPages = Math.ceil(receptionDetails.length / itemsPerPage);
 
   return (
-    <div className="d-flex">
+    <div className="d-flex" style={{ height: "calc(100vh - 4rem)", overflowY: "hidden"}}>
       <Sidebar
         selectedMenu={selectedMenu}
         handleMenuClick={handleMenuClick}
@@ -588,7 +588,7 @@ const ManageReception = () => {
         </LoaderWrapper>
       )}
 
-      <Container>
+      <Container className="overflow-y-auto">
         <div className="d-flex justify-content-between align-items-center flex-wrap">
         <h1
             style={{

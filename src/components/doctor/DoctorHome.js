@@ -8069,7 +8069,7 @@ const DoctorHome = () => {
   return (
     <div
       className="d-flex"
-      style={{ height: "calc(100vh - 4rem)" }}
+      style={{ height: "calc(100vh - 4rem)", overflowY: "hidden" }}
     >
       <Sidebar
         selectedMenu={selectedMenu}
@@ -8077,7 +8077,7 @@ const DoctorHome = () => {
         isSidebarCollapsed={isSidebarCollapsed}
         setIsSidebarCollapsed={setIsSidebarCollapsed}
       />
-      <main className="flex-1 p-4 ">
+      <main className="flex-1 p-4 overflow-y-auto">
         <div className="d-flex justify-content-center align-items-center">
           <button
             className="btn btn-outline-primary me-3"

@@ -313,9 +313,9 @@ const AddReception = () => {
   return (
     <div
       className="d-flex"
-      // style={{
-      //   backgroundColor: "#D7EAF0",
-      // }}
+      style={{
+         height: "calc(100vh - 4rem)", overflowY: "hidden"
+      }}
     >
       <Sidebar
         selectedMenu={selectedMenu}

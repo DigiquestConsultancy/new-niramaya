@@ -221,14 +221,14 @@ const ManageClinic = () => {
   };
 
   return (
-    <div className="d-flex">
+    <div className="d-flex" style={{ height: "calc(100vh - 4rem)", overflowY: "hidden"}}>
       <Sidebar
         selectedMenu={selectedMenu}
         handleMenuClick={handleMenuClick}
         isSidebarCollapsed={isSidebarCollapsed}
         setIsSidebarCollapsed={setIsSidebarCollapsed}
       />
-      <main className="p-4">
+      <main className="p-4 flex-1 overflow-y-auto">
         {loading && (
           <LoaderWrapper>
             <Loader>

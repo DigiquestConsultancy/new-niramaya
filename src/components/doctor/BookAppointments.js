@@ -1285,7 +1285,7 @@ const BookAppointment = () => {
   };
 
   return (
-    <div className="d-flex" style={{height: "calc(100vh - 80px)"}}>
+    <div className="d-flex" style={{height: "calc(100vh - 4rem)", overflowY: "hidden"}}>
        <Sidebar
               selectedMenu={selectedMenu}
               handleMenuClick={handleMenuClick}

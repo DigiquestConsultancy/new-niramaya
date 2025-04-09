@@ -696,35 +696,35 @@
 //     }, 10000);
 //   };
 
-//   const updateQualifications = async (doctor_id) => {
-//     setSuccessMessage("");
-//     setErrorMessage("");
-//     try {
-//       setLoading(true);
-//       const qualificationsToUpdate = qualifications.map((qual) => ({
-//         id: qual.value,
-//         is_selected: formData.qualification.includes(qual.value),
-//       }));
+  // const updateQualifications = async (doctor_id) => {
+  //   setSuccessMessage("");
+  //   setErrorMessage("");
+  //   try {
+  //     setLoading(true);
+  //     const qualificationsToUpdate = qualifications.map((qual) => ({
+  //       id: qual.value,
+  //       is_selected: formData.qualification.includes(qual.value),
+  //     }));
 
-//       const response = await BaseUrl.put(`/doctor/qualifications/`, {
-//         doctor_id: doctor_id,
-//         qualifications: qualificationsToUpdate,
-//       });
+  //     const response = await BaseUrl.put(`/doctor/qualifications/`, {
+  //       doctor_id: doctor_id,
+  //       qualifications: qualificationsToUpdate,
+  //     });
 
-//       if (response.status === 200) {
-//         setSuccessMessage("");
-//         setErrorMessage("");
-//         fetchQualifications();
-//       }
-//     } catch (error) {
-//       setErrorMessage(
-//         error.response?.data?.error || "Error updating qualifications."
-//       );
-//       setSuccessMessage("");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+  //     if (response.status === 200) {
+  //       setSuccessMessage("");
+  //       setErrorMessage("");
+  //       fetchQualifications();
+  //     }
+  //   } catch (error) {
+  //     setErrorMessage(
+  //       error.response?.data?.error || "Error updating qualifications."
+  //     );
+  //     setSuccessMessage("");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 //   const handleAddressSubmit = async (e) => {
 //     setLoadingAddress(true);
 //     setSuccessMessage("");
@@ -2618,31 +2618,31 @@ const [addressErrorMessage, setAddressErrorMessage] = useState("");
   };
 
   
-  const updateQualifications = async (e) => {
-    e.preventDefault();
-    try {
-      const qualificationsToUpdate = formData.qualification.map((qual) => ({
-        id: qual, // Directly use the ID for each qualification
-        is_selected: true, // Assuming the qualification is selected
-      }));
+  // const updateQualifications = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const qualificationsToUpdate = formData.qualification.map((qual) => ({
+  //       id: qual, // Directly use the ID for each qualification
+  //       is_selected: true, // Assuming the qualification is selected
+  //     }));
 
-      // Send updated qualifications to the server
-      const response = await fetch("/doctor/qualifications/", {
-        method: "PUT",
-        body: JSON.stringify({
-          qualifications: qualificationsToUpdate,
-        }),
-      });
+  //     // Send updated qualifications to the server
+  //     const response = await fetch("/doctor/qualifications/", {
+  //       method: "PUT",
+  //       body: JSON.stringify({
+  //         qualifications: qualificationsToUpdate,
+  //       }),
+  //     });
 
-      if (response.ok) {
-        alert("Qualifications updated successfully!");
-      } else {
-        setErrorMessage("Failed to update qualifications.");
-      }
-    } catch (error) {
-      setErrorMessage("Error updating qualifications.");
-    }
-  };
+  //     if (response.ok) {
+  //       alert("Qualifications updated successfully!");
+  //     } else {
+  //       setErrorMessage("Failed to update qualifications.");
+  //     }
+  //   } catch (error) {
+  //     setErrorMessage("Error updating qualifications.");
+  //   }
+  // };
   
   // Example of a dynamic ID generator function
   const generateDynamicId = () => Date.now();
@@ -2693,6 +2693,37 @@ const [addressErrorMessage, setAddressErrorMessage] = useState("");
   //     setLoading(false);
   //   }
   // };
+
+
+  const updateQualifications = async (doctor_id) => {
+    setSuccessMessage("");
+    setErrorMessage("");
+    try {
+      setLoading(true);
+      const qualificationsToUpdate = qualifications.map((qual) => ({
+        id: qual.value,
+        is_selected: formData.qualification.includes(qual.value),
+      }));
+
+      const response = await BaseUrl.put(`/doctor/qualifications/`, {
+        doctor_id: doctor_id,
+        qualifications: qualificationsToUpdate,
+      });
+
+      if (response.status === 200) {
+        setSuccessMessage("");
+        setErrorMessage("");
+        fetchQualifications();
+      }
+    } catch (error) {
+      setErrorMessage(
+        error.response?.data?.error || "Error updating qualifications."
+      );
+      setSuccessMessage("");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddressSubmit = async (e) => {
     setLoadingAddress(true);
@@ -3097,7 +3128,7 @@ const [addressErrorMessage, setAddressErrorMessage] = useState("");
           <label>Qualification</label>
           <span className="text-danger">*</span>
 
-          {/* <Select
+          <Select
             isMulti
             closeMenuOnSelect={false}
             hideSelectedOptions={false}
@@ -3108,9 +3139,9 @@ const [addressErrorMessage, setAddressErrorMessage] = useState("");
             )}
             onChange={handleQualificationChange}
             className={formErrors.qualification ? "is-invalid" : ""}
-          /> */}
+          />
 
-          <CreatableSelect
+          {/* <CreatableSelect
   isMulti
   closeMenuOnSelect={false}
   hideSelectedOptions={false}
@@ -3150,7 +3181,7 @@ const [addressErrorMessage, setAddressErrorMessage] = useState("");
     }
   }}
   className={formErrors.qualification ? "is-invalid" : ""}
-/>
+/> */}
 
           {formErrors.qualification && (
             <p className="text-danger">{formErrors.qualification}</p>
@@ -3906,9 +3937,10 @@ const [addressErrorMessage, setAddressErrorMessage] = useState("");
     <div
       className="d-flex"
       style={{
-        backgroundColor: "#D7EAF0",
-        fontFamily: "sans-serif",
-        height: "calc(100vh - 80px)",
+        // backgroundColor: "#D7EAF0",
+        // fontFamily: "sans-serif",
+        height: "calc(100vh - 4rem)",
+        overflowY: "hidden"
       }}
     >
       <Sidebar
@@ -3931,8 +3963,8 @@ const [addressErrorMessage, setAddressErrorMessage] = useState("");
         </LoaderWrapper>
       )}
       <div
-        className="container mt-5 overflow-y-auto"
-        style={{ backgroundColor: "#D7EAF0", fontFamily: "sans-serif" }}
+        className="container mt-4 overflow-y-auto"
+        style={{  fontFamily: "sans-serif" }}
       >
         <TabWrapper style={{ marginBottom: "0", paddingBottom: "0" }}>
           <Tab
@@ -3973,6 +4005,18 @@ const [addressErrorMessage, setAddressErrorMessage] = useState("");
 };
 
 export default DoctorDetails;
+
+
+
+
+
+
+
+
+
+
+
+
 
 // import React, { useState, useEffect } from "react";
 // import BaseUrl from "../../api/BaseUrl";

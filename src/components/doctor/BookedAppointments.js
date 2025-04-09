@@ -1710,10 +1710,11 @@ const DoctorBookedAppointment = () => {
       className="d-flex"
       fluid
       style={{
-        backgroundColor: "#F2F9FF",
+        // backgroundColor: "#F2F9FF",
         margin: "0px",
         padding: "0px",
-        height: "calc(100vh - 80px)",
+        height: "calc(100vh - 4rem)",
+        overflowY: "hidden"
       }}
     >
       <Sidebar
@@ -1722,7 +1723,7 @@ const DoctorBookedAppointment = () => {
         isSidebarCollapsed={isSidebarCollapsed}
         setIsSidebarCollapsed={setIsSidebarCollapsed}
       />
-      <main className="overflow-y-auto">
+      <main className="flex-1 overflow-y-auto">
         {errorMessage && (
           <div className="alert alert-danger" role="alert">
             {errorMessage}
