@@ -1,3 +1,5 @@
+
+
 // import React, { useEffect, useState, useCallback } from "react";
 // import {
 //   Table,
@@ -16,6 +18,7 @@
 // import styled from "styled-components";
 // import Loader from "react-js-loader";
 // import _ from "lodash";
+// import Sidebar from "./Sidebar";
 
 // const LoaderWrapper = styled.div`
 //   display: flex;
@@ -49,6 +52,13 @@
 //   const rowsPerPage = 15;
 //   const [loading, setLoading] = useState(false);
 //   const [searchQuery, setSearchQuery] = useState("");
+
+//   const [selectedMenu, setSelectedMenu] = useState("Dashboard");
+//   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+//   const handleMenuClick = (menu) => {
+//     setSelectedMenu(menu);
+//   };
 
 //   useEffect(() => {
 //     const token = localStorage.getItem("token");
@@ -189,21 +199,23 @@
 
 //   const totalPages = Math.ceil(payments.length / rowsPerPage);
 
-//   const isValidPhoneNumber = (query) => {
-//     return /^\d{10}$/.test(query); // Adjust to phone format if needed
+//   const handleSearchChange = (e) => {
+//     setSearch(e.target.value);
 //   };
 
-//   // Fetch payments based on search criteria
-//   const fetchSearch = async ({ customerPhone = "", transaction = "" } = {}) => {
+//   const [searchParams, setSearchParams] = useState({
+//     query: "",
+//   });
+
+//   const fetchSearch = async ({ query = "" } = {}) => {
 //     setLoading(true);
 //     try {
-//       const params = {};
-//       if (customerPhone) params["Customer Phone"] = customerPhone; // Search by phone
-//       if (transaction) params["cf_payment_id"] = transaction; // Search by transaction ID
+//       const params = { query };
 
 //       const response = await BaseUrl.get("/doctor/paymentsearch/", { params });
 
 //       if (response.status === 200 && response.data) {
+//         // Parse the CSV response
 //         Papa.parse(response.data, {
 //           complete: (result) => {
 //             const validPayments = result.data.filter(
@@ -214,315 +226,322 @@
 //                 row["Appointment Date"]
 //             );
 
-//             setPayments(validPayments); // Update payments state with valid results
+//             setPayments(validPayments);
+//             setTotalPatients(validPayments.length);
 //           },
 //           header: true,
 //         });
 //       }
 //     } catch (error) {
 //       console.error("Error fetching payments:", error);
-//       setPayments([]); // Clear any existing data if an error occurs
+//       setPayments([]);
+//       setTotalPatients(0);
 //     } finally {
 //       setLoading(false);
 //     }
 //   };
 
-//   // Debounced search function to avoid rapid API calls
 //   const debouncedSearch = useCallback(
 //     _.debounce((query) => {
-//       if (/^\d+$/.test(query)) {
-//         // If the query is numeric (digits only), check both phone and transaction ID
-//         fetchSearch({ customerPhone: query, transaction: query });
-//       } else {
-//         // Otherwise, treat the query as a transaction ID
-//         fetchSearch({ transaction: query });
-//       }
+//       fetchSearch({ query }); // Pass query directly
 //     }, 500),
 //     []
 //   );
 
-//   // Handle input change for the search query
 //   const handleSearchsChange = (e) => {
 //     const value = e.target.value.trim();
-//     setSearchQuery(value); // Update search query state
-//     debouncedSearch(value); // Trigger the debounced search
+//     setSearchQuery(value);
+//     debouncedSearch(value);
+
+//     // Fetch all results when input is cleared
 //     if (!value) {
-//       fetchSearch({}); // Fetch all data when search is cleared
+//       fetchSearch({});
 //     }
 //   };
 
 //   return (
 //     <div
-//       className="payment-history-container"
-//       style={{ backgroundColor: "#D7EAF0", padding: "20px" }}
+//       className="payment-history-container d-flex"
+//       style={{ height: "calc(100vh - 4rem)", overflowY: "hidden" }}
 //     >
-//       {loading && (
-//         <LoaderWrapper>
-//           <LoaderImage>
-//             <Loader
-//               type="spinner-circle"
-//               bgColor="#0091A5"
-//               color="#0091A5"
-//               title="Loading..."
-//               size={100}
-//             />
-//           </LoaderImage>
-//         </LoaderWrapper>
-//       )}
-
-//       <Row className="align-items-center mb-4" style={{ padding: "10px 20px" }}>
-//         <Col xs="12" sm="6" md="4" className="text-center mb-3 mb-md-0">
-//           <h5
-//             style={{ color: "#000", fontWeight: "bold", marginBottom: "5px" }}
-//           >
-//             Payments
-//           </h5>
-//           <p style={{ fontSize: "16px", color: "#000" }}>
-//             Payroll{" "}
-//             <span style={{ fontWeight: "bold" }}>
-//               {new Date().toLocaleString("default", {
-//                 month: "long",
-//                 year: "numeric",
-//               })}
-//             </span>
-//           </p>
-//         </Col>
-
-//         <Col xs="12" sm="6" md="4" className="text-center mb-3 mb-md-0">
-//           <input
-//             type="date"
-//             value={selectedDate}
-//             onChange={(e) => setSelectedDate(e.target.value)}
-//             style={{
-//               padding: "5px 10px",
-//               fontWeight: "bold",
-//               color: "#000",
-//               width: "100%",
-//               borderRadius: "8px",
-//             }}
-//           />
-//         </Col>
-
-//         <Col xs="12" sm="6" md="4" className="text-center">
-//           {clinicPhoto && (
-//             <div
-//               style={{
-//                 display: "inline-flex",
-//                 alignItems: "center",
-//                 justifyContent: "center",
-//               }}
-//             >
-//               <img
-//                 src={clinicPhoto}
-//                 alt="Doctor Profile"
-//                 style={{
-//                   width: "50px",
-//                   height: "50px",
-//                   borderRadius: "50%",
-//                   marginRight: "10px",
-//                 }}
+//       <Sidebar
+//         selectedMenu={selectedMenu}
+//         handleMenuClick={handleMenuClick}
+//         isSidebarCollapsed={isSidebarCollapsed}
+//         setIsSidebarCollapsed={setIsSidebarCollapsed}
+//       />
+//       <main className="p-4 overflow-y-auto">
+//         {loading && (
+//           <LoaderWrapper>
+//             <LoaderImage>
+//               <Loader
+//                 type="spinner-circle"
+//                 bgColor="#0091A5"
+//                 color="#0091A5"
+//                 title="Loading..."
+//                 size={100}
 //               />
-//               <p
+//             </LoaderImage>
+//           </LoaderWrapper>
+//         )}
+
+//         <Row
+//           className="align-items-center mb-4"
+//           style={{ padding: "10px 20px" }}
+//         >
+//           <Col xs="12" sm="6" md="4" className="text-center mb-3 mb-md-0">
+//             <h5
+//               style={{ color: "#000", fontWeight: "bold", marginBottom: "5px" }}
+//             >
+//               Payments
+//             </h5>
+//             <p style={{ fontSize: "16px", color: "#000" }}>
+//               Payroll{" "}
+//               <span style={{ fontWeight: "bold" }}>
+//                 {new Date().toLocaleString("default", {
+//                   month: "long",
+//                   year: "numeric",
+//                 })}
+//               </span>
+//             </p>
+//           </Col>
+
+//           <Col xs="12" sm="6" md="4" className="text-center mb-3 mb-md-0">
+//             <input
+//               type="date"
+//               value={selectedDate}
+//               onChange={(e) => setSelectedDate(e.target.value)}
+//               style={{
+//                 padding: "5px 10px",
+//                 fontWeight: "bold",
+//                 color: "#000",
+//                 width: "100%",
+//                 borderRadius: "8px",
+//               }}
+//             />
+//           </Col>
+
+//           <Col xs="12" sm="6" md="4" className="text-center">
+//             {clinicPhoto && (
+//               <div
 //                 style={{
-//                   margin: "0",
-//                   fontSize: "16px",
-//                   fontWeight: "bold",
-//                   color: "#0174BE",
+//                   display: "inline-flex",
+//                   alignItems: "center",
+//                   justifyContent: "center",
 //                 }}
 //               >
-//                 {clinicName || "Doctor Name"}
-//               </p>
-//             </div>
-//           )}
-//         </Col>
-//       </Row>
-
-//       <hr />
-
-//       <div
-//         className="filters-section mb-4 p-3"
-//         style={{
-//           backgroundColor: "#FFFFFF",
-//           borderRadius: "10px",
-//           width: "100%",
-//           maxWidth: "700px",
-//           margin: "0 auto",
-//         }}
-//       >
-//         <Row className="align-items-center justify-content-center">
-//           <Col xs="auto" className="d-flex align-items-center mb-2 mb-sm-0">
-//             <div style={{ marginRight: "10px" }}>From</div>
-//             <Form.Control
-//               type="date"
-//               value={startDate}
-//               onChange={(e) => setStartDate(e.target.value)}
-//               placeholder="Start Date"
-//               style={{ minWidth: "180px", height: "40px" }}
-//               required
-//             />
+//                 <img
+//                   src={clinicPhoto}
+//                   alt="Doctor Profile"
+//                   style={{
+//                     width: "50px",
+//                     height: "50px",
+//                     borderRadius: "50%",
+//                     marginRight: "10px",
+//                   }}
+//                 />
+//                 <p
+//                   style={{
+//                     margin: "0",
+//                     fontSize: "16px",
+//                     fontWeight: "bold",
+//                     color: "#0174BE",
+//                   }}
+//                 >
+//                   {clinicName || "Doctor Name"}
+//                 </p>
+//               </div>
+//             )}
 //           </Col>
+//         </Row>
 
-//           <Col xs="auto" className="d-flex align-items-center mb-2 mb-sm-0">
-//             <div style={{ marginRight: "10px" }}>To</div>
-//             <Form.Control
-//               type="date"
-//               value={endDate}
-//               onChange={(e) => setEndDate(e.target.value)}
-//               placeholder="End Date"
-//               style={{ minWidth: "180px", height: "40px" }}
-//               required
-//             />
-//           </Col>
+//         <hr />
 
-//           <Col xs="auto" className="d-flex justify-content-center">
+//         <div
+//           className="filters-section mb-4 p-3"
+//           style={{
+//             backgroundColor: "#FFFFFF",
+//             borderRadius: "10px",
+//             width: "100%",
+//             maxWidth: "700px",
+//             margin: "0 auto",
+//           }}
+//         >
+//           <Row className="align-items-center justify-content-center">
+//             <Col xs="auto" className="d-flex align-items-center mb-2 mb-sm-0">
+//               <div style={{ marginRight: "10px" }}>From</div>
+//               <Form.Control
+//                 type="date"
+//                 value={startDate}
+//                 onChange={(e) => setStartDate(e.target.value)}
+//                 placeholder="Start Date"
+//                 style={{ minWidth: "180px", height: "40px" }}
+//                 required
+//               />
+//             </Col>
+
+//             <Col xs="auto" className="d-flex align-items-center mb-2 mb-sm-0">
+//               <div style={{ marginRight: "10px" }}>To</div>
+//               <Form.Control
+//                 type="date"
+//                 value={endDate}
+//                 onChange={(e) => setEndDate(e.target.value)}
+//                 placeholder="End Date"
+//                 style={{ minWidth: "180px", height: "40px" }}
+//                 required
+//               />
+//             </Col>
+
+//             <Col xs="auto" className="d-flex justify-content-center">
+//               <Button
+//                 onClick={fetchPaymentsByDateRange}
+//                 style={{
+//                   backgroundColor: "#0174BE",
+//                   borderColor: "#0174BE",
+//                   minWidth: "120px",
+//                   height: "40px",
+//                 }}
+//               >
+//                 <FaSearch /> Search
+//               </Button>
+//             </Col>
+//           </Row>
+//         </div>
+
+//         <Row className="align-items-center mb-4 justify-content-between">
+//           <Col md="auto" className="text-center">
 //             <Button
-//               onClick={fetchPaymentsByDateRange}
 //               style={{
-//                 backgroundColor: "#0174BE",
-//                 borderColor: "#0174BE",
-//                 minWidth: "120px",
-//                 height: "40px",
+//                 backgroundColor: "#FFFFFF",
+//                 borderColor: "#D7EAF0",
+//                 color: "#000",
+//                 fontSize: "16px",
+//                 fontWeight: "bold",
+//                 borderRadius: "8px",
+//                 padding: "10px 20px",
+//                 boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
 //               }}
 //             >
-//               <FaSearch /> Search
+//               Total Patient :{" "}
+//               <strong style={{ color: "#0174BE", fontSize: "18px" }}>
+//                 {totalPatients}
+//               </strong>
+//             </Button>
+//           </Col>
+
+//           <Col md="6" className="text-center">
+//             <InputGroup style={{ maxWidth: "550px", margin: "0 auto" }}>
+//               <Form.Control
+//                 type="text"
+//                 placeholder="Search by Patient Name or Transaction ID"
+//                 value={searchQuery}
+//                 onChange={handleSearchsChange}
+//                 style={{
+//                   borderRadius: "8px 0 0 8px",
+//                   borderColor: "#0174BE",
+//                   height: "50px",
+//                 }}
+//               />
+//               <Button
+//                 onClick={() => debouncedSearch(searchQuery)}
+//                 style={{
+//                   backgroundColor: "#0174BE",
+//                   color: "#FFFFFF",
+//                   borderRadius: "0 8px 8px 0",
+//                   height: "50px",
+//                 }}
+//               >
+//                 <FaSearch />
+//               </Button>
+//             </InputGroup>
+//           </Col>
+
+//           <Col md="auto" className="text-center">
+//             <Button
+//               onClick={downloadExcel}
+//               style={{
+//                 backgroundColor: "#28A745",
+//                 color: "#FFFFFF",
+//                 fontSize: "16px",
+//                 fontWeight: "bold",
+//                 borderRadius: "8px",
+//                 padding: "10px 20px",
+//               }}
+//             >
+//               <FaDownload style={{ marginRight: "5px" }} /> Download Excel
 //             </Button>
 //           </Col>
 //         </Row>
-//       </div>
 
-//       <Row className="align-items-center mb-4 justify-content-between">
-//         <Col md="auto" className="text-center">
-//           <Button
-//             style={{
-//               backgroundColor: "#FFFFFF",
-//               borderColor: "#D7EAF0",
-//               color: "#000",
-//               fontSize: "16px",
-//               fontWeight: "bold",
-//               borderRadius: "8px",
-//               padding: "10px 20px",
-//               boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-//             }}
-//           >
-//             Total Patient :{" "}
-//             <strong style={{ color: "#0174BE", fontSize: "18px" }}>
-//               {totalPatients}
-//             </strong>
-//           </Button>
-//         </Col>
+//         <hr />
 
-//         <Col md="auto" className="text-center">
-//           <InputGroup style={{ maxWidth: "550px", margin: "0 auto" }}>
-//             <Form.Control
-//               type="text"
-//               placeholder="Search by Mobile Number or Transaction ID"
-//               value={searchQuery}
-//               onChange={handleSearchsChange}
-//               style={{
-//                 borderRadius: "8px 0 0 8px",
-//                 borderColor: "#0174BE",
-//                 height: "50px",
-//               }}
-//             />
-//             <Button
-//               onClick={() => debouncedSearch(searchQuery)}
-//               style={{
-//                 backgroundColor: "#0174BE",
-//                 color: "#FFFFFF",
-//                 borderRadius: "0 8px 8px 0",
-//                 height: "50px",
-//               }}
-//             >
-//               <FaSearch />
-//             </Button>
-//           </InputGroup>
-//         </Col>
-
-//         <Col md="auto" className="text-center">
-//           <Button
-//             onClick={downloadExcel}
-//             style={{
-//               backgroundColor: "#28A745",
-//               color: "#FFFFFF",
-//               fontSize: "16px",
-//               fontWeight: "bold",
-//               borderRadius: "8px",
-//               padding: "10px 20px",
-//             }}
-//           >
-//             <FaDownload style={{ marginRight: "5px" }} /> Download Excel
-//           </Button>
-//         </Col>
-//       </Row>
-
-//       <hr />
-
-//       <div
-//         className="table-section p-3"
-//         style={{ backgroundColor: "#0091A5", borderRadius: "10px" }}
-//       >
-//         <h5 className="text-white mb-3">Payroll {selectedDate}</h5>
-//         <Table striped bordered hover>
-//         <thead style={{ backgroundColor: "#0174BE", color: "#FFFFFF" }}>
-//           <tr>
-//             <th>S. No</th>
-//             <th>Amount</th>
-//             <th>Patient Name</th>
-//             <th>Patient Phone</th>
-//             <th>Age</th>
-//             <th>Address</th>
-//             <th>Doctor Name</th>
-//             <th>Appointment Date</th>
-//             <th>Transaction ID</th>
-//             <th>Payment Type</th>
-//           </tr>
-//         </thead>
-//         <tbody>
-//           {payments.length > 0 ? (
-//             payments.map((payment, index) => (
-//               <tr key={index}>
-//                 <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-//                 <td>{payment["Amount"]}</td>
-//                 <td>{payment["Patient Name"]}</td>
-//                 <td>{payment["Customer Phone"]}</td>
-//                 <td>{payment["Age"]}</td>
-//                 <td>{payment["Address"]}</td>
-//                 <td>{payment["Doctor Name"]}</td>
-//                 <td>{payment["Appointment Date"]}</td>
-//                 <td>{payment["cf_payment_id"]}</td>
-//                 <td>{payment["Payment Type"]}</td>
+//         <div
+//           className="table-section p-3"
+//           style={{ backgroundColor: "#0091A5", borderRadius: "10px" }}
+//         >
+//           <h5 className="text-white mb-3">Payroll {selectedDate}</h5>
+//           <Table striped bordered hover>
+//             <thead style={{ backgroundColor: "#0174BE", color: "#FFFFFF" }}>
+//               <tr>
+//                 <th>S. No</th>
+//                 <th>Amount</th>
+//                 <th>Patient Name</th>
+//                 <th>Patient Phone</th>
+//                 <th>Age</th>
+//                 <th>Address</th>
+//                 <th>Doctor Name</th>
+//                 <th>Appointment Date</th>
+//                 <th>Transaction ID</th>
+//                 <th>Payment Type</th>
 //               </tr>
-//             ))
-//           ) : (
-//             <tr>
-//               <td colSpan="10" className="text-center">
-//                 {"No records found"}
-//               </td>
-//             </tr>
-//           )}
-//         </tbody>
-//       </Table>
+//             </thead>
+//             <tbody>
+//               {currentPayments.length > 0 ? (
+//                 currentPayments.map((payment, index) => (
+//                   <tr key={index}>
+//                     <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
+//                     <td>{payment["Amount"]}</td>
+//                     <td>{payment["Patient Name"]}</td>
+//                     <td>{payment["Customer Phone"]}</td>
+//                     <td>{payment["Age"]}</td>
+//                     <td>{payment["Address"]}</td>
+//                     <td>{payment["Doctor Name"]}</td>
+//                     <td>{payment["Appointment Date"]}</td>
+//                     <td>{payment["cf_payment_id"]}</td>
+//                     <td>{payment["Payment Type"]}</td>
+//                   </tr>
+//                 ))
+//               ) : (
+//                 <tr>
+//                   <td colSpan="11" className="text-center">
+//                     No records found
+//                   </td>
+//                 </tr>
+//               )}
+//             </tbody>
+//           </Table>
 
-//         <Pagination>
-//           <Pagination.Prev
-//             onClick={() => handlePageChange(currentPage - 1)}
-//             disabled={currentPage === 1}
-//           />
-//           {[...Array(totalPages)].map((_, index) => (
-//             <Pagination.Item
-//               key={index + 1}
-//               active={index + 1 === currentPage}
-//               onClick={() => handlePageChange(index + 1)}
-//             >
-//               {index + 1}
-//             </Pagination.Item>
-//           ))}
-//           <Pagination.Next
-//             onClick={() => handlePageChange(currentPage + 1)}
-//             disabled={currentPage === totalPages}
-//           />
-//         </Pagination>
-//       </div>
+//           <Pagination>
+//             <Pagination.Prev
+//               onClick={() => handlePageChange(currentPage - 1)}
+//               disabled={currentPage === 1}
+//             />
+//             {[...Array(totalPages)].map((_, index) => (
+//               <Pagination.Item
+//                 key={index + 1}
+//                 active={index + 1 === currentPage}
+//                 onClick={() => handlePageChange(index + 1)}
+//               >
+//                 {index + 1}
+//               </Pagination.Item>
+//             ))}
+//             <Pagination.Next
+//               onClick={() => handlePageChange(currentPage + 1)}
+//               disabled={currentPage === totalPages}
+//             />
+//           </Pagination>
+//         </div>
+//       </main>
 //     </div>
 //   );
 // };
@@ -534,19 +553,8 @@
 
 
 
-
-
-
 import React, { useEffect, useState, useCallback } from "react";
-import {
-  Table,
-  Button,
-  Row,
-  Col,
-  Form,
-  InputGroup,
-  Pagination,
-} from "react-bootstrap";
+import {Table,Button,Row,Col,Form,InputGroup,Pagination,} from "react-bootstrap";
 import { FaDownload, FaSearch } from "react-icons/fa";
 import Papa from "papaparse";
 import BaseUrl from "../../api/BaseUrl";
@@ -942,139 +950,148 @@ const PaymentHistory = () => {
         </Row>
       </div>
 
-      <Row className="align-items-center mb-4 justify-content-between">
-        <Col md="auto" className="text-center">
-          <Button
+<Row className="align-items-center mb-4 justify-content-between">
+      <Col xs={12} md="auto" className="text-center mb-3 mb-md-0">
+        <Button
+          style={{
+            backgroundColor: "#FFFFFF",
+            borderColor: "#D7EAF0",
+            color: "#000",
+            fontSize: "16px",
+            fontWeight: "bold",
+            borderRadius: "8px",
+            padding: "10px 20px",
+            boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+          }}
+        >
+          Total Patient :{" "}
+          <strong style={{ color: "#0174BE", fontSize: "18px" }}>
+            {totalPatients}
+          </strong>
+        </Button>
+      </Col>
+
+      <Col xs={12} md={6} className="text-center mb-3 mb-md-0">
+        <InputGroup style={{ maxWidth: "100%", width: "100%", margin: "0 auto" }}>
+          <Form.Control
+            type="text"
+            placeholder="Search by Patient Name or Transaction ID"
+            value={searchQuery}
+            onChange={handleSearchsChange}
             style={{
-              backgroundColor: "#FFFFFF",
-              borderColor: "#D7EAF0",
-              color: "#000",
-              fontSize: "16px",
-              fontWeight: "bold",
-              borderRadius: "8px",
-              padding: "10px 20px",
-              boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+              borderRadius: "8px 0 0 8px",
+              borderColor: "#0174BE",
+              height: "50px",
             }}
-          >
-            Total Patient :{" "}
-            <strong style={{ color: "#0174BE", fontSize: "18px" }}>
-              {totalPatients}
-            </strong>
-          </Button>
-        </Col>
-
-        <Col md="6" className="text-center">
-          <InputGroup style={{ maxWidth: "550px", margin: "0 auto" }}>
-            <Form.Control
-              type="text"
-              placeholder="Search by Patient Name or Transaction ID"
-              value={searchQuery}
-              onChange={handleSearchsChange}
-              style={{
-                borderRadius: "8px 0 0 8px",
-                borderColor: "#0174BE",
-                height: "50px",
-              }}
-            />
-            <Button
-              onClick={() => debouncedSearch(searchQuery)}
-              style={{
-                backgroundColor: "#0174BE",
-                color: "#FFFFFF",
-                borderRadius: "0 8px 8px 0",
-                height: "50px",
-              }}
-            >
-              <FaSearch />
-            </Button>
-          </InputGroup>
-        </Col>
-
-        <Col md="auto" className="text-center">
+          />
           <Button
-            onClick={downloadExcel}
+            onClick={() => debouncedSearch(searchQuery)}
             style={{
-              backgroundColor: "#28A745",
+              backgroundColor: "#0174BE",
               color: "#FFFFFF",
-              fontSize: "16px",
-              fontWeight: "bold",
-              borderRadius: "8px",
-              padding: "10px 20px",
+              borderRadius: "0 8px 8px 0",
+              height: "50px",
             }}
           >
-            <FaDownload style={{ marginRight: "5px" }} /> Download Excel
+            <FaSearch />
           </Button>
-        </Col>
-      </Row>
+        </InputGroup>
+      </Col>
+
+      <Col xs={12} md="auto" className="text-center mb-3 mb-md-0">
+        <Button
+          onClick={downloadExcel}
+          style={{
+            backgroundColor: "#28A745",
+            color: "#FFFFFF",
+            fontSize: "16px",
+            fontWeight: "bold",
+            borderRadius: "8px",
+            padding: "10px 20px",
+          }}
+        >
+          <FaDownload style={{ marginRight: "5px" }} /> Download Excel
+        </Button>
+      </Col>
+    </Row>
 
       <hr />
 
-      <div
-        className="table-section p-3"
-        style={{ backgroundColor: "#0091A5", borderRadius: "10px" }}
-      >
-        <h5 className="text-white mb-3">Payroll {selectedDate}</h5>
-        <Table striped bordered hover>
-          <thead style={{ backgroundColor: "#0174BE", color: "#FFFFFF" }}>
-            <tr>
-              <th>S. No</th>
-              <th>Amount</th>
-              <th>Patient Name</th>
-              <th>Patient Phone</th>
-              <th>Age</th>
-              <th>Address</th>
-              <th>Doctor Name</th>
-              <th>Appointment Date</th>
-              <th>Transaction ID</th>
-              <th>Payment Type</th>
+<div
+  className="table-section p-3"
+  style={{ backgroundColor: "#0091A5", borderRadius: "10px" }}
+>
+  <h5 className="text-white mb-3">Payroll {selectedDate}</h5>
+  <div style={{ overflowX: "auto", maxWidth: "100%" }}>
+    <Table
+      striped
+      bordered
+      hover
+      style={{ minWidth: "max-content", width: "100%", tableLayout: "auto" }}
+    >
+      <thead style={{ backgroundColor: "#0174BE", color: "#FFFFFF" }}>
+        <tr>
+          <th style={{ whiteSpace: "nowrap" }}>S. No</th>
+          <th style={{ whiteSpace: "nowrap" }}>Amount</th>
+          <th style={{ whiteSpace: "nowrap" }}>Patient Name</th>
+          <th style={{ whiteSpace: "nowrap" }}>Patient Phone</th>
+          <th style={{ whiteSpace: "nowrap" }}>Age</th>
+          <th style={{ whiteSpace: "nowrap" }}>Address</th>
+          <th style={{ whiteSpace: "nowrap" }}>Doctor Name</th>
+          <th style={{ whiteSpace: "nowrap" }}>Appointment Date</th>
+          <th style={{ whiteSpace: "nowrap" }}>Transaction ID</th>
+          <th style={{ whiteSpace: "nowrap" }}>Payment Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        {currentPayments.length > 0 ? (
+          currentPayments.map((payment, index) => (
+            <tr key={index}>
+              <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
+              <td>{payment["Amount"]}</td>
+              <td>{payment["Patient Name"]}</td>
+              <td>{payment["Customer Phone"]}</td>
+              <td>{payment["Age"]}</td>
+              <td>{payment["Address"]}</td>
+              <td>{payment["Doctor Name"]}</td>
+              <td>{payment["Appointment Date"]}</td>
+              <td>{payment["cf_payment_id"]}</td>
+              <td>{payment["Payment Type"]}</td>
             </tr>
-          </thead>
-          <tbody>
-            {currentPayments.length > 0 ? (
-              currentPayments.map((payment, index) => (
-                <tr key={index}>
-                  <td>{index + 1 + (currentPage - 1) * rowsPerPage}</td>
-                  <td>{payment["Amount"]}</td>
-                  <td>{payment["Patient Name"]}</td>
-                  <td>{payment["Customer Phone"]}</td>
-                  <td>{payment["Age"]}</td>
-                  <td>{payment["Address"]}</td>
-                  <td>{payment["Doctor Name"]}</td>
-                  <td>{payment["Appointment Date"]}</td>
-                  <td>{payment["cf_payment_id"]}</td>
-                  <td>{payment["Payment Type"]}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="11" className="text-center">
-                  No records found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </Table>
+          ))
+        ) : (
+          <tr>
+            <td colSpan="10" className="text-center">
+              No records found
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </Table>
+  </div>
 
-        <Pagination>
-          <Pagination.Prev
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          />
-          {[...Array(totalPages)].map((_, index) => (
-            <Pagination.Item
-              key={index + 1}
-              active={index + 1 === currentPage}
-              onClick={() => handlePageChange(index + 1)}
-            >
-              {index + 1}
-            </Pagination.Item>
-          ))}
-          <Pagination.Next
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          />
-        </Pagination>
-      </div>
+  <Pagination>
+    <Pagination.Prev
+      onClick={() => handlePageChange(currentPage - 1)}
+      disabled={currentPage === 1}
+    />
+    {[...Array(totalPages)].map((_, index) => (
+      <Pagination.Item
+        key={index + 1}
+        active={index + 1 === currentPage}
+        onClick={() => handlePageChange(index + 1)}
+      >
+        {index + 1}
+      </Pagination.Item>
+    ))}
+    <Pagination.Next
+      onClick={() => handlePageChange(currentPage + 1)}
+      disabled={currentPage === totalPages}
+    />
+  </Pagination>
+</div>
+
+
       </main>
     </div>
   );

@@ -3128,7 +3128,7 @@ const [addressErrorMessage, setAddressErrorMessage] = useState("");
           <label>Qualification</label>
           <span className="text-danger">*</span>
 
-          <Select
+          {/* <Select
             isMulti
             closeMenuOnSelect={false}
             hideSelectedOptions={false}
@@ -3139,9 +3139,9 @@ const [addressErrorMessage, setAddressErrorMessage] = useState("");
             )}
             onChange={handleQualificationChange}
             className={formErrors.qualification ? "is-invalid" : ""}
-          />
+          /> */}
 
-          {/* <CreatableSelect
+          <CreatableSelect
   isMulti
   closeMenuOnSelect={false}
   hideSelectedOptions={false}
@@ -3181,7 +3181,7 @@ const [addressErrorMessage, setAddressErrorMessage] = useState("");
     }
   }}
   className={formErrors.qualification ? "is-invalid" : ""}
-/> */}
+/>
 
           {formErrors.qualification && (
             <p className="text-danger">{formErrors.qualification}</p>

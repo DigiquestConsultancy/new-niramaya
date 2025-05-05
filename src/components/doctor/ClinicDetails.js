@@ -154,7 +154,7 @@ const ClinicDetails = () => {
     const dataToSubmit = new FormData();
     Object.keys(formData).forEach((key) => {
       let value = formData[key];
-    
+
       if (key === "date_of_birth") {
         if (value) {
           // Ensure proper YYYY-MM-DD format
@@ -166,7 +166,7 @@ const ClinicDetails = () => {
         dataToSubmit.append(key, value);
       }
     });
-    
+
     if (formData.profile_pic instanceof File) {
       dataToSubmit.append("profile_pic", formData.profile_pic);
     }
@@ -209,15 +209,15 @@ const ClinicDetails = () => {
   };
 
   useEffect(() => {
-      if (successMessage) {
-        const timer = setTimeout(() => {
-          setSuccessMessage("");
-        }, 3000); // 3 seconds
-    
-        return () => clearTimeout(timer); // Cleanup in case component unmounts early
-      }
-    }, [successMessage]);
-    
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage("");
+      }, 3000); // 3 seconds
+
+      return () => clearTimeout(timer); // Cleanup in case component unmounts early
+    }
+  }, [successMessage]);
+
   return (
     <div className=" d-flex">
       <Sidebar
@@ -253,19 +253,19 @@ const ClinicDetails = () => {
           <h2 style={{ marginBottom: "30px" }}>Clinic Details</h2>
           {/* Display success message from backend */}
           {successMessage && (
-  <span
-    className="alert alert-success"
-    style={{
-      position: "fixed",
-      top: "20px",
-      left: "50%",
-      transform: "translateX(-50%)",
-      zIndex: 99999,
-    }}
-  >
-    {successMessage}
-  </span>
-)}
+            <span
+              className="alert alert-success"
+              style={{
+                position: "fixed",
+                top: "20px",
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: 99999,
+              }}
+            >
+              {successMessage}
+            </span>
+          )}
 
           <div className="d-flex align-items-center mb-4">
             <ProfilePicCircle
@@ -289,7 +289,7 @@ const ClinicDetails = () => {
           </div>
 
           <div className="row mb-4">
-            <div className="col-md-4">
+          <div className="col-lg-4 col-md-6 col-12 mb-3">
               <label>Name</label>
               <span className="text-danger">*</span>
               <input
@@ -301,7 +301,7 @@ const ClinicDetails = () => {
                 required
               />
             </div>
-            <div className="col-md-4">
+            <div className="col-lg-4 col-md-6 col-12 mb-3">
               <label>Mobile</label>
               <span className="text-danger">*</span>
               <input
@@ -313,7 +313,7 @@ const ClinicDetails = () => {
                 required
               />
             </div>
-            <div className="col-md-4">
+            <div className="col-lg-4 col-md-6 col-12 mb-3">
               <label>Gender</label>
               <span className="text-danger">*</span>
               <select
@@ -329,10 +329,8 @@ const ClinicDetails = () => {
                 <option value="other">Other</option>
               </select>
             </div>
-          </div>
 
-          <div className="row mb-4">
-            <div className="col-md-4">
+            <div className="col-lg-4 col-md-6 col-12 mb-3">
               <label>Age</label>
               <span className="text-danger">*</span>
               <input
@@ -344,7 +342,7 @@ const ClinicDetails = () => {
                 required
               />
             </div>
-            <div className="col-md-4">
+            <div className="col-lg-4 col-md-6 col-12 mb-3">
               <label>Date of Birth</label>
               <input
                 type="date"
@@ -354,7 +352,7 @@ const ClinicDetails = () => {
                 onChange={handleChange}
               />
             </div>
-            <div className="col-md-4">
+            <div className="col-lg-4 col-md-6 col-12 mb-3">
               <label>Specialization</label>
               <span className="text-danger">*</span>
               <input
@@ -366,10 +364,7 @@ const ClinicDetails = () => {
                 required
               />
             </div>
-          </div>
-
-          <div className="row mb-4">
-            <div className="col-md-4">
+            <div className="col-lg-4 col-md-6 col-12 mb-3">
               <label>Qualification</label>
               <span className="text-danger">*</span>
               <input
@@ -381,7 +376,7 @@ const ClinicDetails = () => {
                 required
               />
             </div>
-            <div className="col-md-4">
+            <div className="col-lg-4 col-md-6 col-12 mb-3">
               <label>Address</label>
               <span className="text-danger">*</span>
               <input

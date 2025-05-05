@@ -1710,11 +1710,10 @@ const DoctorBookedAppointment = () => {
       className="d-flex"
       fluid
       style={{
-        // backgroundColor: "#F2F9FF",
         margin: "0px",
         padding: "0px",
         height: "calc(100vh - 4rem)",
-        overflowY: "hidden"
+        overflowY: "hidden",
       }}
     >
       <Sidebar
@@ -1947,10 +1946,10 @@ const DoctorBookedAppointment = () => {
                       lg={
                         expandedAppointmentId === appointment.appointment_id
                           ? 12
-                          : 2
+                          : 3
                       }
                       key={appointment.appointment_id}
-                      className="mb-5 p-3"
+                      className="mb-5"
                     >
                       <Card>
                         <Card.Header
@@ -2054,7 +2053,7 @@ const DoctorBookedAppointment = () => {
                           }}
                         >
                           <div
-                            onClick={() =>
+                            onDoubleClick={() =>
                               expandedAppointmentId ===
                               appointment.appointment_id
                                 ? setExpandedAppointmentId(null)
@@ -4040,7 +4039,6 @@ const DoctorBookedAppointment = () => {
                                                           position: "relative",
                                                         }}
                                                       >
-                                                        {/* Media Preview */}
                                                         {(() => {
                                                           const type =
                                                             report.content_type;
@@ -4104,12 +4102,6 @@ const DoctorBookedAppointment = () => {
                                                                 ) =>
                                                                   e.target.play()
                                                                 }
-                                                                // onMouseOut={(
-                                                                //   e
-                                                                // ) => {
-                                                                //   e.target.pause();
-                                                                //   e.target.currentTime = 0;
-                                                                // }}
                                                               >
                                                                 <source
                                                                   src={
@@ -4121,61 +4113,6 @@ const DoctorBookedAppointment = () => {
                                                                 does not support
                                                                 the video tag.
                                                               </video>
-
-                                                              // <video
-                                                              //   muted
-                                                              //   preload="metadata"
-                                                              //   style={{
-                                                              //     objectFit:
-                                                              //       "cover",
-                                                              //     height:
-                                                              //       "200px",
-                                                              //     width: "100%",
-                                                              //     borderRadius:
-                                                              //       "5px",
-                                                              //     cursor:
-                                                              //       "pointer",
-                                                              //   }}
-                                                              //   onClick={() =>
-                                                              //     setSelectedFile(
-                                                              //       {
-                                                              //         type: "video",
-                                                              //         url: report.url,
-                                                              //       }
-                                                              //     )
-                                                              //   }
-                                                              //   onMouseOver={(
-                                                              //     e
-                                                              //   ) => {
-                                                              //     if (
-                                                              //       e.target
-                                                              //         .paused
-                                                              //     ) {
-                                                              //       e.target.play();
-                                                              //     }
-                                                              //   }}
-                                                              //   onMouseOut={(
-                                                              //     e
-                                                              //   ) => {
-                                                              //     if (
-                                                              //       !e.target
-                                                              //         .paused
-                                                              //     ) {
-                                                              //       e.target.pause();
-                                                              //       e.target.currentTime = 0;
-                                                              //     }
-                                                              //   }}
-                                                              // >
-                                                              //   <source
-                                                              //     src={
-                                                              //       report.url
-                                                              //     }
-                                                              //     type="video/mp4"
-                                                              //   />
-                                                              //   Your browser
-                                                              //   does not support
-                                                              //   the video tag.
-                                                              // </video>
                                                             );
                                                           } else if (
                                                             type === "file"
@@ -4270,7 +4207,13 @@ const DoctorBookedAppointment = () => {
                                                           }}
                                                         >
                                                           {/* Uncomment if needed */}
-                                                          {new Intl.DateTimeFormat("en-GB").format(new Date(report.received_at))}
+                                                          {new Intl.DateTimeFormat(
+                                                            "en-GB"
+                                                          ).format(
+                                                            new Date(
+                                                              report.received_at
+                                                            )
+                                                          )}
                                                         </div>
 
                                                         {/* Delete Button */}
@@ -4509,49 +4452,48 @@ const DoctorBookedAppointment = () => {
             style={{
               padding: 0,
               height: selectedFile?.type === "image" ? "80vh" : "auto",
-              width: selectedFile?.type === "image" ? "100%" : "auto", 
-              overflow: "hidden", 
+              width: selectedFile?.type === "image" ? "100%" : "auto",
+              overflow: "hidden",
               display: "flex",
               justifyContent: "center",
-              alignItems: "center", 
+              alignItems: "center",
             }}
           >
-           {selectedFile?.type === "image" && (
-  <div
-    style={{
-      position: "relative",
-      width: "100%",
-      height: "100%",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      overflow: zoom > 1 ? "auto" : "hidden",
-      cursor: zoom > 1 ? "zoom-out" : "zoom-in",
-    }}
-    onWheel={(e) => {
-      e.preventDefault();
-      if (e.deltaY < 0) {
-        setZoom((z) => Math.min(z + 0.1, 5)); // zoom in
-      } else {
-        setZoom((z) => Math.max(0.1, z - 0.1)); // zoom out
-      }
-    }}
-  >
-    <img
-      src={selectedFile.url}
-      alt="Preview"
-      style={{
-        maxWidth: "100%",
-        maxHeight: "100%",
-        objectFit: "cover",
-        borderRadius: "5px",
-        transform: `rotate(${rotation}deg) scale(${zoom})`,
-        transition: "transform 0.3s ease",
-      }}
-    />
-  </div>
-)}
-
+            {selectedFile?.type === "image" && (
+              <div
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  overflow: zoom > 1 ? "auto" : "hidden",
+                  cursor: zoom > 1 ? "zoom-out" : "zoom-in",
+                }}
+                onWheel={(e) => {
+                  e.preventDefault();
+                  if (e.deltaY < 0) {
+                    setZoom((z) => Math.min(z + 0.1, 5)); // zoom in
+                  } else {
+                    setZoom((z) => Math.max(0.1, z - 0.1)); // zoom out
+                  }
+                }}
+              >
+                <img
+                  src={selectedFile.url}
+                  alt="Preview"
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: "100%",
+                    objectFit: "cover",
+                    borderRadius: "5px",
+                    transform: `rotate(${rotation}deg) scale(${zoom})`,
+                    transition: "transform 0.3s ease",
+                  }}
+                />
+              </div>
+            )}
 
             {selectedFile?.type === "video" && (
               <video
@@ -4560,7 +4502,7 @@ const DoctorBookedAppointment = () => {
                 autoPlay
                 style={{
                   height: selectedFile?.type === "video" ? "80vh" : "auto",
-                  width: selectedFile?.type === "video" ? "100%" : "auto", 
+                  width: selectedFile?.type === "video" ? "100%" : "auto",
                   // width: "100%",
                   borderRadius: "5px",
                 }}
@@ -4583,20 +4525,6 @@ const DoctorBookedAppointment = () => {
           {selectedFile?.type === "image" && (
             <Modal.Footer className="d-flex justify-content-between align-items-center">
               <div>
-                {/* <Button
-                  variant="outline"
-                  className="me-2 border bg-black text-white"
-                  onClick={() => setZoom((z) => z + 0.1)}
-                >
-                  <LuZoomIn />
-                </Button>
-                <Button
-                  variant="outline"
-                  className="me-2 border bg-black text-white"
-                  onClick={() => setZoom((z) => Math.max(0.1, z - 0.1))}
-                >
-                  <LuZoomOut />
-                </Button> */}
                 <Button
                   variant="primary"
                   className="me-2"
@@ -4628,14 +4556,6 @@ const DoctorBookedAppointment = () => {
               </Button>
             </Modal.Footer>
           )}
-          {/* 
-          {selectedFile?.type !== "pdf" && (
-            <Modal.Footer>
-              <Button variant="secondary" onClick={() => setSelectedFile(null)}>
-                Close
-              </Button>
-            </Modal.Footer>
-          )} */}
         </Modal>
       </main>
     </Container>

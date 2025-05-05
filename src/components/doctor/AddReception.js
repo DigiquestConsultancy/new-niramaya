@@ -312,18 +312,21 @@ const AddReception = () => {
   };
   return (
     <div
-      className="d-flex"
-      style={{
-         height: "calc(100vh - 4rem)", overflowY: "hidden"
-      }}
-    >
-      <Sidebar
-        selectedMenu={selectedMenu}
-        handleMenuClick={handleMenuClick}
-        isSidebarCollapsed={isSidebarCollapsed}
-        setIsSidebarCollapsed={setIsSidebarCollapsed}
-      />
-      <div className="container mt-5">
+    className="d-flex"
+    style={{
+      height: "calc(100vh - 4rem)",
+      overflowY: "auto",
+      flexDirection: "row",
+    }}
+  >
+    <Sidebar
+      selectedMenu={selectedMenu}
+      handleMenuClick={handleMenuClick}
+      isSidebarCollapsed={isSidebarCollapsed}
+      setIsSidebarCollapsed={setIsSidebarCollapsed}
+    />
+    <div className="container mt-5">
+      <div className="mb-3 d-flex justify-content-center justify-content-sm-start">
         <span
           className="px-3 py-2"
           onClick={() => history.push("/doctor/managereception")}
@@ -336,51 +339,63 @@ const AddReception = () => {
         >
           Back
         </span>
-
-        <h2 style={{ color: "#0174BE" }} className="mb-5 text-center">
-          Add Reception
-        </h2>
-        {loading && (
-          <LoaderWrapper>
-            <LoaderImage>
-              <Loader
-                type="spinner-circle"
-                bgColor="#0091A5"
-                color="#0091A5"
-                title="Loading..."
-                size={100}
-              />
-            </LoaderImage>
-          </LoaderWrapper>
-        )}
-
-        {!showDetailsForm && (
-          <div className="form-group row">
-            <label htmlFor="mobileNumber" className="col-sm-2 col-form-label">
-              Mobile Number:
-            </label>
-            <div className="col-sm-8">
-              <PhoneInput
-                id="mobile_number"
-                name="mobile_number"
-                placeholder="Enter mobile number"
-                defaultCountry="IN"
-                value={mobileNumber}
-                onChange={setMobileNumber}
-                required
-              />
-            </div>
-            <div className="col-sm-1">
-              <button
-                className="btn"
-                style={{ backgroundColor: "#199fd9", color: "#f1f8dc" }}
-                onClick={handleVerify}
-              >
-                Verify
-              </button>
-            </div>
+      </div>
+  
+      <h2
+        style={{ color: "#0174BE" }}
+        className="mb-5 text-center text-md-left"
+      >
+        Add Reception
+      </h2>
+  
+      {loading && (
+        <LoaderWrapper>
+          <LoaderImage>
+            <Loader
+              type="spinner-circle"
+              bgColor="#0091A5"
+              color="#0091A5"
+              title="Loading..."
+              size={100}
+            />
+          </LoaderImage>
+        </LoaderWrapper>
+      )}
+  
+      {!showDetailsForm && (
+        <div className="form-group row">
+          <label htmlFor="mobileNumber" className="col-12 col-md-2 col-form-label fw-bold">
+            Mobile Number:
+          </label>
+          <div className="col-12 col-md-10 mb-3">
+            <PhoneInput
+              id="mobile_number"
+              name="mobile_number"
+              placeholder="Enter mobile number"
+              defaultCountry="IN"
+              value={mobileNumber}
+              onChange={setMobileNumber}
+              required
+              className="w-100"
+            />
           </div>
-        )}
+          <div className="col-12 mb-4">
+            <button
+              className="btn w-100 w-md-25"
+              style={{
+                backgroundColor: "#199fd9",
+                color: "#f1f8dc",
+                maxWidth: "200px",
+                margin: "0 auto",
+                display: "block",
+              }}
+              onClick={handleVerify}
+            >
+              Verify
+            </button>
+          </div>
+        </div>
+      )}
 
         {showDetailsForm && (
           <Form

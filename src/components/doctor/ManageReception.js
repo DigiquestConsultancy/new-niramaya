@@ -447,6 +447,7 @@ const Button = styled.button`
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  margin-bottom: 10px;
 
   &.view {
     background-color: #024caa;
