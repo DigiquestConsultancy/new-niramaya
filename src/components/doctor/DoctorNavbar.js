@@ -1,5 +1,3 @@
-
-
 // import React, { useState, useEffect } from "react";
 // import { Link } from "react-router-dom";
 // import Company from "../../images/logo.jpeg";
@@ -636,17 +634,6 @@
 
 // export default DoctorNavbar;
 
-
-
-
-
-
-
-
-
-
-
-
 import React, { useState, useEffect, useRef } from "react";
 import { Col } from "react-bootstrap";
 import { Link } from "react-router-dom";
@@ -658,29 +645,25 @@ import { MdFileDownloadDone } from "react-icons/md";
 import { GiNotebook } from "react-icons/gi";
 import { FcMoneyTransfer } from "react-icons/fc";
 import { MdOutlineLogout } from "react-icons/md";
-import ProfileIcon from "../profile/ProfileIcon";
 import { IoNotifications } from "react-icons/io5";
+import ProfileIcon from "../profile/ProfileIcon";
 import { jwtDecode } from "jwt-decode";
 import BaseUrl from "../../api/BaseUrl";
 
 const DoctorNavbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [hospitalDropdownOpen, setHospitalDropdownOpen] = useState(false);
-  const [appointmentsDropdownOpen, setAppointmentsDropdownOpen] = useState(false);
   const [userType, setUserType] = useState(null);
   const [isVerified, setIsVerified] = useState(false);
   const [isActive, setIsActive] = useState(false);
-  const [navbarOpen, setNavbarOpen] = useState(false);
-  const profileDropdownRef = useRef(null);
-
   const [clinicPhoto, setClinicPhoto] = useState(null);
-  const [clinicName, setClinicName] = useState();
+  const [clinicName, setClinicName] = useState("");
   const [doctorId, setDoctorId] = useState(null);
-  const mobileNumber = useState(null);
+  const [mobileNumber] = useState(null);
+  const profileDropdownRef = useRef(null);
 
   const fetchClinicDetails = async () => {
     try {
-      const response = await BaseUrl.get(`/doctor/opddays/`, {
+      const response = await BaseUrl.get("/doctor/opddays/", {
         params: {
           doctor_id: doctorId,
           mobile_number: mobileNumber,
@@ -689,7 +672,6 @@ const DoctorNavbar = () => {
       if (response.status === 200 && response.data.length > 0) {
         const data = response.data[0];
         setClinicName(data.clinic_name);
-
         if (data.doc_file) {
           const fullImageUrl = `${BaseUrl.defaults.baseURL}${data.doc_file}`;
           setClinicPhoto(fullImageUrl);
@@ -712,7 +694,6 @@ const DoctorNavbar = () => {
       const response = await BaseUrl.post("/doctor/logout/", {
         refresh: refreshToken,
       });
-
       if (response.status === 200 || response.status === 201) {
         try {
           localStorage.clear();
@@ -743,20 +724,6 @@ const DoctorNavbar = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
-  const toggleHospitalDropdown = () => {
-    setHospitalDropdownOpen(!hospitalDropdownOpen);
-  };
-
-  const toggleAppointmentsDropdown = () => {
-    setAppointmentsDropdownOpen(!appointmentsDropdownOpen);
-  };
-
-  const areAllFieldsEnabled = isVerified && isActive;
-
-  const closeNavbar = () => {
-    setNavbarOpen(false);
-  };
-
   const closeProfileDropdown = () => {
     setDropdownOpen(false);
   };
@@ -772,580 +739,478 @@ const DoctorNavbar = () => {
 
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
+  const areAllFieldsEnabled = isVerified && isActive;
+
   return (
     <nav
-      className="navbar navbar-expand-lg sticky-top"
+      className="navbar sticky-top"
       style={{
         backgroundColor: "#FFF",
-        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+        padding: "0.75rem 1rem",
       }}
     >
-      <div className="container-fluid">
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded={navbarOpen ? "true" : "false"}
-          aria-label="Toggle navigation"
-          onClick={() => setNavbarOpen(!navbarOpen)}
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
-
-        {/* Desktop view */}
-        
-        <div
-          className={`collapse navbar-collapse ${navbarOpen ? "show" : ""}`}
-          id="navbarNav"
-        >
-          <ul className="navbar-nav mr-auto d-none d-lg-flex">
-            {userType === "doctor" && (
-              <>
-                {clinicName && clinicPhoto && (
-                  <header className="d-flex  flex-md-row align-items-center text-md-start">
-                    <Col xs={12} md="auto">
-                      <img
-                        src={clinicPhoto}
-                        style={{
-                          height: "3rem",
-                          width: "3rem",
-                          borderRadius: "50%",
-                        }}
-                        alt="Clinic Logo"
-                      />
-                    </Col>
-                    <Col xs={12} md="auto" className="flex-grow-1">
-                      <h3
-                        className="text-center"
-                        style={{ color: "#0F518F", fontWeight: "bold" }}
-                      >
-                        {clinicName}
-                      </h3>
-                    </Col>
-                  </header>
-                )}
-              </>
-            )}
-          </ul>
-
-          <ul className="navbar-nav mr-auto d-none d-lg-flex">
-            {userType === "clinic" && (
-              <>
-                <li className="nav-item mr-3 font-weight-bold">
-                  <Link
-                    className="nav-link"
-                    to="/clinic/home"
-                    style={{ color: "#f18dc" }}
-                  >
-                    Home
-                  </Link>
-                </li>
-                <li className="nav-item mr-3 font-weight-bold">
-                  <Link
-                    className="nav-link"
-                    to="/clinic/createslot"
-                    style={{ color: "#f18dc" }}
-                  >
-                    Appointment Slots
-                  </Link>
-                </li>
-                <li className="nav-item mr-3 font-weight-bold">
-                  <Link
-                    className="nav-link"
-                    to="/clinic/details"
-                    style={{ color: "#f18dc" }}
-                  >
-                    Clinic Details
-                  </Link>
-                </li>
-                <li
-                  className={`nav-item font-weight-bold mr-3 font-weight-bold dropdown ${appointmentsDropdownOpen ? "show" : ""}`}
-                  onMouseEnter={() => setAppointmentsDropdownOpen(true)}
-                  onMouseLeave={() => setAppointmentsDropdownOpen(false)}
+      <div
+        className="container-fluid"
+        style={{
+          // maxWidth: "1400px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "nowrap",
+          gap: "1rem",
+        }}
+      >
+        {/* Logo and Clinic Name */}
+        <div className="d-flex align-items-center">
+          {userType === "doctor" && clinicName && clinicPhoto ? (
+            <header className="d-flex align-items-center">
+              <Col xs="auto">
+                <img
+                  src={clinicPhoto}
+                  style={{
+                    height: "2.5rem",
+                    width: "2.5rem",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    transition: "transform 0.2s ease",
+                  }}
+                  alt="Clinic Logo"
+                  className="clinic-logo"
+                />
+              </Col>
+              <Col xs="auto">
+                <h3
+                  style={{
+                    color: "#0F518F",
+                    fontWeight: "700",
+                    margin: 0,
+                    fontSize: "clamp(1.25rem, 2vw, 1.5rem)",
+                  }}
                 >
-                  <button
-                    className="btn nav-link dropdown-toggle"
-                    id="appointmentsDropdown"
-                    onClick={toggleAppointmentsDropdown}
-                    aria-expanded={appointmentsDropdownOpen}
-                  >
-                    Appointments
-                  </button>
-                  <div
-                    className={`dropdown-menu ${appointmentsDropdownOpen ? "show" : ""}`}
-                    aria-labelledby="appointmentsDropdown"
-                  >
-                    <Link
-                      className="dropdown-item"
-                      to="/clinic/appointmentbook"
-                      onClick={() => setAppointmentsDropdownOpen(false)}
-                    >
-                      Book Appointment
-                    </Link>
-                    <Link
-                      className="dropdown-item"
-                      to="/clinic/bookedappointment"
-                      onClick={() => setAppointmentsDropdownOpen(false)}
-                    >
-                      Booked Appointment
-                    </Link>
-                  </div>
-                </li>
-              </>
-            )}
-          </ul>
-          <ul className="navbar-nav mr-auto d-none d-lg-flex">
-            {userType === "reception" && (
-              <>
-                <li className="nav-item mr-3 font-weight-bold">
-                  <Link
-                    className="nav-link"
-                    to="/reception/home"
-                    style={{ color: "#f18dc" }}
-                  >
-                    Home
-                  </Link>
-                </li>
-                <li className="nav-item mr-3 font-weight-bold">
-                  <Link
-                    className="nav-link"
-                    to="/reception/createslot"
-                    style={{ color: "#f18dc" }}
-                  >
-                    Appointment Slots
-                  </Link>
-                </li>
-                <li className="nav-item mr-3 font-weight-bold">
-                  <Link
-                    className="nav-link"
-                    to="/reception/details"
-                    style={{ color: "#f18dc" }}
-                  >
-                    Reception Details
-                  </Link>
-                </li>
-                <li
-                  className={`nav-item mr-3 font-weight-bold dropdown ${appointmentsDropdownOpen ? "show" : ""}`}
-                  onMouseEnter={() => setAppointmentsDropdownOpen(true)}
-                  onMouseLeave={() => setAppointmentsDropdownOpen(false)}
-                >
-                  <button
-                    className="btn nav-link dropdown-toggle"
-                    id="appointmentsDropdown"
-                    onClick={toggleAppointmentsDropdown}
-                    aria-expanded={appointmentsDropdownOpen}
-                  >
-                    Appointments
-                  </button>
-                  <div
-                    className={`dropdown-menu ${appointmentsDropdownOpen ? "show" : ""}`}
-                    aria-labelledby="appointmentsDropdown"
-                  >
-                    <Link
-                      className="dropdown-item"
-                      to="/reception/appointmentbook"
-                      onClick={() => setAppointmentsDropdownOpen(false)}
-                    >
-                      Book Appointment
-                    </Link>
-                    <Link
-                      className="dropdown-item"
-                      to="/reception/bookedappointment"
-                      onClick={() => setAppointmentsDropdownOpen(false)}
-                    >
-                      Booked Appointment
-                    </Link>
-                  </div>
-                </li>
-              </>
-            )}
-          </ul>
-
-          <ul className="navbar-nav ml-auto d-none d-lg-flex">
-            <li className="nav-item" ref={profileDropdownRef}>
-              <div className="d-flex align-items-center">
-                <span>
-                  <IoNotifications
-                    style={{
-                      height: "2rem",
-                      width: "2rem",
-                      marginRight: "1rem",
-                      cursor: "pointer",
-                      color: "black",
-                    }}
-                  />
-                </span>
-                <span onClick={toggleProfileDropdown}>
-                  <ProfileIcon />
-                </span>
-              </div>
-              <div
-                className={`dropdown-menu dropdown-menu-right ${dropdownOpen ? "show" : ""}`}
-                aria-labelledby="profileDropdown"
-                style={{ backgroundColor: "#fff" }}
-              >
-                {userType === "doctor" && (
-                  <>
-                    <Link
-                      className="dropdown-item"
-                      to="/doctor/home"
-                      onClick={toggleProfileDropdown}
-                    >
-                      <FaHome /> Home
-                    </Link>
-                    <Link
-                      className="dropdown-item"
-                      to="/doctor/details"
-                      onClick={toggleProfileDropdown}
-                    >
-                      <ImProfile /> Doctor Details
-                    </Link>
-                    <Link
-                      className={`dropdown-item ${!areAllFieldsEnabled ? "disabled" : ""}`}
-                      to="/doctor/appointments"
-                      onClick={(e) => {
-                        if (!areAllFieldsEnabled) e.preventDefault();
-                        toggleProfileDropdown();
-                      }}
-                    >
-                      <FaCheckToSlot /> Appointment Slot
-                    </Link>
-                    <Link
-                      className={`dropdown-item ${!areAllFieldsEnabled ? "disabled" : ""}`}
-                      to="/doctor/manageclinic"
-                      onClick={(e) => {
-                        if (!areAllFieldsEnabled) e.preventDefault();
-                        toggleProfileDropdown();
-                      }}
-                    >
-                      <FaClinicMedical /> Manage Clinic
-                    </Link>
-                    <Link
-                      className={`dropdown-item ${!areAllFieldsEnabled ? "disabled" : ""}`}
-                      to="/doctor/managereception"
-                      onClick={(e) => {
-                        if (!areAllFieldsEnabled) e.preventDefault();
-                        toggleProfileDropdown();
-                      }}
-                    >
-                      <FaClinicMedical /> Manage Reception
-                    </Link>
-                    <Link
-                      className={`dropdown-item ${!areAllFieldsEnabled ? "disabled" : ""}`}
-                      to="/doctor/bookedappointment"
-                      onClick={(e) => {
-                        if (!areAllFieldsEnabled) e.preventDefault();
-                        toggleProfileDropdown();
-                      }}
-                    >
-                      <MdFileDownloadDone /> Booked Appointment
-                    </Link>
-                    <Link
-                      className={`dropdown-item ${!areAllFieldsEnabled ? "disabled" : ""}`}
-                      to="/doctor/bookappointment"
-                      onClick={(e) => {
-                        if (!areAllFieldsEnabled) e.preventDefault();
-                        toggleProfileDropdown();
-                      }}
-                    >
-                      <GiNotebook /> Book Appointment
-                    </Link>
-                    <Link
-                      className={`dropdown-item ${!areAllFieldsEnabled ? "disabled" : ""}`}
-                      to="/doctor/paymenthistory"
-                      onClick={(e) => {
-                        if (!areAllFieldsEnabled) e.preventDefault();
-                        toggleProfileDropdown();
-                      }}
-                    >
-                      <FcMoneyTransfer /> Payment History
-                    </Link>
-                    <Link
-                      // className="dropdown-item"
-                      className={`dropdown-item ${!areAllFieldsEnabled ? "disabled" : ""}`}
-                      to="/doctor/managetemplates"
-                      onClick={(e) => {
-                        if (!areAllFieldsEnabled) e.preventDefault();
-                        toggleProfileDropdown();
-                      }}
-                    >
-                      <IoMdSettings /> Manage Templates
-                    </Link>
-                    <Link className="dropdown-item" onClick={handleLogout}>
-                      <MdOutlineLogout /> Logout
-                    </Link>
-                  </>
-                )}
-
-                {userType === "clinic" && (
-                  <>
-                    <Link
-                      className="dropdown-item"
-                      to="/clinic/details"
-                      onClick={toggleProfileDropdown}
-                    >
-                      <ImProfile /> Clinic Details
-                    </Link>
-                    <Link
-                      className={`dropdown-item`}
-                      to="/clinic/createslot"
-                      onClick={toggleProfileDropdown}
-                    >
-                      <FaCheckToSlot /> Create Slot
-                    </Link>
-                    <Link
-                      className={`dropdown-item`}
-                      to="/clinic/appointmentbook"
-                      onClick={toggleProfileDropdown}
-                    >
-                      <GiNotebook /> Book Appointment
-                    </Link>
-                    <Link
-                      className={`dropdown-item`}
-                      to="/clinic/bookedappointment"
-                      onClick={toggleProfileDropdown}
-                    >
-                      <MdFileDownloadDone /> Booked Appointment
-                    </Link>
-                    <Link className={`dropdown-item`} onClick={handleLogout}>
-                      <MdOutlineLogout /> Logout
-                    </Link>
-                  </>
-                )}
-
-                {userType === "reception" && (
-                  <>
-                    <Link
-                      className="dropdown-item"
-                      to="/reception/details"
-                      onClick={toggleProfileDropdown}
-                    >
-                      <ImProfile /> Reception Details
-                    </Link>
-                    <Link
-                      className={`dropdown-item`}
-                      to="/reception/createslot"
-                      onClick={toggleProfileDropdown}
-                    >
-                      <FaCheckToSlot /> Create Slot
-                    </Link>
-                    <Link
-                      className={`dropdown-item`}
-                      to="/reception/appointmentbook"
-                      onClick={toggleProfileDropdown}
-                    >
-                      <GiNotebook /> Book Appointment
-                    </Link>
-                    <Link
-                      className={`dropdown-item`}
-                      to="/reception/bookedappointment"
-                      onClick={toggleProfileDropdown}
-                    >
-                      <MdFileDownloadDone /> Booked Appointment
-                    </Link>
-                    <Link className={`dropdown-item`} onClick={handleLogout}>
-                      <MdOutlineLogout /> Logout
-                    </Link>
-                  </>
-                )}
-              </div>
-            </li>
-          </ul>
-
-          <ul className="navbar-nav d-lg-none text-center">
-            {userType === "doctor" && (
-              <>
-                <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    to="/doctor/home"
-                    onClick={closeNavbar}
-                  >
-                    <FaHome /> Home
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    to="/doctor/details"
-                    onClick={closeNavbar}
-                  >
-                    <ImProfile /> Doctor Details
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    to="/doctor/appointments"
-                    onClick={closeNavbar}
-                  >
-                    <FaCheckToSlot /> Appointment Slot
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    to="/doctor/manageclinic"
-                    onClick={closeNavbar}
-                  >
-                    <FaClinicMedical /> Manage Clinic
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    to="/doctor/managereception"
-                    onClick={closeNavbar}
-                  >
-                    <FaClinicMedical /> Manage Reception
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    to="/doctor/bookedappointment"
-                    onClick={closeNavbar}
-                  >
-                    <MdFileDownloadDone /> Booked Appointment
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    to="/doctor/bookappointment"
-                    onClick={closeNavbar}
-                  >
-                    <GiNotebook /> Book Appointment
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    to="/doctor/paymenthistory"
-                    onClick={closeNavbar}
-                  >
-                    <FcMoneyTransfer /> Payment History
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    to="/doctor/managetemplates"
-                    onClick={closeNavbar}
-                  >
-                    <IoMdSettings /> Manage Templates
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link" onClick={handleLogout}>
-                    <MdOutlineLogout /> Logout
-                  </Link>
-                </li>
-              </>
-            )}
-
-            {userType === "clinic" && (
-              <>
-                <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    to="/clinic/details"
-                    onClick={closeNavbar}
-                  >
-                    <ImProfile /> Clinic Details
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    to="/clinic/createslot"
-                    onClick={closeNavbar}
-                  >
-                    <FaCheckToSlot /> Create Slot
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    to="/clinic/appointmentbook"
-                    onClick={closeNavbar}
-                  >
-                    <GiNotebook /> Book Appointment
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    to="/clinic/bookedappointment"
-                    onClick={closeNavbar}
-                  >
-                    <MdFileDownloadDone /> Booked Appointment
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link" onClick={handleLogout}>
-                    <MdOutlineLogout /> Logout
-                  </Link>
-                </li>
-              </>
-            )}
-
-            {userType === "reception" && (
-              <>
-                <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    to="/reception/details"
-                    onClick={closeNavbar}
-                  >
-                    <ImProfile /> Reception Details
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    to="/reception/createslot"
-                    onClick={closeNavbar}
-                  >
-                    <FaCheckToSlot /> Create Slot
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    to="/reception/appointmentbook"
-                    onClick={closeNavbar}
-                  >
-                    <GiNotebook /> Book Appointment
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link
-                    className="nav-link"
-                    to="/reception/bookedappointment"
-                    onClick={closeNavbar}
-                  >
-                    <MdFileDownloadDone /> Booked Appointment
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link" onClick={handleLogout}>
-                    <MdOutlineLogout /> Logout
-                  </Link>
-                </li>
-              </>
-            )}
-          </ul>
+                  {clinicName}
+                </h3>
+              </Col>
+            </header>
+          ) : (
+            <h3
+              style={{
+                color: "#0F518F",
+                fontWeight: "600",
+                margin: 0,
+                fontSize: "clamp(1.25rem, 2vw, 1.5rem)",
+              }}
+            >
+              Clinic Dashboard
+            </h3>
+          )}
         </div>
+
+        {/* Profile and Notification Icons */}
+        <ul className="navbar-nav d-flex flex-row align-items-center">
+          <li className="nav-item position-relative">
+            <span
+              role="button"
+              aria-label="Notifications"
+              tabIndex={0}
+              style={{
+                cursor: "pointer",
+                transition: "transform 0.2s ease, color 0.2s ease",
+              }}
+              className="icon-hover"
+            >
+              <IoNotifications
+                style={{
+                  height: "1.8rem",
+                  width: "1.8rem",
+                  color: "#333",
+                }}
+              />
+            </span>
+            <span
+              className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+              style={{ fontSize: "0.6rem", display: "none" }}
+            >
+              0
+            </span>
+          </li>
+          <li className="nav-item" ref={profileDropdownRef}>
+            <span
+              role="button"
+              aria-label="Profile"
+              aria-haspopup="true"
+              aria-expanded={dropdownOpen}
+              onClick={toggleProfileDropdown}
+              onKeyDown={(e) => e.key === "Enter" && toggleProfileDropdown()}
+              tabIndex={0}
+              style={{
+                cursor: "pointer",
+                transition: "transform 0.2s ease",
+              }}
+              className="icon-hover"
+            >
+              <ProfileIcon size="1.8rem" />
+            </span>
+            <div
+              className={`dropdown-menu dropdown-menu-right ${
+                dropdownOpen ? "show" : ""
+              }`}
+              aria-labelledby="profileDropdown"
+              style={{
+                backgroundColor: "#FFF",
+                borderRadius: "8px",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                minWidth: "220px",
+                marginTop: "0.5rem",
+                zIndex: 9999, // Highest z-index to overlap everything
+                position: "absolute",
+                right: 10,
+              }}
+            >
+              {userType === "doctor" && (
+                <>
+                  <Link
+                    className="dropdown-item d-flex align-items-center"
+                    to="/doctor/home"
+                    onClick={toggleProfileDropdown}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <FaHome className="me-2" /> Home
+                  </Link>
+                  <Link
+                    className="dropdown-item d-flex align-items-center"
+                    to="/doctor/details"
+                    onClick={toggleProfileDropdown}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <ImProfile className="me-2" /> Doctor Details
+                  </Link>
+                  <Link
+                    className={`dropdown-item d-flex align-items-center ${
+                      !areAllFieldsEnabled ? "disabled" : ""
+                    }`}
+                    to="/doctor/appointments"
+                    onClick={(e) => {
+                      if (!areAllFieldsEnabled) e.preventDefault();
+                      toggleProfileDropdown();
+                    }}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <FaCheckToSlot className="me-2" /> Appointment Slot
+                  </Link>
+                  <Link
+                    className={`dropdown-item d-flex align-items-center ${
+                      !areAllFieldsEnabled ? "disabled" : ""
+                    }`}
+                    to="/doctor/manageclinic"
+                    onClick={(e) => {
+                      if (!areAllFieldsEnabled) e.preventDefault();
+                      toggleProfileDropdown();
+                    }}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <FaClinicMedical className="me-2" /> Manage Clinic
+                  </Link>
+                  <Link
+                    className={`dropdown-item d-flex align-items-center ${
+                      !areAllFieldsEnabled ? "disabled" : ""
+                    }`}
+                    to="/doctor/managereception"
+                    onClick={(e) => {
+                      if (!areAllFieldsEnabled) e.preventDefault();
+                      toggleProfileDropdown();
+                    }}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <FaClinicMedical className="me-2" /> Manage Reception
+                  </Link>
+                  <Link
+                    className={`dropdown-item d-flex align-items-center ${
+                      !areAllFieldsEnabled ? "disabled" : ""
+                    }`}
+                    to="/doctor/bookedappointment"
+                    onClick={(e) => {
+                      if (!areAllFieldsEnabled) e.preventDefault();
+                      toggleProfileDropdown();
+                    }}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <MdFileDownloadDone className="me-2" /> Booked Appointment
+                  </Link>
+                  <Link
+                    className={`dropdown-item d-flex align-items-center ${
+                      !areAllFieldsEnabled ? "disabled" : ""
+                    }`}
+                    to="/doctor/bookappointment"
+                    onClick={(e) => {
+                      if (!areAllFieldsEnabled) e.preventDefault();
+                      toggleProfileDropdown();
+                    }}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <GiNotebook className="me-2" /> Book Appointment
+                  </Link>
+                  <Link
+                    className={`dropdown-item d-flex align-items-center ${
+                      !areAllFieldsEnabled ? "disabled" : ""
+                    }`}
+                    to="/doctor/paymenthistory"
+                    onClick={(e) => {
+                      if (!areAllFieldsEnabled) e.preventDefault();
+                      toggleProfileDropdown();
+                    }}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <FcMoneyTransfer className="me-2" /> Payment History
+                  </Link>
+                  <Link
+                    className={`dropdown-item d-flex align-items-center ${
+                      !areAllFieldsEnabled ? "disabled" : ""
+                    }`}
+                    to="/doctor/managetemplates"
+                    onClick={(e) => {
+                      if (!areAllFieldsEnabled) e.preventDefault();
+                      toggleProfileDropdown();
+                    }}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <IoMdSettings className="me-2" /> Manage Templates
+                  </Link>
+                  <Link
+                    className="dropdown-item d-flex align-items-center"
+                    to="#"
+                    onClick={() => {
+                      handleLogout();
+                      toggleProfileDropdown();
+                    }}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <MdOutlineLogout className="me-2" /> Logout
+                  </Link>
+                </>
+              )}
+              {userType === "clinic" && (
+                <>
+                  <Link
+                    className="dropdown-item d-flex align-items-center"
+                    to="/clinic/home"
+                    onClick={toggleProfileDropdown}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <FaHome className="me-2" /> Home
+                  </Link>
+                  <Link
+                    className="dropdown-item d-flex align-items-center"
+                    to="/clinic/details"
+                    onClick={toggleProfileDropdown}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <ImProfile className="me-2" /> Clinic Details
+                  </Link>
+                  <Link
+                    className="dropdown-item d-flex align-items-center"
+                    to="/clinic/createslot"
+                    onClick={toggleProfileDropdown}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <FaCheckToSlot className="me-2" /> Create Slot
+                  </Link>
+                  <Link
+                    className="dropdown-item d-flex align-items-center"
+                    to="/clinic/appointmentbook"
+                    onClick={toggleProfileDropdown}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <GiNotebook className="me-2" /> Book Appointment
+                  </Link>
+                  <Link
+                    className="dropdown-item d-flex align-items-center"
+                    to="/clinic/bookedappointment"
+                    onClick={toggleProfileDropdown}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <MdFileDownloadDone className="me-2" /> Booked Appointment
+                  </Link>
+                  <Link
+                    className="dropdown-item d-flex align-items-center"
+                    to="#"
+                    onClick={() => {
+                      handleLogout();
+                      toggleProfileDropdown();
+                    }}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <MdOutlineLogout className="me-2" /> Logout
+                  </Link>
+                </>
+              )}
+              {userType === "reception" && (
+                <>
+                  <Link
+                    className="dropdown-item d-flex align-items-center"
+                    to="/reception/home"
+                    onClick={toggleProfileDropdown}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <FaHome className="me-2" /> Home
+                  </Link>
+                  <Link
+                    className="dropdown-item d-flex align-items-center"
+                    to="/reception/details"
+                    onClick={toggleProfileDropdown}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <ImProfile className="me-2" /> Reception Details
+                  </Link>
+                  <Link
+                    className="dropdown-item d-flex align-items-center"
+                    to="/reception/createslot"
+                    onClick={toggleProfileDropdown}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <FaCheckToSlot className="me-2" /> Create Slot
+                  </Link>
+                  <Link
+                    className="dropdown-item d-flex align-items-center"
+                    to="/reception/appointmentbook"
+                    onClick={toggleProfileDropdown}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <GiNotebook className="me-2" /> Book Appointment
+                  </Link>
+                  <Link
+                    className="dropdown-item d-flex align-items-center"
+                    to="/reception/bookedappointment"
+                    onClick={toggleProfileDropdown}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <MdFileDownloadDone className="me-2" /> Booked Appointment
+                  </Link>
+                  <Link
+                    className="dropdown-item d-flex align-items-center"
+                    to="#"
+                    onClick={() => {
+                      handleLogout();
+                      toggleProfileDropdown();
+                    }}
+                    style={{
+                      padding: "0.75rem 1rem",
+                      transition: "background 0.2s ease",
+                    }}
+                  >
+                    <MdOutlineLogout className="me-2" /> Logout
+                  </Link>
+                </>
+              )}
+            </div>
+          </li>
+        </ul>
       </div>
+      <style jsx>{`
+        .clinic-logo:hover {
+          transform: scale(1.1);
+        }
+        .icon-hover:hover {
+          transform: scale(1.1);
+          color: #0f518f !important;
+        }
+        .dropdown-item:hover {
+          background-color: #f8f9fa;
+          color: #0f518f;
+        }
+        .dropdown-item.disabled {
+          color: #6c757d;
+          pointer-events: none;
+          background-color: transparent;
+        }
+        .navbar {
+          z-index: 1000; // Ensure navbar is above most content
+        }
+        .dropdown-menu {
+          z-index: 9999 !important; // Highest z-index for dropdown
+        }
+        @media (max-width: 576px) {
+          .dropdown-menu {
+            width: calc(100% - 2rem);
+            min-width: 100%;
+            right: 1rem;
+            left: 1rem;
+            margin: 0 auto;
+            top: calc(100% + 0.5rem);
+          }
+          .navbar-nav {
+            flex-direction: row !important;
+          }
+        }
+      `}</style>
     </nav>
   );
 };

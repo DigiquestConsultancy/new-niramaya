@@ -101,76 +101,17 @@ function ManageTemplates() {
   };
 
   return (
-    // <div className="d-flex" style={{  height: "calc(100vh - 4rem)", overflowY: "hidden" }}>
-    //   <Sidebar
-    //     selectedMenu={selectedMenu}
-    //     handleMenuClick={handleMenuClick}
-    //     isSidebarCollapsed={isSidebarCollapsed}
-    //     setIsSidebarCollapsed={setIsSidebarCollapsed}
-    //   />
-    //   <main className="pt-4 overflow-y-auto flex-1">
-    //     <h2 className="text-center">Please upload your template</h2>
-    //     <p className="text-center text-danger font-weight-bold">
-    //       (*Please upload Header and Footer of Height = 450px and Width =
-    //       2480px)
-    //     </p>
-    //     <div className="manage-templates-container mt-4">
-    //       <div className="button-panel">
-    //         <label className="upload-button">
-    //           <MdFileUpload /> Upload Header
-    //           <input
-    //             type="file"
-    //             accept="image/*"
-    //             onChange={handleHeaderUpload}
-    //             hidden
-    //           />
-    //         </label>
-    //         <label className="upload-button">
-    //           <MdFileUpload /> Upload Footer
-    //           <input
-    //             type="file"
-    //             accept="image/*"
-    //             onChange={handleFooterUpload}
-    //             hidden
-    //           />
-    //         </label>
-    //         <button className="save-button" onClick={handleSaveTemplate}>
-    //           <FaRegSave /> Save Template
-    //         </button>
-    //       </div>
-    //       <div className="custom-page">
-    //         <div className="header-section">
-    //           {header && (
-    //             <img
-    //               src={`${BaseUrl.defaults.baseURL}${header}`}
-    //               alt="Header"
-    //               className="header-image"
-    //             />
-    //           )}
-    //         </div>
-    //         <div className="page-content">Your content goes here</div>
-    //         <div className="footer-section">
-    //           {footer && (
-    //             <img
-    //               src={`${BaseUrl.defaults.baseURL}${footer}`}
-    //               alt="Footer"
-    //               className="footer-image"
-    //             />
-    //           )}
-    //         </div>
-    //       </div>
-    //     </div>
-    //   </main>
-    // </div>
-
-    <div className="d-flex flex-column flex-md-row vh-100">
+    <div
+    className="d-flex"
+    style={{ height: "calc(100vh - 4rem)", overflowY: "hidden" }}
+  >
       <Sidebar
         selectedMenu={selectedMenu}
         handleMenuClick={handleMenuClick}
         isSidebarCollapsed={isSidebarCollapsed}
         setIsSidebarCollapsed={setIsSidebarCollapsed}
       />
-      <main className="flex-fill p-3 overflow-y-auto">
+     <main className="flex-1 p-4 overflow-y-auto">
         <h3 className="text-center">Please upload your template</h3>
         <p className="text-center text-danger fw-bold">
           (*Please upload Header and Footer of Height = 450px and Width =

@@ -48,31 +48,35 @@ const SubNavbar = () => {
 
         {/* Mobile Layout - 3 Rows (Visible only on small screens) */}
         <Row className="d-flex d-md-none text-center">
-          <Col
-            xs={12}
-            className="d-flex justify-content-center align-items-center text-white"
-          >
-            <FaEnvelope className="icon" />
-            <span className="email">hello@medizo.com</span>
-          </Col>
-          <Col
-            xs={12}
-            className="d-flex justify-content-center align-items-center text-white mt-2"
-          >
-            <FaClock className="icon" />
-            <span className="hours">Mon - Sat: 8:00 am - 7:00 pm</span>
-          </Col>
-          <Col
-            xs={12}
-            className="d-flex justify-content-center align-items-center mt-2"
-          >
-            <FaFacebook className="social-icon" />
-            <FaTwitter className="social-icon" />
-            <FaYoutube className="social-icon" />
-            <FaInstagram className="social-icon" />
-            <FaGooglePlus className="social-icon" />
-          </Col>
-        </Row>
+  {/* First Column: Email, Hours, Social Icons */}
+  <Col xs={12} sm={8} className="d-flex flex-column justify-content-center align-items-center text-white">
+    <div className="d-flex justify-content-center align-items-center mb-2">
+      <FaEnvelope className="icon" />
+      <span className="email ms-2">hello@medizo.com</span>
+    </div>
+    <div className="d-flex justify-content-center align-items-center mb-2">
+      <FaClock className="icon" />
+      <span className="hours ms-2">Mon - Sat: 8:00 am - 7:00 pm</span>
+    </div>
+    <div className="d-flex justify-content-center align-items-center">
+      <FaFacebook className="social-icon mx-1" />
+      <FaTwitter className="social-icon mx-1" />
+      <FaYoutube className="social-icon mx-1" />
+      <FaInstagram className="social-icon mx-1" />
+      <FaGooglePlus className="social-icon mx-1" />
+    </div>
+  </Col>
+
+  {/* Second Column: Doctor Login Button */}
+  <Col xs={12} sm={4} className="d-flex justify-content-center align-items-center mt-3 mt-sm-0">
+    <Link to="/admin">
+      <Button variant="outline-danger" style={{ backgroundColor: "#dc3545", color: "#fff" }}>
+        Doctor Login <FaUserDoctor />
+      </Button>
+    </Link>
+  </Col>
+</Row>
+
       </Container>
     </div>
   );
