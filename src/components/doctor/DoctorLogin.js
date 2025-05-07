@@ -1595,16 +1595,6 @@
 
 // export default DoctorLogin;
 
-
-
-
-
-
-
-
-
-
-
 import React, { useState, useRef, useEffect } from "react";
 import BaseUrl from "../../api/BaseUrl";
 import { Link, useHistory } from "react-router-dom";
@@ -1949,12 +1939,33 @@ const DoctorLogin = ({ setIsDoctorLoggedIn }) => {
         <div
           className="col-md-12 col-lg-6 d-flex justify-content-center align-items-center  d-none d-lg-flex"
           style={{
-            backgroundColor: "#87A2FF", // Blue background color
+            backgroundColor: "#87A2FF", 
             height: "100%",
             position: "relative",
             padding: "20px",
           }}
         >
+          {/* <button
+            className="px-3 py-1"
+            style={{
+              position: "absolute",
+              top: "10px",
+              left: "20px",
+              backgroundColor: "green",
+              color: "white",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: "5px",
+              zIndex: "9999",
+            }}
+            onClick={() => {
+              history.push("/");
+            }}
+          >
+            <FaArrowLeft className="me-1" /> Back
+          </button> */}
+
           <img
             src={doct}
             alt="Doctor"
@@ -1962,7 +1973,7 @@ const DoctorLogin = ({ setIsDoctorLoggedIn }) => {
               width: "500px",
               height: "700px",
               objectFit: "cover",
-              borderRadius: "10%", // Circular image
+              borderRadius: "10%", 
               position: "absolute",
             }}
           />
@@ -2210,6 +2221,26 @@ const DoctorLogin = ({ setIsDoctorLoggedIn }) => {
             ) : (
               // Main Login Form
               <form className="login-form log mb-4 mt-2" onSubmit={handleLogin}>
+                <button
+            className="px-3 py-1"
+            style={{
+              position: "absolute",
+              top: "10px",
+              left: "20px",
+              backgroundColor: "green",
+              color: "white",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: "5px",
+              zIndex: "9999",
+            }}
+            onClick={() => {
+              history.push("/");
+            }}
+          >
+            <FaArrowLeft className="me-1" /> Back
+          </button>
                 <div className="doctor-login-link">
                   <p style={{ fontSize: "15px" }} className="text-link">
                     New here? <Link to="/doctor/register">Register here</Link>

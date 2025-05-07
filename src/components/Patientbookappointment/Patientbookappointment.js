@@ -1876,6 +1876,7 @@ const BookAppointment = () => {
         borderRadius: "10px",
       }}
     >
+      <button className="px-3 py-1" style={{backgroundColor: "green", color: "white", display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "5px"}} onClick={() => {history.push("/")}}> <FaArrowLeft className="me-1"/> Back</button>
       <h2
         style={{
           textAlign: "center",
@@ -1913,10 +1914,9 @@ const BookAppointment = () => {
           }}
         >
           <Card.Body className="d-flex flex-column align-items-center">
-            {/* Image and Title on the same row */}
             <div
               className="d-flex align-items-center"
-              style={{ marginBottom: "10px", gap: "10px" }}
+              style={{ marginBottom: "10px" }}
             >
               <Card.Img
                 src={clinicVisitImage}
@@ -1936,8 +1936,6 @@ const BookAppointment = () => {
                 CLINIC VISIT
               </Card.Title>
             </div>
-
-            {/* Description */}
             <Card.Text
               style={{
                 fontSize: "12px",
@@ -1947,8 +1945,6 @@ const BookAppointment = () => {
             >
               Book Physical Appointment
             </Card.Text>
-
-            {/* Consultancy Fee */}
             <Card.Text
               style={{
                 fontSize: "12px",
@@ -1982,10 +1978,9 @@ const BookAppointment = () => {
           }}
         >
           <Card.Body className="d-flex flex-column align-items-center">
-            {/* Image and Title on the same row */}
             <div
               className="d-flex align-items-center"
-              style={{ marginBottom: "10px", gap: "10px" }}
+              style={{ marginBottom: "10px"}}
             >
               <Card.Img
                 src={onlineConsultationImage}
@@ -2005,8 +2000,6 @@ const BookAppointment = () => {
                 CONSULT ONLINE
               </Card.Title>
             </div>
-
-            {/* Description */}
             <Card.Text
               style={{
                 fontSize: "12px",
@@ -2017,7 +2010,6 @@ const BookAppointment = () => {
               Talk to Doctor Online
             </Card.Text>
 
-            {/* Fee and Dropdown on the same line */}
             <div
               className="d-flex justify-content-between align-items-center"
               style={{
@@ -2028,10 +2020,7 @@ const BookAppointment = () => {
                 color: "#000",
               }}
             >
-              {/* Consultancy Fee (Left) */}
               <span>Consultancy Fee: {consultancyFee}</span>
-
-              {/* Dropdown (Right) */}
               <Form.Select
                 style={{
                   fontSize: "10px",
