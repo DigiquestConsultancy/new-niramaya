@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect } from "react";
 import "../../css/ClinicBookedAppointment.css";
 import {
@@ -15,6 +17,7 @@ import {
   ToastContainer,
 } from "react-bootstrap";
 import { FaTrash } from "react-icons/fa";
+import { LiaFileInvoiceSolid } from "react-icons/lia";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFileAlt,
@@ -28,11 +31,9 @@ import styled from "styled-components";
 import Loader from "react-js-loader";
 import { FaSyncAlt } from "react-icons/fa";
 import { BsPrinterFill } from "react-icons/bs";
-import { LuZoomIn } from "react-icons/lu";
-import { LuZoomOut } from "react-icons/lu";
 import { FaArrowRotateRight } from "react-icons/fa6";
 import { IoMdDownload } from "react-icons/io";
-
+import GenerateInvoice from "./GenerateInvoice";
 import Sidebar from "./Sidebar";
 
 const LoaderWrapper = styled.div`
@@ -136,6 +137,14 @@ const DoctorBookedAppointment = () => {
 
   const [rotation, setRotation] = useState(0);
   const [zoom, setZoom] = useState(1);
+
+  const [isInvoicePopupOpen, setIsInvoicePopupOpen] = useState(false);
+  // const [feedbackMessage, setFeedbackMessage] = useState("");
+  const handleCreateInvoice = () => {
+    // setFeedbackMessage("Invoice generated successfully!");
+    setIsInvoicePopupOpen(false);
+    // setTimeout(() => setFeedbackMessage(""), 3000);
+  };
 
   const [selectedMenu, setSelectedMenu] = useState("Dashboard");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -2142,6 +2151,23 @@ const DoctorBookedAppointment = () => {
                                             : "Show Details"}
                                         </Button>
                                       </div>
+                                      <Button
+                                        style={{
+                                          backgroundColor: "#169976",
+                                          color: "#fff",
+                                          border: "none",
+                                          borderRadius: "5px",
+                                          cursor: "pointer",
+                                          padding: "12px",
+                                        }}
+                                        onClick={() => {
+                                          setSelectedAppointment(appointment);
+                                          setIsInvoicePopupOpen(true);
+                                        }}
+                                      >
+                                        <LiaFileInvoiceSolid size={24} />{" "}
+                                        Generate Invoice
+                                      </Button>
                                       <Button
                                         style={{
                                           backgroundColor: "#8E1616",
@@ -4557,6 +4583,13 @@ const DoctorBookedAppointment = () => {
             </Modal.Footer>
           )}
         </Modal>
+
+        <GenerateInvoice
+          isOpen={isInvoicePopupOpen}
+          onCloseInvoice={() => setIsInvoicePopupOpen(false)}
+          onCreate={handleCreateInvoice}
+          appointment={selectedAppointment}
+        />
       </main>
     </Container>
   );
