@@ -2151,6 +2151,7 @@ const DoctorBookedAppointment = () => {
                                             : "Show Details"}
                                         </Button>
                                       </div>
+                                      {appointment.is_complete && (
                                       <Button
                                         style={{
                                           backgroundColor: "#169976",
@@ -2168,6 +2169,7 @@ const DoctorBookedAppointment = () => {
                                         <LiaFileInvoiceSolid size={24} />{" "}
                                         Generate Invoice
                                       </Button>
+                                      )}
                                       <Button
                                         style={{
                                           backgroundColor: "#8E1616",
