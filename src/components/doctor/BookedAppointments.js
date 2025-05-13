@@ -536,6 +536,7 @@ const DoctorBookedAppointment = () => {
         booked_by: appointment.booked_by,
         mobile_number: appointment.mobile_number,
         patient_id: appointment.patient_id,
+        patient: appointment.patient,
         is_patient: appointment.is_patient,
         is_complete: appointment.is_complete,
         is_canceled: appointment.is_canceled,
