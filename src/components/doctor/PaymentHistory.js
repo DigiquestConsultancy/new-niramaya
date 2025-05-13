@@ -786,18 +786,20 @@ const PaymentHistory = () => {
   };
 
   const handleGenerateInvoice = (payment) => {
-    setSelectedAppointment({
-      booked_by: payment["Patient Name"],
-      uhid: payment["cf_payment_id"] || "N/A",
-      mobile_number: payment["Customer Phone"],
-    });
-    setIsInvoiceOpen(true);
-  };
+  setSelectedAppointment({
+    booked_by: payment["Patient Name"],
+    uhid: payment["cf_payment_id"],
+    mobile_number: payment["Customer Phone"],
+    appointment_id: payment["Appointment_id"],
+    patient: payment["Patient_id"],
+  });
+  setIsInvoiceOpen(true);
+};
 
   const handleCreateInvoice = () => {
     // Implement invoice creation logic here
     setIsInvoiceOpen(false);
-    setSelectedAppointment(null);
+    // setSelectedAppointment(null);
   };
 
   const handleCloseInvoice = () => {
