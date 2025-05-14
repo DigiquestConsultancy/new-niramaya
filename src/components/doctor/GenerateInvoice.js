@@ -377,7 +377,7 @@ import BaseUrl from "../../api/BaseUrl";
 import { jwtDecode } from "jwt-decode";
 
 const GenerateInvoice = ({ isOpen, onCloseInvoice, onCreate, appointment }) => {
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState([{ description: "Consultation Fees", qty: "", amount: "", discount: "", total: "" }]);
   const [additionalDiscount, setAdditionalDiscount] = useState(0);
   const [paymentMode, setPaymentMode] = useState("Cash");
   const [paymentAmount, setPaymentAmount] = useState(0);
@@ -415,7 +415,7 @@ const GenerateInvoice = ({ isOpen, onCloseInvoice, onCreate, appointment }) => {
   const addItem = () => {
     setItems([
       ...items,
-      { description: "", qty: 1, amount: 0, discount: 0, total: 0 },
+      { description: "", qty: "", amount: "", discount: "", total: "" },
     ]);
   };
 
@@ -430,26 +430,14 @@ const GenerateInvoice = ({ isOpen, onCloseInvoice, onCreate, appointment }) => {
   };
 
   const handleViewPdf = (pdfUrl) => {
-    // Construct the PDF URL
-    const baseUrl = BaseUrl.defaults.baseURL.replace(/\/$/, ""); // Remove trailing slash
-    const normalizedPdfUrl = pdfUrl.replace(/^\/+/, ""); // Remove leading slashes
+    const baseUrl = BaseUrl.defaults.baseURL.replace(/\/$/, "");
+    const normalizedPdfUrl = pdfUrl.replace(/^\/+/, "");
     const fullPdfUrl = `${baseUrl}/${normalizedPdfUrl}`;
-
-    // Log for debugging
-    console.log({ pdfUrl, fullPdfUrl });
-
-    // Open the PDF in a new tab
     window.open(fullPdfUrl, "_blank");
   };
 
   const handleDeleteReceipt = async (receiptId) => {
     const token = localStorage.getItem("token");
-    if (!token) {
-      setError("No authentication token found. Please log in again.");
-      setTimeout(() => setError(""), 3000);
-      return;
-    }
-
     try {
       const formData = new FormData();
       formData.append("receipt_id", receiptId);
