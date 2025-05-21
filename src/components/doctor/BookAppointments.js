@@ -1,6 +1,4 @@
-
-
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import BaseUrl from "../../api/BaseUrl";
 import { jwtDecode } from "jwt-decode";
 import { format, addDays } from "date-fns";
@@ -50,7 +48,12 @@ const BookAppointment = () => {
   const [searchInput, setSearchInput] = useState("");
   const [datesToFetch, setDatesToFetch] = useState([]);
   const [doctorId, setDoctorId] = useState("");
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
+
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentSending, setPaymentSending] = useState(false);
+  const [consultationFee, setConsultationFee] = useState("");
+
   const [patientDetails, setPatientDetails] = useState({
     name: "",
     mobile_number: "",
@@ -114,8 +117,26 @@ const BookAppointment = () => {
   useEffect(() => {
     if (selectedDoctorId) {
       fetchDoctorName(selectedDoctorId);
+      fetchClinicDetails(selectedDoctorId);
     }
   }, [selectedDoctorId]);
+
+  const fetchClinicDetails = async (doctorId) => {
+    try {
+      const response = await BaseUrl.get("/doctor/opddays/", {
+        params: {
+          doctor_id: doctorId,
+          // mobile_number: mobileNumber,
+        },
+      });
+      if (response.status === 200 && response.data.length > 0) {
+        const data = response.data[0];
+        setConsultationFee(data.consultation_fee);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const fetchDoctorName = async (doctorId) => {
     setLoading(true);
@@ -183,7 +204,7 @@ const BookAppointment = () => {
     try {
       const response = await BaseUrl.post("/patient/patient/", {
         ...patientDetails,
-        mobile_number: patientDetails.mobile_number, 
+        mobile_number: patientDetails.mobile_number,
       });
 
       if (response.data.success) {
@@ -325,6 +346,7 @@ const BookAppointment = () => {
         setSuccessMessage(response.data.success);
         await patchPatientAppointment(); // Call the PATCH API after successful booking
         setIsModalOpen(false);
+        setShowPaymentModal(true);
       } else {
         setErrorMessage(response.data.error);
       }
@@ -350,6 +372,40 @@ const BookAppointment = () => {
       setErrorMessage(error.response?.data?.error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSendPaymentLink = async () => {
+    setPaymentSending(true);
+    try {
+      const payload = {
+        doctor_id: selectedDoctorId,
+        patient_id: patientId,
+        customer_name: patientDetails.name,
+        customer_phone: patientDetails.mobile_number.replace(/\s/g, ""),
+        link_amount: consultationFee,
+        link_purpose: "Consultation Fee",
+        link_currency: "INR",
+        link_expiry_time: "2025-05-21T23:59:59+05:30",
+        link_auto_reminders: true,
+      };
+
+      const response = await BaseUrl.post(
+        "/payment/createpaymentlink/",
+        payload
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        setSuccessMessage("Payment link sent successfully.");
+        setShowPaymentModal(false);
+      } else {
+        setErrorMessage("Failed to send payment link.");
+      }
+    } catch (error) {
+      console.error("Payment link error:", error);
+      setErrorMessage("Error sending payment link.");
+    } finally {
+      setPaymentSending(false);
     }
   };
 
@@ -492,152 +548,155 @@ const BookAppointment = () => {
   };
 
   return (
-    <div className="d-flex" style={{height: "calc(100vh - 4rem)", overflowY: "hidden"}}>
-       <Sidebar
-              selectedMenu={selectedMenu}
-              handleMenuClick={handleMenuClick}
-              isSidebarCollapsed={isSidebarCollapsed}
-              setIsSidebarCollapsed={setIsSidebarCollapsed}
-            />
-            <main className="overflow-y-auto">
-      {/* Loader Component */}
-      {loading && (
-        <LoaderWrapper>
-          <LoaderImage>
-            <Loader
-              type="spinner-circle"
-              bgColor={"#0091A5"}
-              color={"#0091A5"}
-              title={"Loading..."}
-              size={100}
-            />
-          </LoaderImage>
-        </LoaderWrapper>
-      )}
-
-      <div
-        style={{
-          padding: "20px",
-          borderRadius: "8px",
-        }}
-      >
-        {" "}
-        {errorMessage && (
-          <div className="alert alert-danger">{errorMessage}</div>
+    <div
+      className="d-flex"
+      style={{ height: "calc(100vh - 4rem)", overflowY: "hidden" }}
+    >
+      <Sidebar
+        selectedMenu={selectedMenu}
+        handleMenuClick={handleMenuClick}
+        isSidebarCollapsed={isSidebarCollapsed}
+        setIsSidebarCollapsed={setIsSidebarCollapsed}
+      />
+      <main className="overflow-y-auto">
+        {/* Loader Component */}
+        {loading && (
+          <LoaderWrapper>
+            <LoaderImage>
+              <Loader
+                type="spinner-circle"
+                bgColor={"#0091A5"}
+                color={"#0091A5"}
+                title={"Loading..."}
+                size={100}
+              />
+            </LoaderImage>
+          </LoaderWrapper>
         )}
-        {successMessage && (
-          <div className="alert alert-success">{successMessage}</div>
-        )}
-        <div className="container">
-          <div className="col-12 text-center">
-            <h2
-              style={{
-                paddingBottom: "32px",
-                fontWeight: "600",
-                color: "#0C1187",
-              }}
-            >
-              Book Appointment
-            </h2>
-          </div>
 
-          <div className="row justify-content-center mb-5">
-            <div className="col-12 col-md-6">
-              <div className="d-flex position-relative">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Search by Patient Name / Mobile"
-                  value={searchInput}
-                  onChange={handleSearchInputChange}
-                  style={{
-                    width: "100%",
-                    position: "relative",
-                    overflow: "hidden",
-                    border: "2px solid blue",
-                  }}
-                />
-                {searchResults.length > 0 && renderSearchResults()}
+        <div
+          style={{
+            padding: "20px",
+            borderRadius: "8px",
+          }}
+        >
+          {" "}
+          {errorMessage && (
+            <div className="alert alert-danger">{errorMessage}</div>
+          )}
+          {successMessage && (
+            <div className="alert alert-success">{successMessage}</div>
+          )}
+          <div className="container">
+            <div className="col-12 text-center">
+              <h2
+                style={{
+                  paddingBottom: "32px",
+                  fontWeight: "600",
+                  color: "#0C1187",
+                }}
+              >
+                Book Appointment
+              </h2>
+            </div>
+
+            <div className="row justify-content-center mb-5">
+              <div className="col-12 col-md-6">
+                <div className="d-flex position-relative">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search by Patient Name / Mobile"
+                    value={searchInput}
+                    onChange={handleSearchInputChange}
+                    style={{
+                      width: "100%",
+                      position: "relative",
+                      overflow: "hidden",
+                      border: "2px solid blue",
+                    }}
+                  />
+                  {searchResults.length > 0 && renderSearchResults()}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <form onSubmit={handleSaveDetails}>
-          <div className="row g-4">
-            <div className="col-12 col-md-6 col-xl-3">
-              <label htmlFor="name" className="form-label fw-bold">
-                Name<span className="text-danger">*</span>
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="name"
-                name="name"
-                value={patientDetails.name}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (/^[a-zA-Z\s.]*$/.test(value)) {
-                    handleInputChange(e);
+          <form onSubmit={handleSaveDetails}>
+            <div className="row g-4">
+              <div className="col-12 col-md-6 col-xl-3">
+                <label htmlFor="name" className="form-label fw-bold">
+                  Name<span className="text-danger">*</span>
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="name"
+                  name="name"
+                  value={patientDetails.name}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^[a-zA-Z\s.]*$/.test(value)) {
+                      handleInputChange(e);
+                    }
+                  }}
+                  placeholder="Enter full name"
+                  required
+                />
+              </div>
+
+              <div className="col-12 col-md-6 col-xl-3">
+                <label htmlFor="mobile_number" className="form-label fw-bold">
+                  Mobile Number<span className="text-danger">*</span>
+                </label>
+                <PhoneInput
+                  id="mobile_number"
+                  name="mobile_number"
+                  placeholder="Enter mobile number"
+                  defaultCountry="IN"
+                  value={patientDetails.mobile_number}
+                  onChange={(value) =>
+                    setPatientDetails((prevDetails) => ({
+                      ...prevDetails,
+                      mobile_number: value,
+                    }))
                   }
-                }}
-                placeholder="Enter full name"
-                required
-              />
+                  required
+                />
+              </div>
+
+              <div className="col-12 col-md-6 col-xl-3">
+                <label htmlFor="date_of_birth" className="form-label fw-bold">
+                  Date of Birth
+                </label>
+                <input
+                  type="date"
+                  className="form-control"
+                  id="date_of_birth"
+                  name="date_of_birth"
+                  value={patientDetails.date_of_birth}
+                  onChange={handleInputChange}
+                  max={today}
+                />
+              </div>
+
+              <div className="col-12 col-md-6 col-xl-3">
+                <label htmlFor="age" className="form-label fw-bold">
+                  Age<span className="text-danger">*</span>
+                </label>
+                <input
+                  type="number"
+                  className="form-control"
+                  id="age"
+                  name="age"
+                  value={patientDetails.age}
+                  placeholder="Enter age"
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
             </div>
 
-            <div className="col-12 col-md-6 col-xl-3">
-              <label htmlFor="mobile_number" className="form-label fw-bold">
-                Mobile Number<span className="text-danger">*</span>
-              </label>
-              <PhoneInput
-                id="mobile_number"
-                name="mobile_number"
-                placeholder="Enter mobile number"
-                defaultCountry="IN"
-                value={patientDetails.mobile_number}
-                onChange={(value) =>
-                  setPatientDetails((prevDetails) => ({
-                    ...prevDetails,
-                    mobile_number: value,
-                  }))
-                }
-                required
-              />
-            </div>
-
-            <div className="col-12 col-md-6 col-xl-3">
-              <label htmlFor="date_of_birth" className="form-label fw-bold">
-                Date of Birth
-              </label>
-              <input
-                type="date"
-                className="form-control"
-                id="date_of_birth"
-                name="date_of_birth"
-                value={patientDetails.date_of_birth}
-                onChange={handleInputChange}
-                max={today}
-              />
-            </div>
-
-            <div className="col-12 col-md-6 col-xl-3">
-              <label htmlFor="age" className="form-label fw-bold">
-                Age<span className="text-danger">*</span>
-              </label>
-              <input
-                type="number"
-                className="form-control"
-                id="age"
-                name="age"
-                value={patientDetails.age}
-                placeholder="Enter age"
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-          </div>
-
-          {/* <div className="row g-4 mt-3">
+            {/* <div className="row g-4 mt-3">
             <div className="col-md-3">
               <label htmlFor="blood_group" className="form-label fw-bold">
                 Blood Group
@@ -652,268 +711,298 @@ const BookAppointment = () => {
                 onChange={handleInputChange}
               />
             </div> */}
-        
-          <div className="row g-4 mt-3">
-            <div className="col-12 col-md-6 col-xl-3">
-              <label htmlFor="case_number" className="form-label fw-bold">
-                Case no.
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="case_number"
-                name="case_number"
-                value={patientDetails.case_number}
-                placeholder="Enter case no."
-                onChange={handleInputChange}
-              />
-            </div>
 
-            <div className="col-12 col-md-6 col-xl-3">
-              <label htmlFor="gender" className="form-label fw-bold">
-                Gender<span className="text-danger">*</span>
-              </label>
-              <select
-                className="form-select"
-                id="gender"
-                name="gender"
-                value={patientDetails.gender}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">Select Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="others">Others</option>
-              </select>
-            </div>
+            <div className="row g-4 mt-3">
+              <div className="col-12 col-md-6 col-xl-3">
+                <label htmlFor="case_number" className="form-label fw-bold">
+                  Case no.
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="case_number"
+                  name="case_number"
+                  value={patientDetails.case_number}
+                  placeholder="Enter case no."
+                  onChange={handleInputChange}
+                />
+              </div>
 
-            <div className="col-12 col-md-6 col-xl-3">
-              <label htmlFor="address" className="form-label fw-bold">
-                Address<span className="text-danger">*</span>
-              </label>
-              <textarea
-                className="form-control"
-                id="address"
-                name="address"
-                value={patientDetails.address}
-                placeholder="Enter address"
-                onChange={handleInputChange}
-                rows="1"
-                required
-              ></textarea>
-            </div>
+              <div className="col-12 col-md-6 col-xl-3">
+                <label htmlFor="gender" className="form-label fw-bold">
+                  Gender<span className="text-danger">*</span>
+                </label>
+                <select
+                  className="form-select"
+                  id="gender"
+                  name="gender"
+                  value={patientDetails.gender}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="others">Others</option>
+                </select>
+              </div>
 
-            <div className="col-12 col-md-6 col-xl-3">
-              <label className="form-label fw-bold">Doctor Name</label>
-              <input
-                type="text"
-                className="form-control"
-                value={doctorName}
-                placeholder="Doctor's Name"
-                disabled
-              />
-            </div>
-          </div>
+              <div className="col-12 col-md-6 col-xl-3">
+                <label htmlFor="address" className="form-label fw-bold">
+                  Address<span className="text-danger">*</span>
+                </label>
+                <textarea
+                  className="form-control"
+                  id="address"
+                  name="address"
+                  value={patientDetails.address}
+                  placeholder="Enter address"
+                  onChange={handleInputChange}
+                  rows="1"
+                  required
+                ></textarea>
+              </div>
 
-          <div className="row mt-4">
-            <div className="col-md-12 text-start">
-              <button type="submit" className="btn btn-primary me-2">
-                Save Details
-              </button>
-            </div>
-          </div>
-        </form>
-        <div className="mt-4">
-          <h3
-            style={{ textAlign: "center", margin: "32px", fontWeight: "600" }}
-          >
-            Select Slot
-          </h3>
-          <div className="row justify-content-center mb-3">
-            {/* Today Slots */}
-            <div className="col-4 text-center mb-3">
-              <Button
-                variant={
-                  selectedSlot === "today" ? "primary" : "outline-primary"
-                }
-                onClick={handleToday}
-                disabled={!patientId}
-              >
-                Today ({format(new Date(), "dd MMM")})
-              </Button>
-              <div
-                style={getSlotCountStyle(
-                  slotCount[format(new Date(), "yyyy-MM-dd")] || 0
-                )}
-              >
-                {slotCount[format(new Date(), "yyyy-MM-dd")] || 0} slots
-                available
+              <div className="col-12 col-md-6 col-xl-3">
+                <label className="form-label fw-bold">Doctor Name</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={doctorName}
+                  placeholder="Doctor's Name"
+                  disabled
+                />
               </div>
             </div>
 
-            {/* Tomorrow Slots */}
-            <div className="col-4 text-center mb-3">
-              <Button
-                variant={
-                  selectedSlot === "tomorrow" ? "primary" : "outline-primary"
-                }
-                onClick={handleTomorrow}
-                disabled={!patientId}
-              >
-                Tomorrow ({format(addDays(new Date(), 1), "dd MMM")})
-              </Button>
-              <div
-                style={getSlotCountStyle(
-                  slotCount[format(addDays(new Date(), 1), "yyyy-MM-dd")] || 0
-                )}
-              >
-                {slotCount[format(addDays(new Date(), 1), "yyyy-MM-dd")] || 0}{" "}
-                slots available
+            <div className="row mt-4">
+              <div className="col-md-12 text-start">
+                <button type="submit" className="btn btn-primary me-2">
+                  Save Details
+                </button>
+              </div>
+            </div>
+          </form>
+          <div className="mt-4">
+            <h3
+              style={{ textAlign: "center", margin: "32px", fontWeight: "600" }}
+            >
+              Select Slot
+            </h3>
+            <div className="row justify-content-center mb-3">
+              {/* Today Slots */}
+              <div className="col-4 text-center mb-3">
+                <Button
+                  variant={
+                    selectedSlot === "today" ? "primary" : "outline-primary"
+                  }
+                  onClick={handleToday}
+                  disabled={!patientId}
+                >
+                  Today ({format(new Date(), "dd MMM")})
+                </Button>
+                <div
+                  style={getSlotCountStyle(
+                    slotCount[format(new Date(), "yyyy-MM-dd")] || 0
+                  )}
+                >
+                  {slotCount[format(new Date(), "yyyy-MM-dd")] || 0} slots
+                  available
+                </div>
+              </div>
+
+              {/* Tomorrow Slots */}
+              <div className="col-4 text-center mb-3">
+                <Button
+                  variant={
+                    selectedSlot === "tomorrow" ? "primary" : "outline-primary"
+                  }
+                  onClick={handleTomorrow}
+                  disabled={!patientId}
+                >
+                  Tomorrow ({format(addDays(new Date(), 1), "dd MMM")})
+                </Button>
+                <div
+                  style={getSlotCountStyle(
+                    slotCount[format(addDays(new Date(), 1), "yyyy-MM-dd")] || 0
+                  )}
+                >
+                  {slotCount[format(addDays(new Date(), 1), "yyyy-MM-dd")] || 0}{" "}
+                  slots available
+                </div>
+              </div>
+
+              {/* Day After Tomorrow Slots */}
+              <div className="col-4 text-center mb-3">
+                <Button
+                  variant={
+                    selectedSlot === "dayAfterTomorrow"
+                      ? "primary"
+                      : "outline-primary"
+                  }
+                  onClick={handleDayAfterTomorrow}
+                  disabled={!patientId}
+                >
+                  {format(addDays(new Date(), 2), "EEEE")} (
+                  {format(addDays(new Date(), 2), "dd MMM")})
+                </Button>
+                <div
+                  style={getSlotCountStyle(
+                    slotCount[format(addDays(new Date(), 2), "yyyy-MM-dd")] || 0
+                  )}
+                >
+                  {slotCount[format(addDays(new Date(), 2), "yyyy-MM-dd")] || 0}{" "}
+                  slots available
+                </div>
               </div>
             </div>
 
-            {/* Day After Tomorrow Slots */}
-            <div className="col-4 text-center mb-3">
-              <Button
-                variant={
-                  selectedSlot === "dayAfterTomorrow"
-                    ? "primary"
-                    : "outline-primary"
-                }
-                onClick={handleDayAfterTomorrow}
-                disabled={!patientId}
-              >
-                {format(addDays(new Date(), 2), "EEEE")} (
-                {format(addDays(new Date(), 2), "dd MMM")})
-              </Button>
-              <div
-                style={getSlotCountStyle(
-                  slotCount[format(addDays(new Date(), 2), "yyyy-MM-dd")] || 0
-                )}
-              >
-                {slotCount[format(addDays(new Date(), 2), "yyyy-MM-dd")] || 0}{" "}
-                slots available
-              </div>
-            </div>
-          </div>
+            {/* Render Slots Horizontally with 6 slots per row */}
+            {showSlots && (
+              <div className="d-flex flex-column align-items-center">
+                {Array.from({ length: Math.ceil(slots.length / 6) }).map(
+                  (_, rowIndex) => (
+                    <div
+                      className="d-flex flex-wrap justify-content-center mb-2"
+                      key={rowIndex}
+                    >
+                      {slots
+                        .slice(rowIndex * 6, (rowIndex + 1) * 6)
+                        .map((slot) => {
+                          const currentTime = new Date();
+                          const slotTime = new Date(
+                            `${slot.appointment_date}T${slot.appointment_slot}`
+                          );
 
-          {/* Render Slots Horizontally with 6 slots per row */}
-          {showSlots && (
-            <div className="d-flex flex-column align-items-center">
-              {Array.from({ length: Math.ceil(slots.length / 6) }).map(
-                (_, rowIndex) => (
-                  <div
-                    className="d-flex flex-wrap justify-content-center mb-2"
-                    key={rowIndex}
-                  >
-                    {slots
-                      .slice(rowIndex * 6, (rowIndex + 1) * 6)
-                      .map((slot) => {
-                        const currentTime = new Date();
-                        const slotTime = new Date(
-                          `${slot.appointment_date}T${slot.appointment_slot}`
-                        );
+                          const isPast =
+                            currentTime >= slotTime &&
+                            format(currentTime, "yyyy-MM-dd") ===
+                              slot.appointment_date;
+                          const isBooked = slot.is_booked;
 
-                        const isPast =
-                          currentTime >= slotTime &&
-                          format(currentTime, "yyyy-MM-dd") ===
-                            slot.appointment_date;
-                        const isBooked = slot.is_booked;
+                          const isDisabled = isPast || isBooked;
 
-                        const isDisabled = isPast || isBooked;
-
-                        const buttonStyle = {
-                          width: "196px", // Fixed width
-                          height: "38px", // Fixed height
-                          backgroundColor: isBooked
-                            ? "gray"
-                            : isDisabled
+                          const buttonStyle = {
+                            width: "196px", // Fixed width
+                            height: "38px", // Fixed height
+                            backgroundColor: isBooked
                               ? "gray"
-                              : "#FFFFFF",
-                          color: isDisabled ? "#FFFFFF" : "#000000",
-                          borderColor: "#3D9F41",
-                          cursor: isDisabled ? "not-allowed" : "pointer",
-                          opacity: isDisabled ? 0.7 : 1,
-                          margin: "5px", 
-                          textAlign: "center", 
-                          position: "relative", 
-                          display: "flex", 
-                          alignItems: "center", 
-                          justifyContent: "center", 
-                        };
+                              : isDisabled
+                                ? "gray"
+                                : "#FFFFFF",
+                            color: isDisabled ? "#FFFFFF" : "#000000",
+                            borderColor: "#3D9F41",
+                            cursor: isDisabled ? "not-allowed" : "pointer",
+                            opacity: isDisabled ? 0.7 : 1,
+                            margin: "5px",
+                            textAlign: "center",
+                            position: "relative",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          };
 
-                        const timeStyle = {
-                          marginTop: "2px", 
-                        };
+                          const timeStyle = {
+                            marginTop: "2px",
+                          };
 
-                        return (
-                          <div
-                            key={slot.id}
-                            style={{ position: "relative" }}
-                            onMouseEnter={() =>
-                              isDisabled && setHoverMessage("Booked")
-                            }
-                            onMouseLeave={() => setHoverMessage("")}
-                          >
-                            <Button
-                              style={buttonStyle}
-                              className="slot-button"
-                              onClick={() =>
-                                !isDisabled && handleSlotClick(slot)
+                          return (
+                            <div
+                              key={slot.id}
+                              style={{ position: "relative" }}
+                              onMouseEnter={() =>
+                                isDisabled && setHoverMessage("Booked")
                               }
-                              disabled={isDisabled}
+                              onMouseLeave={() => setHoverMessage("")}
                             >
-                              <span style={timeStyle}>
-                                {formatTime(slot.appointment_slot)}
-                              </span>
-                            </Button>
-
-                            {isDisabled && hoverMessage && (
-                              <div
-                                style={{
-                                  position: "absolute",
-                                  top: "-30px",
-                                  left: "50%",
-                                  transform: "translateX(-50%)",
-                                  backgroundColor: "rgba(0, 0, 0, 0.8)",
-                                  color: "#fff",
-                                  padding: "5px 10px",
-                                  borderRadius: "4px",
-                                  fontSize: "0.8rem",
-                                  zIndex: 10,
-                                  whiteSpace: "nowrap",
-                                }}
+                              <Button
+                                style={buttonStyle}
+                                className="slot-button"
+                                onClick={() =>
+                                  !isDisabled && handleSlotClick(slot)
+                                }
+                                disabled={isDisabled}
                               >
-                                {hoverMessage}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                  </div>
-                )
-              )}
-            </div>
-          )}
+                                <span style={timeStyle}>
+                                  {formatTime(slot.appointment_slot)}
+                                </span>
+                              </Button>
+
+                              {isDisabled && hoverMessage && (
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    top: "-30px",
+                                    left: "50%",
+                                    transform: "translateX(-50%)",
+                                    backgroundColor: "rgba(0, 0, 0, 0.8)",
+                                    color: "#fff",
+                                    padding: "5px 10px",
+                                    borderRadius: "4px",
+                                    fontSize: "0.8rem",
+                                    zIndex: 10,
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  {hoverMessage}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                    </div>
+                  )
+                )}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-      <Modal show={isModalOpen} onHide={handleCancelAppointment}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Appointment</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>You are about to book an appointment with {doctorName}.</p>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCancelAppointment}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleConfirmAppointment}>
-            Confirm
-          </Button>
-        </Modal.Footer>
-      </Modal>
+        <Modal show={isModalOpen} onHide={handleCancelAppointment}>
+          <Modal.Header closeButton>
+            <Modal.Title>Confirm Appointment</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>You are about to book an appointment with {doctorName}.</p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCancelAppointment}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleConfirmAppointment}>
+              Confirm
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal
+          show={showPaymentModal}
+          onHide={() => setShowPaymentModal(false)}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Send Payment Link</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>
+              Do you want to send a payment link to{" "}
+              <strong>{patientDetails.name}</strong>?
+            </p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowPaymentModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleSendPaymentLink}
+              disabled={paymentSending}
+            >
+              {paymentSending ? "Sending..." : "Send"}
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </main>
     </div>
   );
