@@ -1888,6 +1888,15 @@
 
 // export default DoctorDetails;
 
+
+
+
+
+
+
+
+
+
 import React, { useState, useEffect } from "react";
 import BaseUrl from "../../api/BaseUrl";
 import { jwtDecode } from "jwt-decode";
@@ -6476,6 +6485,20 @@ export default DoctorDetails;
 // };
 
 // export default DoctorDetails;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // import React, { useState, useEffect } from "react";
 // import BaseUrl from "../../api/BaseUrl";

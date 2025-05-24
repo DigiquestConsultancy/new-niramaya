@@ -335,6 +335,9 @@ const BookAppointment = () => {
 
   const handleConfirmAppointment = async () => {
     try {
+      const today = new Date();
+      const tomorrow = addDays(new Date(), 1);
+      const dayAfterTomorrow = addDays(new Date(), 2);
       const response = await BaseUrl.post("/doctor/doctorbook/", {
         doctor: selectedDoctorId,
         patient: patientId,
@@ -344,9 +347,12 @@ const BookAppointment = () => {
 
       if (response.status === 200 || response.status === 201) {
         setSuccessMessage(response.data.success);
-        await patchPatientAppointment(); // Call the PATCH API after successful booking
+        await patchPatientAppointment();
+        await handleViewSlots(today);
+        await handleViewSlots(tomorrow);
+        await handleViewSlots(dayAfterTomorrow);
         setIsModalOpen(false);
-        setShowPaymentModal(true);
+        // setShowPaymentModal(true);
       } else {
         setErrorMessage(response.data.error);
       }
@@ -375,39 +381,39 @@ const BookAppointment = () => {
     }
   };
 
-  const handleSendPaymentLink = async () => {
-    setPaymentSending(true);
-    try {
-      const payload = {
-        doctor_id: selectedDoctorId,
-        patient_id: patientId,
-        customer_name: patientDetails.name,
-        customer_phone: patientDetails.mobile_number.replace(/\s/g, ""),
-        link_amount: consultationFee,
-        link_purpose: "Consultation Fee",
-        link_currency: "INR",
-        link_expiry_time: "2025-05-21T23:59:59+05:30",
-        link_auto_reminders: true,
-      };
+  // const handleSendPaymentLink = async () => {
+  //   setPaymentSending(true);
+  //   try {
+  //     const payload = {
+  //       doctor_id: selectedDoctorId,
+  //       patient_id: patientId,
+  //       customer_name: patientDetails.name,
+  //       customer_phone: patientDetails.mobile_number.replace(/\s/g, ""),
+  //       link_amount: consultationFee,
+  //       link_purpose: "Consultation Fee",
+  //       link_currency: "INR",
+  //       link_expiry_time: "2025-05-21T23:59:59+05:30",
+  //       link_auto_reminders: true,
+  //     };
 
-      const response = await BaseUrl.post(
-        "/payment/createpaymentlink/",
-        payload
-      );
+  //     const response = await BaseUrl.post(
+  //       "/payment/createpaymentlink/",
+  //       payload
+  //     );
 
-      if (response.status === 200 || response.status === 201) {
-        setSuccessMessage("Payment link sent successfully.");
-        setShowPaymentModal(false);
-      } else {
-        setErrorMessage("Failed to send payment link.");
-      }
-    } catch (error) {
-      console.error("Payment link error:", error);
-      setErrorMessage("Error sending payment link.");
-    } finally {
-      setPaymentSending(false);
-    }
-  };
+  //     if (response.status === 200 || response.status === 201) {
+  //       setSuccessMessage("Payment link sent successfully.");
+  //       setShowPaymentModal(false);
+  //     } else {
+  //       setErrorMessage("Failed to send payment link.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Payment link error:", error);
+  //     setErrorMessage("Error sending payment link.");
+  //   } finally {
+  //     setPaymentSending(false);
+  //   }
+  // };
 
   const handleCancelAppointment = () => {
     setIsModalOpen(false);
@@ -974,7 +980,7 @@ const BookAppointment = () => {
           </Modal.Footer>
         </Modal>
 
-        <Modal
+        {/* <Modal
           show={showPaymentModal}
           onHide={() => setShowPaymentModal(false)}
         >
@@ -1002,7 +1008,7 @@ const BookAppointment = () => {
               {paymentSending ? "Sending..." : "Send"}
             </Button>
           </Modal.Footer>
-        </Modal>
+        </Modal> */}
       </main>
     </div>
   );
